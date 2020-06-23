@@ -3,8 +3,8 @@
     <item android:drawable="@color/background"/>
     <item
         android:drawable="@drawable/ic_launcher_round"
-        android:width="64dp"
-        android:height="64dp"
+        android:width="86dp"
+        android:height="86dp"
         android:gravity="center">
     </item>
 </layer-list>

@@ -32,7 +32,7 @@ interface MessageDao {
     @Query("SELECT * FROM messages WHERE sender LIKE :sender")
     fun findBySender(sender: String): List<Message>
 
-    @Query("SELECT * FROM messages ORDER BY time DESC")
+    @Query("SELECT * FROM messages ORDER BY time ASC")
     fun loadAll(): LiveData<List<Message>>
 
     @RawQuery

@@ -36,7 +36,8 @@ class ContactsManager(context: Context) {
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    map[phoneNo] = name
+                    if (!phoneNo.startsWith("+91")) map["+91$phoneNo"] = name
+                    else map[phoneNo] = name
                 }
                 pCur?.close()
             }
