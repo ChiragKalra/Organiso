@@ -1,0 +1,27 @@
+package com.bruhascended.sms.services
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.telephony.SmsMessage
+
+
+private class SMSReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {
+            val bundle = intent.extras
+            if (bundle != null) {
+                val pduObjects = bundle["pdus"] as Array<*>
+
+                for (aObject in pduObjects) {
+                    val currentSMS = SmsMessage.createFromPdu(aObject as ByteArray, bundle.getString("format"))
+
+                    val sender = currentSMS.displayOriginatingAddress
+
+                }
+                abortBroadcast()
+            }
+        }
+    }
+}
