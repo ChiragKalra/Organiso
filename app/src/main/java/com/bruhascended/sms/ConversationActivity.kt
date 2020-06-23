@@ -3,7 +3,6 @@
 package com.bruhascended.sms
 
 import android.Manifest
-import android.R.attr.label
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
