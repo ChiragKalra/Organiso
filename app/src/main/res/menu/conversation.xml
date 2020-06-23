@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+
+    <!--<item
+        android:id="@+id/action_search"
+        android:orderInCategory="300"
+        android:title="@string/search"
+        android:icon="@drawable/ic_baseline_search_24"
+        app:showAsAction="ifRoom"/>-->
+    <item
+        android:id="@+id/action_move"
+        android:orderInCategory="300"
+        android:title="@string/move_to"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_report_spam"
+        android:orderInCategory="300"
+        android:title="@string/report_spam"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_block"
+        android:orderInCategory="300"
+        android:title="@string/block"
+        app:showAsAction="never"/>
+
+</menu>

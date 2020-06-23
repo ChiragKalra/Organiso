@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background"
+    tools:context=".ConversationActivity">
+    <ListView
+        android:stackFromBottom="true"
+        android:transcriptMode="normal"
+        android:background="@color/background"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:id="@+id/messageListView"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/grey"
+        android:layout_margin="12dp"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:text="@string/sending_messages_not_supported"/>
+    <LinearLayout
+        android:visibility="gone"
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/messageEditText"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColorHint="#959595"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:inputType="textShortMessage"
+            android:hint="@string/type_your_message_here"
+            android:importantForAutofill="no" />
+        <ImageButton
+            android:id="@+id/sendButton"
+            android:background="#0000"
+            android:tint="@color/colorAccent"
+            android:layout_margin="8dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_baseline_send"
+            android:contentDescription="@string/send" />
+    </LinearLayout>
+</LinearLayout>

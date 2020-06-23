@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">SMS Organiser</string>
+    <string name="tab_text_1">Personal</string>
+    <string name="tab_text_2">Important</string>
+    <string name="tab_text_3">Transactions</string>
+    <string name="tab_text_4">Promotions</string>
+    <string name="tab_text_5">Spam</string>
+    <string name="tab_text_6">Blocked</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="delete">delete</string>
+    <string name="app_icon">App Icon</string>
+    <string name="display_picture">display picture</string>
+    <string name="search">Search</string>
+    <string name="settings">Settings</string>
+    <string name="this_category_has_no_messages_yet">This category has no messages yet.</string>
+    <string name="send">send</string>
+    <string name="type_your_message_here">Type your message here</string>
+    <string name="report_spam">Report Spam</string>
+    <string name="block">Block</string>
+    <string name="move_to">Move to</string>
+    <string name="sending_messages_not_supported">Sending Messages Not Supported</string>
+</resources>
