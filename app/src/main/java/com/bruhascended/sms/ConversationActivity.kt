@@ -63,7 +63,7 @@ class ConversationActivity : AppCompatActivity() {
         })
 
         val sendButton: ImageButton = findViewById(R.id.sendButton)
-        messageEditText= findViewById(R.id.messageEditText)
+        messageEditText = findViewById(R.id.messageEditText)
 
         sendButton.setOnClickListener{
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)

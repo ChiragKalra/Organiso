@@ -58,20 +58,21 @@ class SMSManager (context: Context) {
 
             do {
                 val name = cursor.getString(nameID)
+                if (name != null) {
+                    val message = Message(
+                        null,
+                        name,
+                        cursor.getString(messageID),
+                        cursor.getString(typeID).toInt(),
+                        cursor.getString(dateID).toLong(),
+                        -1
+                    )
 
-                val message = Message(
-                    null,
-                    name,
-                    cursor.getString(messageID),
-                    cursor.getString(typeID).toInt(),
-                    cursor.getString(dateID).toLong(),
-                    -1
-                )
-
-                if (messages.containsKey(name)) {
-                    messages[name]?.add(message)
-                } else {
-                    messages[name] = arrayListOf(message)
+                    if (messages.containsKey(name)) {
+                        messages[name]?.add(message)
+                    } else {
+                        messages[name] = arrayListOf(message)
+                    }
                 }
             } while (cursor.moveToNext())
 
