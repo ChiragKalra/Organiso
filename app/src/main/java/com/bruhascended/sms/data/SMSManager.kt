@@ -76,7 +76,6 @@ class SMSManager (context: Context) {
             } while (cursor.moveToNext())
 
             cursor.close()
-            sp.edit().putLong("last", System.currentTimeMillis()).apply()
         }
     }
 
@@ -134,5 +133,7 @@ class SMSManager (context: Context) {
                     mdb.insert(message)
             }
         }
+        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
+            .putLong("last", System.currentTimeMillis()).apply()
     }
 }
