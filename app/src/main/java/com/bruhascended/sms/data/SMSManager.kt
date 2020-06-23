@@ -47,7 +47,7 @@ class SMSManager (context: Context) {
             null,
             "date" + ">?",
             arrayOf(lastDate),
-            "date DESC"
+            "date ASC"
         )
 
         if (cursor != null && cursor.moveToFirst()) {
