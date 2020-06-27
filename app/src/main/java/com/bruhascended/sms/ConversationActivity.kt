@@ -24,7 +24,7 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDao
 import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.ui.main.MessageListViewAdaptor
+import com.bruhascended.sms.ui.listViewAdapter.MessageListViewAdaptor
 
 
 class ConversationActivity : AppCompatActivity() {
@@ -40,15 +40,20 @@ class ConversationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_conversation)
 
         mContext = this
-        conversation = intent.getSerializableExtra("ye") as Conversation
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.title = conversation.name ?: conversation.sender
 
-        val listView: ListView = findViewById(R.id.messageListView)
         val sendLayout: LinearLayout = findViewById(R.id.sendLayout)
+        val sendButton: ImageButton = findViewById(R.id.sendButton)
+        val listView: ListView = findViewById(R.id.messageListView)
         val notSupport: TextView = findViewById(R.id.notSupported)
+
+        messageEditText = findViewById(R.id.messageEditText)
+
+        conversation = intent.getSerializableExtra("ye") as Conversation
+
+        supportActionBar!!.title = conversation.name ?: conversation.sender
 
         if (!conversation.sender.first().isDigit()) {
             sendLayout.visibility = LinearLayout.GONE
@@ -59,36 +64,77 @@ class ConversationActivity : AppCompatActivity() {
             this, MessageDatabase::class.java, conversation.sender
         ).allowMainThreadQueries().build().manager()
 
-        mdb.loadAll().observe(this, Observer<List<Message>> {
-            listView.adapter = MessageListViewAdaptor(this, it)
+        if (conversation.id == null) {
+            sendSMS()
+        }
 
-            listView.onItemLongClickListener = AdapterView.OnItemLongClickListener{
-                    _: AdapterView<*>, _: View, i: Int, _: Long ->
-                (mContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                .setPrimaryClip(ClipData.newPlainText("copied sms", it[i].text))
-                Toast.makeText(mContext, "Copied To Clipboard", Toast.LENGTH_LONG).show()
-                true
-            }
+        mdb.loadAll().observe(this, Observer<List<Message>> {
+            listView.adapter =
+                MessageListViewAdaptor(
+                    this,
+                    it
+                )
+
+            listView.onItemLongClickListener =
+                AdapterView.OnItemLongClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
+                    (mContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
+                        .setPrimaryClip(ClipData.newPlainText("copied sms", it[i].text))
+                    Toast.makeText(mContext, "Copied To Clipboard", Toast.LENGTH_LONG).show()
+                    true
+                }
         })
 
-        val sendButton: ImageButton = findViewById(R.id.sendButton)
-        messageEditText = findViewById(R.id.messageEditText)
-
-        sendButton.setOnClickListener{
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
-                != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    this, arrayOf(Manifest.permission.SEND_SMS),
-                    12312
-                )
-            } else sendSMS()
+        sendButton.setOnClickListener {
+            if (messageEditText.text.toString().trim() != "") sendSMS()
         }
     }
+
+    private fun sendSMS() {
+        val smsText = if (conversation.id != null)
+            messageEditText.text.toString() else conversation.lastSMS
+        val date = System.currentTimeMillis()
+
+        val smsManager = SmsManager.getDefault()
+        smsManager.sendTextMessage(conversation.sender, null,
+            smsText, null, null)
+        messageEditText.text.clear()
+
+        mdb.insert(
+            Message(
+                null,
+                conversation.sender,
+                smsText,
+                2,
+                date,
+                0
+            )
+        )
+
+        conversation.time = date
+        conversation.lastSMS = smsText
+
+        Thread ( Runnable {
+            var found = false
+            for (i in 0..4) {
+                val res = mainViewModel!!.daos[i].findBySender(conversation.sender)
+                if (res.isNotEmpty()) {
+                    found = true
+                    conversation = res[0]
+                }
+            }
+            if (!found) mainViewModel!!.daos[conversation.label].insert(conversation)
+            else mainViewModel!!.daos[conversation.label].update(conversation)
+        }).start()
+
+        Toast.makeText(mContext, "SMS sent", Toast.LENGTH_LONG).show()
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.conversation, menu)
         return true
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -117,60 +163,16 @@ class ConversationActivity : AppCompatActivity() {
 
                 var selection = conversation.label
                 AlertDialog.Builder(mContext).setTitle("Move ${conversation.sender} to ")
-                .setSingleChoiceItems(choices, selection) { _, select -> selection = select}
-                .setPositiveButton("Move") { dialog, _ ->
-                    moveTo(conversation, selection)
-                    Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
-                    dialog.dismiss()
-                }
-                .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}
-                .create().show()
+                    .setSingleChoiceItems(choices, selection) { _, select -> selection = select}
+                    .setPositiveButton("Move") { dialog, _ ->
+                        moveTo(conversation, selection)
+                        Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}
+                    .create().show()
             }
         }
         return false
-    }
-
-    private fun sendSMS() {
-        val smsText = messageEditText.text.toString()
-        val date = System.currentTimeMillis()
-
-        val smsManager = SmsManager.getDefault()
-        smsManager.sendTextMessage(conversation.sender, null,
-            smsText, null, null)
-        messageEditText.text.clear()
-
-        mdb.insert(
-            Message(
-                null,
-                conversation.sender,
-                smsText,
-                2,
-                date,
-                0
-            )
-        )
-
-        conversation.time = date
-        conversation.lastSMS = smsText
-
-        Thread ( Runnable {
-            mainViewModel!!.daos[conversation.label].update(conversation)
-        }).start()
-
-        Toast.makeText(mContext, "SMS sent", Toast.LENGTH_LONG).show()
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        when (requestCode) {
-            12312 -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                    sendSMS()
-                else Toast.makeText(mContext, "Insufficient Permissions.", Toast.LENGTH_LONG).show()
-            }
-        }
     }
 }
