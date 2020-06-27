@@ -1,6 +1,5 @@
 package com.bruhascended.sms
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -20,15 +19,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 
-lateinit var mainViewModel: MainViewModel
+var mainViewModel: MainViewModel? = null
 
 fun moveTo(conversation: Conversation, to: Int) {
     Thread(Runnable {
-        mainViewModel.daos[conversation.label].delete(conversation)
+        mainViewModel!!.daos[conversation.label].delete(conversation)
 
         conversation.id = null
         conversation.label = to
-        mainViewModel.daos[to].insert(conversation)
+        mainViewModel!!.daos[to].insert(conversation)
     }).start()
 }
 
@@ -54,14 +53,14 @@ class MainActivity : AppCompatActivity() {
         mContext = this
 
         mainViewModel = MainViewModel()
-        mainViewModel.daos = Array(6){
+        mainViewModel!!.daos = Array(6){
             Room.databaseBuilder(
                 mContext, ConversationDatabase::class.java,
                 mContext.resources.getString(labelText[it])
             ).build().manager()
         }
 
-        val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager, mainViewModel)
+        val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager, mainViewModel!!)
         val viewPager: ViewPager = findViewById(R.id.view_pager)
         viewPager.adapter = sectionsPagerAdapter
         viewPager.offscreenPageLimit = 3
