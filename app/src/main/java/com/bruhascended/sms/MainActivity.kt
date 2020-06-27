@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
+import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.data.SMSManager
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
@@ -16,7 +17,6 @@ import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 
 var mainViewModel: MainViewModel? = null
@@ -50,6 +50,9 @@ class MainActivity : AppCompatActivity() {
 
         getNewMessages(this)
 
+        val cmg = ContactsManager(this)
+        val contacts = cmg.getContactsList()
+
         mContext = this
 
         mainViewModel = MainViewModel()
@@ -71,9 +74,10 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+        fab.setOnClickListener {
+            val intent = Intent(mContext, NewConversationActivity::class.java)
+            intent.putExtra("contacts", contacts)
+            startActivity(intent)
         }
     }
 

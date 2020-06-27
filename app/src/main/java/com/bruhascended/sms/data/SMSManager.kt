@@ -6,6 +6,8 @@ import androidx.room.Room
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.*
 import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.ml.FeatureExtractor
+import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.start.StartViewModel
 import kotlin.math.roundToInt
 
@@ -86,7 +88,7 @@ class SMSManager (context: Context) {
         val nn = OrganizerModel(mContext)
         val fe = FeatureExtractor(mContext)
 
-        senderNameMap = ContactsManager(mContext).getContactList()
+        senderNameMap = ContactsManager(mContext).getContactsHashMap()
 
         var total = 0
         for ((_, msgs) in messages) {
@@ -136,8 +138,7 @@ class SMSManager (context: Context) {
                     mContext, MessageDatabase::class.java, conversation
                 ).build().manager()
                 for (message in messages[conversation]!!)
-                    if (message.type in 1..2)
-                        mdb.insert(message)
+                    mdb.insert(message)
             }
         }
         mContext.getSharedPreferences("local", Context.MODE_PRIVATE)

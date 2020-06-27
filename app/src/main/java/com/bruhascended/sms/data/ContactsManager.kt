@@ -7,7 +7,15 @@ import android.provider.ContactsContract
 import io.michaelrocks.libphonenumber.android.NumberParseException
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import io.michaelrocks.libphonenumber.android.Phonenumber
+import java.io.Serializable
+import java.util.HashSet
 
+
+data class Contact (
+    val name: String,
+    val number: String,
+    val dp: String?
+): Serializable
 
 class ContactsManager(context: Context) {
     private val mContext = context
@@ -19,16 +27,16 @@ class ContactsManager(context: Context) {
             try {
                 val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.createInstance(mContext)
                 val numberProto: Phonenumber.PhoneNumber = phoneUtil.parse(number, "")
-                numberProto.nationalNumber.toString()
+                numberProto.nationalNumber.toString().replace(Regex("\\s"), "")
             } catch (e: NumberParseException) {
-                number
+                number.replace(Regex("\\s"), "")
             }
         } else {
-            number
+            number.replace(Regex("\\s"), "")
         }
     }
 
-    fun getContactList(): HashMap<String, String> {
+    fun getContactsHashMap(): HashMap<String, String> {
         val cr: ContentResolver = mContext.contentResolver
         val cur: Cursor? = cr.query(
             ContactsContract.Contacts.CONTENT_URI,
@@ -60,5 +68,43 @@ class ContactsManager(context: Context) {
         }
         cur?.close()
         return map
+    }
+
+    fun getContactsList(): Array<Contact> {
+        val list = HashSet<Contact>()
+
+        val cr: ContentResolver = mContext.contentResolver
+        val cur: Cursor? = cr.query(
+            ContactsContract.Contacts.CONTENT_URI,
+            null, null, null, null
+        )
+        while (cur != null && cur.moveToNext()) {
+            val id: String = cur.getString(
+                cur.getColumnIndex(ContactsContract.Contacts._ID)
+            )
+            val name: String? = cur.getString(
+                cur.getColumnIndex(
+                    ContactsContract.Contacts.DISPLAY_NAME
+                )
+            )
+            if (name != null && cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                val pCur: Cursor? = cr.query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null,
+                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                    arrayOf(id),
+                    null
+                )
+                while (pCur != null && pCur.moveToNext()) {
+                    val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                    list.add(Contact(name, getRaw(phoneNo), null))
+                }
+                pCur?.close()
+            }
+        }
+        cur?.close()
+        val arr = list.toTypedArray()
+        arr.sortBy {it.name}
+        return arr
     }
 }

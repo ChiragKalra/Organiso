@@ -14,6 +14,7 @@ import androidx.lifecycle.Observer
 import com.bruhascended.sms.ConversationActivity
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.ui.listViewAdapter.ConversationListViewAdaptor
 
 
 class PlaceholderFragment (context: Context, viewModel: MainViewModel) : Fragment() {
@@ -41,7 +42,11 @@ class PlaceholderFragment (context: Context, viewModel: MainViewModel) : Fragmen
         val intent = Intent(mContext, ConversationActivity::class.java)
 
         mainViewModel.daos[label].loadAll().observe(viewLifecycleOwner, Observer<List<Conversation>> {
-            listView.adapter = ConversationListViewAdaptor(mContext, it)
+            listView.adapter =
+                ConversationListViewAdaptor(
+                    mContext,
+                    it
+                )
 
             listView.onItemClickListener = AdapterView.OnItemClickListener {
                     _: AdapterView<*>, _: View, i: Int, _: Long ->

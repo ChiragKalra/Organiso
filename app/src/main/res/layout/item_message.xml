@@ -13,7 +13,6 @@
     android:paddingEnd="75dp">
 
     <TextView
-        android:text="किराया नही किश्त दो\n"
         android:paddingStart="22dp"
         android:paddingEnd="12dp"
         android:paddingTop="4dp"
@@ -29,7 +28,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:text="aj fhaf asfjkashfj hasjfh asjkf jas fashf a sjfhkashfash"
         android:layout_margin="8dp"
         android:id="@+id/time"
         android:layout_width="wrap_content"
