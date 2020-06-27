@@ -13,9 +13,9 @@ data class Conversation (
     @PrimaryKey(autoGenerate = true)
     var id: Long?,
     val sender: String,
-    val name: String?,
+    var name: String?,
     var dp: String,
-    val read: Boolean,
+    var read: Boolean,
     var time: Long,
     var lastSMS: String,
     var label: Int

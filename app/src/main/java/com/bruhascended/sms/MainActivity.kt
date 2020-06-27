@@ -31,24 +31,24 @@ fun moveTo(conversation: Conversation, to: Int) {
     }).start()
 }
 
+fun getNewMessages(mContext: Context) {
+    Thread(Runnable {
+        val manager = SMSManager(mContext)
+        manager.getMessages()
+        manager.getLabels(null)
+        manager.saveMessages()
+    }).start()
+}
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context
 
-    private fun getNewMessages() {
-        Thread(Runnable {
-            val manager = SMSManager(mContext)
-            manager.getMessages()
-            manager.getLabels(null)
-            manager.saveMessages()
-        }).start()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        getNewMessages()
+        getNewMessages(this)
 
         mContext = this
 
