@@ -4,10 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.room.Room
 import com.bruhascended.sms.R
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.ConversationDatabase
-import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.db.*
+import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ui.start.StartViewModel
 import kotlin.math.roundToInt
 
@@ -21,6 +19,7 @@ val labelText = arrayOf(
     R.string.tab_text_6
 )
 
+/*
 const val MESSAGE_TYPE_ALL = 0
 const val MESSAGE_TYPE_INBOX = 1
 const val MESSAGE_TYPE_SENT = 2
@@ -28,7 +27,7 @@ const val MESSAGE_TYPE_DRAFT = 3
 const val MESSAGE_TYPE_OUTBOX = 4
 const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
 const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
-
+*/
 
 class SMSManager (context: Context) {
     private var mContext: Context = context
@@ -41,6 +40,8 @@ class SMSManager (context: Context) {
     fun getMessages() {
         val sp = mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
         val lastDate = sp.getLong("last", 0).toString()
+
+        val cm = ContactsManager(mContext)
 
         val cursor = mContext.contentResolver.query(
             Uri.parse("content://sms/"),
@@ -57,8 +58,9 @@ class SMSManager (context: Context) {
             val typeID = cursor.getColumnIndex("type")
 
             do {
-                val name = cursor.getString(nameID)
+                var name = cursor.getString(nameID)
                 if (name != null) {
+                    name = cm.getRaw(name)
                     val message = Message(
                         null,
                         name,
@@ -97,7 +99,7 @@ class SMSManager (context: Context) {
                 labels[0].add(sender)
             } else {
                 val prediction = nn.getPredictions(msgs, fe.getFeatureMatrix(msgs))
-                if (sender.first() != '+' && prediction == 0)
+                if ((!sender.first().isDigit()) && prediction == 0)
                     labels[1].add(sender)
                 else
                     labels[prediction].add(sender)
@@ -109,11 +111,14 @@ class SMSManager (context: Context) {
 
     fun saveMessages() {
         for (i in 0..4) {
-            val db = Room.databaseBuilder(
-                mContext, ConversationDatabase::class.java,
-                mContext.resources.getString(labelText[i])
-            ).build().manager()
-
+            val db: ConversationDao = if (mainViewModel == null) {
+                Room.databaseBuilder(
+                    mContext, ConversationDatabase::class.java,
+                    mContext.resources.getString(labelText[i])
+                ).build().manager()
+            } else {
+                mainViewModel!!.daos[i]
+            }
             for (conversation in labels[i]) {
                 db.insert(
                     Conversation (

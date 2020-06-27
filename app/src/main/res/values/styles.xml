@@ -33,4 +33,8 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="MineCustomTabText" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+    </style>
+
 </resources>

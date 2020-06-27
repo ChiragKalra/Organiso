@@ -4,12 +4,29 @@ import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
 import android.provider.ContactsContract
+import io.michaelrocks.libphonenumber.android.NumberParseException
+import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
+import io.michaelrocks.libphonenumber.android.Phonenumber
 
 
 class ContactsManager(context: Context) {
     private val mContext = context
 
     private val map = HashMap<String, String>()
+
+    fun getRaw(number: String): String {
+        return if (number.startsWith("+")) {
+            try {
+                val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.createInstance(mContext)
+                val numberProto: Phonenumber.PhoneNumber = phoneUtil.parse(number, "")
+                numberProto.nationalNumber.toString()
+            } catch (e: NumberParseException) {
+                number
+            }
+        } else {
+            number
+        }
+    }
 
     fun getContactList(): HashMap<String, String> {
         val cr: ContentResolver = mContext.contentResolver
@@ -21,12 +38,12 @@ class ContactsManager(context: Context) {
             val id: String = cur.getString(
                 cur.getColumnIndex(ContactsContract.Contacts._ID)
             )
-            val name: String = cur.getString(
+            val name: String? = cur.getString(
                 cur.getColumnIndex(
                     ContactsContract.Contacts.DISPLAY_NAME
                 )
             )
-            if (cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+            if (name != null && cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
                 val pCur: Cursor? = cr.query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                     null,
@@ -36,8 +53,7 @@ class ContactsManager(context: Context) {
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    if (!phoneNo.startsWith("+91")) map["+91$phoneNo"] = name
-                    else map[phoneNo] = name
+                    map[getRaw(phoneNo)] = name
                 }
                 pCur?.close()
             }
