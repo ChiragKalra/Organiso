@@ -22,6 +22,7 @@ import androidx.room.Room
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.db.MessageDao
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ui.main.MessageListViewAdaptor
 
@@ -31,6 +32,7 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var conversation: Conversation
     private lateinit var messageEditText: EditText
+    private lateinit var mdb: MessageDao
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,10 +47,17 @@ class ConversationActivity : AppCompatActivity() {
         supportActionBar!!.title = conversation.name ?: conversation.sender
 
         val listView: ListView = findViewById(R.id.messageListView)
+        val sendLayout: LinearLayout = findViewById(R.id.sendLayout)
+        val notSupport: TextView = findViewById(R.id.notSupported)
 
-        val mdb = Room.databaseBuilder(
+        if (!conversation.sender.first().isDigit()) {
+            sendLayout.visibility = LinearLayout.GONE
+            notSupport.visibility = TextView.VISIBLE
+        }
+
+        mdb = Room.databaseBuilder(
             this, MessageDatabase::class.java, conversation.sender
-        ).build().manager()
+        ).allowMainThreadQueries().build().manager()
 
         mdb.loadAll().observe(this, Observer<List<Message>> {
             listView.adapter = MessageListViewAdaptor(this, it)
@@ -122,14 +131,33 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     private fun sendSMS() {
+        val smsText = messageEditText.text.toString()
+        val date = System.currentTimeMillis()
+
         val smsManager = SmsManager.getDefault()
         smsManager.sendTextMessage(conversation.sender, null,
-            messageEditText.text.toString(), null, null)
+            smsText, null, null)
         messageEditText.text.clear()
-        Toast.makeText(
-            mContext, "SMS sent.",
-            Toast.LENGTH_LONG
-        ).show()
+
+        mdb.insert(
+            Message(
+                null,
+                conversation.sender,
+                smsText,
+                2,
+                date,
+                0
+            )
+        )
+
+        conversation.time = date
+        conversation.lastSMS = smsText
+
+        Thread ( Runnable {
+            mainViewModel!!.daos[conversation.label].update(conversation)
+        }).start()
+
+        Toast.makeText(mContext, "SMS sent", Toast.LENGTH_LONG).show()
     }
 
     override fun onRequestPermissionsResult(
@@ -139,16 +167,9 @@ class ConversationActivity : AppCompatActivity() {
     ) {
         when (requestCode) {
             12312 -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     sendSMS()
-                }
-                else {
-                    Toast.makeText(
-                        mContext,
-                        "Insufficient Permissions.", Toast.LENGTH_LONG
-                    ).show()
-                    return
-                }
+                else Toast.makeText(mContext, "Insufficient Permissions.", Toast.LENGTH_LONG).show()
             }
         }
     }

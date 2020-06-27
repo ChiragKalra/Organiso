@@ -17,6 +17,8 @@
         android:divider="@null"
         android:id="@+id/messageListView"/>
     <TextView
+        android:id="@+id/notSupported"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/grey"
@@ -25,7 +27,7 @@
         android:textSize="18sp"
         android:text="@string/sending_messages_not_supported"/>
     <LinearLayout
-        android:visibility="gone"
+        android:id="@+id/sendLayout"
         android:padding="8dp"
         android:layout_width="match_parent"
         android:layout_height="80dp"

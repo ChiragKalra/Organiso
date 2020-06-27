@@ -111,14 +111,13 @@ class SMSManager (context: Context) {
 
     fun saveMessages() {
         for (i in 0..4) {
-            val db: ConversationDao = if (mainViewModel == null) {
+            val db: ConversationDao = if (mainViewModel == null)
                 Room.databaseBuilder(
                     mContext, ConversationDatabase::class.java,
                     mContext.resources.getString(labelText[i])
                 ).build().manager()
-            } else {
-                mainViewModel!!.daos[i]
-            }
+            else mainViewModel!!.daos[i]
+
             for (conversation in labels[i]) {
                 db.insert(
                     Conversation (
@@ -133,13 +132,15 @@ class SMSManager (context: Context) {
                     )
                 )
 
-                val mdb = Room.databaseBuilder(mContext, MessageDatabase::class.java, conversation)
-                    .build().manager()
+                val mdb = Room.databaseBuilder(
+                    mContext, MessageDatabase::class.java, conversation
+                ).build().manager()
                 for (message in messages[conversation]!!)
-                    mdb.insert(message)
+                    if (message.type in 1..2)
+                        mdb.insert(message)
             }
         }
-        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
-            .putLong("last", System.currentTimeMillis()).apply()
+        mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
+            .edit().putLong("last", System.currentTimeMillis()).apply()
     }
 }

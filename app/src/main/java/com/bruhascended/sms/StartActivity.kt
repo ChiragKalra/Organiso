@@ -25,6 +25,13 @@ class StartActivity : AppCompatActivity() {
 
     private val arg = "InitDataOrganized"
 
+    private val perms = arrayOf(
+        Manifest.permission.READ_SMS,
+        Manifest.permission.SEND_SMS,
+        Manifest.permission.RECEIVE_SMS,
+        Manifest.permission.READ_CONTACTS
+    )
+
     private fun messages() {
 
         Thread(Runnable {
@@ -52,11 +59,16 @@ class StartActivity : AppCompatActivity() {
 
         sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
 
+        val grant = Array(perms.size){ActivityCompat.checkSelfPermission(this, perms[it])}
+        if (PackageManager.PERMISSION_DENIED in grant) {
+            ActivityCompat.requestPermissions(this, perms, 1)
+        }
         if (sharedPref.getBoolean(arg, false)) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
+
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
             progress.value = 0
@@ -77,27 +89,17 @@ class StartActivity : AppCompatActivity() {
             discTextView.text = pageViewModel.discStrings[it]
         })
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.READ_SMS,
-                    Manifest.permission.READ_CONTACTS,
-                    Manifest.permission.SEND_SMS
-                ),
-                2)
-        } else {
-            messages()
-        }
+        if (PackageManager.PERMISSION_DENIED in grant)
+            ActivityCompat.requestPermissions(this, perms, 2)
+        else messages()
+
     }
 
-    override fun onRequestPermissionsResult(
+    override fun onRequestPermissionsResult (
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
-    ) {
-       messages()
-    }
+    ) = messages()
+
 
 }

@@ -33,5 +33,5 @@
     <string name="report_spam">Report Spam</string>
     <string name="block">Block</string>
     <string name="move_to">Move to</string>
-    <string name="sending_messages_not_supported">Sending Messages Not Supported</string>
+    <string name="sending_messages_not_supported">Sender Doesn\'t Support Replies</string>
 </resources>
