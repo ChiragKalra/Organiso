@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -32,28 +33,9 @@ class StartActivity : AppCompatActivity() {
         Manifest.permission.READ_CONTACTS
     )
 
-    private fun messages() {
-
-        Thread(Runnable {
-            val manager = SMSManager(mContext)
-            manager.getMessages()
-
-            pageViewModel.disc.postValue(1)
-            manager.getLabels(pageViewModel)
-            pageViewModel.disc.postValue(2)
-            manager.saveMessages()
-
-            startActivity(Intent(mContext, MainActivity::class.java))
-
-            sharedPref.edit().putBoolean(arg, true).apply()
-            (mContext as Activity).finish()
-        }).start()
-    }
-
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_start)
 
         mContext = this
 
@@ -63,12 +45,15 @@ class StartActivity : AppCompatActivity() {
         if (PackageManager.PERMISSION_DENIED in grant) {
             ActivityCompat.requestPermissions(this, perms, 1)
         }
+
         if (sharedPref.getBoolean(arg, false)) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
 
+        setTheme(R.style.AppTheme)
+        setContentView(R.layout.activity_start)
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
             progress.value = 0
@@ -78,6 +63,7 @@ class StartActivity : AppCompatActivity() {
         val progressBar: CircularProgressBar = findViewById(R.id.progressBar)
         val progressTextView: TextView = findViewById(R.id.progressText)
         val discTextView: TextView = findViewById(R.id.infoText)
+        val etaView: TextView = findViewById(R.id.etaText)
 
         pageViewModel.progress.observe(this, Observer<Int> {
             progressTextView.text = "$it%"
@@ -89,17 +75,39 @@ class StartActivity : AppCompatActivity() {
             discTextView.text = pageViewModel.discStrings[it]
         })
 
-        if (PackageManager.PERMISSION_DENIED in grant)
-            ActivityCompat.requestPermissions(this, perms, 2)
-        else messages()
 
+        var preTimer: CountDownTimer? = null
+        pageViewModel.eta.observe(this, Observer<Long> {
+            preTimer?.cancel()
+            preTimer = object: CountDownTimer((it + 1), 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    val sec = (millisUntilFinished/1000)%60
+                    val min = (millisUntilFinished/1000)/60
+                    if ((0 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
+                        if (min>0) etaView.text = "ETA ${min}min ${sec}sec"
+                        else etaView.text = "ETA ${sec}sec"
+                    } else {
+                        etaView.text = ""
+                    }
+                }
+                override fun onFinish() {}
+            }.start()
+        })
+
+        Thread(Runnable {
+            val manager = SMSManager(mContext)
+            manager.getMessages()
+
+            pageViewModel.disc.postValue(1)
+            manager.getLabels(pageViewModel)
+
+            pageViewModel.disc.postValue(2)
+            manager.saveMessages()
+
+            startActivity(Intent(mContext, MainActivity::class.java))
+
+            sharedPref.edit().putBoolean(arg, true).apply()
+            (mContext as Activity).finish()
+        }).start()
     }
-
-    override fun onRequestPermissionsResult (
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) = messages()
-
-
 }

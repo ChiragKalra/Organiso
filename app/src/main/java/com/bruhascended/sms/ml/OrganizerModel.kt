@@ -2,10 +2,12 @@ package com.bruhascended.sms.ml
 
 import android.app.Activity
 import android.content.Context
+import com.bruhascended.sms.data.MESSAGE_CHECK_COUNT
 import com.bruhascended.sms.db.Message
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate
 import java.io.FileInputStream
+import java.lang.Integer.min
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
@@ -34,7 +36,9 @@ class OrganizerModel (context: Context) {
 
         val count = IntArray(5)
 
-        features.forEachIndexed { i, feature ->
+        for (i in 0 until min(features.size, MESSAGE_CHECK_COUNT)) {
+            val feature = features[i]
+
             val inputData = ByteBuffer.allocateDirect(n * 4)
             inputData.order(ByteOrder.nativeOrder())
             for (it in feature) {
@@ -45,6 +49,8 @@ class OrganizerModel (context: Context) {
 
             messages[i].label = out[0].indexOf(out[0].max()!!)
             count[messages[i].label]++
+
+            if (i==9) break
         }
 
         delegate.close()

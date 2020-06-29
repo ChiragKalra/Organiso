@@ -1,10 +1,7 @@
 package com.bruhascended.sms.ui.start
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.bruhascended.sms.db.Conversation
 
 class StartViewModel : ViewModel() {
 
@@ -16,5 +13,6 @@ class StartViewModel : ViewModel() {
 
     val progress = MutableLiveData<Int>()
     val disc = MutableLiveData<Int>()
+    val eta = MutableLiveData<Long>()
 
 }

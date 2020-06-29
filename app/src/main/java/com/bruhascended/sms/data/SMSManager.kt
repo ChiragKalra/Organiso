@@ -2,6 +2,7 @@ package com.bruhascended.sms.data
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.room.Room
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.*
@@ -9,6 +10,7 @@ import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ml.FeatureExtractor
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.start.StartViewModel
+import java.lang.Integer.min
 import kotlin.math.roundToInt
 
 
@@ -30,6 +32,8 @@ const val MESSAGE_TYPE_OUTBOX = 4
 const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
 const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
 */
+
+const val MESSAGE_CHECK_COUNT = 6
 
 class SMSManager (context: Context) {
     private var mContext: Context = context
@@ -88,11 +92,16 @@ class SMSManager (context: Context) {
         val nn = OrganizerModel(mContext)
         val fe = FeatureExtractor(mContext)
 
+        var timeFeat = 0L
+        var timeML = 0L
+
+        val startTime = System.currentTimeMillis()
+
         senderNameMap = ContactsManager(mContext).getContactsHashMap()
 
         var total = 0
         for ((_, msgs) in messages) {
-            total += msgs.size
+            total += min(msgs.size, MESSAGE_CHECK_COUNT)
         }
 
         var done = 0
@@ -100,15 +109,28 @@ class SMSManager (context: Context) {
             if (senderNameMap.containsKey(sender)) {
                 labels[0].add(sender)
             } else {
-                val prediction = nn.getPredictions(msgs, fe.getFeatureMatrix(msgs))
+                var yeah = System.currentTimeMillis()
+                val features = fe.getFeatureMatrix(msgs)
+                timeFeat += System.currentTimeMillis()-yeah
+                yeah = System.currentTimeMillis()
+                val prediction = nn.getPredictions(msgs, features)
+                timeML += System.currentTimeMillis()-yeah
+
                 if ((!sender.first().isDigit()) && prediction == 0)
                     labels[1].add(sender)
                 else
                     labels[prediction].add(sender)
             }
-            done += msgs.size
-            pageViewModel?.progress?.postValue((done * 100f / total).roundToInt())
+            done += min(msgs.size, MESSAGE_CHECK_COUNT)
+            val per = done * 100f / total
+            pageViewModel?.progress?.postValue(per.roundToInt())
+
+            val eta = (System.currentTimeMillis()-startTime) * (100/per-1)
+            pageViewModel?.eta?.postValue(eta.toLong())
         }
+
+        Log.d("time-ml", timeML.toString())
+        Log.d("time-feat", timeFeat.toString())
     }
 
     fun saveMessages() {
@@ -121,6 +143,15 @@ class SMSManager (context: Context) {
             else mainViewModel!!.daos[i]
 
             for (conversation in labels[i]) {
+                if (mainViewModel != null) {
+                    for (j in 0..4) {
+                        val res = mainViewModel!!.daos[j].findBySender(conversation)
+                        if (res.isNotEmpty()) {
+                            mainViewModel!!.daos[i].delete(res[0])
+                        }
+                    }
+                }
+
                 db.insert(
                     Conversation (
                         null,

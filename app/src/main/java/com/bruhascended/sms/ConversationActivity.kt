@@ -2,12 +2,10 @@
 
 package com.bruhascended.sms
 
-import android.Manifest
 import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.telephony.SmsManager
 import android.view.Menu
@@ -15,8 +13,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.bruhascended.sms.data.labelText
@@ -110,20 +106,31 @@ class ConversationActivity : AppCompatActivity() {
             )
         )
 
-        conversation.time = date
-        conversation.lastSMS = smsText
-
         Thread ( Runnable {
-            var found = false
-            for (i in 0..4) {
-                val res = mainViewModel!!.daos[i].findBySender(conversation.sender)
-                if (res.isNotEmpty()) {
-                    found = true
-                    conversation = res[0]
+            if (conversation.id == null) {
+                var found = false
+                for (i in 0..4) {
+                    val res = mainViewModel!!.daos[i].findBySender(conversation.sender)
+                    if (res.isNotEmpty()) {
+                        found = true
+                        conversation = res[0]
+                        break
+                    }
                 }
+
+                conversation.time = date
+                conversation.lastSMS = smsText
+
+                if (found)
+                    mainViewModel!!.daos[conversation.label].update(conversation)
+                else
+                    mainViewModel!!.daos[conversation.label].insert(conversation)
+            } else {
+                conversation.time = date
+                conversation.lastSMS = smsText
+
+                mainViewModel!!.daos[conversation.label].update(conversation)
             }
-            if (!found) mainViewModel!!.daos[conversation.label].insert(conversation)
-            else mainViewModel!!.daos[conversation.label].update(conversation)
         }).start()
 
         Toast.makeText(mContext, "SMS sent", Toast.LENGTH_LONG).show()
@@ -137,10 +144,11 @@ class ConversationActivity : AppCompatActivity() {
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val display = conversation.name?: conversation.sender
         when (item.itemId) {
             R.id.action_block -> {
-                AlertDialog.Builder(mContext).setTitle("Do you want to block ${conversation.sender}?")
-                    .setPositiveButton("Move") { dialog, _ ->
+                AlertDialog.Builder(mContext).setTitle("Do you want to block $display?")
+                    .setPositiveButton("Block") { dialog, _ ->
                         moveTo(conversation, 5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -149,11 +157,22 @@ class ConversationActivity : AppCompatActivity() {
                     .create().show()
             }
             R.id.action_report_spam -> {
-                AlertDialog.Builder(mContext).setTitle("Do you want to report ${conversation.sender} as spam?")
-                    .setPositiveButton("Move") { dialog, _ ->
+                AlertDialog.Builder(mContext).setTitle("Do you want to report $display as spam?")
+                    .setPositiveButton("Report") { dialog, _ ->
                         moveTo(conversation, 4)
                         Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}
+                    .create().show()
+            }
+            R.id.action_delete -> {
+                AlertDialog.Builder(mContext).setTitle("Do you want to delete this conversation?")
+                    .setPositiveButton("Delete") { dialog, _ ->
+                        moveTo(conversation, -1)
+                        Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
+                        dialog.dismiss()
+                        finish()
                     }
                     .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}
                     .create().show()
@@ -162,7 +181,7 @@ class ConversationActivity : AppCompatActivity() {
                 val choices = Array(4){mContext.resources.getString(labelText[it])}
 
                 var selection = conversation.label
-                AlertDialog.Builder(mContext).setTitle("Move ${conversation.sender} to ")
+                AlertDialog.Builder(mContext).setTitle("Move this conversation to")
                     .setSingleChoiceItems(choices, selection) { _, select -> selection = select}
                     .setPositiveButton("Move") { dialog, _ ->
                         moveTo(conversation, selection)

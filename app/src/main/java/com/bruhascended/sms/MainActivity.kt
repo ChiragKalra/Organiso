@@ -22,21 +22,28 @@ import com.google.android.material.tabs.TabLayout
 var mainViewModel: MainViewModel? = null
 
 fun moveTo(conversation: Conversation, to: Int) {
-    Thread(Runnable {
+    Thread( Runnable {
         mainViewModel!!.daos[conversation.label].delete(conversation)
-
-        conversation.id = null
-        conversation.label = to
-        mainViewModel!!.daos[to].insert(conversation)
+        if (to >= 0) {
+            conversation.id = null
+            conversation.label = to
+            mainViewModel!!.daos[to].insert(conversation)
+        }
     }).start()
 }
 
 fun getNewMessages(mContext: Context) {
-    Thread(Runnable {
+    Thread( Runnable {
         val manager = SMSManager(mContext)
         manager.getMessages()
         manager.getLabels(null)
         manager.saveMessages()
+    }).start()
+}
+
+fun getContacts(mContext: Context) {
+    Thread ( Runnable {
+        mainViewModel!!.contacts.postValue(ContactsManager(mContext).getContactsList())
     }).start()
 }
 
@@ -46,16 +53,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        getNewMessages(this)
-
-        val cmg = ContactsManager(this)
-        val contacts = cmg.getContactsList()
 
         mContext = this
-
         mainViewModel = MainViewModel()
+
         mainViewModel!!.daos = Array(6){
             Room.databaseBuilder(
                 mContext, ConversationDatabase::class.java,
@@ -63,21 +64,25 @@ class MainActivity : AppCompatActivity() {
             ).build().manager()
         }
 
+        getNewMessages(this)
+        getContacts(this)
+
+        setContentView(R.layout.activity_main)
+
         val sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager, mainViewModel!!)
         val viewPager: ViewPager = findViewById(R.id.view_pager)
-        viewPager.adapter = sectionsPagerAdapter
-        viewPager.offscreenPageLimit = 3
         val tabs: TabLayout = findViewById(R.id.tabs)
-        tabs.setupWithViewPager(viewPager)
         val fab: FloatingActionButton = findViewById(R.id.fab)
-
         val toolbar: Toolbar = findViewById(R.id.toolbar)
+
         setSupportActionBar(toolbar)
 
+        viewPager.adapter = sectionsPagerAdapter
+        viewPager.offscreenPageLimit = 3
+        tabs.setupWithViewPager(viewPager)
+
         fab.setOnClickListener {
-            val intent = Intent(mContext, NewConversationActivity::class.java)
-            intent.putExtra("contacts", contacts)
-            startActivity(intent)
+            startActivity(Intent(mContext, NewConversationActivity::class.java))
         }
     }
 
