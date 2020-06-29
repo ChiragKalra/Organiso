@@ -3,7 +3,7 @@ package com.bruhascended.sms
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.sms.ui.main.PlaceholderFragment
+import com.bruhascended.sms.ui.main.CategoryFragment
 
 
 class ExtraCategoryActivity : AppCompatActivity() {
@@ -18,7 +18,7 @@ class ExtraCategoryActivity : AppCompatActivity() {
         supportActionBar!!.setTitle(labelText[label])
 
         if (savedInstanceState == null) {
-            val newFragment = PlaceholderFragment.newInstance(this, mainViewModel!!, label)
+            val newFragment = CategoryFragment.newInstance(this, mainViewModel!!, label)
             val ft = supportFragmentManager.beginTransaction()
             ft.add(android.R.id.content, newFragment).commit()
         }

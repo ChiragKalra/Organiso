@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Message
 import java.util.*
@@ -39,35 +38,27 @@ class MessageListViewAdaptor (context: Context, data: List<Message>) : BaseAdapt
         }
     }
 
-    override fun getCount(): Int {
-        return messages.count()
-    }
+    override fun getCount() = messages.size
 
-    override fun getItem(position: Int): Any {
-        return messages[position]
-    }
+    override fun getItem(position: Int) = messages[position]
 
-    override fun getItemId(position: Int): Long {
-        return messages[position].id!!
-    }
+    override fun getItemId(position: Int) = messages[position].id!!
 
     @SuppressLint("ViewHolder", "SetTextI18n")
     override fun getView(
         position: Int, convertView: View?, parent: ViewGroup
     ): View {
         val layoutInflater = LayoutInflater.from(mContext)
-        val root = layoutInflater.inflate(R.layout.item_message, parent, false)
+        val root =  if (messages[position].type != 1)
+            layoutInflater.inflate(R.layout.item_message_out, parent, false)
+        else layoutInflater.inflate(R.layout.item_message, parent, false)
 
-        val rootLayout : ConstraintLayout = root.findViewById(R.id.rootLayout)
         val messageTextView: TextView = root.findViewById(R.id.message)
         val timeTextView: TextView = root.findViewById(R.id.time)
 
         messageTextView.text = messages[position].text
         timeTextView.text = displayTime(messages[position].time)
 
-        if (messages[position].type != 1) {
-            messageTextView.background = mContext.getDrawable(R.drawable.bg_message_colored)
-        }
         return root
     }
 }

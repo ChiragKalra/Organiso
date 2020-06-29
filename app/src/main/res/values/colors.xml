@@ -6,4 +6,5 @@
     <color name="white">#FFF</color>
     <color name="grey">#4A4A4A</color>
     <color name="background">#151515</color>
+    <color name="message_bg_accent">#377137</color>
 </resources>
