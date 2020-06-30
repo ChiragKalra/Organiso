@@ -30,13 +30,14 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
+        android:visibility="gone"
         android:focusableInTouchMode="true"
         android:id="@+id/searchLayout"
-        android:visibility="gone"
+        android:paddingStart="4dp"
+        android:paddingEnd="50dp"
         android:elevation="5dp"
-        android:layout_margin="0dp"
+        android:layout_height="?attr/actionBarSize"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="@id/appBarLayout"
         app:layout_constraintBottom_toBottomOf="@id/appBarLayout"
         android:orientation="horizontal"
@@ -45,7 +46,7 @@
             android:id="@+id/cancelSearch"
             android:background="@drawable/bg_ripple_button"
             android:clickable="true"
-            android:layout_marginStart="9dp"
+            android:layout_marginStart="5dp"
             android:layout_marginEnd="17dp"
             android:padding="7dp"
             android:layout_width="wrap_content"
@@ -53,6 +54,7 @@
             android:src="@drawable/ic_baseline_arrow_back_24"
             android:contentDescription="@string/back_button" />
         <EditText
+            android:background="@color/colorPrimary"
             android:clickable="true"
             android:focusable="true"
             android:focusableInTouchMode="true"
@@ -67,18 +69,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/search"
             android:importantForAutofill="no"
-            android:inputType="textShortMessage" />
-        <ImageButton
-            android:id="@+id/searchButton"
-            android:clickable="true"
-            android:layout_marginStart="17dp"
-            android:layout_marginEnd="9dp"
-            android:padding="7dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_ripple_button"
-            android:src="@drawable/ic_baseline_search_24"
-            android:contentDescription="@string/back_button" />
+            android:inputType="textShortMessage"/>
     </LinearLayout>
 
     <ListView

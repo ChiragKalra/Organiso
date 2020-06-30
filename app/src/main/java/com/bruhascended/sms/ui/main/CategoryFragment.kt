@@ -55,8 +55,7 @@ class CategoryFragment (context: Context, viewModel: MainViewModel) : Fragment()
                 if (it.isEmpty()) textView.visibility = TextView.VISIBLE
                 else textView.visibility = TextView.INVISIBLE
             })
-        }, if (label==0) 0 else 500L)
-
+        }, if (label==0) 0 else 700L)
 
         return root
     }
