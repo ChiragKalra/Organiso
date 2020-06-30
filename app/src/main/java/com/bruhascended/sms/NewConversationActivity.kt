@@ -11,7 +11,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.data.Contact
-import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.listViewAdapter.ContactListViewAdaptor
 import java.util.*
@@ -31,7 +30,6 @@ class NewConversationActivity : AppCompatActivity() {
 
 
         val llm = LinearLayoutManager(this)
-        val cmg = ContactsManager(this)
         val clickAction = { contact: Contact ->
             to.setText(contact.number)
             to.setSelection(contact.number.length)

@@ -9,17 +9,15 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
 import android.telephony.SmsManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.TranslateAnimation
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.bruhascended.sms.data.labelText
@@ -40,11 +38,11 @@ class ConversationActivity : AppCompatActivity() {
 
     private lateinit var messageEditText: EditText
     private lateinit var searchLayout: LinearLayout
-    private lateinit var searchButton: ImageButton
     private lateinit var backButton: ImageButton
     private lateinit var searchEditText: EditText
     private lateinit var listView: ListView
     private lateinit var loading: ProgressBar
+    private lateinit var sendLayout: LinearLayout
     private var inputManager: InputMethodManager? = null
 
     private fun sendSMS() {
@@ -97,14 +95,13 @@ class ConversationActivity : AppCompatActivity() {
 
         mContext = this
 
-        val sendLayout: LinearLayout = findViewById(R.id.sendLayout)
         val sendButton: ImageButton = findViewById(R.id.sendButton)
         val notSupport: TextView = findViewById(R.id.notSupported)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
 
+        sendLayout = findViewById(R.id.sendLayout)
         listView = findViewById(R.id.messageListView)
         messageEditText = findViewById(R.id.messageEditText)
-        searchButton = findViewById(R.id.searchButton)
         backButton = findViewById(R.id.cancelSearch)
         searchLayout = findViewById(R.id.searchLayout)
         searchEditText = findViewById(R.id.searchEditText)
@@ -216,18 +213,12 @@ class ConversationActivity : AppCompatActivity() {
                     override fun onAnimationEnd(animation: Animator) {
                         searchEditText.requestFocus()
                         inputManager?.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
+                        sendLayout.visibility = View.GONE
                     }
                 })
         }
 
-        var animation: Animation = TranslateAnimation(
-            -mContext.resources.getDimensionPixelSize(R.dimen.animation_distance).toFloat(),
-            0F, 0F, 0F)
-        animation.duration = 300
-        animation.fillAfter = true
-        searchButton.startAnimation(animation)
-
-        searchButton.setOnClickListener{
+        searchEditText.doOnTextChanged { _, _, _, _ ->
             val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
             progress.visibility = View.VISIBLE
             if (key.isNotEmpty()) {
@@ -239,23 +230,16 @@ class ConversationActivity : AppCompatActivity() {
         backButton.setOnClickListener{
             inputManager?.hideSoftInputFromWindow(it.windowToken, 0)
             progress.visibility = View.VISIBLE
+            sendLayout.visibility = View.VISIBLE
 
             searchLayout.animate()
                 .alpha(0f)
-                .setDuration(700)
+                .setDuration(300)
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         searchLayout.visibility = View.GONE
                     }
                 })
-
-            animation = TranslateAnimation(
-                0F,
-                -mContext.resources.getDimensionPixelSize(R.dimen.animation_distance).toFloat()
-                , 0F, 0F)
-            animation.duration = 300
-            animation.fillAfter = true
-            searchButton.startAnimation(animation)
 
 
             mdb.loadAll().observe(mContext as AppCompatActivity, object: Observer<List<Message>> {
