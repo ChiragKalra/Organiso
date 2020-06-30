@@ -50,7 +50,6 @@ fun getContacts(mContext: Context) {
 class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

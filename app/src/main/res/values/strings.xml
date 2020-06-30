@@ -35,4 +35,6 @@
     <string name="move_to">Move to</string>
     <string name="sending_messages_not_supported">Sender Doesn\'t Support Replies</string>
     <string name="to">To</string>
+    <string name="find">Find</string>
+    <string name="back_button">back button</string>
 </resources>

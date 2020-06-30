@@ -32,7 +32,6 @@ class NewConversationActivity : AppCompatActivity() {
 
         val llm = LinearLayoutManager(this)
         val cmg = ContactsManager(this)
-        var adaptor: ContactListViewAdaptor? = null
         val clickAction = { contact: Contact ->
             to.setText(contact.number)
             to.setSelection(contact.number.length)
@@ -46,8 +45,8 @@ class NewConversationActivity : AppCompatActivity() {
             if (it != null) {
                 val contacts = it
 
-                adaptor = ContactListViewAdaptor(contacts)
-                adaptor!!.onItemClick = clickAction
+                var adaptor = ContactListViewAdaptor(contacts)
+                adaptor.onItemClick = clickAction
 
                 contactListView.layoutManager = llm
                 contactListView.adapter = adaptor
@@ -71,7 +70,7 @@ class NewConversationActivity : AppCompatActivity() {
                         ContactListViewAdaptor(filtered.toTypedArray())
                     } else ContactListViewAdaptor(contacts)
 
-                    adaptor!!.onItemClick = clickAction
+                    adaptor.onItemClick = clickAction
                     contactListView.adapter = adaptor
                 }
 
