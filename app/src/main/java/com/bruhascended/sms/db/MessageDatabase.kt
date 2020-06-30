@@ -29,8 +29,8 @@ interface MessageDao {
     @Delete
     fun delete(message: Message)
 
-    @Query("SELECT * FROM messages WHERE sender LIKE :sender")
-    fun findBySender(sender: String): List<Message>
+    @Query("SELECT * FROM messages WHERE text LIKE :key")
+    fun search(key: String): List<Message>
 
     @Query("SELECT * FROM messages ORDER BY time ASC")
     fun loadAll(): LiveData<List<Message>>
