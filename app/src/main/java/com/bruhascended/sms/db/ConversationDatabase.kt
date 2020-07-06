@@ -31,7 +31,7 @@ interface ConversationDao {
     @Delete
     fun delete(conversation: Conversation)
 
-    @Query("SELECT * FROM conversations WHERE sender LIKE :sender")
+    @Query("SELECT * FROM conversations WHERE sender LIKE :sender OR name LIKE :sender")
     fun findBySender(sender: String): List<Conversation>
 
     @Query("SELECT * FROM conversations ORDER BY time DESC")

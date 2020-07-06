@@ -228,7 +228,6 @@ class ConversationActivity : AppCompatActivity() {
         }
 
         backButton.setOnClickListener{
-            inputManager?.hideSoftInputFromWindow(it.windowToken, 0)
             progress.visibility = View.VISIBLE
             sendLayout.visibility = View.VISIBLE
 
@@ -238,8 +237,9 @@ class ConversationActivity : AppCompatActivity() {
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         searchLayout.visibility = View.GONE
+                        inputManager?.hideSoftInputFromWindow(it.windowToken, 0)
                     }
-                })
+                }).start()
 
 
             mdb.loadAll().observe(mContext as AppCompatActivity, object: Observer<List<Message>> {

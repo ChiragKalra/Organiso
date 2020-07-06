@@ -104,7 +104,7 @@
     <LinearLayout
         android:id="@+id/sendLayout"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="64dp"
         android:orientation="horizontal"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -127,8 +127,8 @@
 
         <ImageButton
             android:id="@+id/sendButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_margin="8dp"
             android:background="#0000"
             android:contentDescription="@string/send"
