@@ -26,7 +26,7 @@ class OrganizerModel (context: Context) {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    fun getPredictions (messages: ArrayList<Message>, features: Array<Array<Float>>) : Int {
+    fun getPredictions (messages: ArrayList<Message>, features: Array<Array<Float>>) : FloatArray {
         val tfliteModel = loadModelFile(mContext as Activity)
         val delegate = GpuDelegate()
         val options = Interpreter.Options().addDelegate(delegate)
@@ -34,7 +34,7 @@ class OrganizerModel (context: Context) {
 
         val n = features[0].size
 
-        val count = IntArray(5)
+        val probs = FloatArray(5){0f}
 
         for (i in 0 until min(features.size, MESSAGE_CHECK_COUNT)) {
             val feature = features[i]
@@ -48,14 +48,14 @@ class OrganizerModel (context: Context) {
             tflite.run(inputData, out)
 
             messages[i].label = out[0].indexOf(out[0].max()!!)
-            count[messages[i].label]++
+            for (j in 0..4) probs[j] += out[0][j]
 
             if (i==9) break
         }
 
         delegate.close()
         tflite.close()
-        return count.indexOf(count.max()!!)
+        return probs
     }
 
 }

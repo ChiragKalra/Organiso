@@ -83,7 +83,7 @@ class StartActivity : AppCompatActivity() {
                 override fun onTick(millisUntilFinished: Long) {
                     val sec = (millisUntilFinished/1000)%60
                     val min = (millisUntilFinished/1000)/60
-                    if ((0 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
+                    if ((5 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
                         if (min>0) etaView.text = "ETA ${min}min ${sec}sec"
                         else etaView.text = "ETA ${sec}sec"
                     } else {

@@ -3,6 +3,8 @@ package com.bruhascended.sms.db
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.io.Serializable
 
 
@@ -16,7 +18,9 @@ data class Conversation (
     var read: Boolean,
     var time: Long,
     var lastSMS: String,
-    var label: Int
+    var label: Int,
+    var forceLabel: Int,
+    val probs: FloatArray
 ): Serializable
 
 
@@ -42,7 +46,16 @@ interface ConversationDao {
 
 }
 
+class Converters {
+    @TypeConverter
+    fun listToJson(value: FloatArray?): String = Gson().toJson(value)
+
+    @TypeConverter
+    fun jsonToList(value: String?): FloatArray = Gson().fromJson(value, FloatArray::class.java)
+}
+
 @Database(entities = [Conversation::class], version = 1)
+@TypeConverters(Converters::class)
 abstract class ConversationDatabase : RoomDatabase() {
     abstract fun manager(): ConversationDao
 }
