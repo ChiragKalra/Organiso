@@ -214,12 +214,8 @@ class ConversationActivity : AppCompatActivity() {
                     override fun onAnimationEnd(animation: Animator) {
                         searchEditText.requestFocus()
                         inputManager?.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
-                        if (!conversation.sender.first().isDigit()) {
-                            notSupport.visibility = TextView.GONE
-                        } else {
-                            sendLayout.visibility = LinearLayout.GONE
-                        }
-
+                        notSupport.visibility = TextView.GONE
+                        sendLayout.visibility = LinearLayout.GONE
                     }
                 })
         }
