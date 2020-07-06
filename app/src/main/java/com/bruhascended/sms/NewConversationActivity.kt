@@ -93,7 +93,11 @@ class NewConversationActivity : AppCompatActivity() {
                                 true,
                                 0,
                                 message.text.toString().trim(),
-                                0
+                                0,
+                                -1,
+                                FloatArray(5){ it ->
+                                    if (it == 0) 1f else 0f
+                                }
                             )
                         )
                         startActivity(intent)

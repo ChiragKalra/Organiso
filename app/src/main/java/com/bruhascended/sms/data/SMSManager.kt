@@ -2,7 +2,6 @@ package com.bruhascended.sms.data
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.room.Room
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.*
@@ -39,9 +38,12 @@ class SMSManager (context: Context) {
     private var mContext: Context = context
 
     private val messages = HashMap<String, ArrayList<Message>>()
+    private val senderToProbs = HashMap<String, FloatArray>()
     private val labels = Array(5){ArrayList<String>()}
 
     private lateinit var senderNameMap: HashMap<String, String>
+
+    private lateinit var mDaos: Array<ConversationDao>
 
     fun getMessages() {
         val sp = mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
@@ -104,6 +106,15 @@ class SMSManager (context: Context) {
             total += min(msgs.size, MESSAGE_CHECK_COUNT)
         }
 
+        mDaos = Array(5){
+            if (mainViewModel == null)
+                Room.databaseBuilder(
+                    mContext, ConversationDatabase::class.java,
+                    mContext.resources.getString(labelText[it])
+                ).build().manager()
+            else mainViewModel!!.daos[it]
+        }
+
         var done = 0
         for ((sender, msgs) in messages) {
             if (senderNameMap.containsKey(sender)) {
@@ -113,10 +124,29 @@ class SMSManager (context: Context) {
                 val features = fe.getFeatureMatrix(msgs)
                 timeFeat += System.currentTimeMillis()-yeah
                 yeah = System.currentTimeMillis()
-                val prediction = nn.getPredictions(msgs, features)
+                val probs = nn.getPredictions(msgs, features)
                 timeML += System.currentTimeMillis()-yeah
 
-                if ((!sender.first().isDigit()) && prediction == 0)
+
+                var force = -1
+                var conversation: Conversation? = null
+                for (i in 0..4) {
+                    val got = mDaos[i].findBySender(sender)
+                    if (got.isNotEmpty()) {
+                        force = got.first().forceLabel
+                        conversation = got.first()
+                        break
+                    }
+                }
+
+                if (conversation != null)
+                    for (j in 0..4) probs[j] += conversation.probs[j]
+                val prediction = probs.indexOf(probs.max()!!)
+                senderToProbs[sender] = probs
+
+                if (force != -1)
+                    labels[force].add(sender)
+                else if ((!sender.first().isDigit()) && prediction == 0)
                     labels[1].add(sender)
                 else
                     labels[prediction].add(sender)
@@ -128,20 +158,10 @@ class SMSManager (context: Context) {
             val eta = (System.currentTimeMillis()-startTime) * (100/per-1)
             pageViewModel?.eta?.postValue(eta.toLong())
         }
-
-        Log.d("time-ml", timeML.toString())
-        Log.d("time-feat", timeFeat.toString())
     }
 
     fun saveMessages() {
         for (i in 0..4) {
-            val db: ConversationDao = if (mainViewModel == null)
-                Room.databaseBuilder(
-                    mContext, ConversationDatabase::class.java,
-                    mContext.resources.getString(labelText[i])
-                ).build().manager()
-            else mainViewModel!!.daos[i]
-
             for (conversation in labels[i]) {
                 if (mainViewModel != null) {
                     for (j in 0..4) {
@@ -152,8 +172,8 @@ class SMSManager (context: Context) {
                     }
                 }
 
-                db.insert(
-                    Conversation (
+                mDaos[i].insert(
+                    Conversation(
                         null,
                         conversation,
                         senderNameMap[conversation],
@@ -161,7 +181,11 @@ class SMSManager (context: Context) {
                         true,
                         messages[conversation]!!.last().time,
                         messages[conversation]!!.last().text,
-                        i
+                        i,
+                        -1,
+                        senderToProbs[conversation]?: FloatArray(5){
+                            if (it == 0) 1f else 0f
+                        }
                     )
                 )
 

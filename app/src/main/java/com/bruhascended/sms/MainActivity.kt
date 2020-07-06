@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
@@ -41,6 +42,7 @@ fun moveTo(conversation: Conversation, to: Int) {
         if (to >= 0) {
             conversation.id = null
             conversation.label = to
+            conversation.forceLabel = to
             mainViewModel!!.daos[to].insert(conversation)
         }
     }).start()
@@ -144,7 +146,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSearchLayout() {
-        appBar.visibility = View.GONE
+        appBar.visibility = View.INVISIBLE
         searchLayout.apply {
             alpha = 0f
             visibility = View.VISIBLE
@@ -172,31 +174,37 @@ class MainActivity : AppCompatActivity() {
                 listView.visibility = View.VISIBLE
                 progress.visibility = View.GONE
             }
-            listView.onItemClickListener =
-                AdapterView.OnItemClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
+            listView.onItemClickListener = AdapterView.OnItemClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
+                    val intent = Intent(mContext, ConversationActivity::class.java)
                     intent.putExtra("ye", res[i])
                     startActivity(intent)
                 }
 
-            textView.text = "No matches"
+            textView.text = getString(R.string.no_matches)
 
             if (res.isEmpty()) textView.visibility = TextView.VISIBLE
             else textView.visibility = TextView.GONE
         }
 
         backButton.setOnClickListener{
-            searchLayout.animate()
-                .alpha(0f)
-                .setDuration(300)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        searchLayout.visibility = View.GONE
-                        inputManager?.hideSoftInputFromWindow(it.windowToken, 0)
-                        fab.visibility = View.VISIBLE
-                        searchEditText.setText("")
-                        appBar.visibility = View.VISIBLE
-                    }
-                }).start()
+            inputManager?.hideSoftInputFromWindow(it.windowToken, 0)
+            Handler().postDelayed({
+                appBar.apply {
+                    visibility = View.VISIBLE
+                    alpha = 0f
+                    animate().alpha(1f).setDuration(300).start()
+                }
+                searchLayout.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .setListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            searchLayout.visibility = View.GONE
+                            fab.visibility = View.VISIBLE
+                            searchEditText.setText("")
+                        }
+                    }).start()
+            }, 200)
         }
     }
 }
