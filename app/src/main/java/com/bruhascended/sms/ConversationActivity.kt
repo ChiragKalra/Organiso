@@ -43,6 +43,7 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private lateinit var loading: ProgressBar
     private lateinit var sendLayout: LinearLayout
+    private lateinit var notSupport: TextView
     private var inputManager: InputMethodManager? = null
 
     private fun sendSMS() {
@@ -96,7 +97,7 @@ class ConversationActivity : AppCompatActivity() {
         mContext = this
 
         val sendButton: ImageButton = findViewById(R.id.sendButton)
-        val notSupport: TextView = findViewById(R.id.notSupported)
+        notSupport = findViewById(R.id.notSupported)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
 
         sendLayout = findViewById(R.id.sendLayout)
@@ -213,7 +214,12 @@ class ConversationActivity : AppCompatActivity() {
                     override fun onAnimationEnd(animation: Animator) {
                         searchEditText.requestFocus()
                         inputManager?.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
-                        sendLayout.visibility = View.GONE
+                        if (!conversation.sender.first().isDigit()) {
+                            notSupport.visibility = TextView.GONE
+                        } else {
+                            sendLayout.visibility = LinearLayout.GONE
+                        }
+
                     }
                 })
         }
@@ -229,7 +235,11 @@ class ConversationActivity : AppCompatActivity() {
 
         backButton.setOnClickListener{
             progress.visibility = View.VISIBLE
-            sendLayout.visibility = View.VISIBLE
+            if (!conversation.sender.first().isDigit()) {
+                notSupport.visibility = TextView.VISIBLE
+            } else {
+                sendLayout.visibility = LinearLayout.VISIBLE
+            }
 
             searchLayout.animate()
                 .alpha(0f)
