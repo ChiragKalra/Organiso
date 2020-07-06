@@ -43,19 +43,20 @@ class CategoryFragment (context: Context, viewModel: MainViewModel) : Fragment()
         val intent = Intent(mContext, ConversationActivity::class.java)
 
         Handler().postDelayed({
-            mainViewModel.daos[label].loadAll().observe(viewLifecycleOwner, Observer<List<Conversation>> {
-                listView.adapter = ConversationListViewAdaptor(mContext, it)
+            mainViewModel.daos[label].loadAll()
+                .observe(viewLifecycleOwner, Observer<List<Conversation>> {
+                    listView.adapter = ConversationListViewAdaptor(mContext, it)
 
-                listView.onItemClickListener = AdapterView.OnItemClickListener {
-                        _: AdapterView<*>, _: View, i: Int, _: Long ->
-                    intent.putExtra("ye", it[i])
-                    startActivity(intent)
-                }
+                    listView.onItemClickListener =
+                        AdapterView.OnItemClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
+                            intent.putExtra("ye", it[i])
+                            startActivity(intent)
+                        }
 
-                if (it.isEmpty()) textView.visibility = TextView.VISIBLE
-                else textView.visibility = TextView.INVISIBLE
-            })
-        }, if (label==0) 0 else 700L)
+                    if (it.isEmpty()) textView.visibility = TextView.VISIBLE
+                    else textView.visibility = TextView.INVISIBLE
+                })
+        }, if (label == 0) 0 else 700L)
 
         return root
     }

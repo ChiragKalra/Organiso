@@ -39,7 +39,7 @@ class NewConversationActivity : AppCompatActivity() {
         supportActionBar!!.title = "New Conversation"
         llm.orientation = LinearLayoutManager.HORIZONTAL
 
-        mainViewModel!!.contacts.observe(this, Observer<Array<Contact>?> {
+        mainViewModel!!.contacts.observe(this, Observer {
             if (it != null) {
                 val contacts = it
 
