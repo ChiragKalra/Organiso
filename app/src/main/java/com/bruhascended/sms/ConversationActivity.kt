@@ -21,11 +21,9 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.db.MessageDao
-import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.db.*
 import com.bruhascended.sms.ui.listViewAdapter.MessageListViewAdaptor
+import com.bruhascended.sms.ui.main.MainViewModel
 import kotlinx.android.synthetic.main.activity_conversation.*
 import java.util.*
 
@@ -96,6 +94,17 @@ class ConversationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_conversation)
+
+        if (mainViewModel == null) {
+            mainViewModel = MainViewModel()
+
+            mainViewModel!!.daos = Array(6){
+                Room.databaseBuilder(
+                    mContext, ConversationDatabase::class.java,
+                    mContext.resources.getString(labelText[it])
+                ).allowMainThreadQueries().build().manager()
+            }
+        }
 
         mContext = this
 

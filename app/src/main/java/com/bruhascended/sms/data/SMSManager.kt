@@ -180,7 +180,8 @@ class SMSManager (context: Context) {
         }
     }
 
-    fun saveMessages() {
+    fun saveMessages(): ArrayList<Pair<Message, Conversation>> {
+        val returnMessages = ArrayList<Pair<Message, Conversation>>()
         for (i in 0..4) {
             for (conversation in labels[i]) {
                 if (mainViewModel != null) {
@@ -192,32 +193,36 @@ class SMSManager (context: Context) {
                     }
                 }
 
-                mDaos[i].insert(
-                    Conversation(
-                        null,
-                        conversation,
-                        senderNameMap[conversation],
-                        "",
-                        true,
-                        messages[conversation]!!.last().time,
-                        messages[conversation]!!.last().text,
-                        i,
-                        -1,
-                        senderToProbs[conversation]?: FloatArray(5){
-                            if (it == 0) 1f else 0f
-                        }
-                    )
+                val con = Conversation(
+                    null,
+                    conversation,
+                    senderNameMap[conversation],
+                    "",
+                    true,
+                    messages[conversation]!!.last().time,
+                    messages[conversation]!!.last().text,
+                    i,
+                    -1,
+                    senderToProbs[conversation]?: FloatArray(5){
+                        if (it == 0) 1f else 0f
+                    }
                 )
+
+                mDaos[i].insert(con)
 
                 val mdb = if (conversationSender == conversation) conversationDao
                 else Room.databaseBuilder(
                     mContext, MessageDatabase::class.java, conversation
                 ).build().manager()
-                for (message in messages[conversation]!!)
+
+                for (message in messages[conversation]!!) {
                     mdb.insert(message)
+                    returnMessages.add(message to con)
+                }
             }
         }
         mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
             .edit().putLong("last", System.currentTimeMillis()).apply()
+        return returnMessages
     }
 }

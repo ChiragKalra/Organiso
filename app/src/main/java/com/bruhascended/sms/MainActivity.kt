@@ -81,13 +81,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         mContext = this
-        mainViewModel = MainViewModel()
+        if (mainViewModel == null) {
+            mainViewModel = MainViewModel()
 
-        mainViewModel!!.daos = Array(6){
-            Room.databaseBuilder(
-                mContext, ConversationDatabase::class.java,
-                mContext.resources.getString(labelText[it])
-            ).allowMainThreadQueries().build().manager()
+            mainViewModel!!.daos = Array(6) {
+                Room.databaseBuilder(
+                    mContext, ConversationDatabase::class.java,
+                    mContext.resources.getString(labelText[it])
+                ).allowMainThreadQueries().build().manager()
+            }
         }
 
         getNewMessages(this)
