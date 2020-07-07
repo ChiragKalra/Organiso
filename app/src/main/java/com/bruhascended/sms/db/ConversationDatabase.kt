@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.io.Serializable
 
 
