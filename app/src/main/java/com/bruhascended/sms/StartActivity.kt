@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -14,7 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.bruhascended.sms.data.SMSManager
+import com.bruhascended.sms.services.SMSReceiver
 import com.bruhascended.sms.ui.start.StartViewModel
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
@@ -45,6 +48,9 @@ class StartActivity : AppCompatActivity() {
         if (PackageManager.PERMISSION_DENIED in grant) {
             ActivityCompat.requestPermissions(this, perms, 1)
         }
+
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(SMSReceiver(), IntentFilter("android.provider.Telephony.SMS_RECEIVED"))
 
         if (sharedPref.getBoolean(arg, false)) {
             startActivity(Intent(this, MainActivity::class.java))

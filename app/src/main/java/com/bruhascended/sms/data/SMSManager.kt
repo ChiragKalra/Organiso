@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import androidx.room.Room
 import com.bruhascended.sms.R
+import com.bruhascended.sms.conversationDao
+import com.bruhascended.sms.conversationSender
 import com.bruhascended.sms.db.*
 import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ml.FeatureExtractor
@@ -90,7 +92,25 @@ class SMSManager (context: Context) {
         }
     }
 
-    fun getLabels(pageViewModel: StartViewModel?) {
+    fun putMessage(sender: String, body: String) {
+        val name = ContactsManager(mContext).getRaw(sender)
+        val message = Message(
+            null,
+            name,
+            body,
+            1,
+            System.currentTimeMillis(),
+            -1
+        )
+
+        if (messages.containsKey(name)) {
+            messages[name]?.add(message)
+        } else {
+            messages[name] = arrayListOf(message)
+        }
+    }
+
+    fun getLabels(pageViewModel: StartViewModel? = null) {
         val nn = OrganizerModel(mContext)
         val fe = FeatureExtractor(mContext)
 
@@ -189,7 +209,8 @@ class SMSManager (context: Context) {
                     )
                 )
 
-                val mdb = Room.databaseBuilder(
+                val mdb = if (conversationSender == conversation) conversationDao
+                else Room.databaseBuilder(
                     mContext, MessageDatabase::class.java, conversation
                 ).build().manager()
                 for (message in messages[conversation]!!)

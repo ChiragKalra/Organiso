@@ -30,11 +30,14 @@ import kotlinx.android.synthetic.main.activity_conversation.*
 import java.util.*
 
 
+var conversationSender: String? = null
+lateinit var conversationDao: MessageDao
+
 class ConversationActivity : AppCompatActivity() {
+    lateinit var mdb: MessageDao
 
     private lateinit var mContext: Context
     private lateinit var conversation: Conversation
-    private lateinit var mdb: MessageDao
 
     private lateinit var messageEditText: EditText
     private lateinit var searchLayout: LinearLayout
@@ -111,6 +114,8 @@ class ConversationActivity : AppCompatActivity() {
 
         conversation = intent.getSerializableExtra("ye") as Conversation
 
+        conversationSender = conversation.sender
+
         setSupportActionBar(toolbar)
         supportActionBar!!.title = conversation.name ?: conversation.sender
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
@@ -124,6 +129,8 @@ class ConversationActivity : AppCompatActivity() {
         mdb = Room.databaseBuilder(
             this, MessageDatabase::class.java, conversation.sender
         ).allowMainThreadQueries().build().manager()
+
+        conversationDao = mdb
 
         if (conversation.id == null) sendSMS()
         sendButton.setOnClickListener {
@@ -146,6 +153,11 @@ class ConversationActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.conversation, menu)
         return true
+    }
+
+    override fun onDestroy() {
+        conversationSender = null
+        super.onDestroy()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
