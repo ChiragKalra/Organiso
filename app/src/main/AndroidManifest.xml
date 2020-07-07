@@ -17,6 +17,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <receiver
+            android:name=".services.SMSReceiver"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="1000" >
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".NewConversationActivity"
             android:launchMode="singleTop">

@@ -1,6 +1,5 @@
 package com.bruhascended.sms.ml
 
-import android.app.Activity
 import android.content.Context
 import com.bruhascended.sms.ml.Normalizer.removeDates
 import com.bruhascended.sms.ml.Normalizer.removeDecimals
@@ -14,11 +13,11 @@ import com.bruhascended.sms.db.Message
 
 
 class FeatureExtractor (context: Context) {
-    private var mActivity: Activity = context as Activity
+    private var mContext = context
     private val nonWordFeatures = arrayOf("Time", "Digit", "Decimal", "URL", "Date", "NumberOfWords")
 
     private fun getWordFeatures(): List<String> {
-        val fileStr = mActivity.assets.open("words.csv").bufferedReader().use{
+        val fileStr = mContext.assets.open("words.csv").bufferedReader().use{
             it.readText()
         }
         return fileStr.split("\r\n").dropLast(1)
