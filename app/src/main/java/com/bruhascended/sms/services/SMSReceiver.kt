@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.telephony.SmsMessage
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.sms.ConversationActivity
@@ -19,6 +20,7 @@ import com.bruhascended.sms.data.labelText
 
 
 class SMSReceiver : BroadcastReceiver() {
+    private var count = 0
     private val descriptionText = arrayOf(
         R.string.text_1,
         R.string.text_2,
@@ -79,13 +81,13 @@ class SMSReceiver : BroadcastReceiver() {
                     for (pair in messages) {
                         val message = pair.first
                         val conversation = pair.second
-                        val yeah = Intent(context, ConversationActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            intent.putExtra("ye", conversation)
-                        }
-                        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, yeah, 0)
-                        if (message.label != 5) {
-                            val builder = NotificationCompat.Builder(context, message.label.toString())
+                        val yeah = Intent(context, ConversationActivity::class.java)
+                            .putExtra("ye", conversation)
+                        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+                            context, 0, yeah, PendingIntent.FLAG_UPDATE_CURRENT
+                        )
+                        if (conversation.label != 5) {
+                            val builder = NotificationCompat.Builder(context, conversation.label.toString())
                                     .setSmallIcon(R.drawable.ic_launcher_round)
                                     .setContentTitle(conversation.name?: message.sender)
                                     .setContentText(message.text)
@@ -94,7 +96,7 @@ class SMSReceiver : BroadcastReceiver() {
                                     .setContentIntent(pendingIntent)
                                     .setAutoCancel(true)
                             with(NotificationManagerCompat.from(context)) {
-                                notify(message.label, builder.build())
+                                notify(count++, builder.build())
                             }
                         }
                     }

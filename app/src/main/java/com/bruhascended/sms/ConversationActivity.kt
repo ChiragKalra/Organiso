@@ -4,10 +4,10 @@ package com.bruhascended.sms
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.app.Activity
 import android.app.AlertDialog
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
+import android.app.PendingIntent
+import android.content.*
 import android.os.Bundle
 import android.telephony.SmsManager
 import android.view.Menu
@@ -47,12 +47,7 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var notSupport: TextView
     private var inputManager: InputMethodManager? = null
 
-    private fun sendSMS() {
-        val smsText = if (conversation.id != null) messageEditText.text.toString() else conversation.lastSMS
-        val date = System.currentTimeMillis()
-        val smsManager = SmsManager.getDefault()
-        smsManager.sendTextMessage(conversation.sender, null,
-            smsText, null, null)
+    private fun addSmsToDb(smsText: String, date: Long) {
         messageEditText.text.clear()
         mdb.insert(
             Message(
@@ -87,7 +82,57 @@ class ConversationActivity : AppCompatActivity() {
                 mainViewModel!!.daos[conversation.label].update(conversation)
             }
         }).start()
-        Toast.makeText(mContext, "SMS sent", Toast.LENGTH_LONG).show()
+    }
+
+    private fun sendSMS() {
+        val smsManager = SmsManager.getDefault()
+        val smsText = if (conversation.id != null) messageEditText.text.toString() else conversation.lastSMS
+        val date = System.currentTimeMillis()
+
+        val sentPI = PendingIntent.getBroadcast(this, 0, Intent("SENT"), 0)
+        val deliveredPI = PendingIntent.getBroadcast(this, 0, Intent("DELIVERED"), 0)
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(arg0: Context?, arg1: Intent?) {
+                when (resultCode) {
+                    Activity.RESULT_OK -> {
+                        Toast.makeText(
+                            baseContext,
+                            "SMS sent",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        addSmsToDb(smsText, date)
+                    }
+                    SmsManager.RESULT_ERROR_GENERIC_FAILURE -> Toast.makeText(
+                        baseContext,
+                        "Service provider error",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    SmsManager.RESULT_ERROR_NO_SERVICE -> Toast.makeText(
+                        baseContext,
+                        "No service",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }, IntentFilter("SENT"))
+        registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(arg0: Context?, arg1: Intent?) {
+                when (resultCode) {
+                    Activity.RESULT_OK -> Toast.makeText(
+                        baseContext,
+                        "SMS delivered",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Activity.RESULT_CANCELED -> Toast.makeText(
+                        baseContext,
+                        "SMS not delivered",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }, IntentFilter("DELIVERED"))
+
+        smsManager.sendTextMessage(conversation.sender, null, smsText, sentPI, deliveredPI)
     }
 
 
