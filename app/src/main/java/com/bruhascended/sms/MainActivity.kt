@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager
     private lateinit var listView: ListView
     private lateinit var textView: TextView
+    private var searchLayoutVisible = false
     private var inputManager: InputMethodManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_search -> {
                 showSearchLayout()
+                backButton.setOnClickListener{ hideSearchLayout() }
             }
             R.id.action_spam -> {
                 val intent = Intent(mContext, ExtraCategoryActivity::class.java)
@@ -147,7 +149,13 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onBackPressed() {
+        if (searchLayoutVisible) hideSearchLayout()
+        else super.onBackPressed()
+    }
+
     private fun showSearchLayout() {
+        searchLayoutVisible = true
         appBar.visibility = View.INVISIBLE
         searchLayout.apply {
             alpha = 0f
@@ -187,26 +195,27 @@ class MainActivity : AppCompatActivity() {
             if (res.isEmpty()) textView.visibility = TextView.VISIBLE
             else textView.visibility = TextView.GONE
         }
+    }
 
-        backButton.setOnClickListener{
-            inputManager?.hideSoftInputFromWindow(it.windowToken, 0)
-            Handler().postDelayed({
-                appBar.apply {
-                    visibility = View.VISIBLE
-                    alpha = 0f
-                    animate().alpha(1f).setDuration(300).start()
-                }
-                searchLayout.animate()
-                    .alpha(0f)
-                    .setDuration(300)
-                    .setListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            searchLayout.visibility = View.GONE
-                            fab.visibility = View.VISIBLE
-                            searchEditText.setText("")
-                        }
-                    }).start()
-            }, 200)
-        }
+    private fun hideSearchLayout() {
+        searchLayoutVisible = false
+        inputManager?.hideSoftInputFromWindow(backButton.windowToken, 0)
+        Handler().postDelayed({
+            appBar.apply {
+                visibility = View.VISIBLE
+                alpha = 0f
+                animate().alpha(1f).setDuration(300).start()
+            }
+            searchLayout.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .setListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        searchLayout.visibility = View.GONE
+                        fab.visibility = View.VISIBLE
+                        searchEditText.setText("")
+                    }
+                }).start()
+        }, 200)
     }
 }

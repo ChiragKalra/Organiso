@@ -187,9 +187,8 @@ class SMSManager (context: Context) {
                 if (mainViewModel != null) {
                     for (j in 0..4) {
                         val res = mainViewModel!!.daos[j].findBySender(conversation)
-                        if (res.isNotEmpty()) {
-                            mainViewModel!!.daos[i].delete(res[0])
-                        }
+                        for (item in res)
+                            mainViewModel!!.daos[i].delete(item)
                     }
                 }
 
@@ -209,6 +208,7 @@ class SMSManager (context: Context) {
                 )
 
                 mDaos[i].insert(con)
+                con.id = mDaos[i].findBySender(conversation).first().id
 
                 val mdb = if (conversationSender == conversation) conversationDao
                 else Room.databaseBuilder(
@@ -217,7 +217,8 @@ class SMSManager (context: Context) {
 
                 for (message in messages[conversation]!!) {
                     mdb.insert(message)
-                    returnMessages.add(message to con)
+                    if (conversationSender != conversation)
+                        returnMessages.add(message to con)
                 }
             }
         }
