@@ -264,6 +264,7 @@ class ConversationActivity : AppCompatActivity() {
             }
             R.id.action_search -> {
                 showSearchLayout()
+                backButton.setOnClickListener{ hideSearchLayout() }
             }
         }
         return false
@@ -294,33 +295,33 @@ class ConversationActivity : AppCompatActivity() {
             }
             progress.visibility = View.GONE
         }
+    }
 
-        backButton.setOnClickListener{
-            progress.visibility = View.VISIBLE
-            if (!conversation.sender.first().isDigit()) {
-                notSupport.visibility = TextView.VISIBLE
-            } else {
-                sendLayout.visibility = LinearLayout.VISIBLE
-            }
-
-            searchLayout.animate()
-                .alpha(0f)
-                .setDuration(300)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        searchLayout.visibility = View.GONE
-                        inputManager?.hideSoftInputFromWindow(it.windowToken, 0)
-                    }
-                }).start()
-
-
-            mdb.loadAll().observe(mContext as AppCompatActivity, object: Observer<List<Message>> {
-                override fun onChanged(t: List<Message>?) {
-                    listView.adapter = MessageListViewAdaptor(mContext, t!!)
-                    progress.visibility = View.GONE
-                    mdb.loadAll().removeObserver(this)
-                }
-            })
+    private fun hideSearchLayout() {
+        progress.visibility = View.VISIBLE
+        if (!conversation.sender.first().isDigit()) {
+            notSupport.visibility = TextView.VISIBLE
+        } else {
+            sendLayout.visibility = LinearLayout.VISIBLE
         }
+
+        searchLayout.animate()
+            .alpha(0f)
+            .setDuration(300)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    searchLayout.visibility = View.GONE
+                    inputManager?.hideSoftInputFromWindow(backButton.windowToken, 0)
+                }
+            }).start()
+
+
+        mdb.loadAll().observe(mContext as AppCompatActivity, object: Observer<List<Message>> {
+            override fun onChanged(t: List<Message>?) {
+                listView.adapter = MessageListViewAdaptor(mContext, t!!)
+                progress.visibility = View.GONE
+                mdb.loadAll().removeObserver(this)
+            }
+        })
     }
 }

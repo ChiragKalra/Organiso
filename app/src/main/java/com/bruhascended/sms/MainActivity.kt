@@ -199,23 +199,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun hideSearchLayout() {
         searchLayoutVisible = false
-        inputManager?.hideSoftInputFromWindow(backButton.windowToken, 0)
-        Handler().postDelayed({
-            appBar.apply {
-                visibility = View.VISIBLE
-                alpha = 0f
-                animate().alpha(1f).setDuration(300).start()
-            }
-            searchLayout.animate()
-                .alpha(0f)
-                .setDuration(300)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        searchLayout.visibility = View.GONE
-                        fab.visibility = View.VISIBLE
-                        searchEditText.setText("")
-                    }
-                }).start()
-        }, 200)
+        appBar.apply {
+            visibility = View.VISIBLE
+            alpha = 0f
+            animate().alpha(1f).setDuration(300).start()
+        }
+        searchLayout.animate()
+            .alpha(0f)
+            .setDuration(300)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    inputManager?.hideSoftInputFromWindow(backButton.windowToken, 0)
+                    searchLayout.visibility = View.GONE
+                    Handler().postDelayed({ fab.visibility = View.VISIBLE }, 300)
+                    searchEditText.setText("")
+                }
+            }).start()
     }
 }
