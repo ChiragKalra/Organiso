@@ -8,13 +8,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.telephony.SmsMessage
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.sms.ConversationActivity
-import com.bruhascended.sms.MainActivity
 import com.bruhascended.sms.R
-import com.bruhascended.sms.StartActivity
 import com.bruhascended.sms.data.SMSManager
 import com.bruhascended.sms.data.labelText
 
