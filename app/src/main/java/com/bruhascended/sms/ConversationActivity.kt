@@ -45,6 +45,7 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var loading: ProgressBar
     private lateinit var sendLayout: LinearLayout
     private lateinit var notSupport: TextView
+    private lateinit var sendButton: ImageButton
     private var inputManager: InputMethodManager? = null
 
     private fun addSmsToDb(smsText: String, date: Long) {
@@ -85,12 +86,14 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     private fun sendSMS() {
+        sendButton.isEnabled = false
         val smsManager = SmsManager.getDefault()
         val smsText = if (conversation.id != null) messageEditText.text.toString() else conversation.lastSMS
         val date = System.currentTimeMillis()
 
         val sentPI = PendingIntent.getBroadcast(this, 0, Intent("SENT"), 0)
         val deliveredPI = PendingIntent.getBroadcast(this, 0, Intent("DELIVERED"), 0)
+
         registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent?) {
                 when (resultCode) {
@@ -113,6 +116,8 @@ class ConversationActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+                sendButton.isEnabled = true
+                unregisterReceiver(this)
             }
         }, IntentFilter("SENT"))
         registerReceiver(object : BroadcastReceiver() {
@@ -129,6 +134,7 @@ class ConversationActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+                unregisterReceiver(this)
             }
         }, IntentFilter("DELIVERED"))
 
@@ -153,7 +159,6 @@ class ConversationActivity : AppCompatActivity() {
 
         mContext = this
 
-        val sendButton: ImageButton = findViewById(R.id.sendButton)
         notSupport = findViewById(R.id.notSupported)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
 
@@ -164,6 +169,7 @@ class ConversationActivity : AppCompatActivity() {
         searchLayout = findViewById(R.id.searchLayout)
         searchEditText = findViewById(R.id.searchEditText)
         loading = findViewById(R.id.progress)
+        sendButton = findViewById(R.id.sendButton)
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
 
         conversation = intent.getSerializableExtra("ye") as Conversation
