@@ -48,21 +48,22 @@ dependencies {
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.0'
+    implementation 'androidx.core:core-ktx:1.3.1'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation "androidx.lifecycle:lifecycle-runtime:2.3.0-alpha05"
+    implementation "androidx.lifecycle:lifecycle-runtime:2.3.0-alpha06"
     implementation "android.arch.lifecycle:common-java8:1.1.1"
     implementation 'androidx.preference:preference:1.1.1'
 
     implementation 'com.google.code.gson:gson:2.8.6'
 
-    implementation 'androidx.room:room-runtime:2.3.0-alpha01'
-    implementation "androidx.room:room-ktx:2.3.0-alpha01"
+    implementation 'androidx.room:room-runtime:2.3.0-alpha02'
+    implementation "androidx.room:room-ktx:2.3.0-alpha02"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
-    kapt "androidx.room:room-compiler:2.3.0-alpha01"
+    implementation 'androidx.cardview:cardview:1.0.0'
+    kapt "androidx.room:room-compiler:2.3.0-alpha02"
 
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
@@ -71,7 +72,7 @@ dependencies {
 
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
-    implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
 
+    implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
     implementation 'io.michaelrocks:libphonenumber-android:8.12.6'
 }
