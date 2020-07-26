@@ -12,7 +12,7 @@
         android:id="@+id/relativeLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/infoText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -23,10 +23,11 @@
             android:layout_height="300dp"
             app:cpb_background_progressbar_color="#AEAEAE"
             app:cpb_background_progressbar_width="5dp"
-            app:cpb_progress_direction="to_right"
+            app:cpb_progress_direction="to_left"
             app:cpb_progressbar_color="@color/colorAccent"
             app:cpb_progressbar_width="16dp"
-            app:cpb_round_border="true" />
+            app:cpb_round_border="true"
+            app:cpb_indeterminate_mode="true" />
 
         <TextView
             android:id="@+id/progressText"

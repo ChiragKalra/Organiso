@@ -24,6 +24,7 @@ class StartActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var pageViewModel: StartViewModel
     private lateinit var sharedPref: SharedPreferences
+    private var manager: SMSManager? = null
 
     private val arg = "InitDataOrganized"
 
@@ -35,31 +36,17 @@ class StartActivity : AppCompatActivity() {
     )
 
     @SuppressLint("SetTextI18n")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        mContext = this
-
-        sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
-
-        startService(Intent(this, ServiceStarter::class.java))
-
-        val grant = Array(perms.size){ActivityCompat.checkSelfPermission(this, perms[it])}
-        if (PackageManager.PERMISSION_DENIED in grant) {
-            ActivityCompat.requestPermissions(this, perms, 1)
-        }
-
+    private fun messages() {
         if (sharedPref.getBoolean(arg, false)) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
 
-        setTheme(R.style.AppTheme)
         setContentView(R.layout.activity_start)
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
-            progress.value = 0
+            progress.value = -1
             disc.value = 0
         }
 
@@ -69,9 +56,18 @@ class StartActivity : AppCompatActivity() {
         val etaView: TextView = findViewById(R.id.etaText)
 
         pageViewModel.progress.observe(this, Observer<Int> {
-            progressTextView.text = "$it%"
-            progressBar.setProgressWithAnimation(it.toFloat(),
-                ((it-progressBar.progress) * 100).toLong())
+            if (it>-1) {
+                if (progressBar.indeterminateMode) {
+                    progressBar.indeterminateMode = false
+                    pageViewModel.disc.postValue(1)
+                }
+                progressTextView.text = "$it%"
+                if (progressBar.progress != 0f) progressBar.setProgressWithAnimation(
+                    it.toFloat(),
+                    ((it - progressBar.progress) * 100).toLong()
+                )
+                else progressBar.progress = it.toFloat()
+            }
         })
 
         pageViewModel.disc.observe(this, Observer<Int> {
@@ -82,12 +78,13 @@ class StartActivity : AppCompatActivity() {
         var preTimer: CountDownTimer? = null
         pageViewModel.eta.observe(this, Observer<Long> {
             preTimer?.cancel()
-            preTimer = object: CountDownTimer((it + 1), 1000) {
+            preTimer = object : CountDownTimer(it, 1000) {
+                @SuppressLint("SetTextI18n")
                 override fun onTick(millisUntilFinished: Long) {
-                    val sec = (millisUntilFinished/1000)%60
-                    val min = (millisUntilFinished/1000)/60
-                    if ((5 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
-                        if (min>0) etaView.text = "ETA ${min}min ${sec}sec"
+                    val sec = (millisUntilFinished / 1000) % 60
+                    val min = (millisUntilFinished / 1000) / 60
+                    if ((0 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
+                        if (min > 0) etaView.text = "ETA ${min}min ${sec}sec"
                         else etaView.text = "ETA ${sec}sec"
                     } else {
                         etaView.text = ""
@@ -98,14 +95,13 @@ class StartActivity : AppCompatActivity() {
         })
 
         Thread(Runnable {
-            val manager = SMSManager(mContext)
-            manager.getMessages()
+            manager = SMSManager(mContext)
+            manager?.getMessages()
 
-            pageViewModel.disc.postValue(1)
-            manager.getLabels(pageViewModel)
+            manager?.getLabels(pageViewModel)
 
             pageViewModel.disc.postValue(2)
-            manager.saveMessages()
+            manager?.saveMessages()
 
             startActivity(Intent(mContext, MainActivity::class.java))
 
@@ -113,4 +109,29 @@ class StartActivity : AppCompatActivity() {
             (mContext as Activity).finish()
         }).start()
     }
+
+    @SuppressLint("SetTextI18n")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        mContext = this
+        sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
+        startService(Intent(this, ServiceStarter::class.java))
+
+        if (PackageManager.PERMISSION_DENIED in
+            Array(perms.size){ActivityCompat.checkSelfPermission(this, perms[it])})
+            ActivityCompat.requestPermissions(this, perms, 1)
+        else messages()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        manager?.destroy()
+    }
+
+    override fun onRequestPermissionsResult (
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) = messages()
 }

@@ -8,4 +8,11 @@
     <color name="background">#151515</color>
     <color name="message_bg_accent">#377137</color>
     <color name="textInHint">#959595</color>
+
+    <color name="red">#C62828</color>
+    <color name="blue">#1565C0</color>
+    <color name="purple">#6A1B9A</color>
+    <color name="green">#2E7D32</color>
+    <color name="orange">#D84315</color>
+    <color name="teal">#00695C</color>
 </resources>

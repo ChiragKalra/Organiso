@@ -1,14 +1,22 @@
 package com.bruhascended.sms.data
 
 import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.provider.ContactsContract
 import io.michaelrocks.libphonenumber.android.NumberParseException
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import io.michaelrocks.libphonenumber.android.Phonenumber
 import java.io.Serializable
-import java.util.HashSet
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.collections.set
+import kotlin.collections.sortBy
+import kotlin.collections.toTypedArray
 
 
 data class Contact (
@@ -17,9 +25,46 @@ data class Contact (
     val dp: String?
 ): Serializable
 
-class ContactsManager(context: Context) {
-    private val mContext = context
+fun retrieveContactPhoto(mContext: Context, number: String?): Bitmap? {
+    val contentResolver = mContext.contentResolver
+    var contactId: String? = null
+    val uri: Uri = Uri.withAppendedPath(
+        ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+        Uri.encode(number)
+    )
+    val projection = arrayOf(
+        ContactsContract.PhoneLookup.DISPLAY_NAME,
+        ContactsContract.PhoneLookup._ID
+    )
+    val cursor = contentResolver.query(
+        uri,
+        projection,
+        null,
+        null,
+        null
+    )
+    if (cursor != null) {
+        while (cursor.moveToNext()) {
+            contactId =
+                cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.PhoneLookup._ID))
+        }
+        cursor.close()
+    }
+    var photo: Bitmap? = null
+    if (contactId != null) {
+        val inputStream = ContactsContract.Contacts.openContactPhotoInputStream(
+            mContext.contentResolver,
+            ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId.toLong())
+        )
+        if (inputStream != null) photo = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
+    }
+    return photo
+}
 
+class ContactsManager(context: Context) {
+
+    private val mContext = context
     private val map = HashMap<String, String>()
 
     fun getRaw(number: String): String {

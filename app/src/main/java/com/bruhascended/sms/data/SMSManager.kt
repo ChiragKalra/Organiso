@@ -43,6 +43,11 @@ class SMSManager (context: Context) {
     private val senderToProbs = HashMap<String, FloatArray>()
     private val labels = Array(5){ArrayList<String>()}
 
+    private var completedSenderIndex: Int = 0
+    private var completedMessage: Int = 0
+    private var timeTaken: Long = 0
+    private val savedSenders: MutableSet<String> = mutableSetOf()
+
     private lateinit var senderNameMap: HashMap<String, String>
 
     private lateinit var mDaos: Array<ConversationDao>
@@ -113,11 +118,12 @@ class SMSManager (context: Context) {
     fun getLabels(pageViewModel: StartViewModel? = null) {
         val nn = OrganizerModel(mContext)
         val fe = FeatureExtractor(mContext)
+        val sp = mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
 
         var timeFeat = 0L
         var timeML = 0L
 
-        val startTime = System.currentTimeMillis()
+        val startTime = System.currentTimeMillis() - sp.getLong("timeTaken", 0)
 
         senderNameMap = ContactsManager(mContext).getContactsHashMap()
 
@@ -135,8 +141,14 @@ class SMSManager (context: Context) {
             else mainViewModel!!.daos[it]
         }
 
-        var done = 0
-        for ((sender, msgs) in messages) {
+
+        var done = sp.getInt("done", 0)
+        val index = sp.getInt("index", 0)
+        val messagesArray = messages.entries.toTypedArray()
+        for (ind in index until messagesArray.size) {
+            val sender = messagesArray[ind].component1()
+            val msgs = messagesArray[ind].component2()
+
             if (senderNameMap.containsKey(sender)) {
                 labels[0].add(sender)
             } else {
@@ -177,13 +189,26 @@ class SMSManager (context: Context) {
 
             val eta = (System.currentTimeMillis()-startTime) * (100/per-1)
             pageViewModel?.eta?.postValue(eta.toLong())
+
+            completedSenderIndex = ind
+            completedMessage = done
+            timeTaken = (System.currentTimeMillis()-startTime)
         }
     }
 
-    fun saveMessages(): ArrayList<Pair<Message, Conversation>> {
+    fun destroy() {
+        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
+            .putInt("index", completedSenderIndex+1)
+            .putInt("done", completedMessage)
+            .putLong("timeTaken", timeTaken)
+            .apply()
+        Thread(Runnable{saveMessages(false)}).start()
+    }
+
+    fun saveMessages(done: Boolean = true): ArrayList<Pair<Message, Conversation>> {
         val returnMessages = ArrayList<Pair<Message, Conversation>>()
         for (i in 0..4) {
-            for (conversation in labels[i]) {
+            for (conversation in labels[i].toTypedArray()) {
                 if (mainViewModel != null) {
                     for (j in 0..4) {
                         val res = mainViewModel!!.daos[j].findBySender(conversation)
@@ -206,23 +231,25 @@ class SMSManager (context: Context) {
                         if (it == 0) 1f else 0f
                     }
                 )
+                if (!savedSenders.contains(conversation)) {
+                    mDaos[i].insert(con)
+                    savedSenders.add(conversation)
+                    con.id = mDaos[i].findBySender(conversation).first().id
 
-                mDaos[i].insert(con)
-                con.id = mDaos[i].findBySender(conversation).first().id
+                    val mdb = if (conversationSender == conversation) conversationDao
+                    else Room.databaseBuilder(
+                        mContext, MessageDatabase::class.java, conversation
+                    ).build().manager()
 
-                val mdb = if (conversationSender == conversation) conversationDao
-                else Room.databaseBuilder(
-                    mContext, MessageDatabase::class.java, conversation
-                ).build().manager()
-
-                for (message in messages[conversation]!!) {
-                    mdb.insert(message)
-                    if (conversationSender != conversation)
-                        returnMessages.add(message to con)
+                    for (message in messages[conversation]!!) {
+                        mdb.insert(message)
+                        if (conversationSender != conversation)
+                            returnMessages.add(message to con)
+                    }
                 }
             }
         }
-        mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
+        if (done) mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
             .edit().putLong("last", System.currentTimeMillis()).apply()
         return returnMessages
     }
