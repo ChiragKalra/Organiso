@@ -1,23 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="6dp"
     android:id="@+id/rootLayout"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:backgroundTint="#2B2B2B"
+    android:background="@drawable/bg_contact">
 
-    <ImageView
-        android:id="@+id/dpImageView"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_margin="4dp"
-        android:contentDescription="@string/display_picture"
-        android:src="@drawable/ic_baseline_person_48"/>
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp"
+        android:contentDescription="@string/display_picture">
+        <ImageView
+            android:id="@+id/dpImageView"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/display_picture"
+            android:src="@drawable/ic_baseline_person_48" />
+    </androidx.cardview.widget.CardView>
 
     <TextView
+        android:layout_margin="4dp"
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

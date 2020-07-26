@@ -92,16 +92,14 @@ class ConversationListViewAdaptor (context: Context, data: List<Conversation>) :
             val dps = 12 * density.toInt()
             imageView.setPadding(dps,dps,dps,dps)
         } else if (cur.name != null) {
-            Thread(Runnable {
-                if (!memoryCache.containsKey(cur.sender))
-                    memoryCache[cur.sender] = retrieveContactPhoto(mContext, cur.sender)
-                val dp: Bitmap? = memoryCache[cur.sender]
-
+            if (memoryCache.containsKey(cur.sender)) {
+                val dp = memoryCache[cur.sender]
+                if (dp != null) imageView.setImageBitmap(dp)
+            } else Thread( Runnable {
+                memoryCache[cur.sender] = retrieveContactPhoto(mContext, cur.sender)
+                val dp = memoryCache[cur.sender]
                 (mContext as Activity).runOnUiThread {
-                    if (dp != null) {
-                        imageView.setImageBitmap(dp)
-                        imageView.clearColorFilter()
-                    }
+                    if (dp != null) imageView.setImageBitmap(dp)
                 }
             }).start()
         }

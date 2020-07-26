@@ -1,6 +1,7 @@
 package com.bruhascended.sms
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.ImageButton
@@ -15,6 +16,9 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.listViewAdapter.ContactListViewAdaptor
 import java.util.*
 import kotlin.collections.ArrayList
+
+
+var memoryCache = HashMap<String, Bitmap?>()
 
 class NewConversationActivity : AppCompatActivity() {
 
@@ -43,7 +47,7 @@ class NewConversationActivity : AppCompatActivity() {
             if (it != null) {
                 val contacts = it
 
-                var adaptor = ContactListViewAdaptor(contacts)
+                var adaptor = ContactListViewAdaptor(contacts, this)
                 adaptor.onItemClick = clickAction
 
                 contactListView.layoutManager = llm
@@ -65,8 +69,8 @@ class NewConversationActivity : AppCompatActivity() {
                                 filtered.add(contact)
                             }
                         }
-                        ContactListViewAdaptor(filtered.toTypedArray())
-                    } else ContactListViewAdaptor(contacts)
+                        ContactListViewAdaptor(filtered.toTypedArray(), this)
+                    } else ContactListViewAdaptor(contacts, this)
 
                     adaptor.onItemClick = clickAction
                     contactListView.adapter = adaptor
@@ -95,8 +99,8 @@ class NewConversationActivity : AppCompatActivity() {
                                 message.text.toString().trim(),
                                 0,
                                 -1,
-                                FloatArray(5){ it ->
-                                    if (it == 0) 1f else 0f
+                                FloatArray(5){ its ->
+                                    if (its == 0) 1f else 0f
                                 }
                             )
                         )
