@@ -103,7 +103,6 @@ class ConversationListViewAdaptor (context: Context, data: List<Conversation>) :
                 }
             }).start()
         }
-
         return root
     }
 }
