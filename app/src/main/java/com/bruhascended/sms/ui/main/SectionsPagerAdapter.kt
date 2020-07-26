@@ -21,7 +21,7 @@ class SectionsPagerAdapter(
     )
 
     override fun getItem(position: Int) =
-        CategoryFragment.newInstance(context, mainViewModel!!, position)
+        CategoryFragment.newInstance(position)
 
     override fun getPageTitle(position: Int) = context.resources.getString(tabTitles[position])
 

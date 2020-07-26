@@ -1,6 +1,5 @@
 package com.bruhascended.sms.ui.main
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -15,14 +14,25 @@ import androidx.lifecycle.Observer
 import com.bruhascended.sms.ConversationActivity
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ui.listViewAdapter.ConversationListViewAdaptor
 
 
-class CategoryFragment (context: Context, viewModel: MainViewModel) : Fragment() {
+class CategoryFragment : Fragment() {
 
-    private val mContext = context
     private var label: Int = 0
-    private var mainViewModel: MainViewModel = viewModel
+
+    companion object {
+        private const val ARG_SECTION= "section_conversations"
+        @JvmStatic
+        fun newInstance(label: Int): CategoryFragment {
+            return CategoryFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(ARG_SECTION, label)
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,12 +50,12 @@ class CategoryFragment (context: Context, viewModel: MainViewModel) : Fragment()
 
         textView.visibility = TextView.INVISIBLE
 
-        val intent = Intent(mContext, ConversationActivity::class.java)
+        val intent = Intent(requireActivity(), ConversationActivity::class.java)
 
         Handler().postDelayed({
-            mainViewModel.daos[label].loadAll()
+            mainViewModel!!.daos[label].loadAll()
                 .observe(viewLifecycleOwner, Observer<List<Conversation>> {
-                    listView.adapter = ConversationListViewAdaptor(mContext, it)
+                    listView.adapter = ConversationListViewAdaptor(requireActivity(), it)
 
                     listView.onItemClickListener =
                         AdapterView.OnItemClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
@@ -59,17 +69,5 @@ class CategoryFragment (context: Context, viewModel: MainViewModel) : Fragment()
         }, if (label == 0) 0 else 700L)
 
         return root
-    }
-
-    companion object {
-        private const val ARG_SECTION= "section_conversations"
-        @JvmStatic
-        fun newInstance(context: Context, viewModel: MainViewModel, label: Int): CategoryFragment {
-            return CategoryFragment(context, viewModel).apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_SECTION, label)
-                }
-            }
-        }
     }
 }
