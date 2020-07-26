@@ -1,6 +1,5 @@
 package com.bruhascended.sms.ml
 
-import android.app.Activity
 import android.content.Context
 import com.bruhascended.sms.data.MESSAGE_CHECK_COUNT
 import com.bruhascended.sms.db.Message
@@ -17,8 +16,8 @@ import java.nio.channels.FileChannel
 class OrganizerModel (context: Context) {
     private val mContext = context
 
-    private fun loadModelFile(activity: Activity): MappedByteBuffer {
-        val fileDescriptor = activity.assets.openFd("model.tflite")
+    private fun loadModelFile(context: Context): MappedByteBuffer {
+        val fileDescriptor = context.assets.openFd("model.tflite")
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel = inputStream.channel
         val startOffset = fileDescriptor.startOffset
@@ -27,7 +26,7 @@ class OrganizerModel (context: Context) {
     }
 
     fun getPredictions (messages: ArrayList<Message>, features: Array<Array<Float>>) : FloatArray {
-        val tfliteModel = loadModelFile(mContext as Activity)
+        val tfliteModel = loadModelFile(mContext)
         val delegate = GpuDelegate()
         val options = Interpreter.Options().addDelegate(delegate)
         val tflite = Interpreter(tfliteModel, options)

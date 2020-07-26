@@ -24,7 +24,7 @@
         android:visibility="invisible"
         android:id="@+id/contactListView"
         android:layout_width="match_parent"
-        android:layout_height="118dp"
+        android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,10 +37,10 @@
         android:id="@+id/progress"
         android:layout_width="92dp"
         android:layout_height="92dp"
-        app:layout_constraintBottom_toBottomOf="@+id/contactListView"
+        android:layout_margin="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/contactListView" />
+        app:layout_constraintTop_toBottomOf="@+id/toEditText" />
 
 
 

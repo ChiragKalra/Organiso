@@ -86,6 +86,11 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     private fun sendSMS() {
+        Toast.makeText(
+            baseContext,
+            "Sending",
+            Toast.LENGTH_SHORT
+        ).show()
         sendButton.isEnabled = false
         val smsManager = SmsManager.getDefault()
         val smsText = if (conversation.id != null) messageEditText.text.toString() else conversation.lastSMS

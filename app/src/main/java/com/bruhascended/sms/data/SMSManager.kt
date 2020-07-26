@@ -249,8 +249,13 @@ class SMSManager (context: Context) {
                 }
             }
         }
-        if (done) mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
-            .edit().putLong("last", System.currentTimeMillis()).apply()
+        if (done) {
+            mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
+                .putLong("last", System.currentTimeMillis())
+                .putInt("index", 0)
+                .putInt("done", 0)
+                .apply()
+        }
         return returnMessages
     }
 }
