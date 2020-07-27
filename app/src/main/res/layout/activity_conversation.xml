@@ -52,7 +52,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_baseline_arrow_back_24"
-            android:contentDescription="@string/back_button" />
+            android:contentDescription="@string/back_button"
+            android:focusable="true" />
         <EditText
             android:background="@color/colorPrimary"
             android:clickable="true"
@@ -73,6 +74,7 @@
     </LinearLayout>
 
     <ListView
+        android:choiceMode="multipleChoiceModal"
         android:id="@+id/messageListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"

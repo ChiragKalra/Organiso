@@ -11,6 +11,9 @@
         <!--To change the background of options menu-->
         <item name="android:itemBackground">#3D6A3D</item>
         <item name="android:dialogTheme">@style/Theme.AppCompat.DayNight</item>
+        <item name="actionModeStyle">@style/ActionMode</item>
+        <item name="windowActionModeOverlay">true</item>
+
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -35,6 +38,11 @@
 
     <style name="MineCustomTabText" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="ActionMode" parent="@style/Widget.AppCompat.ActionMode">
+        <item name="background">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorPrimary</item>
     </style>
 
 </resources>

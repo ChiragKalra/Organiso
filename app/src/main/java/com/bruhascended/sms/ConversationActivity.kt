@@ -4,17 +4,21 @@ package com.bruhascended.sms
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.*
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Parcelable
 import android.telephony.SmsManager
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.util.SparseBooleanArray
+import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import android.widget.AbsListView.MultiChoiceModeListener
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.doOnTextChanged
@@ -25,6 +29,10 @@ import com.bruhascended.sms.db.*
 import com.bruhascended.sms.ui.listViewAdapter.MessageListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import kotlinx.android.synthetic.main.activity_conversation.*
+import kotlinx.android.synthetic.main.activity_main.view.*
+import java.lang.Integer.max
+import java.lang.Integer.min
+import java.lang.StringBuilder
 import java.util.*
 
 
@@ -46,6 +54,7 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var sendLayout: LinearLayout
     private lateinit var notSupport: TextView
     private lateinit var sendButton: ImageButton
+    private lateinit var toolbar: Toolbar
     private var inputManager: InputMethodManager? = null
 
     private fun addSmsToDb(smsText: String, date: Long) {
@@ -165,8 +174,7 @@ class ConversationActivity : AppCompatActivity() {
         mContext = this
 
         notSupport = findViewById(R.id.notSupported)
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-
+        toolbar = findViewById(R.id.toolbar)
         sendLayout = findViewById(R.id.sendLayout)
         listView = findViewById(R.id.messageListView)
         messageEditText = findViewById(R.id.messageEditText)
@@ -203,14 +211,116 @@ class ConversationActivity : AppCompatActivity() {
                 sendSMS()
         }
 
+        var recyclerViewState: Parcelable
         mdb.loadAll().observe(this, Observer<List<Message>> {
-            listView.adapter = MessageListViewAdaptor(this, it)
-            listView.onItemLongClickListener = AdapterView.OnItemLongClickListener { _, _, i, _ ->
-                (mContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager)
-                    .setPrimaryClip(ClipData.newPlainText("copied sms", it[i].text))
-                Toast.makeText(mContext, "Copied To Clipboard", Toast.LENGTH_LONG).show()
-                true
-            }
+            val editListAdapter = MessageListViewAdaptor(this, it)
+            recyclerViewState = listView.onSaveInstanceState()!!
+            listView.adapter = editListAdapter
+            listView.onRestoreInstanceState(recyclerViewState)
+            var rangeSelect = false
+            var previousSelected = -1
+            listView.setMultiChoiceModeListener(object : MultiChoiceModeListener {
+                override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
+
+                override fun onDestroyActionMode(mode: ActionMode) {
+                    editListAdapter.removeSelection()
+                }
+
+                override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                    mode.menuInflater.inflate(R.menu.message_selection, menu)
+                    rangeSelect = false
+                    previousSelected = -1
+                    return true
+                }
+
+                @SuppressLint("InflateParams")
+                override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                    return when (item.itemId) {
+                        R.id.action_delete -> {
+                            AlertDialog.Builder(mContext).setTitle("Do you want to delete selected messages?")
+                                .setPositiveButton("Delete") { dialog, _ ->
+                                    val selected: SparseBooleanArray = editListAdapter.getSelectedIds()
+                                    for (i in 0 until selected.size()) {
+                                        if (selected.valueAt(i)) {
+                                            val selectedItem: Message = editListAdapter.getItem(selected.keyAt(i))
+                                            mdb.delete(selectedItem)
+                                        }
+                                    }
+                                    if (listView.checkedItemCount == it.size) {
+                                        moveTo(conversation, -1)
+                                        (mContext as ConversationActivity).finish()
+                                    }
+                                    Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
+                                    mode.finish()
+                                    dialog.dismiss()
+                                }
+                                .setNegativeButton("Cancel") { dialog, _ ->
+                                    mode.finish()
+                                    dialog.dismiss()
+                                }
+                                .create().show()
+                            true
+                        }
+                        R.id.action_select_range -> {
+                            val inflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                            val iv = inflater.inflate(R.layout.view_button_transition, null) as ImageView
+
+                            if (rangeSelect) iv.setImageResource(R.drawable.range_to_single)
+                            else iv.setImageResource(R.drawable.single_to_range)
+                            item.actionView = iv
+                            (iv.drawable as AnimatedVectorDrawable).start()
+
+                            Handler().postDelayed({
+                                if (rangeSelect) {
+                                    item.setIcon(R.drawable.ic_single)
+                                } else {
+                                    item.setIcon(R.drawable.ic_range)
+                                }
+                                item.actionView = null
+                                rangeSelect = !rangeSelect
+                                if (rangeSelect) previousSelected = -1
+                            }, 300)
+                            true
+                        }
+                        R.id.action_copy -> {
+                            val clipboard: ClipboardManager =
+                                getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val selected: SparseBooleanArray = editListAdapter.getSelectedIds()
+                            val sb = StringBuilder()
+                            for (i in 0 until selected.size()) {
+                                if (selected.valueAt(i)) {
+                                    val selectedItem: Message = editListAdapter.getItem(selected.keyAt(i))
+                                    sb.append(selectedItem.text).append('\n')
+                                }
+                            }
+                            val clip: ClipData = ClipData.newPlainText("none", sb.toString())
+                            clipboard.setPrimaryClip(clip)
+                            Toast.makeText(mContext, "Copied", Toast.LENGTH_LONG).show()
+                            mode.finish()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+
+                override fun onItemCheckedStateChanged(
+                    mode: ActionMode, position: Int, id: Long, checked: Boolean
+                ) {
+                    if (rangeSelect) {
+                        previousSelected = if (previousSelected == -1) {
+                            position
+                        } else {
+                            val low = min(previousSelected, position) + 1
+                            val high = max(previousSelected, position) - 1
+                            for (i in low..high) listView.setItemChecked(i, !listView.isItemChecked(i))
+                            for (i in low..high) editListAdapter.toggleSelection(i)
+                            -1
+                        }
+                    }
+                    editListAdapter.toggleSelection(position)
+                    mode.title = "${listView.checkedItemCount} selected"
+                }
+            })
             progress.visibility = View.GONE
         })
     }

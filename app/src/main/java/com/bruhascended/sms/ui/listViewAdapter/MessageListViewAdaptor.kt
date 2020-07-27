@@ -1,9 +1,9 @@
 package com.bruhascended.sms.ui.listViewAdapter
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
 import android.text.format.DateUtils
+import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,10 +13,12 @@ import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Message
 import java.util.*
 
+
 class MessageListViewAdaptor (context: Context, data: List<Message>) : BaseAdapter() {
 
     private val mContext: Context = context
-    private val messages: List<Message> = data
+    private var messages: List<Message> = data
+    private var mSelectedItemsIds = SparseBooleanArray()
 
     private fun displayTime(time: Long): String {
         val smsTime = Calendar.getInstance()
@@ -39,15 +41,23 @@ class MessageListViewAdaptor (context: Context, data: List<Message>) : BaseAdapt
     }
 
     override fun getCount() = messages.size
-
     override fun getItem(position: Int) = messages[position]
-
     override fun getItemId(position: Int) = messages[position].id!!
 
-    @SuppressLint("ViewHolder", "SetTextI18n")
-    override fun getView(
-        position: Int, convertView: View?, parent: ViewGroup
-    ): View {
+    fun getSelectedIds() = mSelectedItemsIds
+    fun toggleSelection(position: Int) = selectView(position, !mSelectedItemsIds.get(position))
+
+    fun removeSelection() {
+        mSelectedItemsIds = SparseBooleanArray()
+    }
+
+    private fun selectView(position: Int, value: Boolean) {
+        if (value) mSelectedItemsIds.put(position, value)
+        else mSelectedItemsIds.delete(position)
+    }
+
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val layoutInflater = LayoutInflater.from(mContext)
         val root =  if (messages[position].type != 1)
             layoutInflater.inflate(R.layout.item_message_out, parent, false)

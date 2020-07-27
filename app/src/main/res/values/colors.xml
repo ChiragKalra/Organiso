@@ -8,6 +8,7 @@
     <color name="background">#151515</color>
     <color name="message_bg_accent">#377137</color>
     <color name="textInHint">#959595</color>
+    <color name="selection">#555555</color>
 
     <color name="red">#C62828</color>
     <color name="blue">#1565C0</color>
