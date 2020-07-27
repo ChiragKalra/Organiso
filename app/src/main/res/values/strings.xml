@@ -45,7 +45,7 @@
     <string name="back_button">back button</string>
     <string name="no_matches">No matches</string>
     <string name="animated">animated</string>
-    <string name="copy_to_clipboard">Copy To Clipboard</string>
+    <string name="copy_to_clipboard">Copy</string>
     <string name="select_all">Select All</string>
     <string name="select_range">Select Range</string>
 </resources>

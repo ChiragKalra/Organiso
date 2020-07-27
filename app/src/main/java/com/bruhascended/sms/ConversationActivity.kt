@@ -217,6 +217,7 @@ class ConversationActivity : AppCompatActivity() {
             recyclerViewState = listView.onSaveInstanceState()!!
             listView.adapter = editListAdapter
             listView.onRestoreInstanceState(recyclerViewState)
+
             var rangeSelect = false
             var previousSelected = -1
             listView.setMultiChoiceModeListener(object : MultiChoiceModeListener {
@@ -312,8 +313,10 @@ class ConversationActivity : AppCompatActivity() {
                         } else {
                             val low = min(previousSelected, position) + 1
                             val high = max(previousSelected, position) - 1
-                            for (i in low..high) listView.setItemChecked(i, !listView.isItemChecked(i))
-                            for (i in low..high) editListAdapter.toggleSelection(i)
+                            for (i in low..high) {
+                                listView.setItemChecked(i, !listView.isItemChecked(i))
+                                editListAdapter.toggleSelection(i)
+                            }
                             -1
                         }
                     }

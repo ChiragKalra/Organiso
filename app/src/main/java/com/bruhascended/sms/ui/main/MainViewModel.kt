@@ -12,4 +12,8 @@ class MainViewModel : ViewModel() {
     var contacts = MutableLiveData<Array<Contact>?>().apply {
         postValue(null)
     }
+
+    var selection = MutableLiveData<Boolean>().apply {
+        postValue(false)
+    }
 }

@@ -14,6 +14,7 @@ import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
 import android.text.format.DateFormat
 import android.text.format.DateUtils
+import android.util.SparseBooleanArray
 import android.widget.QuickContactBadge
 import androidx.core.content.ContextCompat
 import com.bruhascended.sms.data.retrieveContactPhoto
@@ -25,6 +26,7 @@ class ConversationListViewAdaptor (context: Context, data: List<Conversation>) :
     private val mContext: Context = context
     private val conversations: List<Conversation> = data
     private var memoryCache = HashMap<String, Bitmap?>()
+    private var mSelectedItemsIds = SparseBooleanArray()
     private var colors: Array<Int>
 
     init {
@@ -62,6 +64,18 @@ class ConversationListViewAdaptor (context: Context, data: List<Conversation>) :
     override fun getCount(): Int = conversations.count()
     override fun getItem(position: Int) = conversations[position]
     override fun getItemId(position: Int)= position.toLong()
+
+    fun getSelectedIds() = mSelectedItemsIds
+    fun toggleSelection(position: Int) = selectView(position, !mSelectedItemsIds.get(position))
+
+    fun removeSelection() {
+        mSelectedItemsIds = SparseBooleanArray()
+    }
+
+    private fun selectView(position: Int, value: Boolean) {
+        if (value) mSelectedItemsIds.put(position, value)
+        else mSelectedItemsIds.delete(position)
+    }
 
     @SuppressLint("ViewHolder", "SetTextI18n")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
