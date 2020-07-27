@@ -17,11 +17,20 @@
         android:title="@string/select_range"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/action_copy"
-        android:icon="@drawable/ic_content_copy"
+        android:id="@+id/action_move"
         android:orderInCategory="300"
-        android:title="@string/copy_to_clipboard"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/move_to"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_report_spam"
+        android:orderInCategory="300"
+        android:title="@string/report_spam"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_block"
+        android:orderInCategory="300"
+        android:title="@string/block"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_baseline_delete_24"

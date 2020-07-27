@@ -2,6 +2,7 @@ package com.bruhascended.sms
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -10,12 +11,14 @@ import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.Observer
 import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
 import com.bruhascended.sms.data.ContactsManager
@@ -121,6 +124,16 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener {
             startActivity(Intent(mContext, NewConversationActivity::class.java))
         }
+
+        mainViewModel!!.selection.observe(this, Observer<Boolean> {
+            if (it) {
+                //tabs.animate().scaleY(0f).setDuration(300).start()
+                tabs.visibility = View.GONE
+            } else {
+                //tabs.animate().scaleY(1f).setDuration(300).start()
+                tabs.visibility = View.VISIBLE
+            }
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

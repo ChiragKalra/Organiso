@@ -3,8 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
+    android:descendantFocusability="blocksDescendants"
     android:layout_width="match_parent"
     android:layout_height="72dp"
+    android:background="@drawable/bg_item_message"
     android:layout_margin="12dp"
     android:orientation="horizontal">
     <androidx.cardview.widget.CardView
