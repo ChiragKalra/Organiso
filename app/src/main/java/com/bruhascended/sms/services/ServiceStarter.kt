@@ -4,23 +4,17 @@ import android.app.Service
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
-import android.util.Log
 
 
 class ServiceStarter: Service() {
-    private lateinit var mSMSreceiver: SMSReceiver
+    private lateinit var mSMSReceiver: SMSReceiver
     private lateinit var mIntentFilter: IntentFilter
     override fun onCreate() {
         super.onCreate()
-
-        //SMS event receiver
-
-        Log.d("s", "--------------------------")
-
-        mSMSreceiver = SMSReceiver()
+        mSMSReceiver = SMSReceiver()
         mIntentFilter = IntentFilter()
         mIntentFilter.addAction("android.provider.Telephony.SMS_RECEIVED")
-        registerReceiver(mSMSreceiver, mIntentFilter)
+        registerReceiver(mSMSReceiver, mIntentFilter)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -31,6 +25,6 @@ class ServiceStarter: Service() {
         super.onDestroy()
 
         // Unregister the SMS receiver
-        unregisterReceiver(mSMSreceiver)
+        unregisterReceiver(mSMSReceiver)
     }
 }
