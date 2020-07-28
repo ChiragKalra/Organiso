@@ -2,7 +2,6 @@ package com.bruhascended.sms
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +24,8 @@ import com.bruhascended.sms.data.SMSManager
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
+import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.services.ServiceStarter
 import com.bruhascended.sms.ui.listViewAdapter.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
@@ -39,7 +39,7 @@ import kotlin.collections.ArrayList
 
 var mainViewModel: MainViewModel? = null
 
-fun moveTo(conversation: Conversation, to: Int) {
+fun moveTo(conversation: Conversation, to: Int, mContext: Context? = null) {
     Thread( Runnable {
         mainViewModel!!.daos[conversation.label].delete(conversation)
         if (to >= 0) {
@@ -47,6 +47,11 @@ fun moveTo(conversation: Conversation, to: Int) {
             conversation.label = to
             conversation.forceLabel = to
             mainViewModel!!.daos[to].insert(conversation)
+        } else {
+            val mdb = Room.databaseBuilder(
+                mContext!!, MessageDatabase::class.java, conversation.sender
+            ).build().manager()
+            mdb.nukeTable()
         }
     }).start()
 }
@@ -99,6 +104,8 @@ class MainActivity : AppCompatActivity() {
         getContacts(this)
 
         setContentView(R.layout.activity_main)
+
+        startService(Intent(this, ServiceStarter::class.java))
 
         val tabs: TabLayout = findViewById(R.id.tabs)
         val toolbar: Toolbar = findViewById(R.id.toolbar)

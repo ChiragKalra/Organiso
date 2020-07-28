@@ -74,7 +74,6 @@ class StartActivity : AppCompatActivity() {
             discTextView.text = pageViewModel.discStrings[it]
         })
 
-
         var preTimer: CountDownTimer? = null
         pageViewModel.eta.observe(this, Observer<Long> {
             preTimer?.cancel()

@@ -212,8 +212,7 @@ class SMSManager (context: Context) {
                 if (mainViewModel != null) {
                     for (j in 0..4) {
                         val res = mainViewModel!!.daos[j].findBySender(conversation)
-                        for (item in res)
-                            mainViewModel!!.daos[i].delete(item)
+                        for (item in res) mainViewModel!!.daos[i].delete(item)
                     }
                 }
 

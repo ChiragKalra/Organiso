@@ -29,6 +29,9 @@ interface MessageDao {
     @Delete
     fun delete(message: Message)
 
+    @Query("DELETE FROM messages")
+    fun nukeTable()
+
     @Query("SELECT * FROM messages WHERE text LIKE :key")
     fun search(key: String): List<Message>
 

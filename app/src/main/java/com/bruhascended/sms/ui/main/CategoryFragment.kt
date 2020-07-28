@@ -130,7 +130,7 @@ class CategoryFragment : Fragment() {
                                     for (i in 0 until selected.size()) {
                                         if (selected.valueAt(i)) {
                                             val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
-                                            moveTo(selectedItem, -1)
+                                            moveTo(selectedItem, -1, mContext)
                                         }
                                     }
 
@@ -180,7 +180,7 @@ class CategoryFragment : Fragment() {
                             true
                         }
                         R.id.action_move -> {
-                            val choices = Array(4){mContext.resources.getString(labelText[it])}
+                            val choices = Array(4){ its -> mContext.resources.getString(labelText[its])}
                             var selection = label
                             AlertDialog.Builder(mContext).setTitle("Move this conversation to")
                                 .setSingleChoiceItems(choices, selection) { _, select -> selection = select}
