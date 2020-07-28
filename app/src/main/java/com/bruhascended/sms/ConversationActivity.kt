@@ -5,15 +5,14 @@ package com.bruhascended.sms
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.AlertDialog
-import android.app.PendingIntent
-import android.content.*
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Parcelable
-import android.telephony.SmsManager
 import android.util.SparseBooleanArray
 import android.view.*
 import android.view.inputmethod.InputMethodManager
@@ -26,13 +25,13 @@ import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.*
+import com.bruhascended.sms.services.SMSSender
 import com.bruhascended.sms.ui.listViewAdapter.MessageListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.activity_main.view.*
 import java.lang.Integer.max
 import java.lang.Integer.min
-import java.lang.StringBuilder
 import java.util.*
 
 
@@ -55,110 +54,14 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var notSupport: TextView
     private lateinit var sendButton: ImageButton
     private lateinit var toolbar: Toolbar
+    private lateinit var smsSender: SMSSender
     private var inputManager: InputMethodManager? = null
-
-    private fun addSmsToDb(smsText: String, date: Long) {
-        messageEditText.text.clear()
-        mdb.insert(
-            Message(
-                null,
-                conversation.sender,
-                smsText,
-                2,
-                date,
-                0
-            )
-        )
-        Thread ( Runnable {
-            if (conversation.id == null) {
-                var found = false
-                for (i in 0..4) {
-                    val res = mainViewModel!!.daos[i].findBySender(conversation.sender)
-                    if (res.isNotEmpty()) {
-                        found = true
-                        conversation = res[0]
-                        break
-                    }
-                }
-                conversation.time = date
-                conversation.lastSMS = smsText
-                if (found)
-                    mainViewModel!!.daos[conversation.label].update(conversation)
-                else
-                    mainViewModel!!.daos[conversation.label].insert(conversation)
-            } else {
-                conversation.time = date
-                conversation.lastSMS = smsText
-                mainViewModel!!.daos[conversation.label].update(conversation)
-            }
-        }).start()
-    }
-
-    private fun sendSMS() {
-        Toast.makeText(
-            baseContext,
-            "Sending",
-            Toast.LENGTH_SHORT
-        ).show()
-        sendButton.isEnabled = false
-        val smsManager = SmsManager.getDefault()
-        val smsText = if (conversation.id != null) messageEditText.text.toString() else conversation.lastSMS
-        val date = System.currentTimeMillis()
-
-        val sentPI = PendingIntent.getBroadcast(this, 0, Intent("SENT"), 0)
-        val deliveredPI = PendingIntent.getBroadcast(this, 0, Intent("DELIVERED"), 0)
-
-        registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(arg0: Context?, arg1: Intent?) {
-                when (resultCode) {
-                    Activity.RESULT_OK -> {
-                        Toast.makeText(
-                            baseContext,
-                            "SMS sent",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        addSmsToDb(smsText, date)
-                    }
-                    SmsManager.RESULT_ERROR_GENERIC_FAILURE -> Toast.makeText(
-                        baseContext,
-                        "Service provider error",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    SmsManager.RESULT_ERROR_NO_SERVICE -> Toast.makeText(
-                        baseContext,
-                        "No service",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                sendButton.isEnabled = true
-                unregisterReceiver(this)
-            }
-        }, IntentFilter("SENT"))
-        registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(arg0: Context?, arg1: Intent?) {
-                when (resultCode) {
-                    Activity.RESULT_OK -> Toast.makeText(
-                        baseContext,
-                        "SMS delivered",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    Activity.RESULT_CANCELED -> Toast.makeText(
-                        baseContext,
-                        "SMS not delivered",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                unregisterReceiver(this)
-            }
-        }, IntentFilter("DELIVERED"))
-
-        smsManager.sendTextMessage(conversation.sender, null, smsText, sentPI, deliveredPI)
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_conversation)
+
+        mContext = this
 
         if (mainViewModel == null) {
             mainViewModel = MainViewModel()
@@ -170,8 +73,6 @@ class ConversationActivity : AppCompatActivity() {
                 ).allowMainThreadQueries().build().manager()
             }
         }
-
-        mContext = this
 
         notSupport = findViewById(R.id.notSupported)
         toolbar = findViewById(R.id.toolbar)
@@ -186,7 +87,6 @@ class ConversationActivity : AppCompatActivity() {
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
 
         conversation = intent.getSerializableExtra("ye") as Conversation
-
         conversationSender = conversation.sender
 
         setSupportActionBar(toolbar)
@@ -205,18 +105,31 @@ class ConversationActivity : AppCompatActivity() {
 
         conversationDao = mdb
 
-        if (conversation.id == null) sendSMS()
+        smsSender = SMSSender(this, conversation, mdb, sendButton)
+
+        if (conversation.id == null) sendButton.callOnClick()
         sendButton.setOnClickListener {
-            if (messageEditText.text.toString().trim() != "")
-                sendSMS()
+            if (messageEditText.text.toString().trim() != "") {
+                smsSender.sendSMS(messageEditText.text.toString())
+                messageEditText.setText("")
+            }
         }
 
         var recyclerViewState: Parcelable
         mdb.loadAll().observe(this, Observer<List<Message>> {
             val editListAdapter = MessageListViewAdaptor(this, it)
             recyclerViewState = listView.onSaveInstanceState()!!
-            listView.adapter = editListAdapter
-            listView.onRestoreInstanceState(recyclerViewState)
+            if (
+                listView.adapter != null &&
+                listView.lastVisiblePosition == listView.adapter.count-1 &&
+                listView.getChildAt(listView.childCount-1).bottom <= listView.height
+            ) {
+                listView.adapter = editListAdapter
+                listView.smoothScrollToPosition(listView.adapter.count-1)
+            } else {
+                listView.adapter = editListAdapter
+                listView.onRestoreInstanceState(recyclerViewState)
+            }
 
             var rangeSelect = false
             var previousSelected = -1
@@ -248,7 +161,7 @@ class ConversationActivity : AppCompatActivity() {
                                         }
                                     }
                                     if (listView.checkedItemCount == it.size) {
-                                        moveTo(conversation, -1)
+                                        moveTo(conversation, -1, mContext)
                                         (mContext as ConversationActivity).finish()
                                     }
                                     Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
@@ -326,16 +239,6 @@ class ConversationActivity : AppCompatActivity() {
             })
             progress.visibility = View.GONE
         })
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.conversation, menu)
-        return true
-    }
-
-    override fun onDestroy() {
-        conversationSender = null
-        super.onDestroy()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -447,5 +350,25 @@ class ConversationActivity : AppCompatActivity() {
                 mdb.loadAll().removeObserver(this)
             }
         })
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.conversation, menu)
+        return true
+    }
+
+    override fun onPause() {
+        conversationSender = null
+        super.onPause()
+    }
+
+    override fun onResume() {
+        conversationSender = conversation.sender
+        super.onResume()
+    }
+
+    override fun onDestroy() {
+        conversationSender = null
+        super.onDestroy()
     }
 }
