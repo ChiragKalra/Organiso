@@ -74,6 +74,7 @@ class CategoryFragment : Fragment() {
 
             var rangeSelect = false
             var previousSelected = -1
+            var actionMenu: Menu? = null
             listView.setMultiChoiceModeListener(object : AbsListView.MultiChoiceModeListener {
                 override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
 
@@ -83,6 +84,7 @@ class CategoryFragment : Fragment() {
                 }
 
                 override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                    actionMenu = menu
                     mode.menuInflater.inflate(R.menu.conversation_selection, menu)
                     rangeSelect = false
                     previousSelected = -1
@@ -90,35 +92,37 @@ class CategoryFragment : Fragment() {
                     return true
                 }
 
+                fun toggleRange(item: MenuItem): Boolean {
+                    val inf = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                    val iv = inf.inflate(R.layout.view_button_transition, null) as ImageView
+
+                    if (rangeSelect) iv.setImageResource(R.drawable.range_to_single)
+                    else iv.setImageResource(R.drawable.single_to_range)
+                    item.actionView = iv
+                    (iv.drawable as AnimatedVectorDrawable).start()
+
+                    Handler().postDelayed({
+                        if (rangeSelect) {
+                            item.setIcon(R.drawable.ic_single)
+                        } else {
+                            item.setIcon(R.drawable.ic_range)
+                        }
+                        item.actionView = null
+                        rangeSelect = !rangeSelect
+                        if (rangeSelect) previousSelected = -1
+                    }, 300)
+                    return true
+                }
+
                 @SuppressLint("InflateParams")
                 override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
                     val selected: SparseBooleanArray = editListAdapter.getSelectedIds()
                     return when (item.itemId) {
-                        R.id.action_select_range -> {
-                            val inf = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-                            val iv = inf.inflate(R.layout.view_button_transition, null) as ImageView
-
-                            if (rangeSelect) iv.setImageResource(R.drawable.range_to_single)
-                            else iv.setImageResource(R.drawable.single_to_range)
-                            item.actionView = iv
-                            (iv.drawable as AnimatedVectorDrawable).start()
-
-                            Handler().postDelayed({
-                                if (rangeSelect) {
-                                    item.setIcon(R.drawable.ic_single)
-                                } else {
-                                    item.setIcon(R.drawable.ic_range)
-                                }
-                                item.actionView = null
-                                rangeSelect = !rangeSelect
-                                if (rangeSelect) previousSelected = -1
-                            }, 300)
-                            true
-                        }
+                        R.id.action_select_range -> toggleRange(item)
                         R.id.action_select_all -> {
+                            if (rangeSelect) toggleRange(actionMenu!!.findItem(R.id.action_select_range))
                             for (i in 0 until editListAdapter.count) {
                                 if (!listView.isItemChecked(i)) {
-                                    editListAdapter.toggleSelection(i)
                                     listView.setItemChecked(i, true)
                                 }
                             }
