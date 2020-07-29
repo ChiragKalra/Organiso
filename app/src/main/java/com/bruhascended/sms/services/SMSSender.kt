@@ -21,6 +21,11 @@ class SMSSender (
     private val sendButton: ImageButton
 ) {
 
+    //TODO add sent sms to global db
+    private fun addSmsToGlobal(message: Message) {
+
+    }
+
     private fun addSmsToDb(smsText: String, date: Long) {
         mdb.insert(
             Message(
