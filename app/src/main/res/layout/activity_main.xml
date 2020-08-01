@@ -6,8 +6,7 @@
     android:background="@color/colorPrimary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:animateLayoutChanges= "true">
+    tools:context=".MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -28,7 +27,8 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
-            android:animateLayoutChanges= "true"
+
+            android:animateLayoutChanges="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
@@ -38,6 +38,7 @@
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
+        android:background="@color/background"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/appBarLayout"
