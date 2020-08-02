@@ -25,7 +25,6 @@ import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.services.ServiceStarter
 import com.bruhascended.sms.ui.listViewAdapter.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
@@ -105,7 +104,7 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        startService(Intent(this, ServiceStarter::class.java))
+        //startService(Intent(this, ShortServiceStarter::class.java))
 
         val tabs: TabLayout = findViewById(R.id.tabs)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
@@ -134,10 +133,8 @@ class MainActivity : AppCompatActivity() {
 
         mainViewModel!!.selection.observe(this, Observer<Boolean> {
             if (it) {
-                //tabs.animate().scaleY(0f).setDuration(300).start()
                 tabs.visibility = View.GONE
             } else {
-                //tabs.animate().scaleY(1f).setDuration(300).start()
                 tabs.visibility = View.VISIBLE
             }
         })

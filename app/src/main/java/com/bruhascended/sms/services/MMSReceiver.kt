@@ -1,61 +1,19 @@
 package com.bruhascended.sms.services
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.telephony.SmsMessage
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import com.bruhascended.sms.ConversationActivity
-import com.bruhascended.sms.R
-import com.bruhascended.sms.data.SMSManager
-import com.bruhascended.sms.data.labelText
 
 
-class SMSReceiver : BroadcastReceiver() {
-    private var count = 0
-    private val descriptionText = arrayOf(
-        R.string.text_1,
-        R.string.text_2,
-        R.string.text_3,
-        R.string.text_4,
-        R.string.text_5
-    )
-
-    private val importance = arrayOf(
-        NotificationManager.IMPORTANCE_MAX,
-        NotificationManager.IMPORTANCE_MAX,
-        NotificationManager.IMPORTANCE_MAX,
-        NotificationManager.IMPORTANCE_LOW,
-        NotificationManager.IMPORTANCE_NONE
-    )
+class MMSReceiver : BroadcastReceiver() {
 
 
      private lateinit var mContext: Context
 
-     private fun createNotificationChannel() {
-         val notificationManager: NotificationManager =
-             mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-         if (notificationManager.notificationChannels.isEmpty()) {
-             for (i in 0..4) {
-                 val name = mContext.getString(labelText[i])
-                 val descriptionText = mContext.getString(descriptionText[i])
-                 val channel = NotificationChannel(i.toString(), name, importance[i]).apply {
-                     description = descriptionText
-                 }
-                 notificationManager.createNotificationChannel(channel)
-             }
-         }
-
-     }
-
     override fun onReceive(context: Context, intent: Intent) {
         mContext = context
-        if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {
+        if (intent.action == "android.provider.Telephony.MMS_RECEIVED") {
+            /*
             val bundle = intent.extras
             if (bundle != null) {
                 val pduObjects = bundle["pdus"] as Array<*>
@@ -96,7 +54,9 @@ class SMSReceiver : BroadcastReceiver() {
                         }
                     }
                 }).start()
+
             }
+             */
         }
     }
 }
