@@ -9,13 +9,13 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.provider.Telephony
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bruhascended.sms.data.SMSManager
-import com.bruhascended.sms.services.ServiceStarter
 import com.bruhascended.sms.ui.start.StartViewModel
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
@@ -43,6 +43,37 @@ class StartActivity : AppCompatActivity() {
             return
         }
 
+        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+        setSmsAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+        startActivityForResult(setSmsAppIntent, 1)
+    }
+
+    @SuppressLint("SetTextI18n")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        mContext = this
+        sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
+        //startService(Intent(this, ShortServiceStarter::class.java))
+
+        if (PackageManager.PERMISSION_DENIED in
+            Array(perms.size){ActivityCompat.checkSelfPermission(this, perms[it])})
+            ActivityCompat.requestPermissions(this, perms, 1)
+        else messages()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        manager?.destroy()
+    }
+
+    override fun onRequestPermissionsResult (
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) = messages()
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         setContentView(R.layout.activity_start)
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
@@ -107,30 +138,6 @@ class StartActivity : AppCompatActivity() {
             sharedPref.edit().putBoolean(arg, true).apply()
             (mContext as Activity).finish()
         }).start()
+        super.onActivityResult(requestCode, resultCode, data)
     }
-
-    @SuppressLint("SetTextI18n")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        mContext = this
-        sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
-        startService(Intent(this, ServiceStarter::class.java))
-
-        if (PackageManager.PERMISSION_DENIED in
-            Array(perms.size){ActivityCompat.checkSelfPermission(this, perms[it])})
-            ActivityCompat.requestPermissions(this, perms, 1)
-        else messages()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        manager?.destroy()
-    }
-
-    override fun onRequestPermissionsResult (
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) = messages()
 }
