@@ -12,6 +12,7 @@ class MMSReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         mContext = context
+        //TODO
         if (intent.action == "android.provider.Telephony.MMS_RECEIVED") {
             /*
             val bundle = intent.extras

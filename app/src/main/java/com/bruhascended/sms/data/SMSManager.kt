@@ -209,22 +209,6 @@ class SMSManager (context: Context) {
         val returnMessages = ArrayList<Pair<Message, Conversation>>()
         for (i in 0..4) {
             for (conversation in labels[i].toTypedArray()) {
-                if (mainViewModel != null) {
-                    for (j in 0..4) {
-                        val res = mainViewModel!!.daos!![j].findBySender(conversation)
-                        for (item in res) mainViewModel!!.daos!![i].delete(item)
-                    }
-                } else {
-                    for (j in 0..4) {
-                        val temp = Room.databaseBuilder(
-                            mContext, ConversationDatabase::class.java,
-                            mContext.resources.getString(labelText[j])
-                        ).build().manager()
-                        val res = temp.findBySender(conversation)
-                        for (item in res) temp.delete(item)
-                    }
-                }
-
                 val con = Conversation(
                     null,
                     conversation,
@@ -240,7 +224,23 @@ class SMSManager (context: Context) {
                     }
                 )
                 if (!savedSenders.contains(conversation)) {
+                    if (mainViewModel != null) {
+                        for (j in 0..4) {
+                            val res = mainViewModel!!.daos!![j].findBySender(conversation)
+                            for (item in res) mainViewModel!!.daos!![i].delete(item)
+                        }
+                    } else {
+                        for (j in 0..4) {
+                            val temp = Room.databaseBuilder(
+                                mContext, ConversationDatabase::class.java,
+                                mContext.resources.getString(labelText[j])
+                            ).build().manager()
+                            val res = temp.findBySender(conversation)
+                            for (item in res) temp.delete(item)
+                        }
+                    }
                     mDaos[i].insert(con)
+
                     savedSenders.add(conversation)
                     con.id = mDaos[i].findBySender(conversation).first().id
 

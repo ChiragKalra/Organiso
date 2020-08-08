@@ -16,7 +16,6 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bruhascended.sms.data.SMSManager
-import com.bruhascended.sms.services.ServiceStarter
 import com.bruhascended.sms.ui.start.StartViewModel
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
@@ -55,7 +54,6 @@ class StartActivity : AppCompatActivity() {
 
         mContext = this
         sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
-        startService(Intent(this, ServiceStarter::class.java))
 
         if (PackageManager.PERMISSION_DENIED in
             Array(perms.size){ActivityCompat.checkSelfPermission(this, perms[it])})
