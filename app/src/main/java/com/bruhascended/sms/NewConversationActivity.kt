@@ -1,5 +1,6 @@
 package com.bruhascended.sms
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -12,8 +13,11 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.data.Contact
+import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.listViewAdapter.ContactListViewAdaptor
+import com.bruhascended.sms.ui.main.MainViewModel
+import java.net.URLDecoder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -22,16 +26,32 @@ var memoryCache = HashMap<String, Bitmap?>()
 
 class NewConversationActivity : AppCompatActivity() {
 
+    private lateinit var to: EditText
+    private lateinit var mContext: Context
+    private lateinit var message: EditText
+
+    private fun processIntentData(intent: Intent) {
+        if (Intent.ACTION_SENDTO == intent.action) {
+            var destinationNumber = intent.dataString
+            destinationNumber = URLDecoder.decode(destinationNumber)
+            destinationNumber = destinationNumber.replace("-", "")
+                .replace("smsto:", "")
+                .replace("sms:", "")
+            to.setText(ContactsManager(mContext).getRaw(destinationNumber))
+            message.requestFocus()
+        } else if (Intent.ACTION_SEND == intent.action && "text/plain" == intent.type) {
+            val str = intent.getStringExtra(Intent.EXTRA_TEXT)
+            message.setText(str)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_conversation)
 
         val contactListView: RecyclerView = findViewById(R.id.contactListView)
-        val to: EditText = findViewById(R.id.toEditText)
-        val message: EditText = findViewById(R.id.messageEditText)
         val sendButton: ImageButton = findViewById(R.id.sendButton)
         val progress: ProgressBar = findViewById(R.id.progress)
-
 
         val llm = LinearLayoutManager(this)
         val clickAction = { contact: Contact ->
@@ -39,11 +59,15 @@ class NewConversationActivity : AppCompatActivity() {
             to.setSelection(contact.number.length)
         }
 
+        to = findViewById(R.id.toEditText)
+        message = findViewById(R.id.messageEditText)
+        mContext = this
+
         to.requestFocus()
         supportActionBar!!.title = "New Conversation"
         llm.orientation = LinearLayoutManager.HORIZONTAL
 
-        mainViewModel!!.contacts.observe(this, Observer {
+        val observer = Observer<Array<Contact>?> {
             if (it != null) {
                 val contacts = it
 
@@ -76,6 +100,8 @@ class NewConversationActivity : AppCompatActivity() {
                     contactListView.adapter = adaptor
                 }
 
+                processIntentData(intent)
+
                 sendButton.setOnClickListener {
                     if (message.text.toString().trim() != "") {
                         var name: String? = null
@@ -99,7 +125,7 @@ class NewConversationActivity : AppCompatActivity() {
                                 message.text.toString().trim(),
                                 0,
                                 -1,
-                                FloatArray(5){ its ->
+                                FloatArray(5) { its ->
                                     if (its == 0) 1f else 0f
                                 }
                             )
@@ -109,6 +135,15 @@ class NewConversationActivity : AppCompatActivity() {
                     }
                 }
             }
-        })
+        }
+        Thread {
+            if (mainViewModel == null) {
+                mainViewModel = MainViewModel()
+                mainViewModel!!.contacts.postValue(ContactsManager(this).getContactsList())
+            }
+            runOnUiThread{
+                mainViewModel!!.contacts.observe(this, observer)
+            }
+        }.start()
     }
 }

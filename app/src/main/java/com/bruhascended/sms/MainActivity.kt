@@ -25,6 +25,8 @@ import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.services.SMSReceiver
+import com.bruhascended.sms.services.ServiceStarter
 import com.bruhascended.sms.ui.listViewAdapter.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
@@ -40,12 +42,12 @@ var mainViewModel: MainViewModel? = null
 
 fun moveTo(conversation: Conversation, to: Int, mContext: Context? = null) {
     Thread( Runnable {
-        mainViewModel!!.daos[conversation.label].delete(conversation)
+        mainViewModel!!.daos!![conversation.label].delete(conversation)
         if (to >= 0) {
             conversation.id = null
             conversation.label = to
             conversation.forceLabel = to
-            mainViewModel!!.daos[to].insert(conversation)
+            mainViewModel!!.daos!![to].insert(conversation)
         } else {
             val mdb = Room.databaseBuilder(
                 mContext!!, MessageDatabase::class.java, conversation.sender
@@ -88,6 +90,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        startService(Intent(this, SMSReceiver::class.java))
+
         mContext = this
         mainViewModel = MainViewModel()
 
@@ -104,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        //startService(Intent(this, ShortServiceStarter::class.java))
+        startService(Intent(this, ServiceStarter::class.java))
 
         val tabs: TabLayout = findViewById(R.id.tabs)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
@@ -193,7 +197,7 @@ class MainActivity : AppCompatActivity() {
 
             var recyclerViewState: Parcelable
             for (i in 0..3) {
-                res.addAll(mainViewModel!!.daos[i].findBySender("%${key}%"))
+                res.addAll(mainViewModel!!.daos!![i].findBySender("%${key}%"))
                 recyclerViewState = listView.onSaveInstanceState()!!
                 listView.adapter = ConversationListViewAdaptor(mContext, res as List<Conversation>)
                 listView.onRestoreInstanceState(recyclerViewState)

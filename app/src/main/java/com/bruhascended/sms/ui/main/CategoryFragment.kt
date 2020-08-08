@@ -58,7 +58,7 @@ class CategoryFragment : Fragment() {
         val intent = Intent(mContext, ConversationActivity::class.java)
 
         var recyclerViewState: Parcelable
-        mainViewModel!!.daos[label].loadAll().observe(viewLifecycleOwner, Observer<List<Conversation>> {
+        mainViewModel!!.daos!![label].loadAll().observe(viewLifecycleOwner, Observer<List<Conversation>> {
             recyclerViewState = listView.onSaveInstanceState()!!
             val editListAdapter = ConversationListViewAdaptor(mContext, it)
             listView.adapter = editListAdapter
