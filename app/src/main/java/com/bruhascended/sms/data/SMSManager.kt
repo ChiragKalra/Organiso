@@ -138,7 +138,7 @@ class SMSManager (context: Context) {
                     mContext, ConversationDatabase::class.java,
                     mContext.resources.getString(labelText[it])
                 ).build().manager()
-            else mainViewModel!!.daos[it]
+            else mainViewModel!!.daos!![it]
         }
 
 
@@ -211,8 +211,17 @@ class SMSManager (context: Context) {
             for (conversation in labels[i].toTypedArray()) {
                 if (mainViewModel != null) {
                     for (j in 0..4) {
-                        val res = mainViewModel!!.daos[j].findBySender(conversation)
-                        for (item in res) mainViewModel!!.daos[i].delete(item)
+                        val res = mainViewModel!!.daos!![j].findBySender(conversation)
+                        for (item in res) mainViewModel!!.daos!![i].delete(item)
+                    }
+                } else {
+                    for (j in 0..4) {
+                        val temp = Room.databaseBuilder(
+                            mContext, ConversationDatabase::class.java,
+                            mContext.resources.getString(labelText[j])
+                        ).build().manager()
+                        val res = temp.findBySender(conversation)
+                        for (item in res) temp.delete(item)
                     }
                 }
 

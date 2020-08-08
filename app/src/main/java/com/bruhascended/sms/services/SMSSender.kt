@@ -9,15 +9,14 @@ import android.content.IntentFilter
 import android.telephony.SmsManager
 import android.widget.ImageButton
 import android.widget.Toast
+import com.bruhascended.sms.conversationDao
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.db.MessageDao
 import com.bruhascended.sms.mainViewModel
 
 class SMSSender (
     private val mContext: Context,
     private var conversation: Conversation,
-    private val mdb: MessageDao,
     private val sendButton: ImageButton
 ) {
 
@@ -27,7 +26,7 @@ class SMSSender (
     }
 
     private fun addSmsToDb(smsText: String, date: Long) {
-        mdb.insert(
+        conversationDao.insert(
             Message(
                 null,
                 conversation.sender,
@@ -40,7 +39,7 @@ class SMSSender (
         if (conversation.id == null) {
             var found = false
             for (i in 0..4) {
-                val res = mainViewModel!!.daos[i].findBySender(conversation.sender)
+                val res = mainViewModel!!.daos!![i].findBySender(conversation.sender)
                 if (res.isNotEmpty()) {
                     found = true
                     conversation = res[0]
@@ -50,18 +49,18 @@ class SMSSender (
             conversation.time = date
             conversation.lastSMS = smsText
             if (found)
-                mainViewModel!!.daos[conversation.label].update(conversation)
+                mainViewModel!!.daos!![conversation.label].update(conversation)
             else
-                mainViewModel!!.daos[conversation.label].insert(conversation)
+                mainViewModel!!.daos!![conversation.label].insert(conversation)
         } else {
             conversation.time = date
             conversation.lastSMS = smsText
-            mainViewModel!!.daos[conversation.label].update(conversation)
+            mainViewModel!!.daos!![conversation.label].update(conversation)
         }
 
     }
 
-    fun sendSMS(text: String) {
+    fun sendSMS(smsText: String) {
         sendButton.isEnabled = false
         Toast.makeText(
             mContext,
@@ -69,7 +68,6 @@ class SMSSender (
             Toast.LENGTH_SHORT
         ).show()
         val smsManager = SmsManager.getDefault()
-        val smsText = if (conversation.id != null) text else conversation.lastSMS
         val date = System.currentTimeMillis()
 
         val sentPI = PendingIntent.getBroadcast(mContext, 0, Intent("SENT"), 0)

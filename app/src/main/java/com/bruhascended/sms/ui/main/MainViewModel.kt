@@ -7,7 +7,7 @@ import com.bruhascended.sms.db.ConversationDao
 
 
 class MainViewModel : ViewModel() {
-    lateinit var daos: Array<ConversationDao>
+    var daos: Array<ConversationDao>? = null
 
     var contacts = MutableLiveData<Array<Contact>?>().apply {
         postValue(null)

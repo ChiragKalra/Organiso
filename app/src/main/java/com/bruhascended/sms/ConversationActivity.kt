@@ -62,18 +62,6 @@ class ConversationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_conversation)
 
         mContext = this
-
-        if (mainViewModel == null) {
-            mainViewModel = MainViewModel()
-
-            mainViewModel!!.daos = Array(6){
-                Room.databaseBuilder(
-                    mContext, ConversationDatabase::class.java,
-                    mContext.resources.getString(labelText[it])
-                ).allowMainThreadQueries().build().manager()
-            }
-        }
-
         notSupport = findViewById(R.id.notSupported)
         toolbar = findViewById(R.id.toolbar)
         sendLayout = findViewById(R.id.sendLayout)
@@ -85,8 +73,8 @@ class ConversationActivity : AppCompatActivity() {
         loading = findViewById(R.id.progress)
         sendButton = findViewById(R.id.sendButton)
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-
         conversation = intent.getSerializableExtra("ye") as Conversation
+        smsSender = SMSSender(this, conversation, sendButton)
         conversationSender = conversation.sender
 
         setSupportActionBar(toolbar)
@@ -99,20 +87,31 @@ class ConversationActivity : AppCompatActivity() {
             notSupport.visibility = TextView.VISIBLE
         }
 
+        if (mainViewModel == null) {
+            mainViewModel = MainViewModel()
+        }
+        if (mainViewModel!!.daos == null) {
+            mainViewModel!!.daos = Array(6){
+                Room.databaseBuilder(
+                    mContext, ConversationDatabase::class.java,
+                    mContext.resources.getString(labelText[it])
+                ).allowMainThreadQueries().build().manager()
+            }
+        }
         mdb = Room.databaseBuilder(
             this, MessageDatabase::class.java, conversation.sender
         ).allowMainThreadQueries().build().manager()
-
         conversationDao = mdb
 
-        smsSender = SMSSender(this, conversation, mdb, sendButton)
-
-        if (conversation.id == null) sendButton.callOnClick()
         sendButton.setOnClickListener {
             if (messageEditText.text.toString().trim() != "") {
                 smsSender.sendSMS(messageEditText.text.toString())
                 messageEditText.setText("")
             }
+        }
+        if (conversation.id == null) {
+            messageEditText.setText(conversation.lastSMS)
+            sendButton.callOnClick()
         }
 
         var recyclerViewState: Parcelable
@@ -122,6 +121,7 @@ class ConversationActivity : AppCompatActivity() {
             if (
                 listView.adapter != null &&
                 listView.lastVisiblePosition == listView.adapter.count-1 &&
+                listView.childCount > 0 &&
                 listView.getChildAt(listView.childCount-1).bottom <= listView.height
             ) {
                 listView.adapter = editListAdapter

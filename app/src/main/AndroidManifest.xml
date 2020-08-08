@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.SMS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:allowBackup="true"
@@ -19,6 +20,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <service android:name=".services.ServiceStarter"/>
+
+        <receiver android:name=".services.BootReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+
+            </intent-filter>
+        </receiver>
 
         <service android:name=".services.HeadlessSMSSender"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
@@ -35,7 +46,7 @@
 
         <receiver android:name=".services.SMSReceiver"
             android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter>
+            <intent-filter android:priority="2147483645">
                 <action android:name="android.provider.Telephony.SMS_DELIVER" />
             </intent-filter>
         </receiver>
@@ -53,6 +64,7 @@
             android:name=".NewConversationActivity"
             android:launchMode="singleTop">
             <intent-filter>
+                <!--TODO -->
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <category android:name="android.intent.category.DEFAULT" />
