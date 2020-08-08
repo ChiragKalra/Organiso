@@ -26,7 +26,6 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.services.SMSReceiver
-import com.bruhascended.sms.services.ServiceStarter
 import com.bruhascended.sms.ui.listViewAdapter.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
@@ -107,8 +106,6 @@ class MainActivity : AppCompatActivity() {
         getContacts(this)
 
         setContentView(R.layout.activity_main)
-
-        startService(Intent(this, ServiceStarter::class.java))
 
         val tabs: TabLayout = findViewById(R.id.tabs)
         val toolbar: Toolbar = findViewById(R.id.toolbar)

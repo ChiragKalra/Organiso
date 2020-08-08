@@ -16,7 +16,6 @@ import com.bruhascended.sms.data.labelText
 
 
 class SMSReceiver : BroadcastReceiver() {
-    private var count = 0
     private val descriptionText = arrayOf(
         R.string.text_1,
         R.string.text_2,
@@ -55,7 +54,7 @@ class SMSReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         mContext = context
-        if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {
+        if (intent.action == "android.provider.Telephony.SMS_DELIVER") {
             val bundle = intent.extras
             if (bundle != null) {
                 val pduObjects = bundle["pdus"] as Array<*>
@@ -91,7 +90,7 @@ class SMSReceiver : BroadcastReceiver() {
                                     .setContentIntent(pendingIntent)
                                     .setAutoCancel(true)
                             with(NotificationManagerCompat.from(context)) {
-                                notify(count++, builder.build())
+                                notify(conversation.id!!.toInt(), builder.build())
                             }
                         }
                     }
