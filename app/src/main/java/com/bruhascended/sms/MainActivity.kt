@@ -230,7 +230,9 @@ class MainActivity : AppCompatActivity() {
                     searchLayout.visibility = View.GONE
                     GlobalScope.launch {
                         delay(300)
-                        fab.visibility = View.VISIBLE
+                        runOnUiThread{
+                            fab.visibility = View.VISIBLE
+                        }
                     }
                     searchEditText.setText("")
                 }
