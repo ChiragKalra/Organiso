@@ -19,7 +19,7 @@ import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.mainViewModel
 
 
-class HeadlessSmsSendService : Service() {
+class HeadlessSMSSender : Service() {
 
     private fun getRecipients(uri: Uri): String {
         val base: String = uri.schemeSpecificPart
