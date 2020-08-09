@@ -186,16 +186,20 @@ class ConversationActivity : AppCompatActivity() {
                             item.actionView = iv
                             (iv.drawable as AnimatedVectorDrawable).start()
 
+
+                            rangeSelect = !rangeSelect
+                            if (rangeSelect) previousSelected = -1
+
                             GlobalScope.launch {
                                 delay(300)
-                                if (rangeSelect) {
-                                    item.setIcon(R.drawable.ic_single)
-                                } else {
-                                    item.setIcon(R.drawable.ic_range)
+                                runOnUiThread {
+                                    if (!rangeSelect) {
+                                        item.setIcon(R.drawable.ic_single)
+                                    } else {
+                                        item.setIcon(R.drawable.ic_range)
+                                    }
+                                    item.actionView = null
                                 }
-                                item.actionView = null
-                                rangeSelect = !rangeSelect
-                                if (rangeSelect) previousSelected = -1
                             }
                             true
                         }

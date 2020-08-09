@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
-import android.os.Handler
 import android.os.Parcelable
 import android.util.SparseBooleanArray
 import android.view.*
@@ -112,16 +111,18 @@ class CategoryFragment : Fragment() {
                     item.actionView = iv
                     (iv.drawable as AnimatedVectorDrawable).start()
 
+                    rangeSelect = !rangeSelect
+                    if (rangeSelect) previousSelected = -1
                     GlobalScope.launch {
                         delay(300)
-                        if (rangeSelect) {
-                            item.setIcon(R.drawable.ic_single)
-                        } else {
-                            item.setIcon(R.drawable.ic_range)
+                        activity?.runOnUiThread {
+                            if (!rangeSelect) {
+                                item.setIcon(R.drawable.ic_single)
+                            } else {
+                                item.setIcon(R.drawable.ic_range)
+                            }
+                            item.actionView = null
                         }
-                        item.actionView = null
-                        rangeSelect = !rangeSelect
-                        if (rangeSelect) previousSelected = -1
                     }
                     return true
                 }
