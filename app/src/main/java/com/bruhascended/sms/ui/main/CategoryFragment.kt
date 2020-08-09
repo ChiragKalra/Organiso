@@ -20,6 +20,9 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.moveTo
 import com.bruhascended.sms.ui.listViewAdapter.ConversationListViewAdaptor
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class CategoryFragment : Fragment() {
@@ -109,7 +112,8 @@ class CategoryFragment : Fragment() {
                     item.actionView = iv
                     (iv.drawable as AnimatedVectorDrawable).start()
 
-                    Handler().postDelayed({
+                    GlobalScope.launch {
+                        delay(300)
                         if (rangeSelect) {
                             item.setIcon(R.drawable.ic_single)
                         } else {
@@ -118,7 +122,7 @@ class CategoryFragment : Fragment() {
                         item.actionView = null
                         rangeSelect = !rangeSelect
                         if (rangeSelect) previousSelected = -1
-                    }, 300)
+                    }
                     return true
                 }
 

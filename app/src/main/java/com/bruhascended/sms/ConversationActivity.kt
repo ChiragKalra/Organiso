@@ -11,7 +11,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Bundle
-import android.os.Handler
 import android.os.Parcelable
 import android.util.SparseBooleanArray
 import android.view.*
@@ -30,6 +29,9 @@ import com.bruhascended.sms.ui.listViewAdapter.MessageListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.activity_main.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.lang.Integer.max
 import java.lang.Integer.min
 import java.util.*
@@ -184,7 +186,8 @@ class ConversationActivity : AppCompatActivity() {
                             item.actionView = iv
                             (iv.drawable as AnimatedVectorDrawable).start()
 
-                            Handler().postDelayed({
+                            GlobalScope.launch {
+                                delay(300)
                                 if (rangeSelect) {
                                     item.setIcon(R.drawable.ic_single)
                                 } else {
@@ -193,7 +196,7 @@ class ConversationActivity : AppCompatActivity() {
                                 item.actionView = null
                                 rangeSelect = !rangeSelect
                                 if (rangeSelect) previousSelected = -1
-                            }, 300)
+                            }
                             true
                         }
                         R.id.action_copy -> {

@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
@@ -32,6 +31,9 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.activity_conversation.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -226,7 +228,10 @@ class MainActivity : AppCompatActivity() {
                 override fun onAnimationEnd(animation: Animator) {
                     inputManager?.hideSoftInputFromWindow(backButton.windowToken, 0)
                     searchLayout.visibility = View.GONE
-                    Handler().postDelayed({ fab.visibility = View.VISIBLE }, 300)
+                    GlobalScope.launch {
+                        delay(300)
+                        fab.visibility = View.VISIBLE
+                    }
                     searchEditText.setText("")
                 }
             }).start()
