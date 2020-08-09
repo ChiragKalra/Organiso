@@ -3,7 +3,9 @@ package com.bruhascended.sms
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ProgressBar
@@ -17,7 +19,6 @@ import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.listViewAdapter.ContactListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
-import java.net.URLDecoder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -30,14 +31,16 @@ class NewConversationActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var message: EditText
 
+    private fun getRecipients(uri: Uri): String {
+        val base: String = uri.schemeSpecificPart
+        val pos = base.indexOf('?')
+        return if (pos == -1) base else base.substring(0, pos)
+    }
+
     private fun processIntentData(intent: Intent) {
         if (Intent.ACTION_SENDTO == intent.action) {
-            var destinationNumber = intent.dataString
-            destinationNumber = URLDecoder.decode(destinationNumber)
-            destinationNumber = destinationNumber.replace("-", "")
-                .replace("smsto:", "")
-                .replace("sms:", "")
-            to.setText(ContactsManager(mContext).getRaw(destinationNumber))
+            val destinations = TextUtils.split(getRecipients(intent.data!!), ";")
+            to.setText(ContactsManager(mContext).getRaw(destinations.first()))
             message.requestFocus()
         } else if (Intent.ACTION_SEND == intent.action && "text/plain" == intent.type) {
             val str = intent.getStringExtra(Intent.EXTRA_TEXT)
@@ -63,6 +66,7 @@ class NewConversationActivity : AppCompatActivity() {
         message = findViewById(R.id.messageEditText)
         mContext = this
 
+        processIntentData(intent)
         to.requestFocus()
         supportActionBar!!.title = "New Conversation"
         llm.orientation = LinearLayoutManager.HORIZONTAL
@@ -79,7 +83,7 @@ class NewConversationActivity : AppCompatActivity() {
                 contactListView.visibility = RecyclerView.VISIBLE
                 progress.visibility = ProgressBar.INVISIBLE
 
-                to.doOnTextChanged { _, _, _, _ ->
+                fun displaySearch() {
                     val filtered = ArrayList<Contact>()
                     val key = to.text.toString().trim().toLowerCase(Locale.ROOT)
 
@@ -100,7 +104,8 @@ class NewConversationActivity : AppCompatActivity() {
                     contactListView.adapter = adaptor
                 }
 
-                processIntentData(intent)
+                to.doOnTextChanged { _, _, _, _ -> displaySearch() }
+                if (to.text.isNotBlank()) displaySearch()
 
                 sendButton.setOnClickListener {
                     if (message.text.toString().trim() != "") {
