@@ -20,10 +20,7 @@ class SMSSender (
     private val sendButton: ImageButton
 ) {
 
-    //TODO add sent sms to global db
-    private fun addSmsToGlobal(message: Message) {
-        //if huawei
-    }
+    //TODO private fun addSmsToGlobal(message: Message) {if huawei}
 
     private fun addSmsToDb(smsText: String, date: Long) {
         conversationDao.insert(

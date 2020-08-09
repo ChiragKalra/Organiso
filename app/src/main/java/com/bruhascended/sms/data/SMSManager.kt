@@ -41,6 +41,7 @@ class SMSManager (context: Context) {
 
     private val messages = HashMap<String, ArrayList<Message>>()
     private val senderToProbs = HashMap<String, FloatArray>()
+    private val senderForce = HashMap<String, Int>()
     private val labels = Array(5){ArrayList<String>()}
 
     private var completedSenderIndex: Int = 0
@@ -175,6 +176,7 @@ class SMSManager (context: Context) {
                     for (j in 0..4) probs[j] += conversation.probs[j]
                 val prediction = probs.indexOf(probs.max()!!)
                 senderToProbs[sender] = probs
+                senderForce[sender] = force
 
                 if (force != -1)
                     labels[force].add(sender)
@@ -209,25 +211,25 @@ class SMSManager (context: Context) {
         val returnMessages = ArrayList<Pair<Message, Conversation>>()
         for (i in 0..4) {
             for (conversation in labels[i].toTypedArray()) {
-                val con = Conversation(
-                    null,
-                    conversation,
-                    senderNameMap[conversation],
-                    "",
-                    true,
-                    messages[conversation]!!.last().time,
-                    messages[conversation]!!.last().text,
-                    i,
-                    -1,
-                    senderToProbs[conversation]?: FloatArray(5){
-                        if (it == 0) 1f else 0f
-                    }
-                )
                 if (!savedSenders.contains(conversation)) {
+                    val con = Conversation(
+                        null,
+                        conversation,
+                        senderNameMap[conversation],
+                        "",
+                        true,
+                        messages[conversation]!!.last().time,
+                        messages[conversation]!!.last().text,
+                        i,
+                        senderForce[conversation] ?: -1,
+                        senderToProbs[conversation]?: FloatArray(5){
+                            if (it == 0) 1f else 0f
+                        }
+                    )
                     if (mainViewModel != null) {
                         for (j in 0..4) {
                             val res = mainViewModel!!.daos!![j].findBySender(conversation)
-                            for (item in res) mainViewModel!!.daos!![i].delete(item)
+                            for (item in res) mainViewModel!!.daos!![j].delete(item)
                         }
                     } else {
                         for (j in 0..4) {

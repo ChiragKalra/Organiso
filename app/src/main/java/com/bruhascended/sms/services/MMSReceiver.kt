@@ -7,8 +7,7 @@ import android.content.Intent
 
 class MMSReceiver : BroadcastReceiver() {
 
-
-     private lateinit var mContext: Context
+    private lateinit var mContext: Context
 
     override fun onReceive(context: Context, intent: Intent) {
         mContext = context
