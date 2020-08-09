@@ -20,8 +20,7 @@ class SectionsPagerAdapter(
         R.string.tab_text_6
     )
 
-    override fun getItem(position: Int) =
-        CategoryFragment.newInstance(position)
+    override fun getItem(position: Int) = CategoryFragment.newInstance(position)
 
     override fun getPageTitle(position: Int) = context.resources.getString(tabTitles[position])
 

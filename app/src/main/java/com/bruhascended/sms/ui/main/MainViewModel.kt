@@ -13,7 +13,7 @@ class MainViewModel : ViewModel() {
         postValue(null)
     }
 
-    var selection = MutableLiveData<Boolean>().apply {
-        postValue(false)
+    var selection = MutableLiveData<Int>().apply {
+        postValue(-1)
     }
 }

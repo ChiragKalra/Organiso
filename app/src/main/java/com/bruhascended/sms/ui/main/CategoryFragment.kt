@@ -75,12 +75,20 @@ class CategoryFragment : Fragment() {
             var rangeSelect = false
             var previousSelected = -1
             var actionMenu: Menu? = null
+
+            mainViewModel!!.selection.observe(viewLifecycleOwner, Observer<Int> { int ->
+                if (int == -1) {
+                    listView.choiceMode = ListView.CHOICE_MODE_NONE
+                    listView.choiceMode = ListView.CHOICE_MODE_MULTIPLE_MODAL
+                }
+            })
+
             listView.setMultiChoiceModeListener(object : AbsListView.MultiChoiceModeListener {
                 override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
 
                 override fun onDestroyActionMode(mode: ActionMode) {
                     editListAdapter.removeSelection()
-                    mainViewModel!!.selection.postValue(false)
+                    mainViewModel!!.selection.postValue(-1)
                 }
 
                 override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
@@ -88,7 +96,7 @@ class CategoryFragment : Fragment() {
                     mode.menuInflater.inflate(R.menu.conversation_selection, menu)
                     rangeSelect = false
                     previousSelected = -1
-                    mainViewModel!!.selection.postValue(true)
+                    mainViewModel!!.selection.postValue(label)
                     return true
                 }
 
