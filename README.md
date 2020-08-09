@@ -6,7 +6,7 @@ SMS Organiser Android is an android app for classifying SMSs into common categor
 However when deployed, it should be used to analyse entire conversations and classify them. Since most conversations contain more than 1 message, real life accuracy jumps to around 99%. 
 
 ## Usage
-This app is in beta. However if you wanna check it out, a compiled apk is present in the release folder.
+This app is in beta. However if you wanna check it out, download the apk from [here](https://github.com/ChiragKalra/sms-organiser-android/blob/master/app/release/app-release.apk).
 
 ## Related Projects
 * Code used to generate the tensorflow model at it's core : https://github.com/Sids2k-ChiragKalra/SMS-organizer
