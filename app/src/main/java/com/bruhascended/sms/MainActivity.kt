@@ -16,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.Observer
 import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
 import com.bruhascended.sms.data.ContactsManager
@@ -126,19 +125,18 @@ class MainActivity : AppCompatActivity() {
 
         viewPager.adapter = SectionsPagerAdapter(this, supportFragmentManager)
         viewPager.offscreenPageLimit = 3
+        viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
+            override fun onPageSelected(position: Int) {
+                if (position != mainViewModel!!.selection.value) {
+                    mainViewModel!!.selection.postValue(-1)
+                }
+            }
+        })
         tabs.setupWithViewPager(viewPager)
 
         fab.setOnClickListener {
             startActivity(Intent(mContext, NewConversationActivity::class.java))
         }
-
-        mainViewModel!!.selection.observe(this, Observer<Boolean> {
-            if (it) {
-                tabs.visibility = View.GONE
-            } else {
-                tabs.visibility = View.VISIBLE
-            }
-        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -22,7 +22,7 @@ class SMSSender (
 
     //TODO add sent sms to global db
     private fun addSmsToGlobal(message: Message) {
-
+        //if huawei
     }
 
     private fun addSmsToDb(smsText: String, date: Long) {
@@ -118,6 +118,8 @@ class SMSSender (
         }, IntentFilter("DELIVERED"))
 
         smsManager.sendTextMessage(conversation.sender, null, smsText, sentPI, deliveredPI)
+        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
+            .putLong("last", System.currentTimeMillis()).apply()
     }
 
 }
