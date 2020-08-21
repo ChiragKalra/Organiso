@@ -24,16 +24,6 @@ val labelText = arrayOf(
     R.string.tab_text_6
 )
 
-/*
-const val MESSAGE_TYPE_ALL = 0
-const val MESSAGE_TYPE_INBOX = 1
-const val MESSAGE_TYPE_SENT = 2
-const val MESSAGE_TYPE_DRAFT = 3
-const val MESSAGE_TYPE_OUTBOX = 4
-const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
-const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
-*/
-
 const val MESSAGE_CHECK_COUNT = 6
 
 class SMSManager (context: Context) {
@@ -142,11 +132,12 @@ class SMSManager (context: Context) {
             else mainViewModel!!.daos!![it]
         }
 
-
         var done = sp.getInt("done", 0)
         val index = sp.getInt("index", 0)
         val messagesArray = messages.entries.toTypedArray()
-        for (ind in index until messagesArray.size) {
+        val number = messagesArray.size
+
+        for (ind in index until number) {
             val sender = messagesArray[ind].component1()
             val msgs = messagesArray[ind].component2()
 
@@ -174,7 +165,7 @@ class SMSManager (context: Context) {
 
                 if (conversation != null)
                     for (j in 0..4) probs[j] += conversation.probs[j]
-                val prediction = probs.indexOf(probs.max()!!)
+                val prediction = probs.toList().indexOf(probs.maxOrNull())
                 senderToProbs[sender] = probs
                 senderForce[sender] = force
 
@@ -204,7 +195,7 @@ class SMSManager (context: Context) {
             .putInt("done", completedMessage)
             .putLong("timeTaken", timeTaken)
             .apply()
-        Thread(Runnable{saveMessages(false)}).start()
+        Thread{saveMessages(false)}.start()
     }
 
     fun saveMessages(done: Boolean = true): ArrayList<Pair<Message, Conversation>> {

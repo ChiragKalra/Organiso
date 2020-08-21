@@ -9,8 +9,12 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.os.Parcelable
 import android.util.SparseBooleanArray
 import android.view.*
@@ -18,17 +22,18 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import android.widget.AbsListView.MultiChoiceModeListener
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.room.Room
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.*
+import com.bruhascended.sms.services.MMSSender
 import com.bruhascended.sms.services.SMSSender
 import com.bruhascended.sms.ui.listViewAdapter.MessageListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.activity_main.view.*
+import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,37 +51,87 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var conversation: Conversation
 
-    private lateinit var messageEditText: EditText
-    private lateinit var searchLayout: LinearLayout
-    private lateinit var backButton: ImageButton
-    private lateinit var searchEditText: EditText
-    private lateinit var listView: ListView
-    private lateinit var loading: ProgressBar
-    private lateinit var sendLayout: LinearLayout
-    private lateinit var notSupport: TextView
-    private lateinit var sendButton: ImageButton
-    private lateinit var toolbar: Toolbar
+    private var mmsType = 0
+    private lateinit var mmsTypeString: String
+    private lateinit var mmsURI: Uri
     private lateinit var smsSender: SMSSender
+    private lateinit var mmsSender: MMSSender
+    private lateinit var inflater: LayoutInflater
     private var inputManager: InputMethodManager? = null
+
+    private fun showSearchLayout() {
+        searchLayout.apply {
+            alpha = 0f
+            visibility = View.VISIBLE
+            animate()
+                .alpha(1f)
+                .setDuration(300)
+                .setListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        searchEditText.requestFocus()
+                        inputManager?.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
+                        notSupported.visibility = TextView.GONE
+                        sendLayout.visibility = LinearLayout.GONE
+                    }
+                })
+        }
+
+        searchEditText.doOnTextChanged { _, _, _, _ ->
+            val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
+            progress.visibility = View.VISIBLE
+            if (key.isNotEmpty()) {
+                listView.adapter = MessageListViewAdaptor(mContext, mdb.search("%${key}%"))
+            }
+            progress.visibility = View.GONE
+        }
+    }
+
+    private fun hideSearchLayout() {
+        progress.visibility = View.VISIBLE
+        if (!conversation.sender.first().isDigit()) {
+            notSupported.visibility = TextView.VISIBLE
+        } else {
+            sendLayout.visibility = LinearLayout.VISIBLE
+        }
+
+        searchLayout.animate()
+            .alpha(0f)
+            .setDuration(300)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    searchLayout.visibility = View.GONE
+                    inputManager?.hideSoftInputFromWindow(backButton.windowToken, 0)
+                }
+            }).start()
+
+
+        mdb.loadAll().observe(mContext as AppCompatActivity, object: Observer<List<Message>> {
+            override fun onChanged(t: List<Message>?) {
+                listView.adapter = MessageListViewAdaptor(mContext, t!!)
+                progress.visibility = View.GONE
+                mdb.loadAll().removeObserver(this)
+            }
+        })
+    }
+
+    private fun loadMedia() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "*/*"
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "audio/*", "video/*"))
+        startActivityForResult(intent, 0)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_conversation)
 
         mContext = this
-        notSupport = findViewById(R.id.notSupported)
-        toolbar = findViewById(R.id.toolbar)
-        sendLayout = findViewById(R.id.sendLayout)
-        listView = findViewById(R.id.messageListView)
-        messageEditText = findViewById(R.id.messageEditText)
-        backButton = findViewById(R.id.cancelSearch)
-        searchLayout = findViewById(R.id.searchLayout)
-        searchEditText = findViewById(R.id.searchEditText)
-        loading = findViewById(R.id.progress)
-        sendButton = findViewById(R.id.sendButton)
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        inflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         conversation = intent.getSerializableExtra("ye") as Conversation
         smsSender = SMSSender(this, conversation, sendButton)
+        mmsSender = MMSSender(this, conversation, sendButton)
         conversationSender = conversation.sender
 
         setSupportActionBar(toolbar)
@@ -86,7 +141,7 @@ class ConversationActivity : AppCompatActivity() {
 
         if (!conversation.sender.first().isDigit()) {
             sendLayout.visibility = LinearLayout.INVISIBLE
-            notSupport.visibility = TextView.VISIBLE
+            notSupported.visibility = TextView.VISIBLE
         }
 
         if (mainViewModel == null) {
@@ -106,7 +161,11 @@ class ConversationActivity : AppCompatActivity() {
         conversationDao = mdb
 
         sendButton.setOnClickListener {
-            if (messageEditText.text.toString().trim() != "") {
+            if (mmsType > 0) {
+                mmsSender.sendSMS(messageEditText.text.toString(), mmsURI, mmsTypeString)
+                messageEditText.setText("")
+                hideMediaPreview()
+            } else if (messageEditText.text.toString().trim() != "") {
                 smsSender.sendSMS(messageEditText.text.toString())
                 messageEditText.setText("")
             }
@@ -116,8 +175,12 @@ class ConversationActivity : AppCompatActivity() {
             sendButton.callOnClick()
         }
 
+        addMedia.setOnClickListener{
+            loadMedia()
+        }
+
         var recyclerViewState: Parcelable
-        mdb.loadAll().observe(this, Observer<List<Message>> {
+        mdb.loadAll().observe(this, {
             val editListAdapter = MessageListViewAdaptor(this, it)
             recyclerViewState = listView.onSaveInstanceState()!!
             if (
@@ -178,7 +241,6 @@ class ConversationActivity : AppCompatActivity() {
                             true
                         }
                         R.id.action_select_range -> {
-                            val inflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
                             val iv = inflater.inflate(R.layout.view_button_transition, null) as ImageView
 
                             if (rangeSelect) iv.setImageResource(R.drawable.range_to_single)
@@ -304,59 +366,124 @@ class ConversationActivity : AppCompatActivity() {
         return false
     }
 
-    private fun showSearchLayout() {
-        searchLayout.apply {
-            alpha = 0f
-            visibility = View.VISIBLE
-            animate()
-                .alpha(1f)
-                .setDuration(300)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        searchEditText.requestFocus()
-                        inputManager?.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
-                        notSupport.visibility = TextView.GONE
-                        sendLayout.visibility = LinearLayout.GONE
+    private fun fadeAway(view: View) {
+        view.apply {
+            if (visibility == View.VISIBLE) {
+                alpha = 1f
+                animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .start()
+                GlobalScope.launch {
+                    delay(400)
+                    runOnUiThread {
+                        visibility = View.GONE
                     }
-                })
-        }
-
-        searchEditText.doOnTextChanged { _, _, _, _ ->
-            val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
-            progress.visibility = View.VISIBLE
-            if (key.isNotEmpty()) {
-                listView.adapter = MessageListViewAdaptor(mContext, mdb.search("%${key}%"))
+                }
             }
-            progress.visibility = View.GONE
         }
     }
 
-    private fun hideSearchLayout() {
-        progress.visibility = View.VISIBLE
-        if (!conversation.sender.first().isDigit()) {
-            notSupport.visibility = TextView.VISIBLE
-        } else {
-            sendLayout.visibility = LinearLayout.VISIBLE
+    private fun hideMediaPreview() {
+        fadeAway(videoView)
+        fadeAway(imagePreview)
+        fadeAway(seekBar)
+        fadeAway(playPauseButton)
+        fadeAway(videoPlayPauseButton)
+
+        mmsType = 0
+        addMedia.setImageResource(R.drawable.close_to_add)
+        (addMedia.drawable as AnimatedVectorDrawable).start()
+        addMedia.setOnClickListener {
+            loadMedia()
+        }
+    }
+
+    private fun showMediaPreview(data: Intent) {
+        addMedia.apply {
+            setImageResource(R.drawable.close)
+            setOnClickListener {
+                hideMediaPreview()
+            }
         }
 
-        searchLayout.animate()
-            .alpha(0f)
-            .setDuration(300)
-            .setListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    searchLayout.visibility = View.GONE
-                    inputManager?.hideSoftInputFromWindow(backButton.windowToken, 0)
-                }
-            }).start()
-
-
-        mdb.loadAll().observe(mContext as AppCompatActivity, object: Observer<List<Message>> {
-            override fun onChanged(t: List<Message>?) {
-                listView.adapter = MessageListViewAdaptor(mContext, t!!)
-                progress.visibility = View.GONE
-                mdb.loadAll().removeObserver(this)
+        mmsURI = data.data!!
+        mmsTypeString = mContext.contentResolver.getType(mmsURI)!!
+        mmsType = when {
+            mmsTypeString.startsWith("image") -> {
+                imagePreview.visibility = View.VISIBLE
+                imagePreview.setImageURI(mmsURI)
+                1
             }
-        })
+            mmsTypeString.startsWith("audio") -> {
+                seekBar.visibility = View.VISIBLE
+                playPauseButton.visibility = View.VISIBLE
+                val mp = MediaPlayer()
+                mp.setDataSource(this, mmsURI)
+                mp.prepare()
+                seekBar.max = mp.duration/500
+
+                val mHandler = Handler(mainLooper)
+                runOnUiThread(object : Runnable {
+                    override fun run() {
+                        seekBar.progress = mp.currentPosition / 500
+                        mHandler.postDelayed(this, 500)
+                    }
+                })
+
+                seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onStopTrackingTouch(seekBar: SeekBar) {}
+                    override fun onStartTrackingTouch(seekBar: SeekBar) {}
+                    override fun onProgressChanged(
+                        seekBar: SeekBar, progress: Int, fromUser: Boolean
+                    ) {
+                        if (fromUser) mp.seekTo(progress * 500)
+                    }
+                })
+
+                playPauseButton.apply {
+                    setOnClickListener {
+                        if (mp.isPlaying) {
+                            mp.pause()
+                            setImageResource(R.drawable.ic_play)
+                        } else {
+                            mp.start()
+                            setImageResource(R.drawable.ic_pause)
+                        }
+                    }
+                }
+                2
+            }
+            mmsTypeString.startsWith("video") -> {
+                videoView.apply {
+                    visibility = View.VISIBLE
+                    videoPlayPauseButton.visibility = View.VISIBLE
+                    setVideoURI(mmsURI)
+                    setOnPreparedListener { mp -> mp.isLooping = true }
+                    videoPlayPauseButton.setOnClickListener {
+                        if (isPlaying) {
+                            pause()
+                            videoPlayPauseButton.setImageResource(R.drawable.ic_play)
+                        } else {
+                            start()
+                            videoPlayPauseButton.setImageResource(R.drawable.ic_pause)
+                        }
+                    }
+                }
+                3
+            }
+            else -> 0
+        }
+        if (mmsType == 0) {
+            hideMediaPreview()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 0 && data != null && data.data != null) {
+            showMediaPreview(data)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
