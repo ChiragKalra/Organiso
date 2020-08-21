@@ -6,8 +6,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
-import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
@@ -19,6 +17,8 @@ import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.listViewAdapter.ContactListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
+import kotlinx.android.synthetic.main.activity_new_conversation.*
+import kotlinx.android.synthetic.main.layout_send.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -27,9 +27,7 @@ var memoryCache = HashMap<String, Bitmap?>()
 
 class NewConversationActivity : AppCompatActivity() {
 
-    private lateinit var to: EditText
     private lateinit var mContext: Context
-    private lateinit var message: EditText
 
     private fun getRecipients(uri: Uri): String {
         val base: String = uri.schemeSpecificPart
@@ -41,10 +39,10 @@ class NewConversationActivity : AppCompatActivity() {
         if (Intent.ACTION_SENDTO == intent.action) {
             val destinations = TextUtils.split(getRecipients(intent.data!!), ";")
             to.setText(ContactsManager(mContext).getRaw(destinations.first()))
-            message.requestFocus()
+            messageEditText.requestFocus()
         } else if (Intent.ACTION_SEND == intent.action && "text/plain" == intent.type) {
             val str = intent.getStringExtra(Intent.EXTRA_TEXT)
-            message.setText(str)
+            messageEditText.setText(str)
         }
     }
 
@@ -52,18 +50,12 @@ class NewConversationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_conversation)
 
-        val contactListView: RecyclerView = findViewById(R.id.contactListView)
-        val sendButton: ImageButton = findViewById(R.id.sendButton)
-        val progress: ProgressBar = findViewById(R.id.progress)
-
         val llm = LinearLayoutManager(this)
         val clickAction = { contact: Contact ->
             to.setText(contact.number)
             to.setSelection(contact.number.length)
         }
 
-        to = findViewById(R.id.toEditText)
-        message = findViewById(R.id.messageEditText)
         mContext = this
 
         processIntentData(intent)
@@ -81,7 +73,7 @@ class NewConversationActivity : AppCompatActivity() {
                 contactListView.layoutManager = llm
                 contactListView.adapter = adaptor
                 contactListView.visibility = RecyclerView.VISIBLE
-                progress.visibility = ProgressBar.INVISIBLE
+                progressBar.visibility = ProgressBar.INVISIBLE
 
                 fun displaySearch() {
                     val filtered = ArrayList<Contact>()
@@ -108,7 +100,7 @@ class NewConversationActivity : AppCompatActivity() {
                 if (to.text.isNotBlank()) displaySearch()
 
                 sendButton.setOnClickListener {
-                    if (message.text.toString().trim() != "") {
+                    if (messageEditText.text.toString().trim() != "") {
                         var name: String? = null
                         val sender: String = to.text.toString().trim()
 
@@ -127,7 +119,7 @@ class NewConversationActivity : AppCompatActivity() {
                                 "",
                                 true,
                                 0,
-                                message.text.toString().trim(),
+                                messageEditText.text.toString().trim(),
                                 0,
                                 -1,
                                 FloatArray(5) { its ->

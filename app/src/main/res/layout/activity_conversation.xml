@@ -43,7 +43,7 @@
         android:orientation="horizontal"
         android:background="@color/colorPrimary">
         <ImageButton
-            android:id="@+id/cancelSearch"
+            android:id="@+id/backButton"
             android:background="@drawable/bg_ripple_button"
             android:clickable="true"
             android:layout_marginStart="5dp"
@@ -75,7 +75,7 @@
 
     <ListView
         android:choiceMode="multipleChoiceModal"
-        android:id="@+id/messageListView"
+        android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/background"
@@ -103,47 +103,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/messageListView" />
 
-    <LinearLayout
-        android:id="@+id/sendLayout"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <include layout="@layout/layout_send"/>
+
+
+    <ImageButton
+        android:visibility="gone"
+        android:layout_marginBottom="74dp"
+        android:id="@+id/videoPlayPauseButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="#0000"
+        android:contentDescription="@string/send"
+        android:src="@drawable/ic_play"
+        android:tint="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="@+id/sendLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/messageListView">
-
-        <EditText
-            android:focusableInTouchMode="true"
-            android:id="@+id/messageEditText"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:hint="@string/type_your_message_here"
-            android:importantForAutofill="no"
-            android:inputType="textShortMessage"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:textColorHint="@color/textInHint" />
-
-        <ImageButton
-            android:id="@+id/sendButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_margin="8dp"
-            android:background="#0000"
-            android:contentDescription="@string/send"
-            android:src="@drawable/ic_baseline_send"
-            android:tint="@color/colorAccent" />
-    </LinearLayout>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/messageListView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/messageListView"
+        app:layout_constraintBottom_toBottomOf="@id/listView"
+        app:layout_constraintEnd_toEndOf="@id/listView"
+        app:layout_constraintStart_toStartOf="@id/listView"
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

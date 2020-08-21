@@ -28,8 +28,14 @@ class OrganizerModel (context: Context) {
     fun getPredictions (messages: ArrayList<Message>, features: Array<Array<Float>>) : FloatArray {
         val tfliteModel = loadModelFile(mContext)
         val delegate = GpuDelegate()
-        val options = Interpreter.Options().addDelegate(delegate)
-        val tflite = Interpreter(tfliteModel, options)
+        val options = Interpreter.Options()
+            .setUseNNAPI(true)
+            .addDelegate(delegate)
+        val tflite =  try {
+            Interpreter(tfliteModel, options)
+        } catch (e: IllegalArgumentException) {
+            Interpreter(tfliteModel, Interpreter.Options())
+        }
 
         val n = features[0].size
 
@@ -46,7 +52,7 @@ class OrganizerModel (context: Context) {
             val out = Array(1){FloatArray(5)}
             tflite.run(inputData, out)
 
-            messages[i].label = out[0].indexOf(out[0].max()!!)
+            messages[i].label = out[0].toList().indexOf(out[0].maxOrNull())
             for (j in 0..4) probs[j] += out[0][j]
 
             if (i==9) break
