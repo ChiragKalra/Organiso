@@ -4,8 +4,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.provider.Telephony
 import android.telephony.SmsMessage
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -16,6 +18,7 @@ import com.bruhascended.sms.data.labelText
 
 
 class SMSReceiver : BroadcastReceiver() {
+
     private val descriptionText = arrayOf(
         R.string.text_1,
         R.string.text_2,
@@ -28,7 +31,7 @@ class SMSReceiver : BroadcastReceiver() {
         NotificationManager.IMPORTANCE_MAX,
         NotificationManager.IMPORTANCE_MAX,
         NotificationManager.IMPORTANCE_MAX,
-        NotificationManager.IMPORTANCE_LOW,
+        NotificationManager.IMPORTANCE_NONE,
         NotificationManager.IMPORTANCE_NONE
     )
 
@@ -49,8 +52,24 @@ class SMSReceiver : BroadcastReceiver() {
                  notificationManager.createNotificationChannel(channel)
              }
          }
-
      }
+
+    private fun saveSms(phoneNumber: String, message: String): Boolean {
+        var ret = false
+        try {
+            val values = ContentValues()
+            values.put("address", phoneNumber)
+            values.put("body", message)
+            values.put("read", 0)
+            values.put("date", System.currentTimeMillis())
+            values.put("type", 1)
+            mContext.contentResolver.insert(Telephony.Sms.CONTENT_URI, values)
+            ret = true
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+        return ret
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         mContext = context
@@ -67,6 +86,7 @@ class SMSReceiver : BroadcastReceiver() {
                         val sender = currentSMS.displayOriginatingAddress.toString()
                         val content = currentSMS.messageBody.toString()
                         smm.putMessage(sender, content)
+                        saveSms(sender, content)
                     }
 
                     smm.getLabels()

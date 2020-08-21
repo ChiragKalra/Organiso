@@ -14,7 +14,9 @@ data class Message (
     val text: String,
     val type: Int,
     val time: Long,
-    var label: Int
+    var label: Int,
+    var delivered: Boolean = false,
+    var path: String? = null
 ): Serializable
 
 
@@ -34,6 +36,9 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages WHERE text LIKE :key")
     fun search(key: String): List<Message>
+
+    @Query("SELECT * FROM messages WHERE time LIKE :time")
+    fun search(time: Long): List<Message>
 
     @Query("SELECT * FROM messages ORDER BY time ASC")
     fun loadAll(): LiveData<List<Message>>
