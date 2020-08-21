@@ -48,4 +48,5 @@
     <string name="copy_to_clipboard">Copy</string>
     <string name="select_all">Select All</string>
     <string name="select_range">Select Range</string>
+    <string name="mms">mms</string>
 </resources>

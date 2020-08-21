@@ -10,14 +10,13 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.Telephony
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bruhascended.sms.data.SMSManager
 import com.bruhascended.sms.ui.start.StartViewModel
-import com.mikhaellopez.circularprogressbar.CircularProgressBar
+import kotlinx.android.synthetic.main.activity_start.*
 
 
 class StartActivity : AppCompatActivity() {
@@ -72,6 +71,7 @@ class StartActivity : AppCompatActivity() {
         grantResults: IntArray
     ) = messages()
 
+    @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         setContentView(R.layout.activity_start)
 
@@ -80,18 +80,13 @@ class StartActivity : AppCompatActivity() {
             disc.value = 0
         }
 
-        val progressBar: CircularProgressBar = findViewById(R.id.progressBar)
-        val progressTextView: TextView = findViewById(R.id.progressText)
-        val discTextView: TextView = findViewById(R.id.infoText)
-        val etaView: TextView = findViewById(R.id.etaText)
-
         pageViewModel.progress.observe(this, Observer<Int> {
             if (it>-1) {
                 if (progressBar.indeterminateMode) {
                     progressBar.indeterminateMode = false
                     pageViewModel.disc.postValue(1)
                 }
-                progressTextView.text = "$it%"
+                progressText.text = "$it%"
                 if (progressBar.progress != 0f) progressBar.setProgressWithAnimation(
                     it.toFloat(),
                     ((it - progressBar.progress) * 100).toLong()
@@ -101,7 +96,7 @@ class StartActivity : AppCompatActivity() {
         })
 
         pageViewModel.disc.observe(this, Observer<Int> {
-            discTextView.text = pageViewModel.discStrings[it]
+            infoText.text = pageViewModel.discStrings[it]
         })
 
         var preTimer: CountDownTimer? = null
@@ -113,11 +108,9 @@ class StartActivity : AppCompatActivity() {
                     val sec = (millisUntilFinished / 1000) % 60
                     val min = (millisUntilFinished / 1000) / 60
                     if ((0 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
-                        if (min > 0) etaView.text = "ETA ${min}min ${sec}sec"
-                        else etaView.text = "ETA ${sec}sec"
-                    } else {
-                        etaView.text = ""
-                    }
+                        if (min > 0) etaText.text = "ETA ${min}min ${sec}sec"
+                        else etaText.text = "ETA ${sec}sec"
+                    } else etaText.text = ""
                 }
                 override fun onFinish() {}
             }.start()
