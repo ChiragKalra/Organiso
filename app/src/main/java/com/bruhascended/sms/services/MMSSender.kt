@@ -6,6 +6,7 @@ import android.content.*
 import android.net.Uri
 import android.provider.Telephony
 import android.telephony.SmsManager
+import android.webkit.MimeTypeMap
 import android.widget.ImageButton
 import android.widget.Toast
 import com.bruhascended.sms.conversationDao
@@ -36,8 +37,9 @@ class MMSSender(
     private lateinit var uri: Uri
     private lateinit var smsText: String
 
-    private fun saveMedia(): String {
-        val name = System.currentTimeMillis().toString() + "." + typeString.split('/')[1]
+    private fun saveMedia(date: Long): String {
+        val name = date.toString() + "." +
+                MimeTypeMap.getSingleton().getExtensionFromMimeType(typeString)
         val destination = File(mContext.filesDir, name)
         val output: OutputStream = FileOutputStream(destination)
         val input = mContext.contentResolver.openInputStream(uri)!!
@@ -78,7 +80,7 @@ class MMSSender(
                 type,
                 date,
                 0,
-                path = saveMedia()
+                path = saveMedia(date)
             )
             val qs = conversationDao.search(date)
             for (m in qs) conversationDao.delete(m)

@@ -2,6 +2,7 @@ package com.bruhascended.sms.ui.listViewAdapter
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
@@ -13,6 +14,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
 import android.widget.*
+import androidx.core.content.FileProvider
+import androidx.core.view.doOnDetach
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Message
 import java.io.File
@@ -45,17 +48,6 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
         }
     }
 
-    override fun getCount() = messages.size
-    override fun getItem(position: Int) = messages[position]
-    override fun getItemId(position: Int) = messages[position].id!!
-
-    fun getSelectedIds() = mSelectedItemsIds
-    fun toggleSelection(position: Int) = selectView(position, !mSelectedItemsIds.get(position))
-
-    fun removeSelection() {
-        mSelectedItemsIds = SparseBooleanArray()
-    }
-
     private fun selectView(position: Int, value: Boolean) {
         if (value) mSelectedItemsIds.put(position, value)
         else mSelectedItemsIds.delete(position)
@@ -63,21 +55,18 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
 
     private fun getMimeType(url: String): String {
         val extension = MimeTypeMap.getFileExtensionFromUrl(url)
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)!!
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)?:""
     }
 
     private fun displayMedia(
         path: String, video: VideoView, image: ImageView, slider: SeekBar,
-        playPause: ImageButton, videoPlayPause: ImageButton
+        playPause: ImageButton, videoPlayPause: ImageButton, mediaLayout: LinearLayout,
+        contentLayout: LinearLayout
     ) {
+        mediaLayout.visibility = View.VISIBLE
+        contentLayout.setBackgroundResource(R.drawable.bg_mms_out)
         val data = Uri.fromFile(File(path))
         val mmsTypeString = getMimeType(path)
-
-        video.visibility = View.GONE
-        image.visibility = View.GONE
-        slider.visibility = View.GONE
-        playPause.visibility = View.GONE
-        videoPlayPause.visibility = View.GONE
 
         when {
             mmsTypeString.startsWith("image") -> {
@@ -85,11 +74,11 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
                 image.setImageURI(data)
             }
             mmsTypeString.startsWith("audio") -> {
+                val mp = MediaPlayer()
                 slider.visibility = View.VISIBLE
                 playPause.visibility = View.VISIBLE
-                val mp = MediaPlayer()
                 mp.setDataSource(mContext, data)
-                mp.prepare()
+                mp.prepareAsync()
                 slider.max = mp.duration/500
 
                 val mHandler = Handler(mContext.mainLooper)
@@ -116,6 +105,9 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
                         playPause.setImageResource(R.drawable.ic_play)
                     } else {
                         mp.start()
+                        slider.doOnDetach {
+                            Thread{mp.reset()}.start()
+                        }
                         playPause.setImageResource(R.drawable.ic_pause)
                     }
                 }
@@ -123,8 +115,14 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
             mmsTypeString.startsWith("video") -> {
                 video.visibility = View.VISIBLE
                 videoPlayPause.visibility = View.VISIBLE
-                video.setVideoURI(data)
-                video.setOnPreparedListener { mp -> mp.isLooping = true }
+                val videoUri = FileProvider.getUriForFile(mContext,
+                    "com.bruhascended.sms.fileProvider", File(path))
+                mContext.grantUriPermission(
+                    "com.bruhascended.sms", videoUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                video.setVideoURI(videoUri)
+                video.setOnPreparedListener {
+                    mp -> mp.isLooping = true
+                }
                 videoPlayPause.setOnClickListener{
                     if (video.isPlaying) {
                         video.pause()
@@ -137,7 +135,6 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
             }
         }
     }
-
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val message = messages[position]
@@ -169,11 +166,24 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
                 displayMedia(
                     message.path!!, findViewById(R.id.video), findViewById(R.id.image),
                     findViewById(R.id.slider), findViewById(R.id.playPause),
-                    findViewById(R.id.videoPlayPause)
+                    findViewById(R.id.videoPlayPause), findViewById(R.id.mediaLayout),
+                    findViewById(R.id.content)
                 )
+                if (message.text == "") messageTextView.visibility = View.GONE
             }
         }
 
         return root
+    }
+
+    override fun getCount() = messages.size
+    override fun getItem(position: Int) = messages[position]
+    override fun getItemId(position: Int) = messages[position].id!!
+
+    fun getSelectedIds() = mSelectedItemsIds
+    fun toggleSelection(position: Int) = selectView(position, !mSelectedItemsIds.get(position))
+
+    fun removeSelection() {
+        mSelectedItemsIds = SparseBooleanArray()
     }
 }

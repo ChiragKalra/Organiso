@@ -56,6 +56,7 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var mmsURI: Uri
     private lateinit var smsSender: SMSSender
     private lateinit var mmsSender: MMSSender
+    private lateinit var mp: MediaPlayer
     private lateinit var inflater: LayoutInflater
     private var inputManager: InputMethodManager? = null
 
@@ -129,6 +130,7 @@ class ConversationActivity : AppCompatActivity() {
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         inflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        mp = MediaPlayer()
         conversation = intent.getSerializableExtra("ye") as Conversation
         smsSender = SMSSender(this, conversation, sendButton)
         mmsSender = MMSSender(this, conversation, sendButton)
@@ -385,12 +387,13 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     private fun hideMediaPreview() {
+        videoView.stopPlayback()
+        mp.reset()
         fadeAway(videoView)
         fadeAway(imagePreview)
         fadeAway(seekBar)
         fadeAway(playPauseButton)
         fadeAway(videoPlayPauseButton)
-
         mmsType = 0
         addMedia.setImageResource(R.drawable.close_to_add)
         (addMedia.drawable as AnimatedVectorDrawable).start()
@@ -418,7 +421,6 @@ class ConversationActivity : AppCompatActivity() {
             mmsTypeString.startsWith("audio") -> {
                 seekBar.visibility = View.VISIBLE
                 playPauseButton.visibility = View.VISIBLE
-                val mp = MediaPlayer()
                 mp.setDataSource(this, mmsURI)
                 mp.prepare()
                 seekBar.max = mp.duration/500
