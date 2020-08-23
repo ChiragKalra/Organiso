@@ -1,8 +1,10 @@
 package com.bruhascended.sms.db
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.bruhascended.sms.mainViewModel
 import com.google.gson.Gson
 import java.io.Serializable
 
@@ -19,7 +21,8 @@ data class Conversation (
     var lastSMS: String,
     var label: Int,
     var forceLabel: Int,
-    val probs: FloatArray
+    val probs: FloatArray,
+    var lastMMS: Boolean = false,
 ): Serializable
 
 

@@ -16,8 +16,8 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.isMainViewModelNull
 import com.bruhascended.sms.mainViewModel
-
 
 class HeadlessSMSSender : Service() {
 
@@ -31,12 +31,12 @@ class HeadlessSMSSender : Service() {
         val senderNameMap = ContactsManager(applicationContext).getContactsHashMap()
 
         val mDaos = Array(5){
-            if (mainViewModel == null)
+            if (isMainViewModelNull())
                 Room.databaseBuilder(
                     applicationContext, ConversationDatabase::class.java,
                     applicationContext.resources.getString(labelText[it])
                 ).build().manager()
-            else mainViewModel!!.daos!![it]
+            else mainViewModel.daos[it]
         }
 
         var force = -1
@@ -53,7 +53,7 @@ class HeadlessSMSSender : Service() {
 
         if (conversation != null)
             for (j in 0..4) probs[j] += conversation.probs[j]
-        var prediction = probs.indexOf(probs.max()!!)
+        var prediction = probs.toList().indexOf(probs.maxOrNull())
         if (force > -1) prediction = force
 
         val con = Conversation (
@@ -68,10 +68,10 @@ class HeadlessSMSSender : Service() {
             force,
             probs
         )
-        if (mainViewModel != null) {
+        if (isMainViewModelNull()) {
             for (j in 0..4) {
-                val res = mainViewModel!!.daos!![j].findBySender(add)
-                for (item in res) mainViewModel!!.daos!![j].delete(item)
+                val res = mainViewModel.daos[j].findBySender(add)
+                for (item in res) mainViewModel.daos[j].delete(item)
             }
         } else {
             for (j in 0..4) {

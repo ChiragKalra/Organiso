@@ -3,11 +3,8 @@ package com.bruhascended.sms.data
 import android.content.Context
 import android.net.Uri
 import androidx.room.Room
-import com.bruhascended.sms.R
-import com.bruhascended.sms.conversationDao
-import com.bruhascended.sms.conversationSender
+import com.bruhascended.sms.*
 import com.bruhascended.sms.db.*
-import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ml.FeatureExtractor
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.start.StartViewModel
@@ -124,12 +121,12 @@ class SMSManager (context: Context) {
         }
 
         mDaos = Array(5){
-            if (mainViewModel == null)
+            if (isMainViewModelNull())
                 Room.databaseBuilder(
                     mContext, ConversationDatabase::class.java,
                     mContext.resources.getString(labelText[it])
                 ).build().manager()
-            else mainViewModel!!.daos!![it]
+            else mainViewModel.daos[it]
         }
 
         var done = sp.getInt("done", 0)
@@ -217,10 +214,10 @@ class SMSManager (context: Context) {
                             if (it == 0) 1f else 0f
                         }
                     )
-                    if (mainViewModel != null) {
+                    if (isMainViewModelNull()) {
                         for (j in 0..4) {
-                            val res = mainViewModel!!.daos!![j].findBySender(conversation)
-                            for (item in res) mainViewModel!!.daos!![j].delete(item)
+                            val res = mainViewModel.daos[j].findBySender(conversation)
+                            for (item in res) mainViewModel.daos[j].delete(item)
                         }
                     } else {
                         for (j in 0..4) {

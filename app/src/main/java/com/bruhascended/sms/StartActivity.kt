@@ -12,7 +12,6 @@ import android.os.CountDownTimer
 import android.provider.Telephony
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bruhascended.sms.data.SMSManager
 import com.bruhascended.sms.ui.start.StartViewModel
@@ -80,7 +79,7 @@ class StartActivity : AppCompatActivity() {
             disc.value = 0
         }
 
-        pageViewModel.progress.observe(this, Observer<Int> {
+        pageViewModel.progress.observe(this, {
             if (it>-1) {
                 if (progressBar.indeterminateMode) {
                     progressBar.indeterminateMode = false
@@ -95,12 +94,12 @@ class StartActivity : AppCompatActivity() {
             }
         })
 
-        pageViewModel.disc.observe(this, Observer<Int> {
+        pageViewModel.disc.observe(this, {
             infoText.text = pageViewModel.discStrings[it]
         })
 
         var preTimer: CountDownTimer? = null
-        pageViewModel.eta.observe(this, Observer<Long> {
+        pageViewModel.eta.observe(this, {
             preTimer?.cancel()
             preTimer = object : CountDownTimer(it, 1000) {
                 @SuppressLint("SetTextI18n")
@@ -116,7 +115,7 @@ class StartActivity : AppCompatActivity() {
             }.start()
         })
 
-        Thread(Runnable {
+        Thread {
             manager = SMSManager(mContext)
             manager?.getMessages()
 
@@ -129,7 +128,7 @@ class StartActivity : AppCompatActivity() {
 
             sharedPref.edit().putBoolean(arg, true).apply()
             (mContext as Activity).finish()
-        }).start()
+        }.start()
         super.onActivityResult(requestCode, resultCode, data)
     }
 }

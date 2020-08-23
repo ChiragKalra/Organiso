@@ -10,7 +10,6 @@ class ExtraCategoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         val label = intent.getIntExtra("Type", 4)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
