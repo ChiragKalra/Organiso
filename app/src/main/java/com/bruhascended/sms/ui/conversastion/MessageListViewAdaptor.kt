@@ -1,8 +1,10 @@
-package com.bruhascended.sms.ui.listViewAdapter
+package com.bruhascended.sms.ui.conversastion
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
@@ -19,6 +21,7 @@ import androidx.core.view.doOnDetach
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Message
 import java.io.File
+import java.io.FileOutputStream
 import java.util.*
 
 
@@ -27,6 +30,7 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
     private val mContext: Context = context
     private var messages: List<Message> = data
     private var mSelectedItemsIds = SparseBooleanArray()
+    private val previewCache: MutableMap<Int, String> = mutableMapOf()
 
     private fun displayTime(time: Long): String {
         val smsTime = Calendar.getInstance()
@@ -55,82 +59,108 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
 
     private fun getMimeType(url: String): String {
         val extension = MimeTypeMap.getFileExtensionFromUrl(url)
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)?:""
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: ""
+    }
+
+    private fun saveCache(bitmap: Bitmap, date: Long): String {
+        val destination = File(mContext.cacheDir, date.toString())
+        FileOutputStream(destination).apply {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, this)
+            close()
+        }
+        return destination.absolutePath
     }
 
     private fun displayMedia(
-        path: String, video: VideoView, image: ImageView, slider: SeekBar,
+        path: String, image: ImageView, slider: SeekBar,
         playPause: ImageButton, videoPlayPause: ImageButton, mediaLayout: LinearLayout,
-        contentLayout: LinearLayout
+        contentLayout: LinearLayout, position: Int
     ) {
         mediaLayout.visibility = View.VISIBLE
         contentLayout.setBackgroundResource(R.drawable.bg_mms_out)
-        val data = Uri.fromFile(File(path))
+        val data = Uri.parse(path)
         val mmsTypeString = getMimeType(path)
+        val contentUri = FileProvider.getUriForFile(
+            mContext,
+            "com.bruhascended.sms.fileProvider", File(path)
+        )
+        mContext.grantUriPermission(
+            "com.bruhascended.sms", contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+        val contentIntent = Intent(Intent.ACTION_VIEW)
+        contentIntent.setDataAndType(contentUri, mmsTypeString)
+        contentIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
 
         when {
             mmsTypeString.startsWith("image") -> {
                 image.visibility = View.VISIBLE
                 image.setImageURI(data)
+                image.setOnClickListener{
+                    mContext.startActivity(contentIntent)
+                }
             }
             mmsTypeString.startsWith("audio") -> {
-                val mp = MediaPlayer()
-                slider.visibility = View.VISIBLE
-                playPause.visibility = View.VISIBLE
-                mp.setDataSource(mContext, data)
-                mp.prepareAsync()
-                slider.max = mp.duration/500
+                MediaPlayer().apply {
+                    slider.visibility = View.VISIBLE
+                    playPause.visibility = View.VISIBLE
+                    setDataSource(mContext, data)
+                    prepareAsync()
+                    slider.max = duration / 500
 
-                val mHandler = Handler(mContext.mainLooper)
-                (mContext as Activity).runOnUiThread(object : Runnable {
-                    override fun run() {
-                        slider.progress = mp.currentPosition / 500
-                        mHandler.postDelayed(this, 500)
-                    }
-                })
-
-                slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                    override fun onStopTrackingTouch(seekBar: SeekBar) {}
-                    override fun onStartTrackingTouch(seekBar: SeekBar) {}
-                    override fun onProgressChanged(
-                        seekBar: SeekBar, progress: Int, fromUser: Boolean
-                    ) {
-                        if (fromUser) mp.seekTo(progress * 500)
-                    }
-                })
-
-                playPause.setOnClickListener{
-                    if (mp.isPlaying) {
-                        mp.pause()
-                        playPause.setImageResource(R.drawable.ic_play)
-                    } else {
-                        mp.start()
-                        slider.doOnDetach {
-                            Thread{mp.reset()}.start()
+                    val mHandler = Handler(mContext.mainLooper)
+                    (mContext as Activity).runOnUiThread(object : Runnable {
+                        override fun run() {
+                            slider.progress = currentPosition / 500
+                            mHandler.postDelayed(this, 500)
                         }
-                        playPause.setImageResource(R.drawable.ic_pause)
+                    })
+
+                    slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                        override fun onStopTrackingTouch(seekBar: SeekBar) {}
+                        override fun onStartTrackingTouch(seekBar: SeekBar) {}
+                        override fun onProgressChanged(
+                            seekBar: SeekBar, progress: Int, fromUser: Boolean
+                        ) {
+                            if (fromUser) seekTo(progress * 500)
+                        }
+                    })
+
+                    playPause.setOnClickListener {
+                        if (isPlaying) {
+                            pause()
+                            playPause.setImageResource(R.drawable.ic_play)
+                        } else {
+                            start()
+                            slider.doOnDetach {
+                                reset()
+                            }
+                            playPause.setImageResource(R.drawable.ic_pause)
+                        }
                     }
                 }
             }
             mmsTypeString.startsWith("video") -> {
-                video.visibility = View.VISIBLE
                 videoPlayPause.visibility = View.VISIBLE
-                val videoUri = FileProvider.getUriForFile(mContext,
-                    "com.bruhascended.sms.fileProvider", File(path))
-                mContext.grantUriPermission(
-                    "com.bruhascended.sms", videoUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                video.setVideoURI(videoUri)
-                video.setOnPreparedListener {
-                    mp -> mp.isLooping = true
-                }
-                videoPlayPause.setOnClickListener{
-                    if (video.isPlaying) {
-                        video.pause()
-                        videoPlayPause.setImageResource(R.drawable.ic_play)
-                    } else {
-                        video.start()
-                        videoPlayPause.setImageResource(R.drawable.ic_pause)
+                image.visibility = View.VISIBLE
+                if (previewCache.containsKey(position))
+                    image.setImageURI(Uri.parse(previewCache[position]))
+                else Thread {
+                    val retriever = MediaMetadataRetriever()
+                    retriever.setDataSource(path)
+                    val length = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!.toLong()
+                    previewCache[position] = saveCache(retriever.getFrameAtTime(
+                        length / 2,
+                        MediaMetadataRetriever.OPTION_CLOSEST
+                    )!!, getItem(position).time)
+                    previewCache[position]!!
+
+                    (mContext as Activity).runOnUiThread {
+                        image.setImageURI(Uri.parse(previewCache[position]))
                     }
+                }.start()
+
+                videoPlayPause.setOnClickListener{
+                    mContext.startActivity(contentIntent)
                 }
             }
         }
@@ -164,10 +194,10 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
 
             if (message.path != null) {
                 displayMedia(
-                    message.path!!, findViewById(R.id.video), findViewById(R.id.image),
+                    message.path!!, findViewById(R.id.image),
                     findViewById(R.id.slider), findViewById(R.id.playPause),
                     findViewById(R.id.videoPlayPause), findViewById(R.id.mediaLayout),
-                    findViewById(R.id.content)
+                    findViewById(R.id.content), position
                 )
                 if (message.text == "") messageTextView.visibility = View.GONE
             }

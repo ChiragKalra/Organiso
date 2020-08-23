@@ -39,8 +39,8 @@
             android:orientation="horizontal">
             <ImageView
                 android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
                 android:scaleType="centerCrop"
                 android:adjustViewBounds="true"
                 android:id="@+id/image"
@@ -60,14 +60,14 @@
                 android:layout_width="164dp"
                 android:layout_height="48dp"
                 android:id="@+id/slider"/>
-            <VideoView
+            <!--<VideoView
                 android:visibility="gone"
                 android:id="@+id/video"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/mms"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop" />-->
         </LinearLayout>
         <TextView
 

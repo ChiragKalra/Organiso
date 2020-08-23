@@ -1,27 +1,31 @@
-package com.bruhascended.sms.ui.listViewAdapter
+package com.bruhascended.sms.ui.main
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.provider.ContactsContract
+import android.text.SpannableString
+import android.text.format.DateFormat
+import android.text.format.DateUtils
+import android.text.style.BackgroundColorSpan
+import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.TextView
-import com.bruhascended.sms.R
-import com.bruhascended.sms.db.Conversation
-import android.text.format.DateFormat
-import android.text.format.DateUtils
-import android.util.SparseBooleanArray
 import android.widget.QuickContactBadge
+import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.bruhascended.sms.R
 import com.bruhascended.sms.data.retrieveContactPhoto
+import com.bruhascended.sms.db.Conversation
 import java.util.*
 import kotlin.collections.HashMap
 
-class ConversationListViewAdaptor (context: Context, data: List<Conversation>) : BaseAdapter() {
+
+class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : BaseAdapter() {
 
     private val mContext: Context = context
     private val conversations: List<Conversation> = data
@@ -92,6 +96,12 @@ class ConversationListViewAdaptor (context: Context, data: List<Conversation>) :
         senderTextView.text = cur.name ?: cur.sender
         messageTextView.text = cur.lastSMS
 
+        if (cur.lastMMS) {
+            val str = SpannableString("Media: ${cur.lastSMS}")
+            str.setSpan(BackgroundColorSpan(Color.YELLOW), 0, 6, 0)
+            messageTextView.text = str
+        }
+
         timeTextView.text = displayTime(cur.time)
 
         imageView.assignContactFromPhone(cur.sender, true)
@@ -104,18 +114,18 @@ class ConversationListViewAdaptor (context: Context, data: List<Conversation>) :
             imageView.isEnabled = false
             val density = mContext.resources.displayMetrics.density
             val dps = 12 * density.toInt()
-            imageView.setPadding(dps,dps,dps,dps)
+            imageView.setPadding(dps, dps, dps, dps)
         } else if (cur.name != null) {
             if (memoryCache.containsKey(cur.sender)) {
                 val dp = memoryCache[cur.sender]
                 if (dp != null) imageView.setImageBitmap(dp)
-            } else Thread( Runnable {
+            } else Thread {
                 memoryCache[cur.sender] = retrieveContactPhoto(mContext, cur.sender)
                 val dp = memoryCache[cur.sender]
                 (mContext as Activity).runOnUiThread {
                     if (dp != null) imageView.setImageBitmap(dp)
                 }
-            }).start()
+            }.start()
         }
         return root
     }
