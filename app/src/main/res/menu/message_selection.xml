@@ -1,26 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity">
-
+    tools:context=".MainActivity"
+    tools:ignore="AppCompatResource">
     <item
         android:id="@+id/action_select_range"
         android:icon="@drawable/ic_single"
         android:orderInCategory="300"
         android:title="@string/select_range"
-        app:showAsAction="ifRoom"/>
+        android:showAsAction="always" />
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/ic_share"
+        android:orderInCategory="300"
+        android:title="@string/share"
+        android:showAsAction="always"/>
     <item
         android:id="@+id/action_copy"
         android:icon="@drawable/ic_content_copy"
         android:orderInCategory="300"
         android:title="@string/copy_to_clipboard"
-        app:showAsAction="ifRoom"/>
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/forward"
+        android:icon="@drawable/ic_forward"
+        android:orderInCategory="300"
+        android:title="@string/forward"
+        android:showAsAction="always"/>
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_baseline_delete_24"
         android:orderInCategory="300"
         android:title="@string/delete"
-        app:showAsAction="ifRoom"/>
+        android:showAsAction="always"/>
 
 </menu>

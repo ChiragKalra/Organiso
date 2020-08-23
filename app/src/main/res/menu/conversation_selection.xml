@@ -16,21 +16,25 @@
         android:orderInCategory="300"
         android:title="@string/select_range"
         app:showAsAction="ifRoom"/>
+
     <item
+        android:icon="@drawable/ic_move"
         android:id="@+id/action_move"
         android:orderInCategory="300"
         android:title="@string/move_to"
-        app:showAsAction="never"/>
+        app:showAsAction="ifRoom"/>
     <item
+        android:icon="@drawable/ic_report"
         android:id="@+id/action_report_spam"
         android:orderInCategory="300"
         android:title="@string/report_spam"
-        app:showAsAction="never"/>
+        app:showAsAction="ifRoom"/>
     <item
+        android:icon="@drawable/ic_block"
         android:id="@+id/action_block"
         android:orderInCategory="300"
         android:title="@string/block"
-        app:showAsAction="never"/>
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_baseline_delete_24"

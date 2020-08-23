@@ -17,13 +17,11 @@ import androidx.core.widget.doOnTextChanged
 import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
 import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.data.SMSManager
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
-import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.services.SMSReceiver
-import com.bruhascended.sms.ui.listViewAdapter.ConversationListViewAdaptor
+import com.bruhascended.sms.ui.main.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
@@ -36,40 +34,8 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
-
-var mainViewModel: MainViewModel? = null
-
-fun moveTo(conversation: Conversation, to: Int, mContext: Context? = null) {
-    Thread {
-        mainViewModel!!.daos!![conversation.label].delete(conversation)
-        if (to >= 0) {
-            conversation.id = null
-            conversation.label = to
-            conversation.forceLabel = to
-            mainViewModel!!.daos!![to].insert(conversation)
-        } else {
-            val mdb = Room.databaseBuilder(
-                mContext!!, MessageDatabase::class.java, conversation.sender
-            ).build().manager()
-            mdb.nukeTable()
-        }
-    }.start()
-}
-
-fun getNewMessages(mContext: Context) {
-    Thread {
-        val manager = SMSManager(mContext)
-        manager.getMessages()
-        manager.getLabels(null)
-        manager.saveMessages()
-    }.start()
-}
-
-fun getContacts(mContext: Context) {
-    Thread {
-        mainViewModel!!.contacts.postValue(ContactsManager(mContext).getContactsList())
-    }.start()
-}
+lateinit var mainViewModel: MainViewModel
+fun isMainViewModelNull() = !(::mainViewModel.isInitialized)
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context
@@ -101,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
             var recyclerViewState: Parcelable
             for (i in 0..3) {
-                res.addAll(mainViewModel!!.daos!![i].findBySender("%${key}%"))
+                res.addAll(mainViewModel.daos[i].findBySender("%${key}%"))
                 recyclerViewState = searchListView.onSaveInstanceState()!!
                 searchListView.adapter = ConversationListViewAdaptor(mContext, res as List<Conversation>)
                 searchListView.onRestoreInstanceState(recyclerViewState)
@@ -155,16 +121,16 @@ class MainActivity : AppCompatActivity() {
         mContext = this
         mainViewModel = MainViewModel()
 
-        mainViewModel!!.daos = Array(6) {
+        mainViewModel.daos = Array(6) {
             Room.databaseBuilder(
                 mContext, ConversationDatabase::class.java,
                 mContext.resources.getString(labelText[it])
             ).allowMainThreadQueries().build().manager()
         }
 
-
-        getNewMessages(this)
-        getContacts(this)
+        Thread {
+            mainViewModel.contacts.postValue(ContactsManager(mContext).getContactsList())
+        }.start()
 
         setContentView(R.layout.activity_main)
 
@@ -176,8 +142,8 @@ class MainActivity : AppCompatActivity() {
         viewPager.offscreenPageLimit = 3
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
-                if (position != mainViewModel!!.selection.value) {
-                    mainViewModel!!.selection.postValue(-1)
+                if (position != mainViewModel.selection.value) {
+                    mainViewModel.selection.postValue(-1)
                 }
             }
         })

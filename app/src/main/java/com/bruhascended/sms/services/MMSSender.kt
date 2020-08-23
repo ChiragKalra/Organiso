@@ -1,5 +1,6 @@
 package com.bruhascended.sms.services
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.*
@@ -37,6 +38,7 @@ class MMSSender(
     private lateinit var uri: Uri
     private lateinit var smsText: String
 
+    @SuppressLint("SetWorldReadable", "SetWorldWritable")
     private fun saveMedia(date: Long): String {
         val name = date.toString() + "." +
                 MimeTypeMap.getSingleton().getExtensionFromMimeType(typeString)
@@ -49,7 +51,7 @@ class MMSSender(
             output.write(buffer, 0, read)
         }
         output.flush()
-        return destination.toString()
+        return destination.absolutePath
     }
 
     private fun addSmsToGlobal(message: Message) {
@@ -98,12 +100,14 @@ class MMSSender(
                     }
                 }
                 conversation.time = date
-                conversation.lastSMS = "MMS: $smsText"
+                conversation.lastSMS = smsText
+                conversation.lastMMS = true
                 if (found) mainViewModel!!.daos!![conversation.label].update(conversation)
                 else mainViewModel!!.daos!![conversation.label].insert(conversation)
             } else {
                 conversation.time = date
-                conversation.lastSMS = "MMS: $smsText"
+                conversation.lastSMS = smsText
+                conversation.lastMMS = true
                 mainViewModel!!.daos!![conversation.label].update(conversation)
             }
         }.start()
