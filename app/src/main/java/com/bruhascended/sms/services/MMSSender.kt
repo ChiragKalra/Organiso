@@ -1,11 +1,13 @@
 package com.bruhascended.sms.services
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.*
 import android.net.Uri
 import android.provider.Telephony
 import android.telephony.SmsManager
+import android.webkit.MimeTypeMap
 import android.widget.ImageButton
 import android.widget.Toast
 import com.bruhascended.sms.conversationDao
@@ -36,8 +38,10 @@ class MMSSender(
     private lateinit var uri: Uri
     private lateinit var smsText: String
 
-    private fun saveMedia(): String {
-        val name = System.currentTimeMillis().toString() + "." + typeString.split('/')[1]
+    @SuppressLint("SetWorldReadable", "SetWorldWritable")
+    private fun saveMedia(date: Long): String {
+        val name = date.toString() + "." +
+                MimeTypeMap.getSingleton().getExtensionFromMimeType(typeString)
         val destination = File(mContext.filesDir, name)
         val output: OutputStream = FileOutputStream(destination)
         val input = mContext.contentResolver.openInputStream(uri)!!
@@ -47,7 +51,7 @@ class MMSSender(
             output.write(buffer, 0, read)
         }
         output.flush()
-        return destination.toString()
+        return destination.absolutePath
     }
 
     private fun addSmsToGlobal(message: Message) {
@@ -78,7 +82,7 @@ class MMSSender(
                 type,
                 date,
                 0,
-                path = saveMedia()
+                path = saveMedia(date)
             )
             val qs = conversationDao.search(date)
             for (m in qs) conversationDao.delete(m)
@@ -96,12 +100,14 @@ class MMSSender(
                     }
                 }
                 conversation.time = date
-                conversation.lastSMS = "MMS: $smsText"
+                conversation.lastSMS = smsText
+                conversation.lastMMS = true
                 if (found) mainViewModel!!.daos!![conversation.label].update(conversation)
                 else mainViewModel!!.daos!![conversation.label].insert(conversation)
             } else {
                 conversation.time = date
-                conversation.lastSMS = "MMS: $smsText"
+                conversation.lastSMS = smsText
+                conversation.lastMMS = true
                 mainViewModel!!.daos!![conversation.label].update(conversation)
             }
         }.start()

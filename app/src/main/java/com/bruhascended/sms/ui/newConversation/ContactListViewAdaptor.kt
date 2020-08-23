@@ -1,7 +1,8 @@
-package com.bruhascended.sms.ui.listViewAdapter
+package com.bruhascended.sms.ui.newConversation
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,13 +13,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.retrieveContactPhoto
-import com.bruhascended.sms.memoryCache
+import java.util.HashMap
 
 class ContactListViewAdaptor (data: Array<Contact>, context: Context):
     RecyclerView.Adapter<ContactListViewAdaptor.MyViewHolder>() {
 
     private val mContext: Context = context
     private var colors: Array<Int>
+    private val memoryCache = HashMap<String, Bitmap?>()
+
     init {
         colors = arrayOf(
             ContextCompat.getColor(mContext, R.color.red),
@@ -66,13 +69,13 @@ class ContactListViewAdaptor (data: Array<Contact>, context: Context):
             val dp = memoryCache[ad]
             if (dp != null) holder.dp.setImageBitmap(dp)
             else holder.dp.setImageResource(R.drawable.ic_baseline_person_48)
-        } else Thread(Runnable {
+        } else Thread {
             memoryCache[ad] = retrieveContactPhoto(mContext, ad)
             val dp = memoryCache[ad]
             (mContext as Activity).runOnUiThread {
                 if (dp != null) holder.dp.setImageBitmap(dp)
             }
-        }).start()
+        }.start()
 
     }
 

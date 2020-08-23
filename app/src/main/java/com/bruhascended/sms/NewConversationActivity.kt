@@ -2,7 +2,6 @@ package com.bruhascended.sms
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
@@ -15,15 +14,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.ui.listViewAdapter.ContactListViewAdaptor
+import com.bruhascended.sms.ui.newConversation.ContactListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import java.util.*
 import kotlin.collections.ArrayList
-
-
-var memoryCache = HashMap<String, Bitmap?>()
 
 class NewConversationActivity : AppCompatActivity() {
 
@@ -134,12 +130,12 @@ class NewConversationActivity : AppCompatActivity() {
             }
         }
         Thread {
-            if (mainViewModel == null) {
+            if (isMainViewModelNull()) {
                 mainViewModel = MainViewModel()
-                mainViewModel!!.contacts.postValue(ContactsManager(this).getContactsList())
+                mainViewModel.contacts.postValue(ContactsManager(this).getContactsList())
             }
             runOnUiThread{
-                mainViewModel!!.contacts.observe(this, observer)
+                mainViewModel.contacts.observe(this, observer)
             }
         }.start()
     }
