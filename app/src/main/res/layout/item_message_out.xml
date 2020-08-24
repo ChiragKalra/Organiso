@@ -12,7 +12,7 @@
     android:paddingTop="12dp"
     android:paddingEnd="8dp"
     android:paddingBottom="8dp"
-    android:background="@drawable/bg_item_message"
+    android:background="@drawable/bg_conversation"
     android:paddingStart="75dp"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -53,10 +53,10 @@
                 android:background="#0000"
                 android:contentDescription="@string/send"
                 android:src="@drawable/ic_play"
-                android:tint="@color/white" />
+                android:tint="?android:textColor" />
             <SeekBar
                 android:visibility="gone"
-                android:thumbTint="@color/white"
+                android:thumbTint="?android:textColor"
                 android:layout_width="164dp"
                 android:layout_height="48dp"
                 android:id="@+id/slider"/>
@@ -76,7 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/message"
-            android:textColor="@color/white"
+            android:textColor="?android:textColor"
             android:textSize="18sp" />
     </LinearLayout>
 
@@ -94,7 +94,7 @@
         android:background="#0000"
         android:contentDescription="@string/send"
         android:src="@drawable/ic_play"
-        android:tint="@color/white" />
+        android:tint="?android:textColor" />
 
     <TextView
         android:id="@+id/time"
@@ -102,7 +102,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/content"
         android:layout_margin="8dp"
-        android:textColor="@color/white"
+        android:textColor="?android:textColor"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@id/content"
         app:layout_constraintEnd_toStartOf="@+id/content"
@@ -116,7 +116,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
         android:layout_marginEnd="16dp"
-        android:textColor="@color/white"
+        android:textColor="?android:textColor"
         android:textSize="12sp"
         android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="parent"

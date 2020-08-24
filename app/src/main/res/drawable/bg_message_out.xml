@@ -9,13 +9,13 @@
             <shape android:shape="rectangle" >
                 <size android:width="8dp"
                     android:height="8dp"/>
-                <solid android:color="@color/message_bg_accent" />
+                <solid android:color="?attr/bg_accent" />
             </shape>
         </rotate>
     </item>
     <item android:right="8dp">
         <shape android:shape="rectangle" >
-            <solid android:color="@color/message_bg_accent" />
+            <solid android:color="?attr/bg_accent" />
             <corners
                 android:bottomLeftRadius="16dp"
                 android:bottomRightRadius="16dp"

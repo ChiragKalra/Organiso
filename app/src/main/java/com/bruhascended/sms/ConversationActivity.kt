@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.*
@@ -101,6 +102,10 @@ class ConversationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .getBoolean("dark_theme", false).apply {
+                if (this) setTheme(R.style.DarkTheme_NoActionBar)
+            }
         setContentView(R.layout.activity_conversation)
 
         mContext = this

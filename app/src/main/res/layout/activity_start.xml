@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".StartActivity"
-    android:background="@color/background">
+    android:background="?backgroundColor">
 
     <RelativeLayout
         android:id="@+id/relativeLayout2"
@@ -24,7 +24,7 @@
             app:cpb_background_progressbar_color="#AEAEAE"
             app:cpb_background_progressbar_width="5dp"
             app:cpb_progress_direction="to_left"
-            app:cpb_progressbar_color="@color/colorAccent"
+            app:cpb_progressbar_color="?attr/colorAccent"
             app:cpb_progressbar_width="16dp"
             app:cpb_round_border="true"
             app:cpb_indeterminate_mode="true" />
@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:textColor="@color/white"
+            android:textColor="?android:textColor"
             android:textSize="56sp" />
 
     </RelativeLayout>
@@ -44,7 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:textColor="@color/white"
+        android:textColor="?android:textColor"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@id/etaText"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,7 +57,7 @@
         android:layout_height="24dp"
         android:layout_centerInParent="true"
         android:layout_marginBottom="54dp"
-        android:textColor="@color/white"
+        android:textColor="?android:textColor"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

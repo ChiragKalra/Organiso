@@ -14,6 +14,7 @@ import android.widget.AdapterView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
 import com.bruhascended.sms.data.ContactsManager
@@ -132,6 +133,10 @@ class MainActivity : AppCompatActivity() {
             mainViewModel.contacts.postValue(ContactsManager(mContext).getContactsList())
         }.start()
 
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .getBoolean("dark_theme", false).apply {
+                if (this) setTheme(R.style.DarkTheme_NoActionBar)
+            }
         setContentView(R.layout.activity_main)
 
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
@@ -173,6 +178,10 @@ class MainActivity : AppCompatActivity() {
             R.id.action_block -> {
                 val intent = Intent(mContext, ExtraCategoryActivity::class.java)
                 intent.putExtra("Type", 5)
+                startActivity(intent)
+            }
+            R.id.action_settings -> {
+                val intent = Intent(mContext, SettingsActivity::class.java)
                 startActivity(intent)
             }
         }

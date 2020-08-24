@@ -10,13 +10,13 @@
             <shape android:shape="rectangle" >
                 <size android:width="8dp"
                     android:height="8dp"/>
-                <solid android:color="@color/grey" />
+                <solid android:color="?android:itemBackground" />
             </shape>
         </rotate>
     </item>
     <item android:left="8dp">
         <shape android:shape="rectangle" >
-            <solid android:color="@color/grey" />
+            <solid android:color="?android:itemBackground" />
             <corners
                 android:bottomLeftRadius="16dp"
                 android:bottomRightRadius="16dp"

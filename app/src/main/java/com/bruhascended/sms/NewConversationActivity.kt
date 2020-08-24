@@ -9,6 +9,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.data.Contact
@@ -44,6 +45,10 @@ class NewConversationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .getBoolean("dark_theme", false).apply {
+                if (this) setTheme(R.style.DarkTheme)
+            }
         setContentView(R.layout.activity_new_conversation)
 
         val llm = LinearLayoutManager(this)

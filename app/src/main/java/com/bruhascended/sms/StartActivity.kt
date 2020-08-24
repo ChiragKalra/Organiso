@@ -13,6 +13,7 @@ import android.provider.Telephony
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.PreferenceManager
 import com.bruhascended.sms.data.SMSManager
 import com.bruhascended.sms.ui.start.StartViewModel
 import kotlinx.android.synthetic.main.activity_start.*
@@ -72,6 +73,10 @@ class StartActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .getBoolean("dark_theme", false).apply {
+                if (this) setTheme(R.style.DarkTheme_NoActionBar)
+            }
         setContentView(R.layout.activity_start)
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {

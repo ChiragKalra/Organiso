@@ -3,19 +3,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/colorPrimary"
+    android:background="?attr/colorPrimary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
+        android:layout_margin="0dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:elevation="2dp"
         android:animateLayoutChanges="true"
-        android:theme="@style/AppTheme.AppBarOverlay"
+        android:theme="?appBarLayoutStyle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -32,12 +32,12 @@
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
             app:tabMode="scrollable"
-            app:tabTextAppearance="@style/MineCustomTabText" />
+            app:tabTextAppearance="?tabTextAppearance" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"
-        android:background="@color/background"
+        android:background="?backgroundColor"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/appBar"
@@ -51,6 +51,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:tint="#000"
+        android:backgroundTint="?attr/colorAccent"
+        app:borderWidth="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_baseline_sms_24" />
@@ -60,7 +62,7 @@
         android:layout_width="match_parent"
         android:visibility="gone"
         android:layout_height="match_parent"
-        android:background="@color/background"
+        android:background="?backgroundColor"
         android:clickable="true"
         android:elevation="10dp"
         android:focusable="true"
@@ -73,7 +75,7 @@
             android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
+            android:background="?attr/colorPrimary"
             android:clickable="true"
             android:elevation="5dp"
             android:focusable="true"
@@ -105,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="@color/colorPrimary"
+                android:background="?attr/colorPrimary"
                 android:clickable="true"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
@@ -114,7 +116,7 @@
                 android:inputType="textShortMessage"
                 android:paddingStart="4dp"
                 android:paddingEnd="4dp"
-                android:textColorHint="@color/textInHint"
+                android:textColorHint="?android:textColorHint"
                 android:textSize="20sp" />
         </LinearLayout>
         <ProgressBar
@@ -132,7 +134,7 @@
             android:id="@+id/searchListView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="@color/background"
+            android:background="?backgroundColor"
             android:clickable="true"
             android:divider="@null"
             android:elevation="3dp"
