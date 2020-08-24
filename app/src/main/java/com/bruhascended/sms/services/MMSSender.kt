@@ -38,7 +38,6 @@ class MMSSender(
     private lateinit var uri: Uri
     private lateinit var smsText: String
 
-    @SuppressLint("SetWorldReadable", "SetWorldWritable")
     private fun saveMedia(date: Long): String {
         val name = date.toString() + "." +
                 MimeTypeMap.getSingleton().getExtensionFromMimeType(typeString)
@@ -92,7 +91,7 @@ class MMSSender(
             if (conversation.id == null) {
                 var found = false
                 for (i in 0..4) {
-                    val res = mainViewModel!!.daos!![i].findBySender(conversation.sender)
+                    val res = mainViewModel.daos[i].findBySender(conversation.sender)
                     if (res.isNotEmpty()) {
                         found = true
                         conversation = res[0]
@@ -102,13 +101,13 @@ class MMSSender(
                 conversation.time = date
                 conversation.lastSMS = smsText
                 conversation.lastMMS = true
-                if (found) mainViewModel!!.daos!![conversation.label].update(conversation)
-                else mainViewModel!!.daos!![conversation.label].insert(conversation)
+                if (found) mainViewModel.daos[conversation.label].update(conversation)
+                else mainViewModel.daos[conversation.label].insert(conversation)
             } else {
                 conversation.time = date
                 conversation.lastSMS = smsText
                 conversation.lastMMS = true
-                mainViewModel!!.daos!![conversation.label].update(conversation)
+                mainViewModel.daos[conversation.label].update(conversation)
             }
         }.start()
     }

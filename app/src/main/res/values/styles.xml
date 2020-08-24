@@ -10,7 +10,7 @@
         <item name="android:itemTextAppearance">@style/AppTheme.MenuTextStyle</item>
         <!--To change the background of options menu-->
         <item name="android:itemBackground">#3D6A3D</item>
-        <item name="android:dialogTheme">@style/Theme.AppCompat.DayNight</item>
+        <item name="android:alertDialogTheme">@style/AppTheme.AlertDialog</item>
         <item name="actionModeStyle">@style/ActionMode</item>
         <item name="windowActionModeOverlay">true</item>
 
@@ -26,6 +26,13 @@
             @drawable/bg_splash
         </item>
         <item name="colorPrimaryDark">@color/background</item>
+    </style>
+
+    <style name="AppTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:textColor">#FFF</item>
+        <item name="android:background">#222</item>
+        <item name="android:textColorSecondary">#DDD</item>
+        <item name="android:textColorAlertDialogListItem">#DDD</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

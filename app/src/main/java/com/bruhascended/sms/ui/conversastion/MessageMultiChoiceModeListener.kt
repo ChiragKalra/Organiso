@@ -34,6 +34,7 @@ class MessageMultiChoiceModeListener(
 
     private var rangeSelect = false
     private var previousSelected = -1
+    private var ignore = false
     private var editListAdapter = listView.adapter as MessageListViewAdaptor
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
@@ -63,9 +64,8 @@ class MessageMultiChoiceModeListener(
                                     mdb.delete(selectedItem)
                                 }
                             }
-                            if (listView.checkedItemCount == editListAdapter.count) {
+                            if (listView.checkedItemCount == editListAdapter.count)
                                 moveTo(conversation, -1, mContext)
-                            }
                         }.start()
                         Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
                         mode.finish()
@@ -87,18 +87,14 @@ class MessageMultiChoiceModeListener(
                 item.actionView = iv
                 (iv.drawable as AnimatedVectorDrawable).start()
 
-
                 rangeSelect = !rangeSelect
                 if (rangeSelect) previousSelected = -1
 
                 GlobalScope.launch {
                     delay(300)
                     (mContext as Activity).runOnUiThread {
-                        if (!rangeSelect) {
-                            item.setIcon(R.drawable.ic_single)
-                        } else {
-                            item.setIcon(R.drawable.ic_range)
-                        }
+                        if (!rangeSelect) item.setIcon(R.drawable.ic_single)
+                        else item.setIcon(R.drawable.ic_range)
                         item.actionView = null
                     }
                 }
@@ -128,20 +124,25 @@ class MessageMultiChoiceModeListener(
     override fun onItemCheckedStateChanged(
         mode: ActionMode, position: Int, id: Long, checked: Boolean
     ) {
-        if (rangeSelect) {
-            previousSelected = if (previousSelected == -1) {
-                position
-            } else {
-                val low = Integer.min(previousSelected, position) + 1
-                val high = Integer.max(previousSelected, position) - 1
-                for (i in low..high) {
-                    listView.setItemChecked(i, !listView.isItemChecked(i))
-                    editListAdapter.toggleSelection(i)
+        if (!ignore) {
+            if (rangeSelect) {
+                previousSelected = if (previousSelected == -1) {
+                    position
+                } else {
+                    val low = Integer.min(previousSelected, position) + 1
+                    val high = Integer.max(previousSelected, position) - 1
+                    for (i in low..high) {
+                        ignore = true
+                        listView.setItemChecked(i, !listView.isItemChecked(i))
+                        ignore = false
+                        editListAdapter.toggleSelection(i)
+                    }
+                    ignore = false
+                    -1
                 }
-                -1
             }
+            editListAdapter.toggleSelection(position)
+            mode.title = listView.checkedItemCount.toString()
         }
-        editListAdapter.toggleSelection(position)
-        mode.title = listView.checkedItemCount.toString()
     }
 }

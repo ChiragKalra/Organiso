@@ -64,7 +64,7 @@ class SMSSender (
             if (conversation.id == null) {
                 var found = false
                 for (i in 0..4) {
-                    val res = mainViewModel!!.daos!![i].findBySender(conversation.sender)
+                    val res = mainViewModel.daos[i].findBySender(conversation.sender)
                     if (res.isNotEmpty()) {
                         found = true
                         conversation = res[0]
@@ -73,12 +73,12 @@ class SMSSender (
                 }
                 conversation.time = date
                 conversation.lastSMS = smsText
-                if (found) mainViewModel!!.daos!![conversation.label].update(conversation)
-                else mainViewModel!!.daos!![conversation.label].insert(conversation)
+                if (found) mainViewModel.daos[conversation.label].update(conversation)
+                else mainViewModel.daos[conversation.label].insert(conversation)
             } else {
                 conversation.time = date
                 conversation.lastSMS = smsText
-                mainViewModel!!.daos!![conversation.label].update(conversation)
+                mainViewModel.daos[conversation.label].update(conversation)
             }
         }.start()
     }
