@@ -35,6 +35,7 @@ android {
                 arguments = ["room.incremental": "true"]
             }
         }
+
     }
 
     lintOptions {

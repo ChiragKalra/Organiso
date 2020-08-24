@@ -1,15 +1,8 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <Preference
-        app:fragment="com.bruhascended.sms.SettingsActivity$MessagesFragment"
-        app:icon="@drawable/messages"
-        app:key="messages_header"
-        app:title="@string/messages_header" />
-
-    <Preference
-        app:fragment="com.bruhascended.sms.SettingsActivity$SyncFragment"
-        app:icon="@drawable/sync"
-        app:key="sync_header"
-        app:title="@string/sync_header" />
+    <SwitchPreference
+        app:icon="@drawable/ic_theme"
+        app:key="dark_theme"
+        app:title="Dark Theme" />
 
 </PreferenceScreen>

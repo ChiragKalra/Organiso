@@ -38,7 +38,7 @@
             android:background="#0000"
             android:contentDescription="@string/send"
             android:src="@drawable/ic_play"
-            android:tint="@color/colorAccent" />
+            android:tint="?attr/colorAccent" />
         <SeekBar
             android:visibility="gone"
             android:layout_width="0dp"
@@ -72,7 +72,7 @@
             android:inputType="textShortMessage"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:textColorHint="@color/textInHint" />
+            android:textColorHint="?android:textColorHint" />
 
 
         <ImageButton
@@ -84,7 +84,7 @@
             android:background="#0000"
             android:contentDescription="@string/send"
             android:src="@drawable/add_file"
-            android:tint="@color/colorAccent" />
+            android:tint="?attr/colorAccent" />
 
         <ImageButton
             android:id="@+id/sendButton"
@@ -94,6 +94,6 @@
             android:background="#0000"
             android:contentDescription="@string/send"
             android:src="@drawable/ic_baseline_send"
-            android:tint="@color/colorAccent" />
+            android:tint="?attr/colorAccent" />
     </LinearLayout>
 </LinearLayout>

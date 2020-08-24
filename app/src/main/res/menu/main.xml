@@ -11,24 +11,21 @@
          android:icon="@drawable/ic_baseline_search_24"
          app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
-    <!--
      <item
          android:id="@+id/action_settings"
          android:orderInCategory="300"
          android:title="@string/settings"
          android:icon="@drawable/ic_baseline_settings_24"
-         app:showAsAction="ifRoom"/>-->
+         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_spam"
         android:orderInCategory="300"
         android:title="@string/tab_text_5"
-        android:icon="@drawable/ic_baseline_block_24"
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_block"
         android:orderInCategory="300"
         android:title="@string/tab_text_6"
-        android:icon="@drawable/ic_baseline_block_24"
         app:showAsAction="never"/>
 
 </menu>

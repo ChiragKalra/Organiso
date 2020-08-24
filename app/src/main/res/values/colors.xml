@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#2C492C</color>
-    <color name="colorPrimaryDark">#1D371A</color>
-    <color name="colorAccent">#4CAF50</color>
-    <color name="white">#FFF</color>
-    <color name="grey">#4A4A4A</color>
-    <color name="background">#151515</color>
-    <color name="message_bg_accent">#377137</color>
-    <color name="textInHint">#959595</color>
-    <color name="selection">#474747</color>
 
+    <!-- dark mode -->
+    <color name="colorPrimaryDark">#1B1B1B</color>
+    <color name="colorPrimaryDarkDark">#000000</color>
+    <color name="colorAccentDark">#FFFFFF</color>
+    <color name="message_bg_accent_dark">#6C6C6C</color>
+    <color name="background_dark">#000000</color>
+    <color name="list_item_background_dark">#202020</color>
+    <color name="selection_background_dark">#2E2E2E</color>
+
+    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_secondary_dark">#D3D3D3</color>
+    <color name="text_hint_dark">#90B184</color>
+
+    <!-- light mode -->
+    <color name="colorPrimaryLight">#1E5021</color>
+    <color name="colorPrimaryDarkLight">#1A471C</color>
+    <color name="colorAccentLight">#F9A825</color>
+    <color name="message_bg_accent_light">#88EFB1</color>
+
+    <color name="background_light">#FFFFFF</color>
+    <color name="list_item_background_light">#DADADA</color>
+    <color name="selection_background_light">#AFD188</color>
+
+    <color name="text_primary_light">#000000</color>
+    <color name="text_secondary_light">#202020</color>
+    <color name="text_hint_light">#364A2E</color>
+
+    <!-- neutral colors -->
     <color name="red">#C62828</color>
     <color name="blue">#1565C0</color>
     <color name="purple">#6A1B9A</color>
