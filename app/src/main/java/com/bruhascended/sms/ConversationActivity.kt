@@ -242,9 +242,7 @@ class ConversationActivity : AppCompatActivity() {
                 null
             }
             else -> null
-        }?.setNegativeButton("Cancel") {
-                dialog, _ -> dialog.dismiss()
-        }?.create()?.show()
+        }?.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}?.create()?.show()
         return false
     }
 

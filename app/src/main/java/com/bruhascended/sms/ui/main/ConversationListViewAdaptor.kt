@@ -4,12 +4,12 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Color
+import android.graphics.Typeface
 import android.provider.ContactsContract
 import android.text.SpannableString
 import android.text.format.DateFormat
 import android.text.format.DateUtils
-import android.text.style.BackgroundColorSpan
+import android.text.style.StyleSpan
 import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +23,6 @@ import com.bruhascended.sms.data.retrieveContactPhoto
 import com.bruhascended.sms.db.Conversation
 import java.util.*
 import kotlin.collections.HashMap
-
 
 class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : BaseAdapter() {
 
@@ -47,21 +46,15 @@ class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : 
     private fun displayTime(time: Long): String {
         val smsTime = Calendar.getInstance()
         smsTime.timeInMillis = time
-
         val now = Calendar.getInstance()
-
         val timeFormatString = if (DateFormat.is24HourFormat(mContext)) "H:mm" else "h:mm aa"
         val dateFormatString = "d MMMM"
         val dateYearFormatString = "dd/MM/yyyy"
         return when {
-            DateUtils.isToday(time) ->
-                DateFormat.format(timeFormatString, smsTime).toString()
-            DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) ->
-                "Yesterday"
-            now[Calendar.YEAR] == smsTime[Calendar.YEAR] ->
-                DateFormat.format(dateFormatString, smsTime).toString()
-            else ->
-                DateFormat.format(dateYearFormatString, smsTime).toString()
+            DateUtils.isToday(time) -> DateFormat.format(timeFormatString, smsTime).toString()
+            DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "Yesterday"
+            now[Calendar.YEAR] == smsTime[Calendar.YEAR] -> DateFormat.format(dateFormatString, smsTime).toString()
+            else -> DateFormat.format(dateYearFormatString, smsTime).toString()
         }
     }
 
@@ -98,7 +91,7 @@ class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : 
 
         if (cur.lastMMS) {
             val str = SpannableString("Media: ${cur.lastSMS}")
-            str.setSpan(BackgroundColorSpan(Color.YELLOW), 0, 6, 0)
+            str.setSpan(StyleSpan(Typeface.BOLD), 0, 6, 0)
             messageTextView.text = str
         }
 
