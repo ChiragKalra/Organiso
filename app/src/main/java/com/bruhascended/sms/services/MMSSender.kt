@@ -1,6 +1,5 @@
 package com.bruhascended.sms.services
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.*
@@ -98,15 +97,21 @@ class MMSSender(
                         break
                     }
                 }
-                conversation.time = date
-                conversation.lastSMS = smsText
-                conversation.lastMMS = true
+                conversation.apply {
+                    time = date
+                    lastSMS = smsText
+                    lastMMS = true
+                    read = false
+                }
                 if (found) mainViewModel.daos[conversation.label].update(conversation)
                 else mainViewModel.daos[conversation.label].insert(conversation)
             } else {
-                conversation.time = date
-                conversation.lastSMS = smsText
-                conversation.lastMMS = true
+                conversation.apply {
+                    time = date
+                    lastSMS = smsText
+                    lastMMS = true
+                    read = false
+                }
                 mainViewModel.daos[conversation.label].update(conversation)
             }
         }.start()

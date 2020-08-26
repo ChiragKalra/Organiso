@@ -36,7 +36,7 @@ public final class ConversationDao_Impl implements ConversationDao {
     this.__insertionAdapterOfConversation = new EntityInsertionAdapter<Conversation>(__db) {
       @Override
       public String createQuery() {
-        return "INSERT OR ABORT INTO `conversations` (`id`,`sender`,`name`,`dp`,`read`,`time`,`lastSMS`,`label`,`forceLabel`,`probs`,`lastMMS`) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR ABORT INTO `conversations` (`id`,`sender`,`name`,`dp`,`read`,`time`,`lastSMS`,`label`,`forceLabel`,`probs`,`isMuted`,`lastMMS`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -80,8 +80,11 @@ public final class ConversationDao_Impl implements ConversationDao {
           stmt.bindString(10, _tmp_1);
         }
         final int _tmp_2;
-        _tmp_2 = value.getLastMMS() ? 1 : 0;
+        _tmp_2 = value.isMuted() ? 1 : 0;
         stmt.bindLong(11, _tmp_2);
+        final int _tmp_3;
+        _tmp_3 = value.getLastMMS() ? 1 : 0;
+        stmt.bindLong(12, _tmp_3);
       }
     };
     this.__deletionAdapterOfConversation = new EntityDeletionOrUpdateAdapter<Conversation>(__db) {
@@ -102,7 +105,7 @@ public final class ConversationDao_Impl implements ConversationDao {
     this.__updateAdapterOfConversation = new EntityDeletionOrUpdateAdapter<Conversation>(__db) {
       @Override
       public String createQuery() {
-        return "UPDATE OR ABORT `conversations` SET `id` = ?,`sender` = ?,`name` = ?,`dp` = ?,`read` = ?,`time` = ?,`lastSMS` = ?,`label` = ?,`forceLabel` = ?,`probs` = ?,`lastMMS` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `conversations` SET `id` = ?,`sender` = ?,`name` = ?,`dp` = ?,`read` = ?,`time` = ?,`lastSMS` = ?,`label` = ?,`forceLabel` = ?,`probs` = ?,`isMuted` = ?,`lastMMS` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -146,12 +149,15 @@ public final class ConversationDao_Impl implements ConversationDao {
           stmt.bindString(10, _tmp_1);
         }
         final int _tmp_2;
-        _tmp_2 = value.getLastMMS() ? 1 : 0;
+        _tmp_2 = value.isMuted() ? 1 : 0;
         stmt.bindLong(11, _tmp_2);
+        final int _tmp_3;
+        _tmp_3 = value.getLastMMS() ? 1 : 0;
+        stmt.bindLong(12, _tmp_3);
         if (value.getId() == null) {
-          stmt.bindNull(12);
+          stmt.bindNull(13);
         } else {
-          stmt.bindLong(12, value.getId());
+          stmt.bindLong(13, value.getId());
         }
       }
     };
@@ -222,6 +228,7 @@ public final class ConversationDao_Impl implements ConversationDao {
       final int _cursorIndexOfLabel = CursorUtil.getColumnIndexOrThrow(_cursor, "label");
       final int _cursorIndexOfForceLabel = CursorUtil.getColumnIndexOrThrow(_cursor, "forceLabel");
       final int _cursorIndexOfProbs = CursorUtil.getColumnIndexOrThrow(_cursor, "probs");
+      final int _cursorIndexOfIsMuted = CursorUtil.getColumnIndexOrThrow(_cursor, "isMuted");
       final int _cursorIndexOfLastMMS = CursorUtil.getColumnIndexOrThrow(_cursor, "lastMMS");
       final List<Conversation> _result = new ArrayList<Conversation>(_cursor.getCount());
       while(_cursor.moveToNext()) {
@@ -254,11 +261,15 @@ public final class ConversationDao_Impl implements ConversationDao {
         final String _tmp_1;
         _tmp_1 = _cursor.getString(_cursorIndexOfProbs);
         _tmpProbs = __converters.jsonToList(_tmp_1);
-        final boolean _tmpLastMMS;
+        final boolean _tmpIsMuted;
         final int _tmp_2;
-        _tmp_2 = _cursor.getInt(_cursorIndexOfLastMMS);
-        _tmpLastMMS = _tmp_2 != 0;
-        _item = new Conversation(_tmpId,_tmpSender,_tmpName,_tmpDp,_tmpRead,_tmpTime,_tmpLastSMS,_tmpLabel,_tmpForceLabel,_tmpProbs,_tmpLastMMS);
+        _tmp_2 = _cursor.getInt(_cursorIndexOfIsMuted);
+        _tmpIsMuted = _tmp_2 != 0;
+        final boolean _tmpLastMMS;
+        final int _tmp_3;
+        _tmp_3 = _cursor.getInt(_cursorIndexOfLastMMS);
+        _tmpLastMMS = _tmp_3 != 0;
+        _item = new Conversation(_tmpId,_tmpSender,_tmpName,_tmpDp,_tmpRead,_tmpTime,_tmpLastSMS,_tmpLabel,_tmpForceLabel,_tmpProbs,_tmpIsMuted,_tmpLastMMS);
         _result.add(_item);
       }
       return _result;
@@ -287,6 +298,7 @@ public final class ConversationDao_Impl implements ConversationDao {
           final int _cursorIndexOfLabel = CursorUtil.getColumnIndexOrThrow(_cursor, "label");
           final int _cursorIndexOfForceLabel = CursorUtil.getColumnIndexOrThrow(_cursor, "forceLabel");
           final int _cursorIndexOfProbs = CursorUtil.getColumnIndexOrThrow(_cursor, "probs");
+          final int _cursorIndexOfIsMuted = CursorUtil.getColumnIndexOrThrow(_cursor, "isMuted");
           final int _cursorIndexOfLastMMS = CursorUtil.getColumnIndexOrThrow(_cursor, "lastMMS");
           final List<Conversation> _result = new ArrayList<Conversation>(_cursor.getCount());
           while(_cursor.moveToNext()) {
@@ -319,11 +331,15 @@ public final class ConversationDao_Impl implements ConversationDao {
             final String _tmp_1;
             _tmp_1 = _cursor.getString(_cursorIndexOfProbs);
             _tmpProbs = __converters.jsonToList(_tmp_1);
-            final boolean _tmpLastMMS;
+            final boolean _tmpIsMuted;
             final int _tmp_2;
-            _tmp_2 = _cursor.getInt(_cursorIndexOfLastMMS);
-            _tmpLastMMS = _tmp_2 != 0;
-            _item = new Conversation(_tmpId,_tmpSender,_tmpName,_tmpDp,_tmpRead,_tmpTime,_tmpLastSMS,_tmpLabel,_tmpForceLabel,_tmpProbs,_tmpLastMMS);
+            _tmp_2 = _cursor.getInt(_cursorIndexOfIsMuted);
+            _tmpIsMuted = _tmp_2 != 0;
+            final boolean _tmpLastMMS;
+            final int _tmp_3;
+            _tmp_3 = _cursor.getInt(_cursorIndexOfLastMMS);
+            _tmpLastMMS = _tmp_3 != 0;
+            _item = new Conversation(_tmpId,_tmpSender,_tmpName,_tmpDp,_tmpRead,_tmpTime,_tmpLastSMS,_tmpLabel,_tmpForceLabel,_tmpProbs,_tmpIsMuted,_tmpLastMMS);
             _result.add(_item);
           }
           return _result;
@@ -369,6 +385,7 @@ public final class ConversationDao_Impl implements ConversationDao {
     final int _cursorIndexOfLabel = cursor.getColumnIndex("label");
     final int _cursorIndexOfForceLabel = cursor.getColumnIndex("forceLabel");
     final int _cursorIndexOfProbs = cursor.getColumnIndex("probs");
+    final int _cursorIndexOfIsMuted = cursor.getColumnIndex("isMuted");
     final int _cursorIndexOfLastMMS = cursor.getColumnIndex("lastMMS");
     final Long _tmpId;
     if (_cursorIndexOfId == -1) {
@@ -438,15 +455,23 @@ public final class ConversationDao_Impl implements ConversationDao {
       _tmp_1 = cursor.getString(_cursorIndexOfProbs);
       _tmpProbs = __converters.jsonToList(_tmp_1);
     }
+    final boolean _tmpIsMuted;
+    if (_cursorIndexOfIsMuted == -1) {
+      _tmpIsMuted = false;
+    } else {
+      final int _tmp_2;
+      _tmp_2 = cursor.getInt(_cursorIndexOfIsMuted);
+      _tmpIsMuted = _tmp_2 != 0;
+    }
     final boolean _tmpLastMMS;
     if (_cursorIndexOfLastMMS == -1) {
       _tmpLastMMS = false;
     } else {
-      final int _tmp_2;
-      _tmp_2 = cursor.getInt(_cursorIndexOfLastMMS);
-      _tmpLastMMS = _tmp_2 != 0;
+      final int _tmp_3;
+      _tmp_3 = cursor.getInt(_cursorIndexOfLastMMS);
+      _tmpLastMMS = _tmp_3 != 0;
     }
-    _entity = new Conversation(_tmpId,_tmpSender,_tmpName,_tmpDp,_tmpRead,_tmpTime,_tmpLastSMS,_tmpLabel,_tmpForceLabel,_tmpProbs,_tmpLastMMS);
+    _entity = new Conversation(_tmpId,_tmpSender,_tmpName,_tmpDp,_tmpRead,_tmpTime,_tmpLastSMS,_tmpLabel,_tmpForceLabel,_tmpProbs,_tmpIsMuted,_tmpLastMMS);
     return _entity;
   }
 }

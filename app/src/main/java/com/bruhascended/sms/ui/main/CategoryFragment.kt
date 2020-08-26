@@ -3,6 +3,7 @@ package com.bruhascended.sms.ui.main
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.bruhascended.sms.ConversationActivity
 import com.bruhascended.sms.R
 import com.bruhascended.sms.mainViewModel
@@ -41,21 +43,23 @@ class CategoryFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
+        val mContext = requireActivity()
+        val dark = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("dark_theme", false)
+        inflater.cloneInContext(ContextThemeWrapper(mContext, if (dark) R.style.DarkTheme else R.style.LightTheme))
         val root = inflater.inflate(R.layout.fragment_main, container, false)
         val listView: ListView = root.findViewById(R.id.listView)
         val textView: TextView = root.findViewById(R.id.emptyList)
-        val mContext = requireActivity()
 
         textView.visibility = TextView.INVISIBLE
 
         val intent = Intent(mContext, ConversationActivity::class.java)
 
-        var recyclerViewState: Parcelable
+        var listViewState: Parcelable
         mainViewModel.daos[label].loadAll().observe(viewLifecycleOwner, {
-            recyclerViewState = listView.onSaveInstanceState()!!
-            val editListAdapter = ConversationListViewAdaptor(mContext, it)
+            listViewState = listView.onSaveInstanceState()!!
+            val editListAdapter = ConversationListViewAdaptor(mContext, it.toMutableList())
             listView.adapter = editListAdapter
-            listView.onRestoreInstanceState(recyclerViewState)
+            listView.onRestoreInstanceState(listViewState)
 
             listView.onItemClickListener = AdapterView.OnItemClickListener { _, _, i, _ ->
                 intent.putExtra("ye", it[i])

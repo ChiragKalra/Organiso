@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.drawable.AnimatedVectorDrawable
+import android.os.Bundle
 import android.util.SparseBooleanArray
 import android.view.ActionMode
 import android.view.LayoutInflater
@@ -19,6 +20,7 @@ import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.moveTo
 import com.bruhascended.sms.mainViewModel
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -33,6 +35,8 @@ class ConversationMultiChoiceModeListener(
     private var previousSelected = -1
     private var ignore = false
     private var actionMenu: Menu? = null
+    private lateinit var muteItem: MenuItem
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
     private var editListAdapter = listView.adapter as ConversationListViewAdaptor
 
     @SuppressLint("InflateParams")
@@ -70,6 +74,14 @@ class ConversationMultiChoiceModeListener(
         mode.menuInflater.inflate(R.menu.conversation_selection, menu)
         rangeSelect = false
         previousSelected = -1
+
+        muteItem = menu.findItem(R.id.action_mute)
+        muteItem.isVisible = false
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(mContext)
+
+        if (label == 4) menu.findItem(R.id.action_report_spam).isVisible = false
+        if (label == 5) menu.findItem(R.id.action_block).isVisible = false
         mainViewModel.selection.postValue(label)
         return true
     }
@@ -93,9 +105,11 @@ class ConversationMultiChoiceModeListener(
                             if (selected.valueAt(i)) {
                                 val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
                                 moveTo(selectedItem, -1, mContext)
+                                val bundle = Bundle()
+                                bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to -1")
+                                firebaseAnalytics.logEvent("conversation_moved", bundle)
                             }
                         }
-
                         Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
                         mode.finish()
                         dialog.dismiss()
@@ -110,9 +124,15 @@ class ConversationMultiChoiceModeListener(
             R.id.action_block -> {
                 AlertDialog.Builder(mContext).setTitle("Do you want to block selected conversations?")
                     .setPositiveButton("Block") { dialog, _ ->
-                        for (i in 0 until selected.size())
-                            if (selected.valueAt(i))
-                                moveTo(editListAdapter.getItem(selected.keyAt(i)), 5)
+                        for (i in 0 until selected.size()) {
+                            if (selected.valueAt(i)) {
+                                val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
+                                moveTo(selectedItem, 5)
+                                val bundle = Bundle()
+                                bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to 5")
+                                firebaseAnalytics.logEvent("conversation_moved", bundle)
+                            }
+                        }
                         Toast.makeText(mContext,"Senders Blocked", Toast.LENGTH_LONG).show()
                         mode.finish()
                         dialog.dismiss()
@@ -127,9 +147,15 @@ class ConversationMultiChoiceModeListener(
             R.id.action_report_spam -> {
                 AlertDialog.Builder(mContext).setTitle("Do you want to report selected conversations?")
                     .setPositiveButton("Report") { dialog, _ ->
-                        for (i in 0 until selected.size())
-                            if (selected.valueAt(i))
-                                moveTo(editListAdapter.getItem(selected.keyAt(i)), 4)
+                        for (i in 0 until selected.size()) {
+                            if (selected.valueAt(i)) {
+                                val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
+                                moveTo(selectedItem, 4)
+                                val bundle = Bundle()
+                                bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to 4")
+                                firebaseAnalytics.logEvent("conversation_moved", bundle)
+                            }
+                        }
                         Toast.makeText(mContext, "Senders Reported Spam", Toast.LENGTH_LONG).show()
                         mode.finish()
                         dialog.dismiss()
@@ -147,9 +173,15 @@ class ConversationMultiChoiceModeListener(
                 AlertDialog.Builder(mContext).setTitle("Move this conversation to")
                     .setSingleChoiceItems(choices, selection) { _, select -> selection = select}
                     .setPositiveButton("Move") { dialog, _ ->
-                        for (i in 0 until selected.size())
-                            if (selected.valueAt(i))
-                                moveTo(editListAdapter.getItem(selected.keyAt(i)), selection)
+                        for (i in 0 until selected.size()) {
+                            if (selected.valueAt(i)) {
+                                val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
+                                moveTo(selectedItem, selection)
+                                val bundle = Bundle()
+                                bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to $selection")
+                                firebaseAnalytics.logEvent("conversation_moved", bundle)
+                            }
+                        }
                         Toast.makeText(mContext, "Conversations Moved", Toast.LENGTH_LONG).show()
                         mode.finish()
                         dialog.dismiss()
@@ -160,6 +192,17 @@ class ConversationMultiChoiceModeListener(
                     }
                     .create().show()
                 true
+            }
+            R.id.action_mute -> {
+                for (i in 0 until selected.size()) {
+                    if (selected.valueAt(i)) {
+                        val conversation = editListAdapter.getItem(selected.keyAt(i))
+                        conversation.isMuted = !conversation.isMuted
+                        mainViewModel.daos[conversation.label].update(conversation)
+                    }
+                }
+                mode.finish()
+                return true
             }
             else -> false
         }
@@ -187,6 +230,17 @@ class ConversationMultiChoiceModeListener(
             }
             editListAdapter.toggleSelection(position)
             mode.title = listView.checkedItemCount.toString()
+            muteItem.isVisible = if (listView.checkedItemCount == 1) {
+                val selected = editListAdapter.getSelectedIds()
+                for (i in 0 until selected.size()) {
+                    if (selected.valueAt(i)) {
+                        val conversation = editListAdapter.getItem(selected.keyAt(i))
+                        if (!conversation.isMuted) muteItem.setIcon(R.drawable.ic_mute)
+                        else muteItem.setIcon(R.drawable.ic_unmute)
+                    }
+                }
+                true
+            } else false
         }
     }
 }

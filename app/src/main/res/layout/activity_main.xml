@@ -109,6 +109,7 @@
                 android:layout_weight="1"
                 android:background="?attr/colorPrimary"
                 android:clickable="true"
+                android:textColor="@color/text_primary_dark"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:hint="@string/search"
@@ -116,7 +117,7 @@
                 android:inputType="textShortMessage"
                 android:paddingStart="4dp"
                 android:paddingEnd="4dp"
-                android:textColorHint="?android:textColorHint"
+                android:textColorHint="@color/text_secondary_dark"
                 android:textSize="20sp" />
         </LinearLayout>
         <ProgressBar

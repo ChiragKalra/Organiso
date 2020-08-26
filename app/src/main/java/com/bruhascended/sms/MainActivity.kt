@@ -26,9 +26,6 @@ import com.bruhascended.sms.ui.main.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.searchListView
-import kotlinx.android.synthetic.main.activity_main.searchEditText
-import kotlinx.android.synthetic.main.activity_main.searchLayout
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -43,6 +40,7 @@ class MainActivity : AppCompatActivity() {
 
     private var searchLayoutVisible = false
     private var inputManager: InputMethodManager? = null
+    private var promotionsVisible: Boolean = true
 
 
     private fun showSearchLayout() {
@@ -133,18 +131,20 @@ class MainActivity : AppCompatActivity() {
             mainViewModel.contacts.postValue(ContactsManager(mContext).getContactsList())
         }.start()
 
-        PreferenceManager.getDefaultSharedPreferences(this)
-            .getBoolean("dark_theme", false).apply {
-                if (this) setTheme(R.style.DarkTheme_NoActionBar)
-            }
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        if (sp.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
+        else setTheme(R.style.LightTheme)
+
+        promotionsVisible = sp.getBoolean("promotions_category_visible", true)
+
         setContentView(R.layout.activity_main)
 
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
 
         setSupportActionBar(mToolbar)
 
-        viewPager.adapter = SectionsPagerAdapter(this, supportFragmentManager)
-        viewPager.offscreenPageLimit = 3
+        viewPager.adapter = SectionsPagerAdapter(this, supportFragmentManager, promotionsVisible)
+        viewPager.offscreenPageLimit = if (promotionsVisible) 3 else 2
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 if (position != mainViewModel.selection.value) {
@@ -157,6 +157,13 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener {
             startActivity(Intent(mContext, NewConversationActivity::class.java))
         }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        promotionsVisible = sp.getBoolean("promotions_category_visible", true)
+        if (promotionsVisible) menu?.removeItem(R.id.action_promotions)
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -175,6 +182,11 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra("Type", 4)
                 startActivity(intent)
             }
+            R.id.action_promotions -> {
+                val intent = Intent(mContext, ExtraCategoryActivity::class.java)
+                intent.putExtra("Type", 3)
+                startActivity(intent)
+            }
             R.id.action_block -> {
                 val intent = Intent(mContext, ExtraCategoryActivity::class.java)
                 intent.putExtra("Type", 5)
@@ -191,5 +203,14 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (searchLayoutVisible) hideSearchLayout()
         else super.onBackPressed()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val sp = PreferenceManager.getDefaultSharedPreferences(this)
+        if (sp.getBoolean("stateChanged", false)) {
+            sp.edit().putBoolean("stateChanged", false).apply()
+            recreate()
+        }
     }
 }

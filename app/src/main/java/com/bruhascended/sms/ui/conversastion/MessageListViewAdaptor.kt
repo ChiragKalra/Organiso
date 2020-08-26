@@ -87,7 +87,7 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
         mContext.grantUriPermission(
             "com.bruhascended.sms", contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
-        val contentIntent = Intent(Intent.ACTION_VIEW)
+        val contentIntent = Intent(Intent.ACTION_QUICK_VIEW)
         contentIntent.setDataAndType(contentUri, mmsTypeString)
         contentIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
 
@@ -215,5 +215,25 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
 
     fun removeSelection() {
         mSelectedItemsIds = SparseBooleanArray()
+    }
+
+    fun isMedia(position: Int) = getItem(position).path != null
+
+    fun getSharable(position: Int) : Intent {
+        val path = getItem(position).path!!
+        val mmsTypeString = getMimeType(path)
+        val contentUri = FileProvider.getUriForFile(
+            mContext,
+            "com.bruhascended.sms.fileProvider", File(path)
+        )
+        mContext.grantUriPermission(
+            "com.bruhascended.sms", contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+        return Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, contentUri)
+            type = mmsTypeString
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
     }
 }

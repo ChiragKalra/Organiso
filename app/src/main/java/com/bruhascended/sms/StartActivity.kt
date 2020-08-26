@@ -3,6 +3,7 @@ package com.bruhascended.sms
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -15,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.bruhascended.sms.data.SMSManager
+import com.bruhascended.sms.ui.MessageNotificationManager
 import com.bruhascended.sms.ui.start.StartViewModel
 import kotlinx.android.synthetic.main.activity_start.*
 
@@ -47,6 +49,25 @@ class StartActivity : AppCompatActivity() {
         startActivityForResult(setSmsAppIntent, 1)
     }
 
+    private fun openSMSappChooser() {
+        val packageManager = packageManager
+        val componentName = ComponentName(this, StartActivity::class.java)
+        packageManager.setComponentEnabledSetting(
+            componentName,
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP
+        )
+        val selector = Intent(Intent.ACTION_MAIN)
+        selector.addCategory(Intent.CATEGORY_APP_MESSAGING)
+        selector.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(selector)
+        packageManager.setComponentEnabledSetting(
+            componentName,
+            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+            PackageManager.DONT_KILL_APP
+        )
+    }
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +86,7 @@ class StartActivity : AppCompatActivity() {
         manager?.destroy()
     }
 
-    override fun onRequestPermissionsResult (
+    override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
@@ -73,11 +94,14 @@ class StartActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        PreferenceManager.getDefaultSharedPreferences(this)
-            .getBoolean("dark_theme", false).apply {
-                if (this) setTheme(R.style.DarkTheme_NoActionBar)
-            }
+        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+            "dark_theme",
+            false
+        )
+        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
         setContentView(R.layout.activity_start)
+
+        openSMSappChooser()
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
             progress.value = -1
@@ -85,7 +109,7 @@ class StartActivity : AppCompatActivity() {
         }
 
         pageViewModel.progress.observe(this, {
-            if (it>-1) {
+            if (it > -1) {
                 if (progressBar.indeterminateMode) {
                     progressBar.indeterminateMode = false
                     pageViewModel.disc.postValue(1)
@@ -116,9 +140,13 @@ class StartActivity : AppCompatActivity() {
                         else etaText.text = "ETA ${sec}sec"
                     } else etaText.text = ""
                 }
+
                 override fun onFinish() {}
             }.start()
         })
+
+        val mnm = MessageNotificationManager(mContext)
+        mnm.createNotificationChannel()
 
         Thread {
             manager = SMSManager(mContext)

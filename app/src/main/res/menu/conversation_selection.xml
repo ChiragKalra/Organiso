@@ -6,16 +6,22 @@
     tools:context=".MainActivity">
 
     <item
-        android:id="@+id/action_select_all"
-        android:icon="@drawable/ic_baseline_select_all_24"
+        android:icon="@drawable/ic_unmute"
+        android:id="@+id/action_mute"
         android:orderInCategory="300"
-        android:title="@string/select_all"
+        android:title="@string/mute"
         android:showAsAction="always"/>
     <item
         android:id="@+id/action_select_range"
         android:icon="@drawable/ic_single"
         android:orderInCategory="300"
         android:title="@string/select_range"
+        android:showAsAction="always"/>
+    <item
+        android:id="@+id/action_select_all"
+        android:icon="@drawable/ic_baseline_select_all_24"
+        android:orderInCategory="300"
+        android:title="@string/select_all"
         android:showAsAction="always"/>
 
     <item
@@ -29,18 +35,18 @@
         android:id="@+id/action_report_spam"
         android:orderInCategory="300"
         android:title="@string/report_spam"
-        android:showAsAction="always"/>
+        android:showAsAction="never"/>
     <item
         android:icon="@drawable/ic_block"
         android:id="@+id/action_block"
         android:orderInCategory="300"
         android:title="@string/block"
-        android:showAsAction="always"/>
+        android:showAsAction="never"/>
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_baseline_delete_24"
         android:orderInCategory="300"
         android:title="@string/delete"
-        android:showAsAction="always"/>
+        android:showAsAction="never"/>
 
 </menu>

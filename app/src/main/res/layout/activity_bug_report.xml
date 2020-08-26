@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".BugReportActivity"
+    android:background="?backgroundColor">
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/title"
+        android:theme="?appBarLayoutStyle">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            app:title="Report A Bug"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <EditText
+        android:padding="8dp"
+        android:background="@drawable/bg_contact"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/title"
+        android:id="@+id/titleEditText"
+        android:importantForAutofill="no"
+        android:inputType="textShortMessage" />
+
+    <EditText
+        android:padding="8dp"
+        android:gravity="top"
+        android:background="@drawable/bg_contact"
+        android:layout_margin="16dp"
+        android:inputType="textMultiLine"
+        app:layout_constraintTop_toBottomOf="@id/titleEditText"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:hint="@string/describe_bug_here"
+        android:id="@+id/full"
+        android:minHeight="240dp"
+        android:importantForAutofill="no" />
+
+    <TextView
+        android:id="@+id/fileName"
+        android:visibility="gone"
+        android:gravity="center_vertical"
+        android:backgroundTint="?bg_accent"
+        android:background="@drawable/bg_contact"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_width="0dp"
+        android:padding="8dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/addFile"
+        app:layout_constraintEnd_toStartOf="@id/addFile"
+        app:layout_constraintBottom_toBottomOf="@id/addFile"/>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addFile"
+        android:tint="#000"
+        app:borderWidth="0dp"
+        android:layout_margin="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/add_file"
+        android:backgroundTint="@color/colorAccent"
+        app:layout_constraintEnd_toStartOf="@id/submit"
+        app:layout_constraintTop_toBottomOf="@id/full" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/submit"
+        android:tint="#000"
+        app:borderWidth="0dp"
+        android:layout_margin="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_baseline_send"
+        android:backgroundTint="@color/colorAccent"
+        app:layout_constraintTop_toBottomOf="@id/full"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

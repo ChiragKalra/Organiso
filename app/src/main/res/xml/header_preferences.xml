@@ -1,8 +1,53 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SwitchPreference
+    <PreferenceCategory
+        app:title="Theme"/>
+    <SwitchPreferenceCompat
+        app:allowDividerBelow="false"
         app:icon="@drawable/ic_theme"
         app:key="dark_theme"
         app:title="Dark Theme" />
+
+    <PreferenceCategory
+        app:title="Categories"/>
+    <SwitchPreferenceCompat
+        app:allowDividerBelow="false"
+        app:defaultValue="true"
+        app:icon="@drawable/ic_shopping"
+        app:key="promotions_category_visible"
+        app:title="Show Promotions Tab" />
+
+    <PreferenceCategory
+        app:title="Notifications"/>
+    <Preference
+        app:allowDividerBelow="false"
+        app:key="notifications"
+        app:icon="@drawable/ic_notifications"
+        app:title="Notification Settings" />
+
+    <PreferenceCategory
+        app:title="Privacy"/>
+    <SwitchPreferenceCompat
+        app:allowDividerBelow="false"
+        app:key="report_spam"
+        app:icon="@drawable/ic_report"
+        app:title="Share anonymous spam reports" />
+
+    <PreferenceCategory
+        app:title="Miscellaneous"/>
+    <Preference
+        app:key="report_bug"
+        app:icon="@drawable/ic_bug_report"
+        app:title="Report a bug" />
+    <Preference
+        app:key="website"
+        app:icon="@drawable/ic_web"
+        app:title="Visit project website" />
+    <Preference
+        app:key="github"
+        app:icon="@drawable/github"
+        app:title="Check out the source code" />
+
 
 </PreferenceScreen>

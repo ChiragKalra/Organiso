@@ -1,0 +1,9 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="24dp"
+        android:height="24dp">
+        <bitmap
+            android:src="@drawable/github_raw"
+            android:tint="?android:textColor"/>
+    </item>
+</layer-list>

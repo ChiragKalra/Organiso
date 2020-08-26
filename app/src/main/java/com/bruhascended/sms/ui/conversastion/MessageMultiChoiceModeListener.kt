@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.util.SparseBooleanArray
 import android.view.ActionMode
@@ -36,15 +37,13 @@ class MessageMultiChoiceModeListener(
     private var previousSelected = -1
     private var ignore = false
     private var editListAdapter = listView.adapter as MessageListViewAdaptor
+    private lateinit var shareMenuItem: MenuItem
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
 
-    override fun onDestroyActionMode(mode: ActionMode) {
-        editListAdapter.removeSelection()
-    }
-
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         mode.menuInflater.inflate(R.menu.message_selection, menu)
+        this.shareMenuItem = menu.findItem(R.id.action_share)
         rangeSelect = false
         previousSelected = -1
         return true
@@ -60,7 +59,11 @@ class MessageMultiChoiceModeListener(
                             val selected: SparseBooleanArray = editListAdapter.getSelectedIds()
                             for (i in 0 until selected.size()) {
                                 if (selected.valueAt(i)) {
-                                    val selectedItem: Message = editListAdapter.getItem(selected.keyAt(i))
+                                    val selectedItem: Message = editListAdapter.getItem(
+                                        selected.keyAt(
+                                            i
+                                        )
+                                    )
                                     mdb.delete(selectedItem)
                                 }
                             }
@@ -79,7 +82,8 @@ class MessageMultiChoiceModeListener(
                 true
             }
             R.id.action_select_range -> {
-                val inflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+                val inflater =
+                    mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
                 val iv = inflater.inflate(R.layout.view_button_transition, null) as ImageView
 
                 if (rangeSelect) iv.setImageResource(R.drawable.range_to_single)
@@ -117,6 +121,13 @@ class MessageMultiChoiceModeListener(
                 mode.finish()
                 true
             }
+            R.id.action_share -> {
+                val selected = editListAdapter.getSelectedIds().keyAt(0)
+                val intent = editListAdapter.getSharable(selected)
+                mContext.startActivity(Intent.createChooser(intent, "Share"))
+                mode.finish()
+                true
+            }
             else -> false
         }
     }
@@ -143,6 +154,17 @@ class MessageMultiChoiceModeListener(
             }
             editListAdapter.toggleSelection(position)
             mode.title = listView.checkedItemCount.toString()
+            val selected = editListAdapter.getSelectedIds()
+            for (i in 0 until selected.size()) {
+                if (selected.valueAt(i)) {
+                    shareMenuItem.isVisible = listView.checkedItemCount == 1 &&
+                    editListAdapter.isMedia(editListAdapter.getSelectedIds().keyAt(i))
+                }
+            }
         }
+    }
+
+    override fun onDestroyActionMode(mode: ActionMode) {
+        editListAdapter.removeSelection()
     }
 }

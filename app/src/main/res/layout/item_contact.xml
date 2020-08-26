@@ -7,7 +7,6 @@
     android:id="@+id/rootLayout"
     android:gravity="center"
     android:orientation="vertical"
-    android:backgroundTint="#2B2B2B"
     android:background="@drawable/bg_contact">
 
     <androidx.cardview.widget.CardView

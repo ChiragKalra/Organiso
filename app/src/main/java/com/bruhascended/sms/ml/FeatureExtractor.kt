@@ -56,6 +56,13 @@ class FeatureExtractor (context: Context) {
         return features
     }
 
+    fun getFeaturesLength() : Int {
+        val wordFeatures = getWordFeatures()
+        val k = nonWordFeatures.size
+        val l = wordFeatures.size
+        return k+l
+    }
+
     fun getFeatureMatrix(messages: ArrayList<Message>): Array<Array<Float>> {
         val wordFeatures = getWordFeatures()
 
@@ -65,4 +72,16 @@ class FeatureExtractor (context: Context) {
 
         return Array(m){getFeatures(k, l, messages[it], wordFeatures)}
     }
+
+
+    fun getFeatureVector(message: Message): Array<Float> {
+        val wordFeatures = getWordFeatures()
+
+        val k = nonWordFeatures.size
+        val l = wordFeatures.size
+
+        return getFeatures(k, l, message, wordFeatures)
+    }
+
+
 }
