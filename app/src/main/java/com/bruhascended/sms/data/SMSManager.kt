@@ -2,12 +2,14 @@ package com.bruhascended.sms.data
 
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import androidx.room.Room
 import com.bruhascended.sms.*
 import com.bruhascended.sms.db.*
 import com.bruhascended.sms.ml.FeatureExtractor
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.start.StartViewModel
+import com.google.firebase.analytics.FirebaseAnalytics
 import java.lang.Integer.min
 import kotlin.math.roundToInt
 
@@ -105,7 +107,6 @@ class SMSManager (context: Context) {
 
     fun getLabels(pageViewModel: StartViewModel? = null) {
         val nn = OrganizerModel(mContext)
-        val fe = FeatureExtractor(mContext)
         val sp = mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
 
         var timeFeat = 0L
@@ -134,6 +135,8 @@ class SMSManager (context: Context) {
         val messagesArray = messages.entries.toTypedArray()
         val number = messagesArray.size
 
+        val firebaseAnalytics = FirebaseAnalytics.getInstance(mContext)
+
         for (ind in index until number) {
             val sender = messagesArray[ind].component1()
             val msgs = messagesArray[ind].component2()
@@ -142,10 +145,9 @@ class SMSManager (context: Context) {
                 labels[0].add(sender)
             } else {
                 var yeah = System.currentTimeMillis()
-                val features = fe.getFeatureMatrix(msgs)
                 timeFeat += System.currentTimeMillis()-yeah
                 yeah = System.currentTimeMillis()
-                val probs = nn.getPredictions(msgs, features)
+                val probs = nn.getPredictions(msgs)
                 timeML += System.currentTimeMillis()-yeah
 
 
@@ -183,6 +185,10 @@ class SMSManager (context: Context) {
             completedSenderIndex = ind
             completedMessage = done
             timeTaken = (System.currentTimeMillis()-startTime)
+
+            val bundle = Bundle()
+            bundle.putString(FirebaseAnalytics.Param.METHOD, if (pageViewModel == null) "background" else "init")
+            firebaseAnalytics.logEvent("conversation_organised", bundle)
         }
     }
 

@@ -30,9 +30,9 @@ public final class ConversationDatabase_Impl extends ConversationDatabase {
     final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(configuration, new RoomOpenHelper.Delegate(1) {
       @Override
       public void createAllTables(SupportSQLiteDatabase _db) {
-        _db.execSQL("CREATE TABLE IF NOT EXISTS `conversations` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `sender` TEXT NOT NULL, `name` TEXT, `dp` TEXT NOT NULL, `read` INTEGER NOT NULL, `time` INTEGER NOT NULL, `lastSMS` TEXT NOT NULL, `label` INTEGER NOT NULL, `forceLabel` INTEGER NOT NULL, `probs` TEXT NOT NULL, `lastMMS` INTEGER NOT NULL)");
+        _db.execSQL("CREATE TABLE IF NOT EXISTS `conversations` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `sender` TEXT NOT NULL, `name` TEXT, `dp` TEXT NOT NULL, `read` INTEGER NOT NULL, `time` INTEGER NOT NULL, `lastSMS` TEXT NOT NULL, `label` INTEGER NOT NULL, `forceLabel` INTEGER NOT NULL, `probs` TEXT NOT NULL, `isMuted` INTEGER NOT NULL, `lastMMS` INTEGER NOT NULL)");
         _db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6aa6c5a092a7d9c831b10d8306d9d555')");
+        _db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '147abd9e9c0636e1f775b681d47f0ddd')");
       }
 
       @Override
@@ -76,7 +76,7 @@ public final class ConversationDatabase_Impl extends ConversationDatabase {
 
       @Override
       protected RoomOpenHelper.ValidationResult onValidateSchema(SupportSQLiteDatabase _db) {
-        final HashMap<String, TableInfo.Column> _columnsConversations = new HashMap<String, TableInfo.Column>(11);
+        final HashMap<String, TableInfo.Column> _columnsConversations = new HashMap<String, TableInfo.Column>(12);
         _columnsConversations.put("id", new TableInfo.Column("id", "INTEGER", false, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsConversations.put("sender", new TableInfo.Column("sender", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsConversations.put("name", new TableInfo.Column("name", "TEXT", false, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -87,6 +87,7 @@ public final class ConversationDatabase_Impl extends ConversationDatabase {
         _columnsConversations.put("label", new TableInfo.Column("label", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsConversations.put("forceLabel", new TableInfo.Column("forceLabel", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsConversations.put("probs", new TableInfo.Column("probs", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsConversations.put("isMuted", new TableInfo.Column("isMuted", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsConversations.put("lastMMS", new TableInfo.Column("lastMMS", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysConversations = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesConversations = new HashSet<TableInfo.Index>(0);
@@ -99,7 +100,7 @@ public final class ConversationDatabase_Impl extends ConversationDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "6aa6c5a092a7d9c831b10d8306d9d555", "5ee255d8a50b2d82efe01c73956c073e");
+    }, "147abd9e9c0636e1f775b681d47f0ddd", "f680e8eb2b4ca6104fc99640908f447d");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(configuration.context)
         .name(configuration.name)
         .callback(_openCallback)

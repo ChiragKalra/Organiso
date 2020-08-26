@@ -25,47 +25,48 @@ data class Contact (
     val dp: String?
 ): Serializable
 
-fun retrieveContactPhoto(mContext: Context, number: String?): Bitmap? {
-    val contentResolver = mContext.contentResolver
-    var contactId: String? = null
-    val uri: Uri = Uri.withAppendedPath(
-        ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-        Uri.encode(number)
-    )
-    val projection = arrayOf(
-        ContactsContract.PhoneLookup.DISPLAY_NAME,
-        ContactsContract.PhoneLookup._ID
-    )
-    val cursor = contentResolver.query(
-        uri,
-        projection,
-        null,
-        null,
-        null
-    )
-    if (cursor != null) {
-        while (cursor.moveToNext()) {
-            contactId =
-                cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.PhoneLookup._ID))
-        }
-        cursor.close()
-    }
-    var photo: Bitmap? = null
-    if (contactId != null) {
-        val inputStream = ContactsContract.Contacts.openContactPhotoInputStream(
-            mContext.contentResolver,
-            ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId.toLong())
-        )
-        if (inputStream != null) photo = BitmapFactory.decodeStream(inputStream)
-        inputStream?.close()
-    }
-    return photo
-}
 
 class ContactsManager(context: Context) {
 
     private val mContext = context
     private val map = HashMap<String, String>()
+
+    fun retrieveContactPhoto(number: String): Bitmap? {
+        val contentResolver = mContext.contentResolver
+        var contactId: String? = null
+        val uri: Uri = Uri.withAppendedPath(
+            ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+            Uri.encode(number)
+        )
+        val projection = arrayOf(
+            ContactsContract.PhoneLookup.DISPLAY_NAME,
+            ContactsContract.PhoneLookup._ID
+        )
+        val cursor = contentResolver.query(
+            uri,
+            projection,
+            null,
+            null,
+            null
+        )
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                contactId =
+                    cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.PhoneLookup._ID))
+            }
+            cursor.close()
+        }
+        var photo: Bitmap? = null
+        if (contactId != null) {
+            val inputStream = ContactsContract.Contacts.openContactPhotoInputStream(
+                mContext.contentResolver,
+                ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId.toLong())
+            )
+            if (inputStream != null) photo = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+        }
+        return photo
+    }
 
     fun getRaw(number: String): String {
         return if (number.startsWith("+")) {

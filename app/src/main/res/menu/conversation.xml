@@ -11,10 +11,16 @@
         android:icon="@drawable/ic_baseline_search_24"
         app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
+
     <item
         android:id="@+id/action_move"
         android:orderInCategory="300"
         android:title="@string/move_to"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_mute"
+        android:orderInCategory="300"
+        android:title="@string/unMute"
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_report_spam"

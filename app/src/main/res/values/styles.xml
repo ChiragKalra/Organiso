@@ -1,65 +1,30 @@
 <resources>
-
     <!-- default theme -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
-    </style>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
 
-
-    <!-- dark theme -->
-    <style name="DarkTheme" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimaryDark</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDarkDark</item>
-        <item name="colorAccent">@color/colorAccentDark</item>
         <item name="tabTextColor">@color/text_secondary_dark</item>
         <item name="tabSelectedTextColor">@color/text_primary_dark</item>
-        <item name="windowActionModeOverlay">true</item>
+
+        <item name="android:itemBackground">@color/popupMenuBackground</item>
+
         <item name="tabTextAppearance">@style/TabText</item>
         <item name="appBarLayoutStyle">@style/AppBarOverlay</item>
-        <item name="android:actionBarStyle">@style/AppBarOverlay</item>
+        <item name="actionModeStyle">@style/ActionMode</item>
+        <item name="popupTheme">@style/Popup</item>
 
-        <item name="backgroundColor">@color/background_dark</item>
-        <item name="android:textColor">@color/text_primary_dark</item>
-        <item name="android:textColorPrimary">@color/text_primary_dark</item>
-        <item name="android:textColorSecondary">@color/text_primary_dark</item>
-        <item name="android:textColorHint">@color/text_hint_dark</item>
-        <item name="android:itemBackground">@color/list_item_background_dark</item>
-        <item name="multiChoiceSelectorColor">@color/selection_background_dark</item>
-        <item name="bg_accent">@color/message_bg_accent_dark</item>
-
-        <item name="android:itemTextAppearance">@style/DarkTheme.MenuTextStyle</item>
-        <item name="android:alertDialogTheme">@style/DarkTheme.AlertDialog</item>
-        <item name="actionModeStyle">@style/DarkTheme.ActionMode</item>
-    </style>
-
-    <style name="DarkTheme.NoActionBar" parent="DarkTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
-    <style name="DarkTheme.Splash" parent="DarkTheme">
+    <style name="Splash" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@drawable/bg_splash</item>
-        <item name="colorPrimaryDark">@color/background_dark</item>
     </style>
-
-    <style name="DarkTheme.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
-        <item name="android:textColor">@color/text_primary_dark</item>
-        <item name="android:background">@color/background_dark</item>
-        <item name="android:textColorSecondary">@color/text_hint_dark</item>
-        <item name="android:textColorAlertDialogListItem">@color/text_secondary_dark</item>
-    </style>
-
-    <style name="DarkTheme.MenuTextStyle">
-        <item name="android:textColor">@color/text_primary_dark</item>
-        <item name="panelBackground">@color/background_dark</item>
-    </style>
-
-    <style name="DarkTheme.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">@color/colorPrimaryDark</item>
-    </style>
-
-    <style name="DarkTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Dark" />
 
     <style name="TabText" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">14sp</item>
@@ -68,71 +33,68 @@
     </style>
 
     <style name="AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="background">@color/colorPrimaryDark</item>
+        <item name="background">?colorPrimary</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:titleTextColor">@color/text_primary_dark</item>
+        <item name="android:actionButtonStyle">@color/text_primary_dark</item>
     </style>
 
+    <style name="ActionMode" parent="@style/Widget.AppCompat.ActionMode">
+        <item name="background">?colorPrimary</item>
+        <item name="actionModeBackground">?colorPrimary</item>
+        <item name="android:background">@color/popupMenuBackground</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="popupMenuBackground">@color/popupMenuBackground</item>
+        <item name="android:popupBackground">@color/popupMenuBackground</item>
+        <item name="android:itemBackground">@color/popupMenuBackground</item>
+    </style>
+
+    <style name="Popup" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:background">@color/popupMenuBackground</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+    </style>
+
+    <!-- dark theme -->
+    <style name="DarkTheme" parent="AppTheme">
+        <item name="backgroundColor">@color/background_dark</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:textColorPrimary">@color/text_primary_dark</item>
+        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
+        <item name="android:textColorHint">@color/text_hint_dark</item>
+        <item name="contactItemBackground">@color/list_item_background_dark</item>
+        <item name="multiChoiceSelectorColor">@color/selection_background_dark</item>
+        <item name="bg_accent">@color/message_bg_accent_dark</item>
+        <item name="android:alertDialogTheme">@style/DarkTheme.AlertDialog</item>
+    </style>
+
+    <style name="DarkTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:background">@color/background_dark</item>
+        <item name="android:textColorSecondary">@color/text_hint_dark</item>
+        <item name="android:textColorAlertDialogListItem">@color/text_secondary_dark</item>
+    </style>
 
     <!-- light theme -->
-    <style name="LightTheme" parent="Theme.MaterialComponents.DayNight">
-        <item name="colorPrimary">@color/colorPrimaryLight</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDarkLight</item>
-        <item name="colorAccent">@color/colorAccentLight</item>
-        <item name="tabTextColor">@color/text_secondary_dark</item>
-        <item name="tabSelectedTextColor">@color/text_primary_dark</item>
-        <item name="windowActionModeOverlay">true</item>
-        <item name="tabTextAppearance">@style/TabText</item>
-        <item name="appBarLayoutStyle">@style/AppBarOverlay</item>
-        <item name="android:actionBarStyle">@style/AppBarOverlay</item>
-
+    <style name="LightTheme" parent="AppTheme">
         <item name="backgroundColor">@color/background_light</item>
         <item name="android:textColorPrimary">@color/text_primary_light</item>
         <item name="android:textColor">@color/text_primary_light</item>
         <item name="android:textColorSecondary">@color/text_primary_light</item>
         <item name="android:textColorHint">@color/text_hint_light</item>
-        <item name="android:itemBackground">@color/list_item_background_light</item>
+        <item name="contactItemBackground">@color/list_item_background_light</item>
         <item name="multiChoiceSelectorColor">@color/selection_background_light</item>
         <item name="bg_accent">@color/message_bg_accent_light</item>
-
-        <item name="android:itemTextAppearance">@style/LightTheme.MenuTextStyle</item>
-        <item name="android:alertDialogTheme">@style/LightTheme.AlertDialog</item>
-        <item name="actionModeStyle">@style/LightTheme.ActionMode</item>
+       <item name="android:alertDialogTheme">@style/LightTheme.AlertDialog</item>
     </style>
 
-    <style name="LightTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="LightTheme.Splash" parent="LightTheme">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:windowBackground">@drawable/bg_splash</item>
-        <item name="colorPrimaryDark">@color/background_light</item>
-    </style>
-
-    <style name="LightTheme.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+    <style name="LightTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:colorEdgeEffect">@color/text_primary_light</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColor">@color/text_primary_light</item>
         <item name="android:background">@color/background_light</item>
         <item name="android:textColorSecondary">@color/text_hint_light</item>
         <item name="android:textColorAlertDialogListItem">@color/text_secondary_light</item>
-    </style>
-
-    <style name="LightTheme.MenuTextStyle">
-        <item name="android:textColor">@color/text_primary_light</item>
-    </style>
-
-    <style name="LightTheme.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">@color/colorPrimaryLight</item>
-    </style>
-
-    <style name="LightTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
-
-    <style name="LightTheme.TabText" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="LightTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="background">@color/colorPrimaryLight</item>
     </style>
 
 </resources>

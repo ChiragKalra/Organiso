@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.bruhascended.sms.R
-import com.bruhascended.sms.mainViewModel
 
 class SectionsPagerAdapter(
         private val context: Context,
-        fm: FragmentManager
+        fm: FragmentManager,
+        private val promo: Boolean
     ): FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     private val tabTitles = arrayOf(
@@ -24,5 +24,5 @@ class SectionsPagerAdapter(
 
     override fun getPageTitle(position: Int) = context.resources.getString(tabTitles[position])
 
-    override fun getCount() = 4
+    override fun getCount() = if (promo) 4 else 3
 }

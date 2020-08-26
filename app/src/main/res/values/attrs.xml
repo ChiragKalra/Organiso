@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="multiChoiceSelectorColor" format="reference"/>
+    <attr name="contactItemBackground" format="reference"/>
     <attr name="bg_accent" format="reference"/>
 </resources>

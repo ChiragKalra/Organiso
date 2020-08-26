@@ -11,7 +11,7 @@
     <string name="text_4">Advertisements</string>
     <string name="text_5">Probably fraud</string>
     <string name="tab_text_6">Blocked</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_settings">Settings</string>
 
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
@@ -51,4 +51,12 @@
     <string name="mms">mms</string>
     <string name="share">Share</string>
     <string name="forward">Forward</string>
+    <string name="conversation_is_muted">conversation is muted</string>
+    <string name="mute">Mute</string>
+    <string name="unMute">UnMute</string>
+    <string name="title">Title</string>
+    <string name="describe_bug_here">Describe bug here</string>
+    <string name="submit_report">Submit Report</string>
+    <string name="add_file">Add File</string>
+    <string name="attach_file">Attach File</string>
 </resources>

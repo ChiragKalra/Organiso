@@ -31,6 +31,7 @@ class MessageNotificationManager (private val mContext: Context) {
     )
 
     fun sendSmsNotification(conversation: Conversation, message: Message) {
+        if (conversation.isMuted) return
         val yeah = Intent(mContext, ConversationActivity::class.java)
             .putExtra("ye", conversation)
         val pendingIntent: PendingIntent = PendingIntent.getActivity(

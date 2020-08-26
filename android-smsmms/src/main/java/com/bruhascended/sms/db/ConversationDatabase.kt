@@ -20,6 +20,7 @@ data class Conversation (
     var label: Int,
     var forceLabel: Int,
     val probs: FloatArray,
+    var isMuted: Boolean = false,
     var lastMMS: Boolean = false,
 ): Serializable
 

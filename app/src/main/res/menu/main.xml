@@ -18,6 +18,11 @@
          android:icon="@drawable/ic_baseline_settings_24"
          app:showAsAction="ifRoom"/>
     <item
+        android:id="@+id/action_promotions"
+        android:orderInCategory="300"
+        android:title="@string/tab_text_4"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_spam"
         android:orderInCategory="300"
         android:title="@string/tab_text_5"

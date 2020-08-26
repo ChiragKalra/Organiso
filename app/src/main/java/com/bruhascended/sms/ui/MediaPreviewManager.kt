@@ -1,10 +1,11 @@
-package com.bruhascended.sms.ui.media
+package com.bruhascended.sms.ui
 
 import android.content.Intent
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
+import android.os.Parcelable
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -78,7 +79,7 @@ class MediaPreviewManager(
             }
         }
 
-        mmsURI = data.data!!
+        mmsURI = data.data ?: data.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
         mmsTypeString = mActivity.contentResolver.getType(mmsURI)!!
         mmsType = when {
             mmsTypeString.startsWith("image") -> {

@@ -22,12 +22,16 @@ import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.*
 import com.bruhascended.sms.services.MMSSender
 import com.bruhascended.sms.services.SMSSender
-import com.bruhascended.sms.ui.media.MediaPreviewManager
+import com.bruhascended.sms.ui.MediaPreviewManager
 import com.bruhascended.sms.ui.conversastion.MessageListViewAdaptor
 import com.bruhascended.sms.ui.conversastion.MessageMultiChoiceModeListener
 import com.bruhascended.sms.ui.main.MainViewModel
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 
 var conversationSender: String? = null
@@ -44,6 +48,7 @@ class ConversationActivity : AppCompatActivity() {
     private var inputManager: InputMethodManager? = null
 
     private lateinit var mpm: MediaPreviewManager
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     private fun showSearchLayout() {
         searchLayout.apply {
@@ -102,10 +107,9 @@ class ConversationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        PreferenceManager.getDefaultSharedPreferences(this)
-            .getBoolean("dark_theme", false).apply {
-                if (this) setTheme(R.style.DarkTheme_NoActionBar)
-            }
+        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)
+        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+
         setContentView(R.layout.activity_conversation)
 
         mContext = this
@@ -114,6 +118,7 @@ class ConversationActivity : AppCompatActivity() {
         conversation = intent.getSerializableExtra("ye") as Conversation
         smsSender = SMSSender(this, conversation, sendButton)
         mmsSender = MMSSender(this, conversation, sendButton)
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         conversationSender = conversation.sender
 
         setSupportActionBar(toolbar)
@@ -134,6 +139,11 @@ class ConversationActivity : AppCompatActivity() {
                     mContext.resources.getString(labelText[it])
                 ).allowMainThreadQueries().build().manager()
             }
+        }
+
+        if (conversation.id != null) {
+            conversation.read = true
+            mainViewModel.daos[conversation.label].update(conversation)
         }
 
         mdb = Room.databaseBuilder(
@@ -164,6 +174,7 @@ class ConversationActivity : AppCompatActivity() {
 
         if (conversation.id == null) {
             messageEditText.setText(conversation.lastSMS)
+            if (intent.data != null) mpm.showMediaPreview(intent)
             sendButton.callOnClick()
         }
 
@@ -205,6 +216,9 @@ class ConversationActivity : AppCompatActivity() {
                 AlertDialog.Builder(mContext)
                     .setTitle("Do you want to block $display?")
                     .setPositiveButton("Block") { dialog, _ ->
+                        val bundle = Bundle()
+                        bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to 5")
+                        firebaseAnalytics.logEvent("conversation_moved", bundle)
                         moveTo(conversation, 5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -214,6 +228,9 @@ class ConversationActivity : AppCompatActivity() {
                 AlertDialog.Builder(mContext)
                     .setTitle("Do you want to report $display as spam?")
                     .setPositiveButton("Report") { dialog, _ ->
+                        val bundle = Bundle()
+                        bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to 4")
+                        firebaseAnalytics.logEvent("conversation_moved", bundle)
                         moveTo(conversation, 4)
                         Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -223,6 +240,9 @@ class ConversationActivity : AppCompatActivity() {
                 AlertDialog.Builder(mContext)
                     .setTitle("Do you want to delete this conversation?")
                     .setPositiveButton("Delete") { dialog, _ ->
+                        val bundle = Bundle()
+                        bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to -1")
+                        firebaseAnalytics.logEvent("conversation_moved", bundle)
                         moveTo(conversation, -1)
                         Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -236,6 +256,9 @@ class ConversationActivity : AppCompatActivity() {
                     .setTitle("Move this conversation to")
                     .setSingleChoiceItems(choices, selection) { _, select -> selection = select}
                     .setPositiveButton("Move") { dialog, _ ->
+                        val bundle = Bundle()
+                        bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to $selection")
+                        firebaseAnalytics.logEvent("conversation_moved", bundle)
                         moveTo(conversation, selection)
                         Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -244,6 +267,17 @@ class ConversationActivity : AppCompatActivity() {
             R.id.action_search -> {
                 showSearchLayout()
                 backButton.setOnClickListener{ hideSearchLayout() }
+                null
+            }
+            R.id.action_mute -> {
+                conversation.isMuted = !conversation.isMuted
+                mainViewModel.daos[conversation.label].update(conversation)
+                GlobalScope.launch {
+                    delay(300)
+                    runOnUiThread {
+                        item.title = if (conversation.isMuted) "UnMute" else "Mute"
+                    }
+                }
                 null
             }
             else -> null
@@ -258,13 +292,19 @@ class ConversationActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val muteItem = menu!!.findItem(R.id.action_mute)
+        muteItem.title = if (conversation.isMuted) "UnMute" else "Mute"
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.conversation, menu)
         return true
     }
 
     override fun onPause() {
-        conversationSender = null
+       conversationSender = null
         super.onPause()
     }
 

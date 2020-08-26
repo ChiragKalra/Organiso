@@ -3,45 +3,45 @@ package com.bruhascended.sms.ui.main
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Typeface
 import android.provider.ContactsContract
+import android.text.Spannable
 import android.text.SpannableString
 import android.text.format.DateFormat
 import android.text.format.DateUtils
+import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.QuickContactBadge
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.bruhascended.sms.R
-import com.bruhascended.sms.data.retrieveContactPhoto
+import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.ui.dpMemoryCache
 import java.util.*
-import kotlin.collections.HashMap
 
-class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : BaseAdapter() {
 
-    private val mContext: Context = context
-    private val conversations: List<Conversation> = data
-    private var memoryCache = HashMap<String, Bitmap?>()
+class ConversationListViewAdaptor(
+    private val mContext: Context,
+    private val conversations: MutableList<Conversation>
+) : BaseAdapter() {
+
     private var mSelectedItemsIds = SparseBooleanArray()
-    private var colors: Array<Int>
-
-    init {
-        colors = arrayOf(
-            ContextCompat.getColor(mContext, R.color.red),
-            ContextCompat.getColor(mContext, R.color.blue),
-            ContextCompat.getColor(mContext, R.color.purple),
-            ContextCompat.getColor(mContext, R.color.green),
-            ContextCompat.getColor(mContext, R.color.teal),
-            ContextCompat.getColor(mContext, R.color.orange)
-        )
-    }
+    private var colors: Array<Int> = arrayOf(
+        ContextCompat.getColor(mContext, R.color.red),
+        ContextCompat.getColor(mContext, R.color.blue),
+        ContextCompat.getColor(mContext, R.color.purple),
+        ContextCompat.getColor(mContext, R.color.green),
+        ContextCompat.getColor(mContext, R.color.teal),
+        ContextCompat.getColor(mContext, R.color.orange)
+    )
+    private var cm: ContactsManager = ContactsManager(mContext)
 
     private fun displayTime(time: Long): String {
         val smsTime = Calendar.getInstance()
@@ -53,7 +53,10 @@ class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : 
         return when {
             DateUtils.isToday(time) -> DateFormat.format(timeFormatString, smsTime).toString()
             DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "Yesterday"
-            now[Calendar.YEAR] == smsTime[Calendar.YEAR] -> DateFormat.format(dateFormatString, smsTime).toString()
+            now[Calendar.YEAR] == smsTime[Calendar.YEAR] -> DateFormat.format(
+                dateFormatString,
+                smsTime
+            ).toString()
             else -> DateFormat.format(dateYearFormatString, smsTime).toString()
         }
     }
@@ -69,6 +72,11 @@ class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : 
         mSelectedItemsIds = SparseBooleanArray()
     }
 
+    fun add(persons: List<Conversation>) {
+        conversations.addAll(persons)
+    }
+
+
     private fun selectView(position: Int, value: Boolean) {
         if (value) mSelectedItemsIds.put(position, value)
         else mSelectedItemsIds.delete(position)
@@ -82,18 +90,28 @@ class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : 
         val root = layoutInflater.inflate(R.layout.item_conversation, parent, false)
 
         val imageView: QuickContactBadge = root.findViewById(R.id.dp)
+        val muteImage: ImageView = root.findViewById(R.id.mutedImage)
         val senderTextView: TextView = root.findViewById(R.id.sender)
         val messageTextView: TextView = root.findViewById(R.id.lastMessage)
         val timeTextView: TextView = root.findViewById(R.id.time)
 
         senderTextView.text = cur.name ?: cur.sender
-        messageTextView.text = cur.lastSMS
 
-        if (cur.lastMMS) {
+        val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+
+        messageTextView.text = if (cur.lastMMS) {
             val str = SpannableString("Media: ${cur.lastSMS}")
-            str.setSpan(StyleSpan(Typeface.BOLD), 0, 6, 0)
-            messageTextView.text = str
+            val color = mContext.getColor(R.color.colorAccent)
+            str.setSpan(ForegroundColorSpan(color), 0, 6, 0)
+            if (!cur.read) str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
+            str
+        } else {
+            val str = SpannableString(cur.lastSMS)
+            if (!cur.read) str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
+            str
         }
+
+        if (cur.isMuted) muteImage.visibility = View.VISIBLE
 
         timeTextView.text = displayTime(cur.time)
 
@@ -103,18 +121,18 @@ class ConversationListViewAdaptor(context: Context, data: List<Conversation>) : 
         imageView.setBackgroundColor(colors[position % colors.size])
 
         if (cur.sender.first().isLetter()) {
-            imageView.setImageResource(R.drawable.ic_business)
+            imageView.setImageResource(R.drawable.ic_bot)
             imageView.isEnabled = false
             val density = mContext.resources.displayMetrics.density
             val dps = 12 * density.toInt()
             imageView.setPadding(dps, dps, dps, dps)
         } else if (cur.name != null) {
-            if (memoryCache.containsKey(cur.sender)) {
-                val dp = memoryCache[cur.sender]
+            if (dpMemoryCache.containsKey(cur.sender)) {
+                val dp = dpMemoryCache[cur.sender]
                 if (dp != null) imageView.setImageBitmap(dp)
             } else Thread {
-                memoryCache[cur.sender] = retrieveContactPhoto(mContext, cur.sender)
-                val dp = memoryCache[cur.sender]
+                dpMemoryCache[cur.sender] = cm.retrieveContactPhoto(cur.sender)
+                val dp = dpMemoryCache[cur.sender]
                 (mContext as Activity).runOnUiThread {
                     if (dp != null) imageView.setImageBitmap(dp)
                 }

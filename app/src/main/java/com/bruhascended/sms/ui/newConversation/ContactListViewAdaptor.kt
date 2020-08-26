@@ -2,7 +2,6 @@ package com.bruhascended.sms.ui.newConversation
 
 import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,28 +11,24 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.Contact
-import com.bruhascended.sms.data.retrieveContactPhoto
-import java.util.HashMap
+import com.bruhascended.sms.data.ContactsManager
+import com.bruhascended.sms.ui.dpMemoryCache
 
-class ContactListViewAdaptor (data: Array<Contact>, context: Context):
-    RecyclerView.Adapter<ContactListViewAdaptor.MyViewHolder>() {
+class ContactListViewAdaptor (
+    private val contacts: Array<Contact>,
+    private val mContext: Context
+): RecyclerView.Adapter<ContactListViewAdaptor.MyViewHolder>() {
 
-    private val mContext: Context = context
-    private var colors: Array<Int>
-    private val memoryCache = HashMap<String, Bitmap?>()
+    private val colors: Array<Int> = arrayOf(
+        ContextCompat.getColor(mContext, R.color.red),
+        ContextCompat.getColor(mContext, R.color.blue),
+        ContextCompat.getColor(mContext, R.color.purple),
+        ContextCompat.getColor(mContext, R.color.green),
+        ContextCompat.getColor(mContext, R.color.teal),
+        ContextCompat.getColor(mContext, R.color.orange)
+    )
 
-    init {
-        colors = arrayOf(
-            ContextCompat.getColor(mContext, R.color.red),
-            ContextCompat.getColor(mContext, R.color.blue),
-            ContextCompat.getColor(mContext, R.color.purple),
-            ContextCompat.getColor(mContext, R.color.green),
-            ContextCompat.getColor(mContext, R.color.teal),
-            ContextCompat.getColor(mContext, R.color.orange)
-        )
-    }
-
-    private val contacts: Array<Contact> = data
+    private val cm = ContactsManager(mContext)
 
     var onItemClick: ((Contact) -> Unit)? = null
 
@@ -65,18 +60,17 @@ class ContactListViewAdaptor (data: Array<Contact>, context: Context):
         holder.dp.setBackgroundColor(colors[position % colors.size])
 
         val ad = contact.number
-        if (memoryCache.containsKey(ad)) {
-            val dp = memoryCache[ad]
+        if (dpMemoryCache.containsKey(ad)) {
+            val dp = dpMemoryCache[ad]
             if (dp != null) holder.dp.setImageBitmap(dp)
             else holder.dp.setImageResource(R.drawable.ic_baseline_person_48)
         } else Thread {
-            memoryCache[ad] = retrieveContactPhoto(mContext, ad)
-            val dp = memoryCache[ad]
+            dpMemoryCache[ad] = cm.retrieveContactPhoto(ad)
+            val dp = dpMemoryCache[ad]
             (mContext as Activity).runOnUiThread {
                 if (dp != null) holder.dp.setImageBitmap(dp)
             }
         }.start()
-
     }
 
 }
