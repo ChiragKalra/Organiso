@@ -218,7 +218,7 @@ class ConversationActivity : AppCompatActivity() {
                     .setPositiveButton("Block") { dialog, _ ->
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to 5")
-                        firebaseAnalytics.logEvent("conversation_moved", bundle)
+                        firebaseAnalytics.logEvent("${conversation.label}_to_5", bundle)
                         moveTo(conversation, 5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -230,7 +230,8 @@ class ConversationActivity : AppCompatActivity() {
                     .setPositiveButton("Report") { dialog, _ ->
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to 4")
-                        firebaseAnalytics.logEvent("conversation_moved", bundle)
+                        firebaseAnalytics.logEvent("${conversation.label}_to_4", bundle)
+                        reportSpam(this, conversation)
                         moveTo(conversation, 4)
                         Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -242,7 +243,7 @@ class ConversationActivity : AppCompatActivity() {
                     .setPositiveButton("Delete") { dialog, _ ->
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to -1")
-                        firebaseAnalytics.logEvent("conversation_moved", bundle)
+                        firebaseAnalytics.logEvent("${conversation.label}_to_-1", bundle)
                         moveTo(conversation, -1)
                         Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -258,7 +259,7 @@ class ConversationActivity : AppCompatActivity() {
                     .setPositiveButton("Move") { dialog, _ ->
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to $selection")
-                        firebaseAnalytics.logEvent("conversation_moved", bundle)
+                        firebaseAnalytics.logEvent("${conversation.label}_to_$selection", bundle)
                         moveTo(conversation, selection)
                         Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
                         dialog.dismiss()

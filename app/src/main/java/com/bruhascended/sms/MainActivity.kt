@@ -135,7 +135,6 @@ class MainActivity : AppCompatActivity() {
         if (sp.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
         else setTheme(R.style.LightTheme)
 
-        promotionsVisible = sp.getBoolean("promotions_category_visible", true)
 
         setContentView(R.layout.activity_main)
 
@@ -143,6 +142,7 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(mToolbar)
 
+        promotionsVisible = sp.getBoolean("promotions_category_visible", true)
         viewPager.adapter = SectionsPagerAdapter(this, supportFragmentManager, promotionsVisible)
         viewPager.offscreenPageLimit = if (promotionsVisible) 3 else 2
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {

@@ -15,10 +15,12 @@ import android.widget.AbsListView
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.moveTo
+import com.bruhascended.sms.db.reportSpam
 import com.bruhascended.sms.mainViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.GlobalScope
@@ -107,7 +109,7 @@ class ConversationMultiChoiceModeListener(
                                 moveTo(selectedItem, -1, mContext)
                                 val bundle = Bundle()
                                 bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to -1")
-                                firebaseAnalytics.logEvent("conversation_moved", bundle)
+                                firebaseAnalytics.logEvent("${selectedItem.label}_to_-1", bundle)
                             }
                         }
                         Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
@@ -130,7 +132,7 @@ class ConversationMultiChoiceModeListener(
                                 moveTo(selectedItem, 5)
                                 val bundle = Bundle()
                                 bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to 5")
-                                firebaseAnalytics.logEvent("conversation_moved", bundle)
+                                firebaseAnalytics.logEvent("${selectedItem.label}_to_5", bundle)
                             }
                         }
                         Toast.makeText(mContext,"Senders Blocked", Toast.LENGTH_LONG).show()
@@ -151,9 +153,10 @@ class ConversationMultiChoiceModeListener(
                             if (selected.valueAt(i)) {
                                 val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
                                 moveTo(selectedItem, 4)
+                                reportSpam(mContext as AppCompatActivity, selectedItem)
                                 val bundle = Bundle()
                                 bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to 4")
-                                firebaseAnalytics.logEvent("conversation_moved", bundle)
+                                firebaseAnalytics.logEvent("${selectedItem.label}_to_4", bundle)
                             }
                         }
                         Toast.makeText(mContext, "Senders Reported Spam", Toast.LENGTH_LONG).show()
@@ -179,7 +182,7 @@ class ConversationMultiChoiceModeListener(
                                 moveTo(selectedItem, selection)
                                 val bundle = Bundle()
                                 bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to $selection")
-                                firebaseAnalytics.logEvent("conversation_moved", bundle)
+                                firebaseAnalytics.logEvent("${selectedItem.label}_to_-1", bundle)
                             }
                         }
                         Toast.makeText(mContext, "Conversations Moved", Toast.LENGTH_LONG).show()

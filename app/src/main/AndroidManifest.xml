@@ -73,7 +73,6 @@
             android:name=".NewConversationActivity"
             android:enabled="true"
             android:exported="true"
-            android:label="Send MMS"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

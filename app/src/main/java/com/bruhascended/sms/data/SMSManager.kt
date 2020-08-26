@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.room.Room
 import com.bruhascended.sms.*
 import com.bruhascended.sms.db.*
-import com.bruhascended.sms.ml.FeatureExtractor
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.start.StartViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -206,6 +205,28 @@ class SMSManager (context: Context) {
         for (i in 0..4) {
             for (conversation in labels[i].toTypedArray()) {
                 if (!savedSenders.contains(conversation)) {
+                    var muted = false
+                    if (isMainViewModelNull()) {
+                        for (j in 0..4) {
+                            val temp = Room.databaseBuilder(
+                                mContext, ConversationDatabase::class.java,
+                                mContext.resources.getString(labelText[j])
+                            ).build().manager()
+                            val res = temp.findBySender(conversation)
+                            for (item in res) {
+                                if (!muted) muted = item.isMuted
+                                temp.delete(item)
+                            }
+                        }
+                    } else {
+                        for (j in 0..4) {
+                            val res = mainViewModel.daos[j].findBySender(conversation)
+                            for (item in res) {
+                                if (!muted) muted = item.isMuted
+                                mainViewModel.daos[j].delete(item)
+                            }
+                        }
+                    }
                     val con = Conversation(
                         null,
                         conversation,
@@ -218,23 +239,9 @@ class SMSManager (context: Context) {
                         senderForce[conversation] ?: -1,
                         senderToProbs[conversation]?: FloatArray(5){
                             if (it == 0) 1f else 0f
-                        }
+                        },
+                        muted
                     )
-                    if (isMainViewModelNull()) {
-                        for (j in 0..4) {
-                            val temp = Room.databaseBuilder(
-                                mContext, ConversationDatabase::class.java,
-                                mContext.resources.getString(labelText[j])
-                            ).build().manager()
-                            val res = temp.findBySender(conversation)
-                            for (item in res) temp.delete(item)
-                        }
-                    } else {
-                        for (j in 0..4) {
-                            val res = mainViewModel.daos[j].findBySender(conversation)
-                            for (item in res) mainViewModel.daos[j].delete(item)
-                        }
-                    }
                     mDaos[i].insert(con)
 
                     savedSenders.add(conversation)
