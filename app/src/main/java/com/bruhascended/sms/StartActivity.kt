@@ -3,7 +3,6 @@ package com.bruhascended.sms
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -37,38 +36,6 @@ class StartActivity : AppCompatActivity() {
     )
 
     @SuppressLint("SetTextI18n")
-    private fun messages() {
-        if (sharedPref.getBoolean(arg, false)) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-            return
-        }
-
-        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-        setSmsAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
-        startActivityForResult(setSmsAppIntent, 1)
-    }
-
-    private fun openSMSappChooser() {
-        val packageManager = packageManager
-        val componentName = ComponentName(this, StartActivity::class.java)
-        packageManager.setComponentEnabledSetting(
-            componentName,
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP
-        )
-        val selector = Intent(Intent.ACTION_MAIN)
-        selector.addCategory(Intent.CATEGORY_APP_MESSAGING)
-        selector.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(selector)
-        packageManager.setComponentEnabledSetting(
-            componentName,
-            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-            PackageManager.DONT_KILL_APP
-        )
-    }
-
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -81,9 +48,17 @@ class StartActivity : AppCompatActivity() {
         else messages()
     }
 
-    override fun onPause() {
-        super.onPause()
-        manager?.destroy()
+    @SuppressLint("SetTextI18n")
+    private fun messages() {
+        if (sharedPref.getBoolean(arg, false)) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
+        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+        setSmsAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+        startActivityForResult(setSmsAppIntent, 1)
     }
 
     override fun onRequestPermissionsResult(
@@ -100,8 +75,6 @@ class StartActivity : AppCompatActivity() {
         )
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
         setContentView(R.layout.activity_start)
-
-        openSMSappChooser()
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
             progress.value = -1
@@ -163,5 +136,10 @@ class StartActivity : AppCompatActivity() {
             (mContext as Activity).finish()
         }.start()
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        manager?.destroy()
     }
 }

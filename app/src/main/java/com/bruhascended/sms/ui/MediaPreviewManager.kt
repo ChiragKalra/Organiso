@@ -44,6 +44,7 @@ class MediaPreviewManager(
                 GlobalScope.launch {
                     delay(400)
                     mActivity.runOnUiThread {
+                        alpha = 1f
                         visibility = View.GONE
                     }
                 }

@@ -2,6 +2,7 @@ package com.bruhascended.sms.db
 
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
+import androidx.paging.PagingSource
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.google.gson.Gson
@@ -42,9 +43,6 @@ interface ConversationDao {
 
     @Query("SELECT * FROM conversations ORDER BY time DESC")
     fun loadAll(): LiveData<List<Conversation>>
-
-    @Query("SELECT * FROM conversations ORDER BY time DESC")
-    fun loadAllPaged(): DataSource.Factory<Int, Conversation>
 
     @RawQuery
     fun findByQuery(query: SupportSQLiteQuery): List<Conversation>

@@ -29,7 +29,7 @@ import java.util.*
 
 class ConversationListViewAdaptor(
     private val mContext: Context,
-    private val conversations: MutableList<Conversation>
+    private val conversations: List<Conversation>
 ) : BaseAdapter() {
 
     private var mSelectedItemsIds = SparseBooleanArray()
@@ -71,11 +71,6 @@ class ConversationListViewAdaptor(
     fun removeSelection() {
         mSelectedItemsIds = SparseBooleanArray()
     }
-
-    fun add(persons: List<Conversation>) {
-        conversations.addAll(persons)
-    }
-
 
     private fun selectView(position: Int, value: Boolean) {
         if (value) mSelectedItemsIds.put(position, value)
