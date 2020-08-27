@@ -1,17 +1,15 @@
 package com.bruhascended.sms
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.Telephony
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.bruhascended.sms.data.SMSManager
@@ -28,13 +26,6 @@ class StartActivity : AppCompatActivity() {
 
     private val arg = "InitDataOrganized"
 
-    private val perms = arrayOf(
-        Manifest.permission.READ_SMS,
-        Manifest.permission.SEND_SMS,
-        Manifest.permission.RECEIVE_SMS,
-        Manifest.permission.READ_CONTACTS
-    )
-
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,38 +33,32 @@ class StartActivity : AppCompatActivity() {
         mContext = this
         sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
 
-        if (PackageManager.PERMISSION_DENIED in
-            Array(perms.size){ActivityCompat.checkSelfPermission(this, perms[it])})
-            ActivityCompat.requestPermissions(this, perms, 1)
-        else messages()
+        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+        setSmsAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+
+        if (sharedPref.getBoolean(arg, false)) {
+            if (Telephony.Sms.getDefaultSmsPackage(this) == packageName) {
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+                return
+            }
+            startActivityForResult(setSmsAppIntent, 1)
+        }
+        startActivityForResult(setSmsAppIntent, 0)
     }
 
     @SuppressLint("SetTextI18n")
-    private fun messages() {
-        if (sharedPref.getBoolean(arg, false)) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode==1) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
-
-        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-        setSmsAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
-        startActivityForResult(setSmsAppIntent, 1)
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) = messages()
-
-    @SuppressLint("SetTextI18n")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-            "dark_theme",
-            false
-        )
-        setTheme(if (dark) R.style.DarkTheme_NoActionBar else R.style.LightTheme_NoActionBar)
+        val dark = PreferenceManager.getDefaultSharedPreferences(this)
+            .getBoolean("dark_theme", false)
+        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+        window.statusBarColor = getColor(if (dark) R.color.background_dark else R.color.background_light)
+        if (!dark) window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         setContentView(R.layout.activity_start)
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
