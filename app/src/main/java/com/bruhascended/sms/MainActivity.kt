@@ -19,8 +19,8 @@ import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.ConversationDatabase
+import com.bruhascended.db.Conversation
+import com.bruhascended.db.ConversationDatabase
 import com.bruhascended.sms.services.SMSReceiver
 import com.bruhascended.sms.ui.main.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel

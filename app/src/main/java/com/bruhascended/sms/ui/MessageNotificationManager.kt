@@ -10,8 +10,8 @@ import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.sms.ConversationActivity
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.Message
+import com.bruhascended.db.Conversation
+import com.bruhascended.db.Message
 
 class MessageNotificationManager (private val mContext: Context) {
     private val descriptionText = arrayOf(

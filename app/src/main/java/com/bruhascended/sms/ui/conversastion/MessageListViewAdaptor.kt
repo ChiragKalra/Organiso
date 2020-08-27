@@ -19,7 +19,7 @@ import android.widget.*
 import androidx.core.content.FileProvider
 import androidx.core.view.doOnDetach
 import com.bruhascended.sms.R
-import com.bruhascended.sms.db.Message
+import com.bruhascended.db.Message
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*

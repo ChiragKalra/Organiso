@@ -1,9 +1,10 @@
-package com.bruhascended.sms.db
+package com.bruhascended.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import java.io.Serializable
+
 
 
 @Entity(tableName = "messages")

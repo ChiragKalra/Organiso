@@ -9,7 +9,7 @@ import com.bruhascended.sms.ml.Normalizer.stem
 import com.bruhascended.sms.ml.Normalizer.time
 import com.bruhascended.sms.ml.Normalizer.toFloat
 import com.bruhascended.sms.ml.Normalizer.trimUrls
-import com.bruhascended.sms.db.Message
+import com.bruhascended.db.Message
 
 
 class FeatureExtractor (context: Context) {
@@ -63,6 +63,7 @@ class FeatureExtractor (context: Context) {
         return k+l
     }
 
+    /*
     fun getFeatureMatrix(messages: ArrayList<Message>): Array<Array<Float>> {
         val wordFeatures = getWordFeatures()
 
@@ -71,7 +72,7 @@ class FeatureExtractor (context: Context) {
         val m = messages.size
 
         return Array(m){getFeatures(k, l, messages[it], wordFeatures)}
-    }
+    }*/
 
 
     fun getFeatureVector(message: Message): Array<Float> {

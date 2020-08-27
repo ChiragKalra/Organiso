@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.db.Conversation
+import com.bruhascended.db.Conversation
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.MediaPreviewManager
 import com.bruhascended.sms.ui.newConversation.ContactListViewAdaptor

@@ -1,10 +1,13 @@
-package com.bruhascended.sms.db;
+package com.bruhascended.sms;
 
 import android.content.Context;
 import android.webkit.MimeTypeMap;
 
 import androidx.room.Room;
 
+import com.bruhascended.db.Message;
+import com.bruhascended.db.MessageDao;
+import com.bruhascended.db.MessageDatabase;
 import com.google.android.mms.ContentType;
 import com.google.android.mms.pdu_alt.MultimediaMessagePdu;
 import com.google.android.mms.pdu_alt.PduBody;
@@ -29,7 +32,7 @@ public class MMSHandler {
         return destination.getAbsolutePath();
     }
 
-     private static String getRaw(Context context, String number) {
+    private static String getRaw(Context context, String number) {
         if (number.startsWith("+")) {
             try {
                 PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.createInstance(context);
@@ -51,10 +54,9 @@ public class MMSHandler {
                     if (part == null || part.getData() == null || part.getContentType() == null || part.getName() == null)
                         continue;
                     String partType = new String(part.getContentType());
-                    String partName = new String(part.getName());
                     String address = pdu.getFrom().toString();
                     String name = getRaw(context, address);
-                    Long date = System.currentTimeMillis();
+                    long date = System.currentTimeMillis();
 
                     MessageDao db = Room.databaseBuilder(
                             context.getApplicationContext(),

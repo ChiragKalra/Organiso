@@ -18,9 +18,7 @@ import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
 import com.bruhascended.sms.R
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.db.MessageDao
+import com.bruhascended.db.*
 import com.bruhascended.sms.db.moveTo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
