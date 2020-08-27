@@ -1,10 +1,8 @@
-package com.bruhascended.sms.db
+package com.bruhascended.db
 
 import androidx.lifecycle.LiveData
-import androidx.paging.DataSource
-import androidx.paging.PagingSource
-import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
+import androidx.room.*
 import com.google.gson.Gson
 import java.io.Serializable
 

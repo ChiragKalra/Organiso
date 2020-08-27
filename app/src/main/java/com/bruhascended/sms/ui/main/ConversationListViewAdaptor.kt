@@ -22,7 +22,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.db.Conversation
+import com.bruhascended.db.Conversation
 import com.bruhascended.sms.ui.dpMemoryCache
 import java.util.*
 

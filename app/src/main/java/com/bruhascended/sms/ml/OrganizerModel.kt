@@ -3,7 +3,7 @@ package com.bruhascended.sms.ml
 import android.content.Context
 import android.os.Bundle
 import com.bruhascended.sms.data.MESSAGE_CHECK_COUNT
-import com.bruhascended.sms.db.Message
+import com.bruhascended.db.Message
 import com.google.firebase.analytics.FirebaseAnalytics
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate

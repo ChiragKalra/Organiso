@@ -70,9 +70,8 @@ class CategoryFragment : Fragment() {
                     else -> 0
                 }
             )
-            val liveData = mainViewModel.daos[label].loadAll()
             (mContext as Activity).runOnUiThread {
-                liveData.observe(viewLifecycleOwner, {
+                mainViewModel.daos[label].loadAll().observe(viewLifecycleOwner, {
                     progressView.visibility = View.GONE
                     if (it.isEmpty()) {
                         textView.visibility = TextView.VISIBLE

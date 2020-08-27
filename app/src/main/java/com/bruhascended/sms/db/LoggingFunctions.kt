@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.room.Room
+import com.bruhascended.db.*
 import com.google.firebase.database.FirebaseDatabase
 
 fun reportSpam(activity: AppCompatActivity, conversation: Conversation) {

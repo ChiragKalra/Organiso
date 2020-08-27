@@ -10,8 +10,8 @@ import android.webkit.MimeTypeMap
 import android.widget.ImageButton
 import android.widget.Toast
 import com.bruhascended.sms.conversationDao
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.Message
+import com.bruhascended.db.Conversation
+import com.bruhascended.db.Message
 import com.bruhascended.sms.mainViewModel
 import java.io.File
 import java.io.FileOutputStream

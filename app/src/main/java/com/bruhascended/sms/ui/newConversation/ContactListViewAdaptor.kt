@@ -40,7 +40,7 @@ class ContactListViewAdaptor (
 
         init {
             view.setOnClickListener {
-                onItemClick?.invoke(contacts[adapterPosition])
+                onItemClick?.invoke(contacts[layoutPosition])
             }
         }
     }

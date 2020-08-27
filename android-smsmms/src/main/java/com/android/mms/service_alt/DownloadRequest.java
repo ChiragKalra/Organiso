@@ -42,7 +42,7 @@ import com.klinker.android.send_message.Transaction;
 
 import timber.log.Timber;
 
-import static com.bruhascended.sms.db.MMSHandler.processPduAttachments;
+import static com.bruhascended.sms.MMSHandler.processPduAttachments;
 
 /**
  * Request to download an MMS

@@ -19,7 +19,11 @@ import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.sms.db.*
+import com.bruhascended.db.Conversation
+import com.bruhascended.db.ConversationDatabase
+import com.bruhascended.db.Message
+import com.bruhascended.db.MessageDao
+import com.bruhascended.db.MessageDatabase
 import com.bruhascended.sms.services.MMSSender
 import com.bruhascended.sms.services.SMSSender
 import com.bruhascended.sms.ui.MediaPreviewManager
@@ -219,7 +223,7 @@ class ConversationActivity : AppCompatActivity() {
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to 5")
                         firebaseAnalytics.logEvent("${conversation.label}_to_5", bundle)
-                        moveTo(conversation, 5)
+                        com.bruhascended.sms.db.moveTo(conversation, 5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }
@@ -231,8 +235,8 @@ class ConversationActivity : AppCompatActivity() {
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to 4")
                         firebaseAnalytics.logEvent("${conversation.label}_to_4", bundle)
-                        reportSpam(this, conversation)
-                        moveTo(conversation, 4)
+                        com.bruhascended.sms.db.reportSpam(this, conversation)
+                        com.bruhascended.sms.db.moveTo(conversation, 4)
                         Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }
@@ -244,7 +248,7 @@ class ConversationActivity : AppCompatActivity() {
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to -1")
                         firebaseAnalytics.logEvent("${conversation.label}_to_-1", bundle)
-                        moveTo(conversation, -1)
+                        com.bruhascended.sms.db.moveTo(conversation, -1)
                         Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         finish()
@@ -260,7 +264,7 @@ class ConversationActivity : AppCompatActivity() {
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to $selection")
                         firebaseAnalytics.logEvent("${conversation.label}_to_$selection", bundle)
-                        moveTo(conversation, selection)
+                        com.bruhascended.sms.db.moveTo(conversation, selection)
                         Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }

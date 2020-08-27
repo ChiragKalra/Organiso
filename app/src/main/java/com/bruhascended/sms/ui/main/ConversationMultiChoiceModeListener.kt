@@ -18,7 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.sms.db.Conversation
+import com.bruhascended.db.Conversation
 import com.bruhascended.sms.db.moveTo
 import com.bruhascended.sms.db.reportSpam
 import com.bruhascended.sms.mainViewModel
@@ -153,7 +153,10 @@ class ConversationMultiChoiceModeListener(
                             if (selected.valueAt(i)) {
                                 val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
                                 moveTo(selectedItem, 4)
-                                reportSpam(mContext as AppCompatActivity, selectedItem)
+                                reportSpam(
+                                    mContext as AppCompatActivity,
+                                    selectedItem
+                                )
                                 val bundle = Bundle()
                                 bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to 4")
                                 firebaseAnalytics.logEvent("${selectedItem.label}_to_4", bundle)

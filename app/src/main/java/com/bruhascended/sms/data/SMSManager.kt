@@ -4,8 +4,9 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import androidx.room.Room
+import com.bruhascended.db.*
 import com.bruhascended.sms.*
-import com.bruhascended.sms.db.*
+import com.bruhascended.sms.R
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.start.StartViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
