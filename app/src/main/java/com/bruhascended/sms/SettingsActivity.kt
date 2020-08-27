@@ -71,7 +71,7 @@ class SettingsActivity : AppCompatActivity(),
 
     class HeaderFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.header_preferences, rootKey)
+            setPreferencesFromResource(R.xml.preferences, rootKey)
 
             val notifPref: Preference = findPreference("notifications")!!
             val githubPref: Preference = findPreference("github")!!

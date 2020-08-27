@@ -67,6 +67,10 @@
         <item name="android:alertDialogTheme">@style/DarkTheme.AlertDialog</item>
     </style>
 
+    <style name="DarkTheme.NoActionBar">
+        <item name="colorPrimaryDark">@color/background_light</item>
+    </style>
+
     <style name="DarkTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColor">@color/text_primary_dark</item>
@@ -86,6 +90,10 @@
         <item name="multiChoiceSelectorColor">@color/selection_background_light</item>
         <item name="bg_accent">@color/message_bg_accent_light</item>
        <item name="android:alertDialogTheme">@style/LightTheme.AlertDialog</item>
+    </style>
+
+    <style name="LightTheme.NoActionBar">
+        <item name="colorPrimaryDark">@color/background_light</item>
     </style>
 
     <style name="LightTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">

@@ -39,7 +39,7 @@ class MessageNotificationManager (private val mContext: Context) {
         )
         if (conversation.label != 5) {
             val builder = NotificationCompat.Builder(mContext, conversation.label.toString())
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .setContentTitle(conversation.name?: message.sender)
                 .setContentText(message.text)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))

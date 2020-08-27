@@ -73,7 +73,7 @@ class StartActivity : AppCompatActivity() {
             "dark_theme",
             false
         )
-        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+        setTheme(if (dark) R.style.DarkTheme_NoActionBar else R.style.LightTheme_NoActionBar)
         setContentView(R.layout.activity_start)
 
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
