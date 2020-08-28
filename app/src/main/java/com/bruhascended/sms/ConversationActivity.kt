@@ -255,11 +255,15 @@ class ConversationActivity : AppCompatActivity() {
                     }
             }
             R.id.action_move -> {
-                val choices = Array(4){mContext.resources.getString(labelText[it])}
-                var selection = conversation.label
+                val choices = ArrayList<String>().apply {
+                    for (i in 0..3) {
+                        if (i!=conversation.label) add(mContext.resources.getString(labelText[i]))
+                    }
+                }.toTypedArray()
+                var selection = 0
                 AlertDialog.Builder(mContext)
                     .setTitle("Move this conversation to")
-                    .setSingleChoiceItems(choices, selection) { _, select -> selection = select}
+                    .setSingleChoiceItems(choices, selection) { _, select -> selection = select + if (select>=conversation.label) 1 else 0}
                     .setPositiveButton("Move") { dialog, _ ->
                         val bundle = Bundle()
                         bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to $selection")

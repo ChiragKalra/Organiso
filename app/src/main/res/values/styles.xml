@@ -4,10 +4,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-
         <item name="tabTextColor">@color/text_secondary_dark</item>
         <item name="tabSelectedTextColor">@color/text_primary_dark</item>
-
         <item name="android:itemBackground">@color/popupMenuBackground</item>
 
         <item name="tabTextAppearance">@style/TabText</item>
@@ -20,8 +18,11 @@
         <item name="windowActionModeOverlay">true</item>
     </style>
 
-    <style name="Splash" parent="AppTheme">
+    <style name="Splash" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="backgroundColor">@color/background_light</item>
         <item name="android:windowBackground">@drawable/bg_splash</item>
+        <item name="colorPrimaryDark">@color/background_light</item>
+        <item name="android:navigationBarColor">?backgroundColor</item>
     </style>
 
     <style name="TabText" parent="TextAppearance.Design.Tab">
@@ -63,6 +64,7 @@
         <item name="multiChoiceSelectorColor">@color/selection_background_dark</item>
         <item name="bg_accent">@color/message_bg_accent_dark</item>
         <item name="android:alertDialogTheme">@style/DarkTheme.AlertDialog</item>
+        <item name="android:navigationBarColor">?backgroundColor</item>
     </style>
 
     <style name="DarkTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
@@ -84,6 +86,7 @@
         <item name="multiChoiceSelectorColor">@color/selection_background_light</item>
         <item name="bg_accent">@color/message_bg_accent_light</item>
        <item name="android:alertDialogTheme">@style/LightTheme.AlertDialog</item>
+        <item name="android:navigationBarColor">?backgroundColor</item>
     </style>
 
 

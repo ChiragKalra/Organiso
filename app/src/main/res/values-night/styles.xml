@@ -1,0 +1,8 @@
+<resources>
+    <style name="Splash" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="backgroundColor">@color/background_dark</item>
+        <item name="android:windowBackground">@drawable/bg_splash</item>
+        <item name="colorPrimaryDark">@color/background_dark</item>
+        <item name="android:navigationBarColor">?backgroundColor</item>
+    </style>
+</resources>

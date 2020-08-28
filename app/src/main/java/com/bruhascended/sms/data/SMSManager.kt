@@ -25,7 +25,7 @@ val labelText = arrayOf(
 
 const val MESSAGE_CHECK_COUNT = 6
 
-class SMSManager (context: Context) {
+class SMSManager(context: Context) {
     private var mContext: Context = context
 
     private val messages = HashMap<String, ArrayList<Message>>()
@@ -64,12 +64,13 @@ class SMSManager (context: Context) {
 
             do {
                 var name = cursor.getString(nameID)
-                if (name != null) {
+                val messageContent = cursor.getString(messageID)
+                if (name != null && messageContent != null && messageContent != "") {
                     name = cm.getRaw(name)
                     val message = Message(
                         null,
                         name,
-                        cursor.getString(messageID),
+                        messageContent,
                         cursor.getString(typeID).toInt(),
                         cursor.getString(dateID).toLong(),
                         -1
@@ -187,14 +188,17 @@ class SMSManager (context: Context) {
             timeTaken = (System.currentTimeMillis()-startTime)
 
             val bundle = Bundle()
-            bundle.putString(FirebaseAnalytics.Param.METHOD, if (pageViewModel == null) "background" else "init")
+            bundle.putString(
+                FirebaseAnalytics.Param.METHOD,
+                if (pageViewModel == null) "background" else "init"
+            )
             firebaseAnalytics.logEvent("conversation_organised", bundle)
         }
     }
 
     fun destroy() {
         mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
-            .putInt("index", completedSenderIndex+1)
+            .putInt("index", completedSenderIndex + 1)
             .putInt("done", completedMessage)
             .putLong("timeTaken", timeTaken)
             .apply()
@@ -206,7 +210,7 @@ class SMSManager (context: Context) {
         for (i in 0..4) {
             for (conversation in labels[i].toTypedArray()) {
                 if (!savedSenders.contains(conversation)) {
-                    var muted = false
+                    var preConversation: Conversation? = null
                     if (isMainViewModelNull()) {
                         for (j in 0..4) {
                             val temp = Room.databaseBuilder(
@@ -214,39 +218,59 @@ class SMSManager (context: Context) {
                                 mContext.resources.getString(labelText[j])
                             ).build().manager()
                             val res = temp.findBySender(conversation)
-                            for (item in res) {
-                                if (!muted) muted = item.isMuted
-                                temp.delete(item)
+                            if (res.isNotEmpty()) {
+                                preConversation = res.first()
+                                for (item in res.slice(1 until res.size))
+                                    temp.delete(item)
+                                break
                             }
                         }
                     } else {
                         for (j in 0..4) {
                             val res = mainViewModel.daos[j].findBySender(conversation)
-                            for (item in res) {
-                                if (!muted) muted = item.isMuted
-                                mainViewModel.daos[j].delete(item)
+                            if (res.isNotEmpty()) {
+                                preConversation = res.first()
+                                for (item in res.slice(1 until res.size))
+                                    mainViewModel.daos[j].delete(item)
+                                break
                             }
                         }
                     }
-                    val con = Conversation(
-                        null,
-                        conversation,
-                        senderNameMap[conversation],
-                        "",
-                        true,
-                        messages[conversation]!!.last().time,
-                        messages[conversation]!!.last().text,
-                        i,
-                        senderForce[conversation] ?: -1,
-                        senderToProbs[conversation]?: FloatArray(5){
-                            if (it == 0) 1f else 0f
-                        },
-                        muted
-                    )
-                    mDaos[i].insert(con)
+                    val con = if (preConversation != null) {
+                        preConversation.apply {
+                            read = false
+                            time = messages[conversation]!!.last().time
+                            lastSMS = messages[conversation]!!.last().text
+                            label = i
+                            forceLabel = senderForce[conversation] ?: -1
+                            probs = senderToProbs[conversation] ?: FloatArray(5) {
+                                if (it == 0) 1f else 0f
+                            }
+                            name = senderNameMap[conversation]
+                            mDaos[i].update(preConversation)
+                        }
+                        preConversation
+                    } else {
+                        val con = Conversation(
+                            null,
+                            conversation,
+                            senderNameMap[conversation],
+                            "",
+                            false,
+                            messages[conversation]!!.last().time,
+                            messages[conversation]!!.last().text,
+                            i,
+                            senderForce[conversation] ?: -1,
+                            senderToProbs[conversation] ?: FloatArray(5) {
+                                if (it == 0) 1f else 0f
+                            }
+                        )
+                        mDaos[i].insert(con)
+                        con.id = mDaos[i].findBySender(conversation).first().id
+                        con
+                    }
 
                     savedSenders.add(conversation)
-                    con.id = mDaos[i].findBySender(conversation).first().id
 
                     val mdb = if (conversationSender == conversation) conversationDao
                     else Room.databaseBuilder(

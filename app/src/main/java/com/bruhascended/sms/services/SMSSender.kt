@@ -45,7 +45,7 @@ class SMSSender (
         }
     }
 
-    private fun addSmsToDb(smsText: String, date: Long, type: Int, delivered: Boolean) {
+    private fun addSmsToDb(smsText: String, date: Long, type: Int, delivered: Boolean, saveToDb: Boolean = false) {
         Thread {
             val message = Message(
                 null,
@@ -59,7 +59,7 @@ class SMSSender (
             val qs = conversationDao.search(date)
             for (m in qs) conversationDao.delete(m)
             conversationDao.insert(message)
-            if (type == 2) addSmsToGlobal(message)
+            if (saveToDb) addSmsToGlobal(message)
 
             if (conversation.id == null) {
                 var found = false
@@ -95,7 +95,7 @@ class SMSSender (
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent?) {
                 when (resultCode) {
-                    Activity.RESULT_OK -> addSmsToDb(smsText, date, 2, false)
+                    Activity.RESULT_OK -> addSmsToDb(smsText, date, 2, false, saveToDb = true)
                     SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
                         Toast.makeText(
                             mContext,
@@ -119,8 +119,8 @@ class SMSSender (
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent?) {
                 when (resultCode) {
-                    Activity.RESULT_OK -> addSmsToDb(smsText, date, 2, true)
-                    Activity.RESULT_CANCELED -> addSmsToDb(smsText, date, 2, false)
+                    Activity.RESULT_OK -> addSmsToDb(smsText, date, 4, true)
+                    Activity.RESULT_CANCELED -> addSmsToDb(smsText, date, 4, false)
                 }
                 mContext.unregisterReceiver(this)
             }
