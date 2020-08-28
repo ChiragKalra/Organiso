@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.Telephony
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
@@ -33,27 +34,40 @@ class StartActivity : AppCompatActivity() {
         mContext = this
         sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
 
-        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-        setSmsAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+        onPause()
 
-        if (sharedPref.getBoolean(arg, false)) {
-            if (Telephony.Sms.getDefaultSmsPackage(this) == packageName) {
+        if (Telephony.Sms.getDefaultSmsPackage(this) == packageName) {
+            if (sharedPref.getBoolean(arg, false)) {
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
                 return
+            } else {
+                organise()
+                return
             }
-            startActivityForResult(setSmsAppIntent, 1)
         }
+
+        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+        setSmsAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
         startActivityForResult(setSmsAppIntent, 0)
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode==1) {
+        if (resultCode != Activity.RESULT_OK) {
+            Toast.makeText(this, "Unable to set as default SMS app.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+        if (sharedPref.getBoolean(arg, false)) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
+        organise()
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun organise() {
         val dark = PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean("dark_theme", false)
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
@@ -61,11 +75,11 @@ class StartActivity : AppCompatActivity() {
         if (!dark) window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         setContentView(R.layout.activity_start)
 
-        pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
-            progress.value = -1
-            disc.value = 0
-        }
 
+        pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
+        progress.value = -1
+        disc.value = 0
+    }
         pageViewModel.progress.observe(this, {
             if (it > -1) {
                 if (progressBar.indeterminateMode) {
@@ -120,7 +134,6 @@ class StartActivity : AppCompatActivity() {
             sharedPref.edit().putBoolean(arg, true).apply()
             (mContext as Activity).finish()
         }.start()
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onPause() {

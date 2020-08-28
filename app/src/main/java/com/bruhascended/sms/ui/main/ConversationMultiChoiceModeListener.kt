@@ -174,10 +174,14 @@ class ConversationMultiChoiceModeListener(
                 true
             }
             R.id.action_move -> {
-                val choices = Array(4){ its -> mContext.resources.getString(labelText[its])}
-                var selection = label
+                val choices = ArrayList<String>().apply {
+                    for (i in 0..3) {
+                        if (i!=label) add(mContext.resources.getString(labelText[i]))
+                    }
+                }.toTypedArray()
+                var selection = 0
                 AlertDialog.Builder(mContext).setTitle("Move this conversation to")
-                    .setSingleChoiceItems(choices, selection) { _, select -> selection = select}
+                    .setSingleChoiceItems(choices, selection) { _, select -> selection = select + if (select>=label) 1 else 0}
                     .setPositiveButton("Move") { dialog, _ ->
                         for (i in 0 until selected.size()) {
                             if (selected.valueAt(i)) {

@@ -8,7 +8,6 @@ import com.bruhascended.db.ConversationDao
 
 class MainViewModel : ViewModel() {
     lateinit var daos: Array<ConversationDao>
-    fun isDaosNull() = !::daos.isInitialized
 
     var contacts = MutableLiveData<Array<Contact>?>().apply {
         postValue(null)

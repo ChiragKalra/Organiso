@@ -19,7 +19,7 @@ data class Conversation (
     var lastSMS: String,
     var label: Int,
     var forceLabel: Int,
-    val probs: FloatArray,
+    var probs: FloatArray,
     var isMuted: Boolean = false,
     var lastMMS: Boolean = false
 ): Serializable

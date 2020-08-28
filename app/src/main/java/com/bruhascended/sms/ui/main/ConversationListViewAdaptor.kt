@@ -19,12 +19,17 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.QuickContactBadge
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.db.Conversation
+import com.bruhascended.sms.data.Contact
+import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ui.dpMemoryCache
 import java.util.*
+import kotlin.to
 
 
 class ConversationListViewAdaptor(
@@ -90,7 +95,28 @@ class ConversationListViewAdaptor(
         val messageTextView: TextView = root.findViewById(R.id.lastMessage)
         val timeTextView: TextView = root.findViewById(R.id.time)
 
+        if (cur.name == null) {
+            mainViewModel.contacts.observe(
+                mContext as AppCompatActivity,
+                object : Observer<Array<Contact>?> {
+                    override fun onChanged(contacts: Array<Contact>?) {
+                        mainViewModel.contacts.removeObserver(this)
+                        if (contacts == null) return
+                        for (contact in contacts) {
+                            if (contact.number == cur.sender) {
+                                cur.name = contact.name
+                                mainViewModel.daos[cur.label].update(cur)
+                                break
+                            }
+                        }
+
+                    }
+                }
+            )
+        }
         senderTextView.text = cur.name ?: cur.sender
+
+
 
         val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 
