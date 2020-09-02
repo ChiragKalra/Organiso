@@ -26,6 +26,10 @@ interface MessageDao {
     @Insert
     fun insert(message: Message)
 
+    @Transaction
+    @Insert
+    fun insertAll(messages: List<Message>)
+
     @Update
     fun update(message: Message)
 

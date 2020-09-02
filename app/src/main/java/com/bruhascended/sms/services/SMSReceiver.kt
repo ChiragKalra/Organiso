@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.telephony.SmsMessage
-import com.bruhascended.sms.data.SMSManager
+import com.bruhascended.sms.data.IncomingSMSManager
 import com.bruhascended.sms.ui.MessageNotificationManager
 
 
@@ -32,26 +32,25 @@ class SMSReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == "android.provider.Telephony.SMS_RECEIVED" &&
+            context.packageName == Telephony.Sms.getDefaultSmsPackage(context)) return
+
         val mnm = MessageNotificationManager(context)
-        mnm.createNotificationChannel()
         mContext = context
-        if (intent.action == "android.provider.Telephony.SMS_DELIVER") {
-            val bundle = intent.extras
-            if (bundle != null) Thread {
-                val pduObjects = bundle["pdus"] as Array<*>
-                val smm = SMSManager(context)
+        val bundle = intent.extras
+        if (bundle != null) Thread {
+            val pduObjects = bundle["pdus"] as Array<*>
+            val smm = IncomingSMSManager(context)
+            var sender = ""
+            var content = ""
 
-                for (aObject in pduObjects) {
-                    val currentSMS = SmsMessage.createFromPdu(aObject as ByteArray, bundle.getString("format"))
-                    val sender = currentSMS.displayOriginatingAddress.toString()
-                    val content = currentSMS.messageBody.toString()
-                    smm.putMessage(sender, content)
-                    saveSms(sender, content)
-                }
-
-                smm.getLabels()
-                for (pair in smm.saveMessages()) mnm.sendSmsNotification(pair.second, pair.first)
-            }.start()
-        }
+            for (aObject in pduObjects) {
+                val currentSMS = SmsMessage.createFromPdu(aObject as ByteArray, bundle.getString("format"))
+                sender = currentSMS.displayOriginatingAddress.toString()
+                content += currentSMS.messageBody.toString()
+            }
+            mnm.sendSmsNotification(smm.putMessage(sender, content))
+            saveSms(sender, content)
+        }.start()
     }
 }

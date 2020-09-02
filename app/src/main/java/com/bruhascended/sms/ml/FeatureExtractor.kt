@@ -15,6 +15,7 @@ import com.bruhascended.db.Message
 class FeatureExtractor (context: Context) {
     private var mContext = context
     private val nonWordFeatures = arrayOf("Time", "Digit", "Decimal", "URL", "Date", "NumberOfWords")
+    private val wordFeatures = getWordFeatures()
 
     private fun getWordFeatures(): List<String> {
         val fileStr = mContext.assets.open("words.csv").bufferedReader().use{
@@ -57,7 +58,6 @@ class FeatureExtractor (context: Context) {
     }
 
     fun getFeaturesLength() : Int {
-        val wordFeatures = getWordFeatures()
         val k = nonWordFeatures.size
         val l = wordFeatures.size
         return k+l
@@ -76,11 +76,8 @@ class FeatureExtractor (context: Context) {
 
 
     fun getFeatureVector(message: Message): Array<Float> {
-        val wordFeatures = getWordFeatures()
-
         val k = nonWordFeatures.size
         val l = wordFeatures.size
-
         return getFeatures(k, l, message, wordFeatures)
     }
 

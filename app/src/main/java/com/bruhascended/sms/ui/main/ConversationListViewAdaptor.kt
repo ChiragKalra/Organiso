@@ -116,14 +116,12 @@ class ConversationListViewAdaptor(
         }
         senderTextView.text = cur.name ?: cur.sender
 
-
-
         val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 
         messageTextView.text = if (cur.lastMMS) {
             val str = SpannableString("Media: ${cur.lastSMS}")
             val color = mContext.getColor(R.color.colorAccent)
-            str.setSpan(ForegroundColorSpan(color), 0, 6, 0)
+            str.setSpan(ForegroundColorSpan(color), 0, 6, flag)
             if (!cur.read) str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
             str
         } else {

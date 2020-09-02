@@ -7,13 +7,14 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.bruhascended.sms.ConversationActivity
-import com.bruhascended.sms.R
-import com.bruhascended.sms.data.labelText
 import com.bruhascended.db.Conversation
 import com.bruhascended.db.Message
+import com.bruhascended.sms.ConversationActivity
+import com.bruhascended.sms.R
+import com.bruhascended.sms.conversationSender
+import com.bruhascended.sms.data.labelText
 
-class MessageNotificationManager (private val mContext: Context) {
+class MessageNotificationManager(private val mContext: Context) {
     private val descriptionText = arrayOf(
         R.string.text_1,
         R.string.text_2,
@@ -30,17 +31,22 @@ class MessageNotificationManager (private val mContext: Context) {
         NotificationManager.IMPORTANCE_NONE
     )
 
-    fun sendSmsNotification(conversation: Conversation, message: Message) {
-        if (conversation.isMuted) return
+    fun sendSmsNotification(pair: Pair<Message, Conversation>) {
+        val conversation: Conversation = pair.second
+        val message: Message = pair.first
+
+        if (conversation.isMuted || conversation.sender == conversationSender) return
         val yeah = Intent(mContext, ConversationActivity::class.java)
             .putExtra("ye", conversation)
+        yeah.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             mContext, 0, yeah, PendingIntent.FLAG_UPDATE_CURRENT
         )
+
         if (conversation.label != 5) {
             val builder = NotificationCompat.Builder(mContext, conversation.label.toString())
                 .setSmallIcon(R.drawable.messages)
-                .setContentTitle(conversation.name?: message.sender)
+                .setContentTitle(conversation.name ?: message.sender)
                 .setContentText(message.text)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)

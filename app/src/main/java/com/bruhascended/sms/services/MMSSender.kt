@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.*
 import android.net.Uri
-import android.provider.Telephony
 import android.telephony.SmsManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageButton
@@ -52,25 +51,6 @@ class MMSSender(
         return destination.absolutePath
     }
 
-    private fun addSmsToGlobal(message: Message) {
-        val romsThatDontSaveSms = arrayOf("HUAWEI")
-        if (android.os.Build.MANUFACTURER in romsThatDontSaveSms) {
-            try {
-                val values = ContentValues()
-                values.put("address", message.sender)
-                values.put("body", message.text)
-                values.put("read", 0)
-                values.put("date", message.time)
-                values.put("type", message.type)
-                mContext.contentResolver.insert(Telephony.Sms.CONTENT_URI, values)
-                mContext.contentResolver.insert(Telephony.Sms.Sent.CONTENT_URI, values)
-                mContext.contentResolver.insert(Telephony.Sms.Outbox.CONTENT_URI, values)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-        }
-    }
-
     private fun addSmsToDb(date: Long, type: Int) {
         Thread {
             val message = Message(
@@ -85,7 +65,6 @@ class MMSSender(
             val qs = conversationDao.search(date)
             for (m in qs) conversationDao.delete(m)
             conversationDao.insert(message)
-            if (type == 2) addSmsToGlobal(message)
 
             if (conversation.id == null) {
                 var found = false
@@ -117,7 +96,7 @@ class MMSSender(
         }.start()
     }
 
-    fun sendSMS(smsText: String, data: Uri, type: String) {
+    fun sendMMS(smsText: String, data: Uri, type: String) {
         val date = System.currentTimeMillis()
         this.smsText = smsText
         uri = data
