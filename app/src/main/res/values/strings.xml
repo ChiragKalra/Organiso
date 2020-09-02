@@ -59,4 +59,5 @@
     <string name="submit_report">Submit Report</string>
     <string name="add_file">Add File</string>
     <string name="attach_file">Attach File</string>
+    <string name="resume_process_in_background">Resume process in background</string>
 </resources>

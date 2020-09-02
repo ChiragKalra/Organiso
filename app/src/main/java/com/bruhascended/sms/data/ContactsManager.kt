@@ -21,8 +21,7 @@ import kotlin.collections.toTypedArray
 
 data class Contact (
     val name: String,
-    val number: String,
-    val dp: String?
+    val number: String
 ): Serializable
 
 
@@ -143,7 +142,7 @@ class ContactsManager(context: Context) {
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    list.add(Contact(name, getRaw(phoneNo), null))
+                    list.add(Contact(name, getRaw(phoneNo)))
                 }
                 pCur?.close()
             }

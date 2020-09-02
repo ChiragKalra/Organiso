@@ -73,32 +73,28 @@ class CategoryFragment : Fragment() {
             (mContext as Activity).runOnUiThread {
                 mainViewModel.daos[label].loadAll().observe(viewLifecycleOwner, {
                     progressView.visibility = View.GONE
-                    if (it.isEmpty()) {
-                        textView.visibility = TextView.VISIBLE
-                    } else {
-                        textView.visibility = TextView.INVISIBLE
+                    if (it.isEmpty()) textView.visibility = TextView.VISIBLE
+                    else textView.visibility = TextView.INVISIBLE
 
-                        listView.apply {
-                            val listViewState = onSaveInstanceState()!!
-                            adapter = ConversationListViewAdaptor(mContext, it.toMutableList())
-                            onRestoreInstanceState(listViewState)
-                            onItemClickListener = AdapterView.OnItemClickListener { _, _, i, _ ->
-                                intent.putExtra("ye", it[i])
-                                startActivity(intent)
-                            }
-                            setMultiChoiceModeListener(
-                                ConversationMultiChoiceModeListener(mContext, listView, label)
-                            )
-                            mainViewModel.selection.observe(viewLifecycleOwner, { int ->
-                                if (int == -1) {
-                                    choiceMode = ListView.CHOICE_MODE_NONE
-                                    choiceMode = ListView.CHOICE_MODE_MULTIPLE_MODAL
-                                }
-                            })
+                    listView.apply {
+                        val listViewState = onSaveInstanceState()!!
+                        adapter = ConversationListViewAdaptor(mContext, it.toMutableList())
+                        onRestoreInstanceState(listViewState)
+                        onItemClickListener = AdapterView.OnItemClickListener { _, _, i, _ ->
+                            intent.putExtra("ye", it[i])
+                            startActivity(intent)
                         }
+                        setMultiChoiceModeListener(
+                            ConversationMultiChoiceModeListener(mContext, listView, label)
+                        )
+                        mainViewModel.selection.observe(viewLifecycleOwner, { int ->
+                            if (int == -1) {
+                                choiceMode = ListView.CHOICE_MODE_NONE
+                                choiceMode = ListView.CHOICE_MODE_MULTIPLE_MODAL
+                            }
+                        })
                     }
-                }
-                )
+                })
             }
         }
         return root

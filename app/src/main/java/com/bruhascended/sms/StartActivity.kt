@@ -1,102 +1,116 @@
 package com.bruhascended.sms
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.PowerManager
 import android.provider.Telephony
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.preference.PreferenceManager
 import com.bruhascended.sms.data.SMSManager
 import com.bruhascended.sms.ui.MessageNotificationManager
 import com.bruhascended.sms.ui.start.StartViewModel
 import kotlinx.android.synthetic.main.activity_start.*
+import java.lang.Math.round
 
 
 class StartActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var pageViewModel: StartViewModel
     private lateinit var sharedPref: SharedPreferences
-    private var manager: SMSManager? = null
 
     private val arg = "InitDataOrganized"
 
-    @SuppressLint("SetTextI18n")
+    private val perms = arrayOf(
+        Manifest.permission.READ_SMS,
+        Manifest.permission.SEND_SMS,
+        Manifest.permission.RECEIVE_SMS,
+        Manifest.permission.READ_CONTACTS
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         mContext = this
         sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
 
-        onPause()
+        if (PackageManager.PERMISSION_DENIED in
+            Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
+            ActivityCompat.requestPermissions(this, perms, 1)
+        else messages()
 
-        if (Telephony.Sms.getDefaultSmsPackage(this) == packageName) {
-            if (sharedPref.getBoolean(arg, false)) {
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
-                return
-            } else {
-                organise()
-                return
-            }
-        }
-
-        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-        setSmsAppIntent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
-        startActivityForResult(setSmsAppIntent, 0)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode != Activity.RESULT_OK) {
-            Toast.makeText(this, "Unable to set as default SMS app.", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) = messages()
+
+    private fun messages() {
         if (sharedPref.getBoolean(arg, false)) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
         }
+        if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
+            Toast.makeText(this,
+                "Set app as default SMS app for best performance.", Toast.LENGTH_LONG).show()
+            val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
+            startActivityForResult(setSmsAppIntent, 1)
+        } else {
+            organise()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         organise()
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun organise() {
-        val dark = PreferenceManager.getDefaultSharedPreferences(this)
-            .getBoolean("dark_theme", false)
-        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
-        window.statusBarColor = getColor(if (dark) R.color.background_dark else R.color.background_light)
-        if (!dark) window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+                Configuration.UI_MODE_NIGHT_YES ) {
+            setTheme(R.style.DarkTheme)
+            window.statusBarColor = getColor(R.color.background_dark)
+        } else {
+            setTheme(R.style.LightTheme)
+            window.statusBarColor = getColor(R.color.background_light)
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
+
         setContentView(R.layout.activity_start)
 
-
         pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
-        progress.value = -1
+        progress.value = 0f
         disc.value = 0
     }
         pageViewModel.progress.observe(this, {
-            if (it > -1) {
+            if (it > 0) {
                 if (progressBar.indeterminateMode) {
                     progressBar.indeterminateMode = false
                     pageViewModel.disc.postValue(1)
                 }
-                progressText.text = "$it%"
-                if (progressBar.progress != 0f) progressBar.setProgressWithAnimation(
-                    it.toFloat(),
-                    ((it - progressBar.progress) * 100).toLong()
-                )
-                else progressBar.progress = it.toFloat()
+                progressText.text = "${round(it)}%"
+                progressBar.progress = it
             }
         })
 
         pageViewModel.disc.observe(this, {
             infoText.text = pageViewModel.discStrings[it]
+            if (it == 2) etaText.visibility = View.INVISIBLE
         })
 
         var preTimer: CountDownTimer? = null
@@ -108,36 +122,37 @@ class StartActivity : AppCompatActivity() {
                     val sec = (millisUntilFinished / 1000) % 60
                     val min = (millisUntilFinished / 1000) / 60
                     if ((0 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
-                        if (min > 0) etaText.text = "ETA ${min}min ${sec}sec"
-                        else etaText.text = "ETA ${sec}sec"
+                        etaText.text = when {
+                            min > 0 -> "ETA ${min}min"
+                            sec > 9 -> "Less than a minute remaining"
+                            sec > 3 -> "Just a few more seconds"
+                            else -> "Finishing Up"
+                        }
                     } else etaText.text = ""
                 }
-
                 override fun onFinish() {}
             }.start()
         })
 
-        val mnm = MessageNotificationManager(mContext)
-        mnm.createNotificationChannel()
+        MessageNotificationManager(mContext).createNotificationChannel()
 
         Thread {
-            manager = SMSManager(mContext)
-            manager?.getMessages()
-
-            manager?.getLabels(pageViewModel)
-
-            pageViewModel.disc.postValue(2)
-            manager?.saveMessages()
+            val wakeLock: PowerManager.WakeLock =
+                (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+                    newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMS Organiser::MyWakelock").apply {
+                        acquire(10*60*1000L)
+                    }
+                }
+            SMSManager(mContext, pageViewModel).apply {
+                getMessages()
+                getLabels()
+            }
 
             startActivity(Intent(mContext, MainActivity::class.java))
+            wakeLock.release()
 
             sharedPref.edit().putBoolean(arg, true).apply()
             (mContext as Activity).finish()
         }.start()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        manager?.destroy()
     }
 }

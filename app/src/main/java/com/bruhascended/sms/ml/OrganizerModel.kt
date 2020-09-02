@@ -19,6 +19,19 @@ class OrganizerModel (context: Context) {
     private val mContext = context
     private val fe = FeatureExtractor(mContext)
     private val firebaseAnalytics = FirebaseAnalytics.getInstance(mContext)
+    private val tfliteModel = loadModelFile(mContext)
+    private val delegate = GpuDelegate()
+    private val options = Interpreter.Options()
+        .setUseNNAPI(true)
+        .setNumThreads(6)
+        .addDelegate(delegate)
+    private val tflite =  try {
+        Interpreter(tfliteModel, options)
+    } catch (e: IllegalArgumentException) {
+        Interpreter(tfliteModel, Interpreter.Options())
+    }
+
+    private val n = fe.getFeaturesLength()
 
     private fun loadModelFile(context: Context): MappedByteBuffer {
         val fileDescriptor = context.assets.openFd("model.tflite")
@@ -29,21 +42,9 @@ class OrganizerModel (context: Context) {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
+    fun getPrediction(message: Message) = getPredictions(arrayListOf(message))
+
     fun getPredictions(messages: ArrayList<Message>) : FloatArray {
-
-        val tfliteModel = loadModelFile(mContext)
-        val delegate = GpuDelegate()
-        val options = Interpreter.Options()
-            .setUseNNAPI(true)
-            .addDelegate(delegate)
-        val tflite =  try {
-            Interpreter(tfliteModel, options)
-        } catch (e: IllegalArgumentException) {
-            Interpreter(tfliteModel, Interpreter.Options())
-        }
-
-        val n = fe.getFeaturesLength()
-
         val probs = FloatArray(5){0f}
 
         for (i in 0 until min(messages.size, MESSAGE_CHECK_COUNT)) {
@@ -64,10 +65,13 @@ class OrganizerModel (context: Context) {
             bundle.putString(FirebaseAnalytics.Param.METHOD, "default")
             firebaseAnalytics.logEvent("message_organised", bundle)
         }
+        return probs
+    }
 
+    fun close() {
         delegate.close()
         tflite.close()
-        return probs
+        tfliteModel.clear()
     }
 
 }

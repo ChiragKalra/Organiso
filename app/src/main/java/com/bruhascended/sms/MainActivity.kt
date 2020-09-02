@@ -2,6 +2,7 @@ package com.bruhascended.sms
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -135,7 +136,6 @@ class MainActivity : AppCompatActivity() {
         if (sp.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
         else setTheme(R.style.LightTheme)
 
-
         setContentView(R.layout.activity_main)
 
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
@@ -158,6 +158,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(mContext, NewConversationActivity::class.java))
         }
     }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onNewIntent(intent: Intent?) {}
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val sp = PreferenceManager.getDefaultSharedPreferences(this)

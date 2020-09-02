@@ -7,7 +7,7 @@
         app:allowDividerBelow="false"
         app:icon="@drawable/ic_theme"
         app:key="dark_theme"
-        app:title="Dark Theme" />
+        app:title="Force Dark Theme" />
 
     <PreferenceCategory
         app:title="Categories"/>

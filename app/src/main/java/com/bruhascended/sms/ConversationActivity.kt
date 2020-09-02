@@ -18,12 +18,8 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.room.Room
+import com.bruhascended.db.*
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.db.Conversation
-import com.bruhascended.db.ConversationDatabase
-import com.bruhascended.db.Message
-import com.bruhascended.db.MessageDao
-import com.bruhascended.db.MessageDatabase
 import com.bruhascended.sms.services.MMSSender
 import com.bruhascended.sms.services.SMSSender
 import com.bruhascended.sms.ui.MediaPreviewManager
@@ -64,7 +60,10 @@ class ConversationActivity : AppCompatActivity() {
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         searchEditText.requestFocus()
-                        inputManager?.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
+                        inputManager?.showSoftInput(
+                            searchEditText,
+                            InputMethodManager.SHOW_IMPLICIT
+                        )
                         notSupported.visibility = TextView.GONE
                         sendLayout.visibility = LinearLayout.GONE
                     }
@@ -100,7 +99,7 @@ class ConversationActivity : AppCompatActivity() {
             }).start()
 
 
-        mdb.loadAll().observe(mContext as AppCompatActivity, object: Observer<List<Message>> {
+        mdb.loadAll().observe(mContext as AppCompatActivity, object : Observer<List<Message>> {
             override fun onChanged(t: List<Message>?) {
                 listView.adapter = MessageListViewAdaptor(mContext, t!!)
                 progress.visibility = View.GONE
@@ -109,16 +108,7 @@ class ConversationActivity : AppCompatActivity() {
         })
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)
-        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
-
-        setContentView(R.layout.activity_conversation)
-
-        mContext = this
-        inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-
+    private fun setupActivity(intent: Intent) {
         conversation = intent.getSerializableExtra("ye") as Conversation
         smsSender = SMSSender(this, conversation, sendButton)
         mmsSender = MMSSender(this, conversation, sendButton)
@@ -167,7 +157,7 @@ class ConversationActivity : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             if (mpm.mmsType > 0) {
-                mmsSender.sendSMS(messageEditText.text.toString(), mpm.mmsURI, mpm.mmsTypeString)
+                mmsSender.sendMMS(messageEditText.text.toString(), mpm.mmsURI, mpm.mmsTypeString)
                 messageEditText.setText("")
                 mpm.hideMediaPreview()
             } else if (messageEditText.text.toString().trim() != "") {
@@ -187,7 +177,7 @@ class ConversationActivity : AppCompatActivity() {
         }
 
         mdb.loadAll().observe(this, {
-            if(it.count() > 0) it.last().apply {
+            if (it.count() > 0) it.last().apply {
                 conversation.lastSMS = text
                 conversation.time = time
                 conversation.lastMMS = path != null
@@ -197,7 +187,8 @@ class ConversationActivity : AppCompatActivity() {
             listView.apply {
                 val recyclerViewState = onSaveInstanceState()!!
                 if (adapter != null && lastVisiblePosition == adapter.count - 1 &&
-                    childCount > 0 && getChildAt(childCount - 1).bottom <= height) {
+                    childCount > 0 && getChildAt(childCount - 1).bottom <= height
+                ) {
                     adapter = editListAdapter
                     smoothScrollToPosition(adapter.count - 1)
                 } else {
@@ -213,15 +204,40 @@ class ConversationActivity : AppCompatActivity() {
         })
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+            "dark_theme",
+            false
+        )
+        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+
+        setContentView(R.layout.activity_conversation)
+
+        mContext = this
+        inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+
+        setupActivity(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        if (intent != null) setupActivity(intent)
+        super.onNewIntent(intent)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val display = conversation.name ?: conversation.sender
+        if (item.itemId == android.R.id.home) onBackPressed()
         when (item.itemId) {
             R.id.action_block -> {
                 AlertDialog.Builder(mContext)
                     .setTitle("Do you want to block $display?")
                     .setPositiveButton("Block") { dialog, _ ->
                         val bundle = Bundle()
-                        bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to 5")
+                        bundle.putString(
+                            FirebaseAnalytics.Param.METHOD,
+                            "${conversation.label} to 5"
+                        )
                         firebaseAnalytics.logEvent("${conversation.label}_to_5", bundle)
                         com.bruhascended.sms.db.moveTo(conversation, 5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
@@ -233,7 +249,10 @@ class ConversationActivity : AppCompatActivity() {
                     .setTitle("Do you want to report $display as spam?")
                     .setPositiveButton("Report") { dialog, _ ->
                         val bundle = Bundle()
-                        bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to 4")
+                        bundle.putString(
+                            FirebaseAnalytics.Param.METHOD,
+                            "${conversation.label} to 4"
+                        )
                         firebaseAnalytics.logEvent("${conversation.label}_to_4", bundle)
                         com.bruhascended.sms.db.reportSpam(this, conversation)
                         com.bruhascended.sms.db.moveTo(conversation, 4)
@@ -246,7 +265,10 @@ class ConversationActivity : AppCompatActivity() {
                     .setTitle("Do you want to delete this conversation?")
                     .setPositiveButton("Delete") { dialog, _ ->
                         val bundle = Bundle()
-                        bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to -1")
+                        bundle.putString(
+                            FirebaseAnalytics.Param.METHOD,
+                            "${conversation.label} to -1"
+                        )
                         firebaseAnalytics.logEvent("${conversation.label}_to_-1", bundle)
                         com.bruhascended.sms.db.moveTo(conversation, -1)
                         Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
@@ -257,16 +279,21 @@ class ConversationActivity : AppCompatActivity() {
             R.id.action_move -> {
                 val choices = ArrayList<String>().apply {
                     for (i in 0..3) {
-                        if (i!=conversation.label) add(mContext.resources.getString(labelText[i]))
+                        if (i != conversation.label) add(mContext.resources.getString(labelText[i]))
                     }
                 }.toTypedArray()
                 var selection = 0
                 AlertDialog.Builder(mContext)
                     .setTitle("Move this conversation to")
-                    .setSingleChoiceItems(choices, selection) { _, select -> selection = select + if (select>=conversation.label) 1 else 0}
+                    .setSingleChoiceItems(choices, selection) { _, select ->
+                        selection = select + if (select >= conversation.label) 1 else 0
+                    }
                     .setPositiveButton("Move") { dialog, _ ->
                         val bundle = Bundle()
-                        bundle.putString(FirebaseAnalytics.Param.METHOD, "${conversation.label} to $selection")
+                        bundle.putString(
+                            FirebaseAnalytics.Param.METHOD,
+                            "${conversation.label} to $selection"
+                        )
                         firebaseAnalytics.logEvent("${conversation.label}_to_$selection", bundle)
                         com.bruhascended.sms.db.moveTo(conversation, selection)
                         Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
@@ -275,7 +302,7 @@ class ConversationActivity : AppCompatActivity() {
             }
             R.id.action_search -> {
                 showSearchLayout()
-                backButton.setOnClickListener{ hideSearchLayout() }
+                backButton.setOnClickListener { hideSearchLayout() }
                 null
             }
             R.id.action_mute -> {
@@ -305,6 +332,12 @@ class ConversationActivity : AppCompatActivity() {
         val muteItem = menu!!.findItem(R.id.action_mute)
         muteItem.title = if (conversation.isMuted) "UnMute" else "Mute"
         return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        startActivity(Intent(this, MainActivity::class.java)
+            .putExtra("label", conversation.label))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

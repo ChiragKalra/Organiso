@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="LightTheme" parent="AppTheme">
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="backgroundColor">@color/background_light</item>
+        <item name="android:textColorPrimary">@color/text_primary_light</item>
+        <item name="android:textColor">@color/text_primary_light</item>
+        <item name="android:textColorSecondary">@color/text_primary_light</item>
+        <item name="android:textColorHint">@color/text_hint_light</item>
+        <item name="contactItemBackground">@color/list_item_background_light</item>
+        <item name="multiChoiceSelectorColor">@color/selection_background_light</item>
+        <item name="bg_accent">@color/message_bg_accent_light</item>
+        <item name="android:alertDialogTheme">@style/LightTheme.AlertDialog</item>
+        <item name="android:navigationBarColor">?backgroundColor</item>
+    </style>
+</resources>

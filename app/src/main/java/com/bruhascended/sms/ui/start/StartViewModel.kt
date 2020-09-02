@@ -8,10 +8,10 @@ class StartViewModel : ViewModel() {
     val discStrings = arrayOf(
         "Getting your messages.",
         "Organising your messages.",
-        "Finishing up."
+        "Done."
     )
 
-    val progress = MutableLiveData<Int>()
+    val progress = MutableLiveData<Float>()
     val disc = MutableLiveData<Int>()
     val eta = MutableLiveData<Long>()
 
