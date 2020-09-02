@@ -75,6 +75,7 @@ class SettingsActivity : AppCompatActivity(),
 
             val notifPref: Preference = findPreference("notifications")!!
             val githubPref: Preference = findPreference("github")!!
+            val websitePref: Preference = findPreference("website")!!
             val bugPref: Preference = findPreference("report_bug")!!
             val tabPref: SwitchPreferenceCompat = findPreference("promotions_category_visible")!!
             val themePref: SwitchPreferenceCompat = findPreference("dark_theme")!!
@@ -88,7 +89,12 @@ class SettingsActivity : AppCompatActivity(),
             }
 
             githubPref.setOnPreferenceClickListener {
-                val link = Uri.parse("https://github.com/ChiragKalra/sms-organiser-android")
+                val link = Uri.parse("https://github.com/ChiragKalra/Organiso")
+                requireActivity().startActivity(Intent(Intent.ACTION_VIEW, link))
+                false
+            }
+            websitePref.setOnPreferenceClickListener {
+                val link = Uri.parse("https://organiso.web.app/")
                 requireActivity().startActivity(Intent(Intent.ACTION_VIEW, link))
                 false
             }

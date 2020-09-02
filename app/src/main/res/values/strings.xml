@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SMS Organiser</string>
+    <string name="app_name">Organiso</string>
     <string name="tab_text_1">Personal</string>
     <string name="tab_text_2">Important</string>
     <string name="tab_text_3">Transactions</string>
