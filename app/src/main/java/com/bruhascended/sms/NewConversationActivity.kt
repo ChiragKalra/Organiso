@@ -17,6 +17,8 @@ import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.db.Conversation
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.MediaPreviewManager
+import com.bruhascended.sms.ui.isMainViewModelNull
+import com.bruhascended.sms.ui.mainViewModel
 import com.bruhascended.sms.ui.newConversation.ContactListViewAdaptor
 import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.activity_new_conversation.toolbar

@@ -48,6 +48,9 @@ interface MessageDao {
     @Query("SELECT * FROM messages ORDER BY time ASC")
     fun loadAll(): LiveData<List<Message>>
 
+    @Query("SELECT * FROM messages")
+    fun loadAllSync(): List<Message>
+
     @RawQuery
     fun findByQuery(query: SupportSQLiteQuery): List<Message>
 

@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -22,7 +23,7 @@ import com.bruhascended.db.*
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.services.MMSSender
 import com.bruhascended.sms.services.SMSSender
-import com.bruhascended.sms.ui.MediaPreviewManager
+import com.bruhascended.sms.ui.*
 import com.bruhascended.sms.ui.conversastion.MessageListViewAdaptor
 import com.bruhascended.sms.ui.conversastion.MessageMultiChoiceModeListener
 import com.bruhascended.sms.ui.main.MainViewModel
@@ -33,9 +34,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
-
-var conversationSender: String? = null
-lateinit var conversationDao: MessageDao
 
 class ConversationActivity : AppCompatActivity() {
     private lateinit var mdb: MessageDao
@@ -316,6 +314,12 @@ class ConversationActivity : AppCompatActivity() {
                 }
                 null
             }
+            R.id.action_call -> {
+                val intent = Intent(Intent.ACTION_DIAL)
+                intent.data = Uri.parse("tel:${conversation.sender}")
+                startActivity(intent)
+                null
+            }
             else -> null
         }?.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}?.create()?.show()
         return false
@@ -329,15 +333,21 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        val muteItem = menu!!.findItem(R.id.action_mute)
+        if (menu == null) return super.onPrepareOptionsMenu(menu)
+        val muteItem = menu.findItem(R.id.action_mute)
+        val callItem = menu.findItem(R.id.action_call)
+
         muteItem.title = if (conversation.isMuted) "UnMute" else "Mute"
+        callItem.isVisible = conversation.sender.first().isDigit()
         return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        startActivity(Intent(this, MainActivity::class.java)
-            .putExtra("label", conversation.label))
+        startActivity(
+            Intent(this, MainActivity::class.java)
+                .putExtra("label", conversation.label)
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

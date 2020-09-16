@@ -26,6 +26,7 @@ import com.bruhascended.sms.services.SMSReceiver
 import com.bruhascended.sms.ui.main.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
+import com.bruhascended.sms.ui.mainViewModel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -33,8 +34,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
-lateinit var mainViewModel: MainViewModel
-fun isMainViewModelNull() = !(::mainViewModel.isInitialized)
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context

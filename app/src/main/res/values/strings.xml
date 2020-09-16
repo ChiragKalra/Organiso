@@ -14,22 +14,11 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
 
     <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">
-        Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="delete">Delete</string>
-    <string name="app_icon">App Icon</string>
     <string name="display_picture">display picture</string>
     <string name="search">Search</string>
     <string name="settings">Settings</string>
@@ -41,7 +30,6 @@
     <string name="move_to">Move to</string>
     <string name="sending_messages_not_supported">Sender Doesn\'t Support Replies</string>
     <string name="to">To</string>
-    <string name="find">Find</string>
     <string name="back_button">back button</string>
     <string name="no_matches">No matches</string>
     <string name="animated">animated</string>
@@ -50,14 +38,11 @@
     <string name="select_range">Select Range</string>
     <string name="mms">mms</string>
     <string name="share">Share</string>
-    <string name="forward">Forward</string>
     <string name="conversation_is_muted">conversation is muted</string>
     <string name="mute">Mute</string>
     <string name="unMute">UnMute</string>
     <string name="title">Title</string>
     <string name="describe_bug_here">Describe bug here</string>
-    <string name="submit_report">Submit Report</string>
-    <string name="add_file">Add File</string>
-    <string name="attach_file">Attach File</string>
-    <string name="resume_process_in_background">Resume process in background</string>
+    <string name="call">Call</string>
+    <string name="view_contact">View Contact</string>
 </resources>

@@ -7,10 +7,10 @@ import android.provider.Telephony
 import android.telephony.SmsManager
 import android.widget.ImageButton
 import android.widget.Toast
-import com.bruhascended.sms.conversationDao
+import com.bruhascended.sms.ui.conversationDao
 import com.bruhascended.db.Conversation
 import com.bruhascended.db.Message
-import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.ui.mainViewModel
 
 /*
 const val MESSAGE_TYPE_ALL = 0

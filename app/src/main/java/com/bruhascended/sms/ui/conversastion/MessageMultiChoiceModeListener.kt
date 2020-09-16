@@ -103,9 +103,8 @@ class MessageMultiChoiceModeListener(
                 true
             }
             R.id.action_copy -> {
-                val clipboard: ClipboardManager =
-                    mContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val selected: SparseBooleanArray = editListAdapter.getSelectedIds()
+                val clipboard = mContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val selected = editListAdapter.getSelectedIds()
                 val sb = StringBuilder()
                 for (i in 0 until selected.size()) {
                     if (selected.valueAt(i)) {
@@ -113,7 +112,7 @@ class MessageMultiChoiceModeListener(
                         sb.append(selectedItem.text).append('\n')
                     }
                 }
-                val clip: ClipData = ClipData.newPlainText("none", sb.toString())
+                val clip = ClipData.newPlainText("none", sb.toString())
                 clipboard.setPrimaryClip(clip)
                 Toast.makeText(mContext, "Copied", Toast.LENGTH_LONG).show()
                 mode.finish()

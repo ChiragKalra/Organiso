@@ -22,14 +22,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import com.bruhascended.sms.R
-import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.db.Conversation
+import com.bruhascended.sms.R
 import com.bruhascended.sms.data.Contact
-import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.ui.dpMemoryCache
+import com.bruhascended.sms.ui.mainViewModel
 import java.util.*
-import kotlin.to
 
 
 class ConversationListViewAdaptor(
@@ -138,6 +137,7 @@ class ConversationListViewAdaptor(
         imageView.setMode(ContactsContract.QuickContact.MODE_LARGE)
 
         imageView.setBackgroundColor(colors[position % colors.size])
+        imageView.performClick()
 
         if (cur.sender.first().isLetter()) {
             imageView.setImageResource(R.drawable.ic_bot)

@@ -8,13 +8,13 @@ import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.text.TextUtils
 import androidx.room.Room
-import com.bruhascended.sms.conversationDao
-import com.bruhascended.sms.conversationSender
+import com.bruhascended.sms.ui.conversationDao
+import com.bruhascended.sms.ui.conversationSender
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.db.*
-import com.bruhascended.sms.isMainViewModelNull
-import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.ui.isMainViewModelNull
+import com.bruhascended.sms.ui.mainViewModel
 
 class HeadlessSMSSender : Service() {
 

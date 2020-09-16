@@ -21,7 +21,7 @@ import com.bruhascended.sms.data.labelText
 import com.bruhascended.db.Conversation
 import com.bruhascended.sms.db.moveTo
 import com.bruhascended.sms.db.reportSpam
-import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.ui.mainViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -78,7 +78,6 @@ class ConversationMultiChoiceModeListener(
         previousSelected = -1
 
         muteItem = menu.findItem(R.id.action_mute)
-        muteItem.isVisible = false
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(mContext)
 
@@ -212,7 +211,7 @@ class ConversationMultiChoiceModeListener(
                     }
                 }
                 mode.finish()
-                return true
+                true
             }
             else -> false
         }
@@ -240,7 +239,7 @@ class ConversationMultiChoiceModeListener(
             }
             editListAdapter.toggleSelection(position)
             mode.title = listView.checkedItemCount.toString()
-            muteItem.isVisible = if (listView.checkedItemCount == 1) {
+            if (listView.checkedItemCount == 1) {
                 val selected = editListAdapter.getSelectedIds()
                 for (i in 0 until selected.size()) {
                     if (selected.valueAt(i)) {
@@ -249,8 +248,9 @@ class ConversationMultiChoiceModeListener(
                         else muteItem.setIcon(R.drawable.ic_unmute)
                     }
                 }
-                true
-            } else false
+            } else {
+                muteItem.setIcon(R.drawable.ic_mute)
+            }
         }
     }
 }
