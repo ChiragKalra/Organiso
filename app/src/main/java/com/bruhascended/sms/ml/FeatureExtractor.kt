@@ -1,14 +1,6 @@
 package com.bruhascended.sms.ml
 
 import android.content.Context
-import com.bruhascended.sms.ml.Normalizer.removeDates
-import com.bruhascended.sms.ml.Normalizer.removeDecimals
-import com.bruhascended.sms.ml.Normalizer.removeLines
-import com.bruhascended.sms.ml.Normalizer.removeNumbers
-import com.bruhascended.sms.ml.Normalizer.stem
-import com.bruhascended.sms.ml.Normalizer.time
-import com.bruhascended.sms.ml.Normalizer.toFloat
-import com.bruhascended.sms.ml.Normalizer.trimUrls
 import com.bruhascended.db.Message
 
 

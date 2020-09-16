@@ -11,7 +11,13 @@
         android:icon="@drawable/ic_baseline_search_24"
         app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
-
+    <item
+        android:id="@+id/action_call"
+        android:orderInCategory="300"
+        android:title="@string/call"
+        android:icon="@drawable/ic_phone"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
     <item
         android:id="@+id/action_move"
         android:orderInCategory="300"

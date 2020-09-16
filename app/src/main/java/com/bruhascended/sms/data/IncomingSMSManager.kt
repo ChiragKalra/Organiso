@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.room.Room
 import com.bruhascended.db.*
-import com.bruhascended.sms.*
+import com.bruhascended.sms.ui.*
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -103,6 +103,6 @@ class IncomingSMSManager(context: Context) {
 
         mdb.insert(message)
 
-        return message to conversation
+        return mdb.search(message.time).first() to conversation
     }
 }

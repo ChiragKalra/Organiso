@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.bruhascended.sms.ConversationActivity
 import com.bruhascended.sms.R
-import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.ui.mainViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

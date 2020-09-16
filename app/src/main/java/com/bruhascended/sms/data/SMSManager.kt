@@ -8,7 +8,9 @@ import com.bruhascended.db.*
 import com.bruhascended.sms.*
 import com.bruhascended.sms.R
 import com.bruhascended.sms.ml.OrganizerModel
+import com.bruhascended.sms.ui.isMainViewModelNull
 import com.bruhascended.sms.ui.main.MainViewModel
+import com.bruhascended.sms.ui.mainViewModel
 import com.bruhascended.sms.ui.start.StartViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 
@@ -179,6 +181,7 @@ class SMSManager(
             saveThread.start()
             updateProgress(msgs.size)
         }
+        saveThread?.join()
         finish()
     }
 }
