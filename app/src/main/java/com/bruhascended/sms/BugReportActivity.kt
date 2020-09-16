@@ -70,9 +70,7 @@ class BugReportActivity : AppCompatActivity() {
         if (result == null) {
             result = uri.path
             val cut = result!!.lastIndexOf('/')
-            if (cut != 1) {
-                result = result.substring(cut + 1)
-            }
+            if (cut >= 0) result = result.substring(cut + 1)
         }
         return result
     }
