@@ -12,6 +12,13 @@
         android:title="@string/share"
         android:showAsAction="always"/>
     <item
+        android:id="@+id/action_forward"
+        android:icon="@drawable/ic_forward"
+        android:orderInCategory="300"
+        android:title="@string/forward"
+        android:showAsAction="always"/>
+
+    <item
         android:id="@+id/action_select_range"
         android:icon="@drawable/ic_single"
         android:orderInCategory="300"

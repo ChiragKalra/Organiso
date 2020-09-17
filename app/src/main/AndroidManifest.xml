@@ -33,6 +33,21 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <service android:name="com.android.mms.transaction.TransactionService"/>
+
+        <receiver
+            android:name="com.android.mms.transaction.PushReceiver"
+            android:permission="android.permission.BROADCAST_WAP_PUSH">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+                <data android:mimeType="application/vnd.wap.mms-message" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".services.MMSReceiver"
+            android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED"/>
+
         <service
             android:name=".services.HeadlessSMSSender"
             android:exported="true"
@@ -57,17 +72,6 @@
             <intent-filter android:priority="2147483645">
                 <action android:name="android.provider.Telephony.SMS_DELIVER" />
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver> <!-- BroadcastReceiver that listens for incoming MMS messages -->
-        <receiver
-            android:name=".services.MMSReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_WAP_PUSH">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
-
-                <data android:mimeType="application/vnd.wap.mms-message" />
             </intent-filter>
         </receiver>
 

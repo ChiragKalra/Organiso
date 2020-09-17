@@ -12,7 +12,10 @@ import com.bruhascended.sms.ui.conversationDao
 import com.bruhascended.sms.ui.conversationSender
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.db.*
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.db.ConversationDatabase
+import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ui.isMainViewModelNull
 import com.bruhascended.sms.ui.mainViewModel
 

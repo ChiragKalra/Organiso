@@ -22,7 +22,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import com.bruhascended.db.Conversation
+import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
