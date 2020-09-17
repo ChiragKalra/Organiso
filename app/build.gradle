@@ -80,8 +80,5 @@ dependencies {
     implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
     implementation 'io.michaelrocks:libphonenumber-android:8.12.6'
 
-
-    implementation project(path: ':android-smsmms')
-
-    implementation project(path: ':database')
+    implementation 'com.klinkerapps:android-smsmms:5.2.5'
 }

@@ -7,12 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import android.provider.Telephony
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.preference.PreferenceManager
@@ -20,8 +22,8 @@ import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.data.labelText
-import com.bruhascended.db.Conversation
-import com.bruhascended.db.ConversationDatabase
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.services.SMSReceiver
 import com.bruhascended.sms.ui.main.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
@@ -137,6 +139,12 @@ class MainActivity : AppCompatActivity() {
         else setTheme(R.style.LightTheme)
 
         setContentView(R.layout.activity_main)
+
+        if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
+            val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
+            startActivityForResult(setSmsAppIntent, 1)
+        }
 
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
 

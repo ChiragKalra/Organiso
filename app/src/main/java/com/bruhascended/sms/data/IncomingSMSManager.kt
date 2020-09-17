@@ -3,7 +3,10 @@ package com.bruhascended.sms.data
 import android.content.Context
 import android.os.Bundle
 import androidx.room.Room
-import com.bruhascended.db.*
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.db.ConversationDatabase
+import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ui.*
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.main.MainViewModel

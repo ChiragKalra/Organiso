@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.db.Conversation
+import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.MediaPreviewManager
 import com.bruhascended.sms.ui.isMainViewModelNull
@@ -100,6 +100,10 @@ class NewConversationActivity : AppCompatActivity() {
             addMedia
         )
 
+        addMedia.setOnClickListener{
+            mpm.loadMedia()
+        }
+
         processIntentData(intent)
         to.requestFocus()
         setSupportActionBar(toolbar)
@@ -107,10 +111,6 @@ class NewConversationActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.title = "New Conversation"
         llm.orientation = LinearLayoutManager.HORIZONTAL
-
-        addMedia.setOnClickListener{
-            mpm.loadMedia()
-        }
 
         val observer = Observer<Array<Contact>?> {
             if (it == null) return@Observer

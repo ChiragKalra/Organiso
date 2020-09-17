@@ -1,20 +1,23 @@
 package com.bruhascended.sms.services
 
 import android.app.Activity
-import android.app.PendingIntent
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.telephony.SmsManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageButton
 import android.widget.Toast
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.ui.conversationDao
-import com.bruhascended.db.Conversation
-import com.bruhascended.db.Message
 import com.bruhascended.sms.ui.mainViewModel
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
+import com.klinker.android.send_message.Settings
+import com.klinker.android.send_message.Transaction
+import java.io.*
+import com.klinker.android.send_message.Message as MMS
 
 
 /*
@@ -52,12 +55,18 @@ class MMSSender(
     }
 
     private fun addSmsToDb(date: Long, type: Int) {
+        val qs = conversationDao.search(date).first()
+        qs.type = type
+        conversationDao.update(qs)
+    }
+
+    private fun addMmsToDb(date: Long) {
         Thread {
             val message = Message(
                 null,
                 conversation.sender,
                 smsText,
-                type,
+                6,
                 date,
                 0,
                 path = saveMedia(date)
@@ -96,6 +105,17 @@ class MMSSender(
         }.start()
     }
 
+    private fun getBytes(inputStream: InputStream): ByteArray {
+        val byteBuffer = ByteArrayOutputStream()
+        val bufferSize = 1024
+        val buffer = ByteArray(bufferSize)
+        var len: Int
+        while (inputStream.read(buffer).also { len = it } != -1) {
+            byteBuffer.write(buffer, 0, len)
+        }
+        return byteBuffer.toByteArray()
+    }
+
     fun sendMMS(smsText: String, data: Uri, type: String) {
         val date = System.currentTimeMillis()
         this.smsText = smsText
@@ -104,10 +124,15 @@ class MMSSender(
 
         sendButton.isEnabled = false
 
-        val smsManager = SmsManager.getDefault()
-        val sentPI = PendingIntent.getBroadcast(mContext, 0, Intent("SENT"), 0)
+        addMmsToDb(date)
+        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
+            .putLong("last", System.currentTimeMillis()).apply()
 
-        addSmsToDb(date, 6)
+        val settings = Settings()
+        settings.useSystemSending = true
+
+        val transaction = Transaction(mContext, settings)
+        transaction.setExplicitBroadcastForSentMms(Intent("DELIVERED"))
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent?) {
                 when (resultCode) {
@@ -139,12 +164,13 @@ class MMSSender(
                 }
                 mContext.unregisterReceiver(this)
             }
-        }, IntentFilter("SENT"))
+        }, IntentFilter("DELIVERED"))
 
-        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
-            .putLong("last", System.currentTimeMillis()).apply()
+        val message = MMS(smsText, conversation.sender)
+        val iStream: InputStream = mContext.contentResolver.openInputStream(uri)!!
+        message.addMedia(getBytes(iStream), type)
 
-        smsManager.sendMultimediaMessage(mContext, data, null, null, sentPI)
+        transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
 
         sendButton.isEnabled = true
     }

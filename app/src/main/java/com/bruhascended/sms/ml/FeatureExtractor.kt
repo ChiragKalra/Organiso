@@ -1,7 +1,7 @@
 package com.bruhascended.sms.ml
 
 import android.content.Context
-import com.bruhascended.db.Message
+import com.bruhascended.sms.db.Message
 
 
 class FeatureExtractor (context: Context) {

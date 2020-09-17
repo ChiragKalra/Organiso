@@ -19,8 +19,8 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.room.Room
-import com.bruhascended.db.*
 import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.db.*
 import com.bruhascended.sms.services.MMSSender
 import com.bruhascended.sms.services.SMSSender
 import com.bruhascended.sms.ui.*

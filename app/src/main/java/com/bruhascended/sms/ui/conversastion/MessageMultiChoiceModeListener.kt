@@ -18,7 +18,10 @@ import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
 import com.bruhascended.sms.R
-import com.bruhascended.db.*
+import com.bruhascended.sms.NewConversationActivity
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.db.MessageDao
 import com.bruhascended.sms.db.moveTo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -36,12 +39,14 @@ class MessageMultiChoiceModeListener(
     private var ignore = false
     private var editListAdapter = listView.adapter as MessageListViewAdaptor
     private lateinit var shareMenuItem: MenuItem
+    private lateinit var forwardMenuItem: MenuItem
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         mode.menuInflater.inflate(R.menu.message_selection, menu)
         this.shareMenuItem = menu.findItem(R.id.action_share)
+        this.forwardMenuItem =  menu.findItem(R.id.action_forward)
         rangeSelect = false
         previousSelected = -1
         return true
@@ -125,6 +130,17 @@ class MessageMultiChoiceModeListener(
                 mode.finish()
                 true
             }
+            R.id.action_forward -> {
+                val selected = editListAdapter.getItem(editListAdapter.getSelectedIds().keyAt(0))
+                val intent = Intent(mContext, NewConversationActivity::class.java).apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, selected.text)
+                }
+                mContext.startActivity(intent)
+                mode.finish()
+                true
+            }
             else -> false
         }
     }
@@ -155,7 +171,9 @@ class MessageMultiChoiceModeListener(
             for (i in 0 until selected.size()) {
                 if (selected.valueAt(i)) {
                     shareMenuItem.isVisible = listView.checkedItemCount == 1 &&
-                    editListAdapter.isMedia(editListAdapter.getSelectedIds().keyAt(i))
+                        editListAdapter.isMedia(editListAdapter.getSelectedIds().keyAt(i))
+                    forwardMenuItem.isVisible = listView.checkedItemCount == 1 &&
+                        !editListAdapter.isMedia(editListAdapter.getSelectedIds().keyAt(i))
                 }
             }
         }

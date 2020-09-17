@@ -1,7 +1,7 @@
 package com.bruhascended.sms.ui
 
 import android.graphics.Bitmap
-import com.bruhascended.db.MessageDao
+import com.bruhascended.sms.db.MessageDao
 import com.bruhascended.sms.ui.main.MainViewModel
 import java.util.HashMap
 

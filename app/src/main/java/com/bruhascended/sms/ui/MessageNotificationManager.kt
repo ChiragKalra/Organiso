@@ -8,10 +8,10 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.room.Room
-import com.bruhascended.db.Conversation
-import com.bruhascended.db.ConversationDatabase
-import com.bruhascended.db.Message
-import com.bruhascended.db.MessageDatabase
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.db.ConversationDatabase
+import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ConversationActivity
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.labelText
@@ -42,7 +42,7 @@ class MessageNotificationManager(private val mContext: Context) {
         val yeah = Intent(mContext, ConversationActivity::class.java)
             .putExtra("ye", conversation)
         yeah.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+        val pendingIntent = PendingIntent.getActivity(
             mContext, 0, yeah, PendingIntent.FLAG_UPDATE_CURRENT
         )
 
@@ -89,7 +89,7 @@ class MessageNotificationManager(private val mContext: Context) {
             NotificationCompat.Builder(mContext, conversation.label.toString())
                 .setContentTitle("OTP from ${message.sender}")
                 .setStyle(NotificationCompat.BigTextStyle().bigText(otp))
-                .addAction(R.drawable.ic_content_copy, mContext.getString(R.string.copy_to_clipboard), copyPI)
+                .addAction(R.drawable.ic_content_copy, mContext.getString(R.string.copy_otp), copyPI)
                 .addAction(R.drawable.ic_baseline_delete_24, mContext.getString(R.string.delete), deletePI)
         }.setSmallIcon(R.drawable.message)
             .setAutoCancel(true)
@@ -100,15 +100,13 @@ class MessageNotificationManager(private val mContext: Context) {
     }
 
     fun createNotificationChannel() {
-        val notificationManager: NotificationManager =
-            mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (notificationManager.notificationChannels.isEmpty()) {
             for (i in 0..4) {
                 val name = mContext.getString(labelText[i])
-                val descriptionText = mContext.getString(descriptionText[i])
                 val channel = NotificationChannel(i.toString(), name, importance[i]).apply {
-                    description = descriptionText
+                    description = mContext.getString(descriptionText[i])
                 }
                 notificationManager.createNotificationChannel(channel)
             }
