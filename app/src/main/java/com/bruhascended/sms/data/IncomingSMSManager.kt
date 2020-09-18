@@ -91,7 +91,7 @@ class IncomingSMSManager(context: Context) {
                 prediction,
                 -1,
                 FloatArray(5) {
-                    if (it == 0) 1f else 0f
+                    if (it == prediction) 1f else 0f
                 }
             )
             mainViewModel.daos[prediction].insert(con)

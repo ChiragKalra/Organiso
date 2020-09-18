@@ -44,7 +44,6 @@
     <string name="title">Title</string>
     <string name="describe_bug_here">Describe bug here</string>
     <string name="call">Call</string>
-    <string name="view_contact">View Contact</string>
     <string name="copy_otp">Copy OTP</string>
     <string name="forward">Forward</string>
 </resources>

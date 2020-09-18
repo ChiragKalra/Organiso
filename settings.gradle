@@ -1,4 +1,2 @@
-include ':database'
-include ':android-smsmms'
 include ':app'
 rootProject.name = "SMS Organiser"

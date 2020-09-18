@@ -79,6 +79,7 @@ dependencies {
 
     implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
     implementation 'io.michaelrocks:libphonenumber-android:8.12.6'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     implementation 'com.klinkerapps:android-smsmms:5.2.5'
 }
