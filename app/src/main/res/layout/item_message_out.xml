@@ -8,7 +8,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:paddingTop="12dp"
+    android:paddingTop="8dp"
     android:paddingEnd="8dp"
     android:paddingBottom="8dp"
     android:background="@drawable/bg_conversation"
@@ -16,35 +16,40 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
-        android:gravity="center"
+        android:paddingEnd="12dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:paddingStart="4dp"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:id="@+id/content"
-        android:paddingEnd="18dp"
-        android:paddingStart="12dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="6dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_message_out"
-        app:layout_constraintBottom_toTopOf="@id/status"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
         <LinearLayout
+            android:gravity="center_vertical"
             android:visibility="gone"
             android:id="@+id/mediaLayout"
-            android:layout_margin="8dp"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-            <ImageView
-                android:visibility="gone"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
-                android:id="@+id/image"
-                android:contentDescription="@string/mms" />
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp">
+                <ImageView
+                    android:visibility="gone"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    android:adjustViewBounds="true"
+                    android:id="@+id/image"
+                    android:contentDescription="@string/mms" />
+            </androidx.cardview.widget.CardView>
             <ImageButton
+                android:layout_margin="4dp"
                 android:visibility="gone"
                 android:id="@+id/playPause"
                 android:layout_width="48dp"
@@ -56,20 +61,13 @@
             <SeekBar
                 android:visibility="gone"
                 android:thumbTint="?android:textColor"
-                android:layout_width="164dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="48dp"
                 android:id="@+id/slider"/>
-            <!--<VideoView
-                android:visibility="gone"
-                android:id="@+id/video"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/mms"
-                android:scaleType="centerCrop" />-->
         </LinearLayout>
         <TextView
-
+            android:layout_margin="4dp"
             android:textIsSelectable="false"
             android:autoLink="all"
             android:layout_width="wrap_content"

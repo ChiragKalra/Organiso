@@ -20,6 +20,7 @@ import androidx.core.content.FileProvider
 import androidx.core.view.doOnDetach
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Message
+import com.squareup.picasso.Picasso
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -31,6 +32,26 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
     private var messages: List<Message> = data
     private var mSelectedItemsIds = SparseBooleanArray()
     private val previewCache: MutableMap<Int, String> = mutableMapOf()
+    private val picasso = Picasso.get()
+
+    init {
+        Thread {
+            for (position in data.indices) {
+                val sms = data[position]
+                val p = sms.path
+                if (p != null && getMimeType(p).startsWith("video")) {
+                    val retriever = MediaMetadataRetriever()
+                    retriever.setDataSource(p)
+                    val length = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!.toLong()
+                    val bm = retriever.getFrameAtTime(
+                        length / 2,
+                        MediaMetadataRetriever.OPTION_CLOSEST
+                    )!!
+                    previewCache[position] = saveCache(bm, getItem(position).time)
+                }
+            }
+        }.start()
+    }
 
     private fun displayTime(time: Long): String {
         val smsTime = Calendar.getInstance()
@@ -77,7 +98,8 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
         contentLayout: LinearLayout, position: Int
     ) {
         mediaLayout.visibility = View.VISIBLE
-        contentLayout.setBackgroundResource(R.drawable.bg_mms_out)
+        if (getItem(position).type == 1) contentLayout.setBackgroundResource(R.drawable.bg_mms)
+        else contentLayout.setBackgroundResource(R.drawable.bg_mms_out)
         val data = Uri.parse(path)
         val mmsTypeString = getMimeType(path)
         val contentUri = FileProvider.getUriForFile(
@@ -94,7 +116,7 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
         when {
             mmsTypeString.startsWith("image") -> {
                 image.visibility = View.VISIBLE
-                image.setImageURI(data)
+                picasso.load(File(data.toString())).into(image)
                 image.setOnClickListener{
                     mContext.startActivity(contentIntent)
                 }
@@ -105,36 +127,36 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
                     playPause.visibility = View.VISIBLE
                     setDataSource(mContext, data)
                     prepareAsync()
-                    slider.max = duration / 500
+                    setOnPreparedListener {
+                        slider.max = duration / 500
 
-                    val mHandler = Handler(mContext.mainLooper)
-                    (mContext as Activity).runOnUiThread(object : Runnable {
-                        override fun run() {
-                            slider.progress = currentPosition / 500
-                            mHandler.postDelayed(this, 500)
-                        }
-                    })
-
-                    slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                        override fun onStopTrackingTouch(seekBar: SeekBar) {}
-                        override fun onStartTrackingTouch(seekBar: SeekBar) {}
-                        override fun onProgressChanged(
-                            seekBar: SeekBar, progress: Int, fromUser: Boolean
-                        ) {
-                            if (fromUser) seekTo(progress * 500)
-                        }
-                    })
-
-                    playPause.setOnClickListener {
-                        if (isPlaying) {
-                            pause()
-                            playPause.setImageResource(R.drawable.ic_play)
-                        } else {
-                            start()
-                            slider.doOnDetach {
-                                reset()
+                        val mHandler = Handler(mContext.mainLooper)
+                        (mContext as Activity).runOnUiThread(object : Runnable {
+                            override fun run() {
+                                slider.progress = currentPosition / 500
+                                mHandler.postDelayed(this, 500)
                             }
-                            playPause.setImageResource(R.drawable.ic_pause)
+                        })
+
+                        slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                            override fun onStopTrackingTouch(s: SeekBar) {}
+                            override fun onStartTrackingTouch(s: SeekBar) {}
+                            override fun onProgressChanged(
+                                seekBar: SeekBar, progress: Int, fromUser: Boolean
+                            ) {
+                                if (fromUser) seekTo(progress * 500)
+                            }
+                        })
+
+                        playPause.setOnClickListener {
+                            if (isPlaying) {
+                                pause()
+                                playPause.setImageResource(R.drawable.ic_play)
+                            } else {
+                                start()
+                                slider.doOnDetach { reset() }
+                                playPause.setImageResource(R.drawable.ic_pause)
+                            }
                         }
                     }
                 }
@@ -143,19 +165,18 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
                 videoPlayPause.visibility = View.VISIBLE
                 image.visibility = View.VISIBLE
                 if (previewCache.containsKey(position))
-                    image.setImageURI(Uri.parse(previewCache[position]))
+                    picasso.load(File(previewCache[position]!!)).into(image)
                 else Thread {
                     val retriever = MediaMetadataRetriever()
                     retriever.setDataSource(path)
                     val length = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)!!.toLong()
-                    previewCache[position] = saveCache(retriever.getFrameAtTime(
+                    val bm = retriever.getFrameAtTime(
                         length / 2,
                         MediaMetadataRetriever.OPTION_CLOSEST
-                    )!!, getItem(position).time)
-                    previewCache[position]!!
-
+                    )!!
+                    previewCache[position] = saveCache(bm, getItem(position).time)
                     (mContext as Activity).runOnUiThread {
-                        image.setImageURI(Uri.parse(previewCache[position]))
+                        picasso.load(File(previewCache[position]!!)).into(image)
                     }
                 }.start()
 
@@ -169,7 +190,8 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val message = messages[position]
         val layoutInflater = LayoutInflater.from(mContext)
-        val root =  if (messages[position].type == 1)
+
+        val root = if (messages[position].type == 1)
             layoutInflater.inflate(R.layout.item_message, parent, false)
         else layoutInflater.inflate(R.layout.item_message_out, parent, false)
 
@@ -187,7 +209,7 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
                 else when (message.type) {
                     2 -> "sent"
                     5 -> "failed"
-                    6 -> "sending"
+                    6 -> "queued"
                     else -> "unknown"
                 }
             }

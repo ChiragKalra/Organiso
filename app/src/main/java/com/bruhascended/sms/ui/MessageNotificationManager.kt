@@ -47,50 +47,57 @@ class MessageNotificationManager(private val mContext: Context) {
         )
 
         val otp = getOtp(message.text)
+        val copyPI = PendingIntent.getBroadcast(mContext, 0, Intent("COPY"), 0)
+        val deletePI = PendingIntent.getBroadcast(mContext, 0, Intent("DELETE"), 0)
 
-        val builder = if (otp == null) {
-            NotificationCompat.Builder(mContext, conversation.label.toString())
-                .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
-                .setContentTitle(conversation.name ?: message.sender)
-        } else {
-            val copyPI = PendingIntent.getBroadcast(mContext, 0, Intent("COPY"), 0)
-            val deletePI = PendingIntent.getBroadcast(mContext, 0, Intent("DELETE"), 0)
-
-            mContext.applicationContext.registerReceiver(object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("OTP", otp)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, "Copied", Toast.LENGTH_LONG).show()
+        mContext.applicationContext.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("OTP", otp)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(context, "Copied", Toast.LENGTH_LONG).show()
+            }
+        }, IntentFilter("COPY"))
+        mContext.applicationContext.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val mdb = Room.databaseBuilder(
+                    mContext, MessageDatabase::class.java, conversation.sender
+                ).allowMainThreadQueries().build().manager()
+                mdb.delete(message)
+                if (mdb.loadAllSync().isEmpty()) {
+                    if (isMainViewModelNull()) {
+                        Room.databaseBuilder(
+                            mContext, ConversationDatabase::class.java,
+                            mContext.resources.getString(labelText[conversation.label])
+                        ).allowMainThreadQueries().build().manager()
+                    } else {
+                        mainViewModel.daos[conversation.label]
+                    }.delete(conversation)
                 }
-            }, IntentFilter("COPY"))
-            mContext.applicationContext.registerReceiver(object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    val mdb = Room.databaseBuilder(
-                        mContext, MessageDatabase::class.java, conversation.sender
-                    ).allowMainThreadQueries().build().manager()
-                    mdb.delete(message)
-                    if (mdb.loadAllSync().isEmpty()) {
-                        if (isMainViewModelNull()) {
-                            Room.databaseBuilder(
-                                mContext, ConversationDatabase::class.java,
-                                mContext.resources.getString(labelText[conversation.label])
-                            ).allowMainThreadQueries().build().manager()
-                        } else {
-                            mainViewModel.daos[conversation.label]
-                        }.delete(conversation)
-                    }
-                    NotificationManagerCompat.from(mContext).cancel(conversation.id!!.toInt())
-                    Toast.makeText(context, "Deleted", Toast.LENGTH_LONG).show()
-                    mContext.applicationContext.unregisterReceiver(this)
-                }
-            }, IntentFilter("DELETE"))
+                NotificationManagerCompat.from(mContext).cancel(conversation.id!!.toInt())
+                Toast.makeText(context, "Deleted", Toast.LENGTH_LONG).show()
+                mContext.applicationContext.unregisterReceiver(this)
+            }
+        }, IntentFilter("DELETE"))
 
-            NotificationCompat.Builder(mContext, conversation.label.toString())
-                .setContentTitle("OTP from ${message.sender}")
-                .setStyle(NotificationCompat.BigTextStyle().bigText(otp))
-                .addAction(R.drawable.ic_content_copy, mContext.getString(R.string.copy_otp), copyPI)
-                .addAction(R.drawable.ic_baseline_delete_24, mContext.getString(R.string.delete), deletePI)
+        val builder = when {
+            message.path != null -> {
+                NotificationCompat.Builder(mContext, conversation.label.toString())
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
+                    .setContentTitle("Media from ${conversation.name ?: message.sender}")
+            }
+            otp == null -> {
+                NotificationCompat.Builder(mContext, conversation.label.toString())
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
+                    .setContentTitle(conversation.name ?: message.sender)
+            }
+            else -> {
+                NotificationCompat.Builder(mContext, conversation.label.toString())
+                    .setContentTitle("OTP from ${message.sender}")
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(otp))
+                    .addAction(R.drawable.ic_content_copy, mContext.getString(R.string.copy_otp), copyPI)
+                    .addAction(R.drawable.ic_baseline_delete_24, mContext.getString(R.string.delete), deletePI)
+            }
         }.setSmallIcon(R.drawable.message)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)

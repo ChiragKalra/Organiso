@@ -93,35 +93,38 @@ class MediaPreviewManager(
                 playPauseButton.visibility = View.VISIBLE
                 mp.apply {
                     setDataSource(mActivity, mmsURI)
-                    prepare()
-                    seekBar.max = mp.duration / 500
+                    prepareAsync()
+                    setOnPreparedListener {
+                        seekBar.max = mp.duration / 500
 
-                    val mHandler = Handler(mActivity.mainLooper)
-                    mActivity.runOnUiThread(object : Runnable {
-                        override fun run() {
-                            seekBar.progress = currentPosition / 500
-                            mHandler.postDelayed(this, 500)
-                        }
-                    })
+                        val mHandler = Handler(mActivity.mainLooper)
+                        mActivity.runOnUiThread(object : Runnable {
+                            override fun run() {
+                                seekBar.progress = currentPosition / 500
+                                mHandler.postDelayed(this, 500)
+                            }
+                        })
 
-                    seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                        override fun onStopTrackingTouch(seekBar: SeekBar) {}
-                        override fun onStartTrackingTouch(seekBar: SeekBar) {}
-                        override fun onProgressChanged(
-                            seekBar: SeekBar, progress: Int, fromUser: Boolean
-                        ) {
-                            if (fromUser) seekTo(progress * 500)
-                        }
-                    })
+                        seekBar.setOnSeekBarChangeListener(object :
+                            SeekBar.OnSeekBarChangeListener {
+                            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+                            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+                            override fun onProgressChanged(
+                                seekBar: SeekBar, progress: Int, fromUser: Boolean
+                            ) {
+                                if (fromUser) seekTo(progress * 500)
+                            }
+                        })
 
-                    playPauseButton.apply {
-                        setOnClickListener {
-                            if (isPlaying) {
-                                pause()
-                                setImageResource(R.drawable.ic_play)
-                            } else {
-                                start()
-                                setImageResource(R.drawable.ic_pause)
+                        playPauseButton.apply {
+                            setOnClickListener {
+                                if (isPlaying) {
+                                    pause()
+                                    setImageResource(R.drawable.ic_play)
+                                } else {
+                                    start()
+                                    setImageResource(R.drawable.ic_pause)
+                                }
                             }
                         }
                     }
