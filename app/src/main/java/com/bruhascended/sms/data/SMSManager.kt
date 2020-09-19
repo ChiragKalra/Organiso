@@ -2,9 +2,9 @@ package com.bruhascended.sms.data
 
 import android.content.Context
 import android.net.Uri
-import android.os.Bundle
 import androidx.room.Room
 import com.bruhascended.sms.R
+import com.bruhascended.sms.analytics.AnalyticsLogger
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
@@ -14,7 +14,6 @@ import com.bruhascended.sms.ui.isMainViewModelNull
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.mainViewModel
 import com.bruhascended.sms.ui.start.StartViewModel
-import com.google.firebase.analytics.FirebaseAnalytics
 
 val labelText = arrayOf(
     R.string.tab_text_1,
@@ -34,8 +33,6 @@ class SMSManager(
     private val nn = OrganizerModel(mContext)
     private val cm = ContactsManager(mContext)
     private val sp = mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
-    private val firebaseAnalytics = FirebaseAnalytics.getInstance(mContext)
-    private val bundle = Bundle().apply { putString(FirebaseAnalytics.Param.METHOD, "init") }
 
     private val messages = HashMap<String, ArrayList<Message>>()
     private val senderToProbs = HashMap<String, FloatArray>()
@@ -73,7 +70,7 @@ class SMSManager(
         pageViewModel.progress.postValue(per)
         pageViewModel.eta.postValue(eta.toLong())
 
-        firebaseAnalytics.logEvent("conversation_organised", bundle)
+        AnalyticsLogger(mContext).log("conversation_organised", "init")
     }
 
     private fun saveMessage(ind: Int, sender: String, messages: ArrayList<Message>, i: Int) {

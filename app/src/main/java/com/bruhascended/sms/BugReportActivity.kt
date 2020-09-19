@@ -10,9 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
+import com.bruhascended.sms.analytics.AnalyticsLogger
 import kotlinx.android.synthetic.main.activity_bug_report.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -95,33 +93,17 @@ class BugReportActivity : AppCompatActivity() {
 
         submit.setOnClickListener {
             if (titleEditText.text.toString() != "" && full.text.toString() != "") {
-                postBugReport()
+                AnalyticsLogger(this).reportBug(
+                    titleEditText.text.toString(),
+                    full.text.toString(),
+                    fileUri
+                )
+                Toast.makeText(this, "Bug Report sent", Toast.LENGTH_SHORT).show()
                 finish()
             } else {
                 Toast.makeText(this, "empty field(s)", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    private fun postBugReport() {
-        val firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-        val bundle = Bundle()
-        val rn = System.currentTimeMillis().toString()
-        bundle.putString(FirebaseAnalytics.Param.METHOD, "default")
-        firebaseAnalytics.logEvent("bug_reported", bundle)
-
-        val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("bug_report/${rn}")
-        myRef.child("title").setValue(titleEditText.text.toString())
-        myRef.child("detail").setValue(full.text.toString())
-
-        if (fileUri!=null) {
-            val storageRef = FirebaseStorage.getInstance().reference
-            val riversRef = storageRef.child("bug_report/${rn}")
-            riversRef.putFile(fileUri!!)
-        }
-
-        Toast.makeText(this, "Bug Report sent", Toast.LENGTH_SHORT).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

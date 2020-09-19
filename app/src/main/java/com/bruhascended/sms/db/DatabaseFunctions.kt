@@ -15,8 +15,9 @@ fun moveTo(conversation: Conversation, to: Int, mContext: Context? = null) {
         } else {
             val mdb = Room.databaseBuilder(
                 mContext!!, MessageDatabase::class.java, conversation.sender
-            ).build().manager()
-            mdb.nukeTable()
+            ).build()
+            mdb.manager().nukeTable()
+            mdb.close()
         }
     }.start()
 }

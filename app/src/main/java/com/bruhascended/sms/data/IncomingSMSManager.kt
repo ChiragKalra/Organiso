@@ -1,8 +1,8 @@
 package com.bruhascended.sms.data
 
 import android.content.Context
-import android.os.Bundle
 import androidx.room.Room
+import com.bruhascended.sms.analytics.AnalyticsLogger
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
@@ -10,7 +10,6 @@ import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ui.*
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ui.main.MainViewModel
-import com.google.firebase.analytics.FirebaseAnalytics
 
 class IncomingSMSManager(context: Context) {
     private var mContext: Context = context
@@ -39,12 +38,7 @@ class IncomingSMSManager(context: Context) {
             -1
         )
 
-        val bundle = Bundle()
-        bundle.putString(
-            FirebaseAnalytics.Param.METHOD,
-            "background"
-        )
-        FirebaseAnalytics.getInstance(mContext).logEvent("conversation_organised", bundle)
+        AnalyticsLogger(mContext).log("conversation_organised", "background")
 
         var conversation: Conversation? = null
         for (i in 0..4) {
