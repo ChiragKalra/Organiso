@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
+        android:hardwareAccelerated="true"
         android:allowBackup="true"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
@@ -33,7 +34,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <service android:name="com.android.mms.transaction.TransactionService"/>
 
         <receiver
             android:name="com.android.mms.transaction.PushReceiver"
@@ -46,7 +46,21 @@
 
         <receiver
             android:name=".services.MMSReceiver"
-            android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED"/>
+            android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED" />
+
+        <receiver
+            android:name=".services.SMSReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="2147483645">
+                <action android:name="android.provider.Telephony.SMS_DELIVER" />
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+
+        <service android:name="com.android.mms.transaction.TransactionService" />
 
         <service
             android:name=".services.HeadlessSMSSender"
@@ -64,16 +78,6 @@
             </intent-filter>
         </service>
 
-        <receiver
-            android:name=".services.SMSReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter android:priority="2147483645">
-                <action android:name="android.provider.Telephony.SMS_DELIVER" />
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
 
         <activity
             android:name=".NewConversationActivity"
@@ -92,25 +96,32 @@
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="audio/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="video/*" />
             </intent-filter>
 
@@ -158,7 +169,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-
         <activity
             android:name=".BugReportActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
@@ -166,9 +176,8 @@
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".SettingsActivity" />
         </activity>
-
     </application>
 
 </manifest>

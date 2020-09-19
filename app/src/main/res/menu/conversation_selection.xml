@@ -31,6 +31,7 @@
         android:title="@string/move_to"
         android:showAsAction="always"/>
     <item
+        android:iconTint="@android:color/white"
         android:icon="@drawable/ic_report"
         android:id="@+id/action_report_spam"
         android:orderInCategory="300"
