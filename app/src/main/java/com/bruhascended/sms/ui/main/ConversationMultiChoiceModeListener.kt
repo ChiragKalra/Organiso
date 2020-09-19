@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.drawable.AnimatedVectorDrawable
-import android.os.Bundle
 import android.util.SparseBooleanArray
 import android.view.ActionMode
 import android.view.LayoutInflater
@@ -15,14 +14,12 @@ import android.widget.AbsListView
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.sms.R
+import com.bruhascended.sms.analytics.AnalyticsLogger
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.moveTo
-import com.bruhascended.sms.db.reportSpam
 import com.bruhascended.sms.ui.mainViewModel
-import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -38,7 +35,7 @@ class ConversationMultiChoiceModeListener(
     private var ignore = false
     private var actionMenu: Menu? = null
     private lateinit var muteItem: MenuItem
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var analyticsLogger: AnalyticsLogger
     private var editListAdapter = listView.adapter as ConversationListViewAdaptor
 
     @SuppressLint("InflateParams")
@@ -79,7 +76,7 @@ class ConversationMultiChoiceModeListener(
 
         muteItem = menu.findItem(R.id.action_mute)
 
-        firebaseAnalytics = FirebaseAnalytics.getInstance(mContext)
+        analyticsLogger = AnalyticsLogger(mContext)
 
         if (label == 4) menu.findItem(R.id.action_report_spam).isVisible = false
         if (label == 5) menu.findItem(R.id.action_block).isVisible = false
@@ -106,9 +103,7 @@ class ConversationMultiChoiceModeListener(
                             if (selected.valueAt(i)) {
                                 val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
                                 moveTo(selectedItem, -1, mContext)
-                                val bundle = Bundle()
-                                bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to -1")
-                                firebaseAnalytics.logEvent("${selectedItem.label}_to_-1", bundle)
+                                analyticsLogger.log("${selectedItem.label}_to_-1")
                             }
                         }
                         Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
@@ -129,9 +124,7 @@ class ConversationMultiChoiceModeListener(
                             if (selected.valueAt(i)) {
                                 val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
                                 moveTo(selectedItem, 5)
-                                val bundle = Bundle()
-                                bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to 5")
-                                firebaseAnalytics.logEvent("${selectedItem.label}_to_5", bundle)
+                                analyticsLogger.log("${selectedItem.label}_to_5")
                             }
                         }
                         Toast.makeText(mContext,"Senders Blocked", Toast.LENGTH_LONG).show()
@@ -152,13 +145,8 @@ class ConversationMultiChoiceModeListener(
                             if (selected.valueAt(i)) {
                                 val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
                                 moveTo(selectedItem, 4)
-                                reportSpam(
-                                    mContext as AppCompatActivity,
-                                    selectedItem
-                                )
-                                val bundle = Bundle()
-                                bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to 4")
-                                firebaseAnalytics.logEvent("${selectedItem.label}_to_4", bundle)
+                                analyticsLogger.reportSpam(selectedItem)
+                                analyticsLogger.log("${selectedItem.label}_to_4")
                             }
                         }
                         Toast.makeText(mContext, "Senders Reported Spam", Toast.LENGTH_LONG).show()
@@ -186,9 +174,7 @@ class ConversationMultiChoiceModeListener(
                             if (selected.valueAt(i)) {
                                 val selectedItem: Conversation = editListAdapter.getItem(selected.keyAt(i))
                                 moveTo(selectedItem, selection)
-                                val bundle = Bundle()
-                                bundle.putString(FirebaseAnalytics.Param.METHOD, "${selectedItem.label} to $selection")
-                                firebaseAnalytics.logEvent("${selectedItem.label}_to_-1", bundle)
+                                analyticsLogger.log("${selectedItem.label}_to_$selection")
                             }
                         }
                         Toast.makeText(mContext, "Conversations Moved", Toast.LENGTH_LONG).show()

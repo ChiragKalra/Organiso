@@ -22,7 +22,19 @@ data class Conversation (
     var probs: FloatArray,
     var isMuted: Boolean = false,
     var lastMMS: Boolean = false
-): Serializable
+): Serializable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Conversation
+        if (sender != other.sender) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return sender.hashCode()
+    }
+}
 
 
 @Dao

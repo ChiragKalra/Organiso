@@ -19,6 +19,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.room.Room
+import com.bruhascended.sms.analytics.AnalyticsLogger
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.*
 import com.bruhascended.sms.services.MMSSender
@@ -27,7 +28,6 @@ import com.bruhascended.sms.ui.*
 import com.bruhascended.sms.ui.conversastion.MessageListViewAdaptor
 import com.bruhascended.sms.ui.conversastion.MessageMultiChoiceModeListener
 import com.bruhascended.sms.ui.main.MainViewModel
-import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.GlobalScope
@@ -46,7 +46,7 @@ class ConversationActivity : AppCompatActivity() {
     private var inputManager: InputMethodManager? = null
 
     private lateinit var mpm: MediaPreviewManager
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var analyticsLogger: AnalyticsLogger
 
     private fun showSearchLayout() {
         searchLayout.apply {
@@ -110,7 +110,7 @@ class ConversationActivity : AppCompatActivity() {
         conversation = intent.getSerializableExtra("ye") as Conversation
         smsSender = SMSSender(this, conversation, sendButton)
         mmsSender = MMSSender(this, conversation, sendButton)
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        analyticsLogger = AnalyticsLogger(this)
         conversationSender = conversation.sender
 
         setSupportActionBar(toolbar)
@@ -231,13 +231,8 @@ class ConversationActivity : AppCompatActivity() {
                 AlertDialog.Builder(mContext)
                     .setTitle("Do you want to block $display?")
                     .setPositiveButton("Block") { dialog, _ ->
-                        val bundle = Bundle()
-                        bundle.putString(
-                            FirebaseAnalytics.Param.METHOD,
-                            "${conversation.label} to 5"
-                        )
-                        firebaseAnalytics.logEvent("${conversation.label}_to_5", bundle)
-                        com.bruhascended.sms.db.moveTo(conversation, 5)
+                        analyticsLogger.log("${conversation.label}_to_5")
+                        moveTo(conversation, 5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }
@@ -246,14 +241,9 @@ class ConversationActivity : AppCompatActivity() {
                 AlertDialog.Builder(mContext)
                     .setTitle("Do you want to report $display as spam?")
                     .setPositiveButton("Report") { dialog, _ ->
-                        val bundle = Bundle()
-                        bundle.putString(
-                            FirebaseAnalytics.Param.METHOD,
-                            "${conversation.label} to 4"
-                        )
-                        firebaseAnalytics.logEvent("${conversation.label}_to_4", bundle)
-                        com.bruhascended.sms.db.reportSpam(this, conversation)
-                        com.bruhascended.sms.db.moveTo(conversation, 4)
+                        analyticsLogger.log("${conversation.label}_to_4")
+                        analyticsLogger.reportSpam(conversation)
+                        moveTo(conversation, 4)
                         Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }
@@ -262,13 +252,8 @@ class ConversationActivity : AppCompatActivity() {
                 AlertDialog.Builder(mContext)
                     .setTitle("Do you want to delete this conversation?")
                     .setPositiveButton("Delete") { dialog, _ ->
-                        val bundle = Bundle()
-                        bundle.putString(
-                            FirebaseAnalytics.Param.METHOD,
-                            "${conversation.label} to -1"
-                        )
-                        firebaseAnalytics.logEvent("${conversation.label}_to_-1", bundle)
-                        com.bruhascended.sms.db.moveTo(conversation, -1)
+                        analyticsLogger.log("${conversation.label}_to_-1")
+                        moveTo(conversation, -1)
                         Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         finish()
@@ -287,13 +272,8 @@ class ConversationActivity : AppCompatActivity() {
                         selection = select + if (select >= conversation.label) 1 else 0
                     }
                     .setPositiveButton("Move") { dialog, _ ->
-                        val bundle = Bundle()
-                        bundle.putString(
-                            FirebaseAnalytics.Param.METHOD,
-                            "${conversation.label} to $selection"
-                        )
-                        firebaseAnalytics.logEvent("${conversation.label}_to_$selection", bundle)
-                        com.bruhascended.sms.db.moveTo(conversation, selection)
+                        analyticsLogger.log("${conversation.label}_to_$selection")
+                        moveTo(conversation, selection)
                         Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }

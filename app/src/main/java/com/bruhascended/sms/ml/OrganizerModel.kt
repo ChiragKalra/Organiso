@@ -1,10 +1,9 @@
 package com.bruhascended.sms.ml
 
 import android.content.Context
-import android.os.Bundle
+import com.bruhascended.sms.analytics.AnalyticsLogger
 import com.bruhascended.sms.data.MESSAGE_CHECK_COUNT
 import com.bruhascended.sms.db.Message
-import com.google.firebase.analytics.FirebaseAnalytics
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate
 import java.io.FileInputStream
@@ -18,7 +17,6 @@ import java.nio.channels.FileChannel
 class OrganizerModel (context: Context) {
     private val mContext = context
     private val fe = FeatureExtractor(mContext)
-    private val firebaseAnalytics = FirebaseAnalytics.getInstance(mContext)
     private val tfliteModel = loadModelFile(mContext)
     private val delegate = GpuDelegate()
     private val options = Interpreter.Options()
@@ -61,9 +59,7 @@ class OrganizerModel (context: Context) {
             messages[i].label = out[0].toList().indexOf(out[0].maxOrNull())
             for (j in 0..4) probs[j] += out[0][j]
 
-            val bundle = Bundle()
-            bundle.putString(FirebaseAnalytics.Param.METHOD, "default")
-            firebaseAnalytics.logEvent("message_organised", bundle)
+            AnalyticsLogger(mContext).log("message_organised")
         }
         return probs
     }
