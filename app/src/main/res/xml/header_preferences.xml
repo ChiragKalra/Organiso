@@ -1,0 +1,29 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:allowDividerBelow="false"
+        app:key="notifications"
+        app:icon="@drawable/ic_notifications"
+        app:title="Notifications" />
+
+    <Preference
+        app:fragment="com.bruhascended.sms.SettingsActivity$CategoryFragment"
+        app:icon="@drawable/ic_category"
+        app:key="category_header"
+        app:title="Categories" />
+
+    <Preference
+        app:fragment="com.bruhascended.sms.SettingsActivity$InfoFragment"
+        app:icon="@drawable/ic_info"
+        app:key="info_header"
+        app:title="Info" />
+
+    <PreferenceCategory
+        app:title="Theme"/>
+    <SwitchPreferenceCompat
+        app:allowDividerBelow="false"
+        app:icon="@drawable/ic_theme"
+        app:key="dark_theme"
+        app:title="Dark Theme" />
+
+</PreferenceScreen>
