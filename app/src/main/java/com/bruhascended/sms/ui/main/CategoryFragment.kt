@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+
+*/
 
 package com.bruhascended.sms.ui.main
 
@@ -37,26 +38,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class CategoryFragment : Fragment() {
-
+class CategoryFragment(
+    private var pos: Int = 0,
     private var label: Int = 0
-
-    companion object {
-        private const val ARG_SECTION= "section_conversations"
-        @JvmStatic
-        fun newInstance(label: Int): CategoryFragment {
-            return CategoryFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_SECTION, label)
-                }
-            }
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        label = arguments?.getInt(ARG_SECTION)!!
-    }
+) : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,17 +60,8 @@ class CategoryFragment : Fragment() {
 
         val intent = Intent(mContext, ConversationActivity::class.java)
 
-        val promo = PreferenceManager.getDefaultSharedPreferences(mContext)
-            .getBoolean("promotions_category_visible", true)
         GlobalScope.launch {
-            delay(
-                when(label) {
-                    1 -> 500
-                    2 -> 500
-                    3 -> if (promo) 700 else 0
-                    else -> 0
-                }
-            )
+            delay(if (pos == 0) 0 else 500)
             (mContext as Activity).runOnUiThread {
                 mainViewModel.daos[label].loadAll().observe(viewLifecycleOwner, {
                     progressView.visibility = View.GONE

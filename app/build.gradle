@@ -82,6 +82,8 @@ dependencies {
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
 
+    implementation 'commons-io:commons-io:2.5'
+
     implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
     implementation 'io.michaelrocks:libphonenumber-android:8.12.6'
     implementation 'com.squareup.picasso:picasso:2.71828'

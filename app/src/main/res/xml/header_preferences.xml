@@ -1,4 +1,10 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:selectable="false"
+        android:layout="@layout/view_app_badge"
+        app:key="app_badge"/>
 
     <Preference
         app:allowDividerBelow="false"
@@ -7,13 +13,13 @@
         app:title="Notifications" />
 
     <Preference
-        app:fragment="com.bruhascended.sms.SettingsActivity$CategoryFragment"
+        app:fragment="com.bruhascended.sms.ui.settings.CategorySettingsFragment"
         app:icon="@drawable/ic_category"
         app:key="category_header"
-        app:title="Categories" />
+        app:title="Customise Categories" />
 
     <Preference
-        app:fragment="com.bruhascended.sms.SettingsActivity$InfoFragment"
+        app:fragment="com.bruhascended.sms.ui.settings.InfoFragment"
         app:icon="@drawable/ic_info"
         app:key="info_header"
         app:title="Info" />
