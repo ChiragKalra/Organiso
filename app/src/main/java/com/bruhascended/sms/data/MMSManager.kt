@@ -19,6 +19,8 @@ package com.bruhascended.sms.data
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.provider.Telephony
+import android.telephony.TelephonyManager
 import android.webkit.MimeTypeMap
 import androidx.room.Room
 import com.bruhascended.sms.db.Conversation
@@ -31,16 +33,22 @@ import com.bruhascended.sms.ui.isMainViewModelNull
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.mainViewModel
 import java.io.*
+import java.lang.Exception
 
 
-class IncomingMMSManager(private val context: Context) {
-    private var date: Long = 0
+@SuppressLint("Recycle")
+class MMSManager(private val context: Context) {
+    private val cm = ContactsManager(context)
+    private val senderNameMap = cm.getContactsHashMap()
 
-    @SuppressLint("Recycle")
-    private fun getAddressNumber(id: String): String? {
-        val selection = "type=137 AND msg_id=$id"
+    private val tMgr = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    @SuppressLint("MissingPermission", "HardwareIds")
+    private var mPhoneNumber = cm.getRaw(tMgr.line1Number)
+
+    private fun getAddressNumber(id: String): Pair<Boolean, String> {
+        var selection = "type=137 AND msg_id=$id"
         val uriAddress = Uri.parse("content://mms/${id}/addr")
-        val cursor = context.contentResolver.query(
+        var cursor = context.contentResolver.query(
             uriAddress, arrayOf("address"), selection, null, null
         )!!
         var address = ""
@@ -51,26 +59,41 @@ class IncomingMMSManager(private val context: Context) {
             } while (cursor.moveToNext())
         }
         cursor.close()
-        return address
+        if (address != mPhoneNumber) return false to address
+
+        selection = "type=151 AND msg_id=$id"
+        cursor = context.contentResolver.query(
+            uriAddress, arrayOf("address"), selection, null, null
+        )!!
+        if (cursor.moveToFirst()) {
+            do {
+                address = cursor.getString(cursor.getColumnIndex("address"))
+                if (address != null) break
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return true to address
     }
 
     private fun getMmsText(id: String): String {
         val partURI = Uri.parse("content://mms/part/$id")
-        val inp: InputStream? = context.contentResolver.openInputStream(partURI)
         val sb = StringBuilder()
-        if (inp != null) {
-            val isr = InputStreamReader(inp, "UTF-8")
-            val reader = BufferedReader(isr)
-            var temp: String? = reader.readLine()
-            while (temp != null) {
-                sb.append(temp)
-                temp = reader.readLine()
+        try {
+            val inp: InputStream? = context.contentResolver.openInputStream(partURI)
+            if (inp != null) {
+                val isr = InputStreamReader(inp, "UTF-8")
+                val reader = BufferedReader(isr)
+                var temp: String? = reader.readLine()
+                while (temp != null) {
+                    sb.append(temp)
+                    temp = reader.readLine()
+                }
             }
-        }
+        } catch (e: Exception) { }
         return sb.toString()
     }
 
-    private fun saveFile(_id: String, typeString: String): String {
+    private fun saveFile(_id: String, typeString: String, date: Long): String {
         val partURI = Uri.parse("content://mms/part/$_id")
         val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(typeString)
         val name = "$date.$ext"
@@ -86,11 +109,33 @@ class IncomingMMSManager(private val context: Context) {
         return destination.absolutePath
     }
 
-    @SuppressLint("Recycle")
-    fun putMMS(uri: Uri) : Pair<Message, Conversation> {
-        date = System.currentTimeMillis()
-        val mmsId = uri.toString().split("/").last()
+    fun getMMS(lastDate: String) {
+        context.contentResolver.query(
+            Telephony.Mms.CONTENT_URI,
+            null,
+            "date" + ">?",
+            arrayOf(lastDate),
+            "date ASC"
+        ) ?.apply {
+            if (moveToFirst()) {
+                val idColumn = getColumnIndex("_id")
+                val dateColumn = getColumnIndex("date")
+                val textColumn = getColumnIndex("text_only")
+                do {
+                    val id = getString(idColumn)
+                    val isMms = getString(textColumn) == "0"
+                    val date = getString(dateColumn).toLong()
+                    if (isMms) {
+                        putMMS(id, date)
+                    }
+                } while (moveToNext())
+            }
+            close()
+        }
+    }
 
+    fun putMMS(mmsId: String, date: Long = System.currentTimeMillis()):
+            Pair<Message, Conversation>? {
         val selectionPart = "mid=$mmsId"
         val partUri = Uri.parse("content://mms/part")
         val cursor = context.contentResolver.query(
@@ -105,27 +150,29 @@ class IncomingMMSManager(private val context: Context) {
                 val typeString = cursor.getString(cursor.getColumnIndex("ct"))
                 if ("text/plain" == typeString) {
                     body = getMmsText(partId)
-                } else if (
-                    typeString.startsWith("video") ||
+                } else if (file==null &&
+                    (typeString.startsWith("video") ||
                     typeString.startsWith("image") ||
-                    typeString.startsWith("audio")
+                    typeString.startsWith("audio"))
                 ) {
-                    file = saveFile(partId, typeString)
+                    file = saveFile(partId, typeString, date)
                 }
+                if (file!=null && body.isNotEmpty()) break
             } while (cursor.moveToNext())
         }
         cursor.close()
 
-        val sender = getAddressNumber(mmsId)!!
+        if (file == null) return null
 
-        val rawNumber = ContactsManager(context).getRaw(sender)
-        val senderNameMap = ContactsManager(context).getContactsHashMap()
+        val sender = getAddressNumber(mmsId)
+        val sentByUser = sender.first
+        val rawNumber = cm.getRaw(sender.second)
 
         val message = Message(
             null,
-            sender,
+            sender.second,
             body,
-            1,
+            if (sentByUser) 2 else 1,
             date,
             0,
             false,
