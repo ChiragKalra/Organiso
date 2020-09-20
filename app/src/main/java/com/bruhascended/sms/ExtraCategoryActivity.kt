@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+
+*/
 
 package com.bruhascended.sms
 
@@ -39,7 +40,7 @@ class ExtraCategoryActivity : AppCompatActivity() {
         supportActionBar!!.setTitle(labelText[label])
 
         if (savedInstanceState == null) {
-            val newFragment = CategoryFragment.newInstance(label)
+            val newFragment = CategoryFragment(0, label)
             supportFragmentManager.beginTransaction().add(R.id.fragmentContainer, newFragment).commit()
         }
     }

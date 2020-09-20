@@ -14,7 +14,7 @@
 
     <color name="text_primary_dark">#FFFFFF</color>
     <color name="text_secondary_dark">#90B184</color>
-    <color name="text_hint_dark">#BFBFBF</color>
+    <color name="text_hint_dark">#9F9F9F</color>
 
     <!-- light mode -->
     <color name="message_bg_accent_light">#88EFB1</color>
@@ -23,8 +23,8 @@
     <color name="selection_background_light">#EAFFE4</color>
 
     <color name="text_primary_light">#000000</color>
-    <color name="text_secondary_light">#202020</color>
-    <color name="text_hint_light">#364A2E</color>
+    <color name="text_secondary_light">#364A2E</color>
+    <color name="text_hint_light">#393939</color>
 
     <!-- neutral colors -->
     <color name="red">#C62828</color>

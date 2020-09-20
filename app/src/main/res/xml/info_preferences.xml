@@ -27,10 +27,9 @@
         app:key="github"
         app:title="Check out the source code" />
     <Preference
-        app:fragment="com.bruhascended.sms.SettingsActivity$LicenseFragment"
+        app:fragment="com.bruhascended.sms.ui.settings.LicenseFragment"
         app:icon="@drawable/ic_policy"
-        app:key="License"
+        app:key="license"
         app:title="License" />
-
 
 </PreferenceScreen>

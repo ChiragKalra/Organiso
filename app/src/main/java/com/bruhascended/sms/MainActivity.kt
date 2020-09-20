@@ -10,7 +10,7 @@
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
+   See the License for the prefsecific language governing permissions and
    limitations under the License.
  */
 
@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.Telephony
@@ -44,6 +45,7 @@ import com.bruhascended.sms.ui.main.ConversationListViewAdaptor
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
 import com.bruhascended.sms.ui.mainViewModel
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -55,6 +57,8 @@ import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context
+    private lateinit var prefs: SharedPreferences
+    private lateinit var hiddenCategories: Array<Int>
 
     private var searchLayoutVisible = false
     private var inputManager: InputMethodManager? = null
@@ -149,8 +153,8 @@ class MainActivity : AppCompatActivity() {
             mainViewModel.contacts.postValue(ContactsManager(mContext).getContactsList())
         }.start()
 
-        val sp = PreferenceManager.getDefaultSharedPreferences(this)
-        if (sp.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
         else setTheme(R.style.LightTheme)
 
         setContentView(R.layout.activity_main)
@@ -165,9 +169,25 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(mToolbar)
 
-        promotionsVisible = sp.getBoolean("promotions_category_visible", true)
-        viewPager.adapter = SectionsPagerAdapter(this, supportFragmentManager, promotionsVisible)
-        viewPager.offscreenPageLimit = if (promotionsVisible) 3 else 2
+        if (prefs.getString("visible_categories", "null") == "null") {
+            val vis = Array(4){it}
+            val hid = Array(2){4+it}
+            prefs.edit()
+                .putString("visible_categories", Gson().toJson(vis))
+                .putString("hidden_categories", Gson().toJson(hid))
+                .apply()
+        }
+
+        val visibleCategories = Gson().fromJson(
+            prefs.getString("visible_categories", ""), Array<Int>::class.java
+        )
+        hiddenCategories = Gson().fromJson(
+            prefs.getString("hidden_categories", ""), Array<Int>::class.java
+        )
+        viewPager.adapter = SectionsPagerAdapter(
+            this, visibleCategories, prefs, supportFragmentManager
+        )
+        viewPager.offscreenPageLimit = 5
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 if (position != mainViewModel.selection.value) {
@@ -185,10 +205,18 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent?) {}
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        val sp = PreferenceManager.getDefaultSharedPreferences(this)
-        promotionsVisible = sp.getBoolean("promotions_category_visible", true)
-        if (promotionsVisible) menu?.removeItem(R.id.action_promotions)
+    private var addedCategoriesToMenu: Boolean = false
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        if (addedCategoriesToMenu) return super.onPrepareOptionsMenu(menu)
+        addedCategoriesToMenu = true
+        for (i in hiddenCategories.indices) {
+            val label = hiddenCategories[i]
+            val customTitle = prefs.getString("custom_label_$label", "")!!
+            menu.add(
+                0, label, 400+i,
+                if (customTitle=="") getString(labelText[label]) else customTitle
+            )
+        }
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -201,25 +229,15 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_search -> {
                 showSearchLayout()
-                mBackButton.setOnClickListener{ hideSearchLayout() }
-            }
-            R.id.action_spam -> {
-                val intent = Intent(mContext, ExtraCategoryActivity::class.java)
-                intent.putExtra("Type", 4)
-                startActivity(intent)
-            }
-            R.id.action_promotions -> {
-                val intent = Intent(mContext, ExtraCategoryActivity::class.java)
-                intent.putExtra("Type", 3)
-                startActivity(intent)
-            }
-            R.id.action_block -> {
-                val intent = Intent(mContext, ExtraCategoryActivity::class.java)
-                intent.putExtra("Type", 5)
-                startActivity(intent)
+                mBackButton.setOnClickListener { hideSearchLayout() }
             }
             R.id.action_settings -> {
                 val intent = Intent(mContext, SettingsActivity::class.java)
+                startActivity(intent)
+            }
+            else -> {
+                val intent = Intent(mContext, ExtraCategoryActivity ::class.java)
+                intent.putExtra("Type", item.itemId)
                 startActivity(intent)
             }
         }
@@ -232,11 +250,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        super.onResume()
-        val sp = PreferenceManager.getDefaultSharedPreferences(this)
-        if (sp.getBoolean("stateChanged", false)) {
-            sp.edit().putBoolean("stateChanged", false).apply()
-            recreate()
+        if (prefs.getBoolean("stateChanged", false)) {
+            prefs.edit().putBoolean("stateChanged", false).apply()
+            finish()
+            startActivity(intent)
         }
+        super.onResume()
     }
 }

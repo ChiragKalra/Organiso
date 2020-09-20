@@ -113,7 +113,7 @@ class ConversationMultiChoiceModeListener(
                 true
             }
             R.id.action_delete -> {
-                AlertDialog.Builder(mContext).setTitle("Do you want to delete selected conversations?")
+                AlertDialog.Builder(mContext).setTitle("Delete selected conversations?")
                     .setPositiveButton("Delete") { dialog, _ ->
                         for (i in 0 until selected.size()) {
                             if (selected.valueAt(i)) {
@@ -134,7 +134,7 @@ class ConversationMultiChoiceModeListener(
                 true
             }
             R.id.action_block -> {
-                AlertDialog.Builder(mContext).setTitle("Do you want to block selected conversations?")
+                AlertDialog.Builder(mContext).setTitle("Block selected conversations?")
                     .setPositiveButton("Block") { dialog, _ ->
                         for (i in 0 until selected.size()) {
                             if (selected.valueAt(i)) {
@@ -155,7 +155,7 @@ class ConversationMultiChoiceModeListener(
                 true
             }
             R.id.action_report_spam -> {
-                AlertDialog.Builder(mContext).setTitle("Do you want to report selected conversations?")
+                AlertDialog.Builder(mContext).setTitle("Report selected conversations?")
                     .setPositiveButton("Report") { dialog, _ ->
                         for (i in 0 until selected.size()) {
                             if (selected.valueAt(i)) {
