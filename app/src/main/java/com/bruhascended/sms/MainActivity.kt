@@ -254,6 +254,7 @@ class MainActivity : AppCompatActivity() {
             prefs.edit().putBoolean("stateChanged", false).apply()
             finish()
             startActivity(intent)
+            overridePendingTransition(0, 0)
         }
         super.onResume()
     }

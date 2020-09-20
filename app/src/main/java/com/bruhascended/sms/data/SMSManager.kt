@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+
+*/
 
 package com.bruhascended.sms.data
 
@@ -48,6 +49,7 @@ class SMSManager(
 ) {
     private val nn = OrganizerModel(mContext)
     private val cm = ContactsManager(mContext)
+    private val mmsManager = MMSManager(mContext)
     private val sp = mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
 
     private val messages = HashMap<String, ArrayList<Message>>()
@@ -62,6 +64,8 @@ class SMSManager(
     private var startTime = 0L
 
     private lateinit var senderNameMap: HashMap<String, String>
+
+    private lateinit var mmsThread: Thread
 
     private fun finish() {
         pageViewModel.disc.postValue(2)
@@ -137,7 +141,7 @@ class SMSManager(
                 do {
                     var name = getString(nameID)
                     val messageContent = getString(messageID)
-                    if (name != null && messageContent != null && messageContent != "") {
+                    if (name != null && !messageContent.isNullOrEmpty()) {
                         name = cm.getRaw(name)
                         val message = Message(
                             null,
@@ -155,6 +159,8 @@ class SMSManager(
             }
             close()
         }
+        mmsThread = Thread { mmsManager.getMMS(lastDate) }
+        mmsThread.start()
     }
 
     fun getLabels() {
@@ -197,6 +203,8 @@ class SMSManager(
             updateProgress(msgs.size)
         }
         saveThread?.join()
+
+        mmsThread.join()
         finish()
     }
 }

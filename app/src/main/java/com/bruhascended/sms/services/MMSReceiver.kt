@@ -18,7 +18,7 @@ package com.bruhascended.sms.services
 
 import android.content.Context
 import android.net.Uri
-import com.bruhascended.sms.data.IncomingMMSManager
+import com.bruhascended.sms.data.MMSManager
 import com.bruhascended.sms.ui.MessageNotificationManager
 import com.klinker.android.send_message.MmsReceivedReceiver
 
@@ -26,7 +26,8 @@ import com.klinker.android.send_message.MmsReceivedReceiver
 class MMSReceiver : MmsReceivedReceiver() {
 
     override fun onMessageReceived(context: Context, uri: Uri) {
-        MessageNotificationManager(context).sendSmsNotification(IncomingMMSManager(context).putMMS(uri))
+        MessageNotificationManager(context).sendSmsNotification(MMSManager(context)
+                .putMMS(uri.toString().split("/").last())!!)
     }
 
     override fun onError(p0: Context?, p1: String?) {}
