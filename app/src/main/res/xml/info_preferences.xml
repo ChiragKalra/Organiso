@@ -9,14 +9,6 @@
         app:title="Report a bug" />
 
     <PreferenceCategory
-        app:title="Privacy" />
-    <SwitchPreferenceCompat
-        app:defaultValue="true"
-        app:icon="@drawable/ic_report"
-        app:key="report_spam"
-        app:title="Share anonymous spam reports" />
-
-    <PreferenceCategory
         app:title="About App" />
     <Preference
         app:icon="@drawable/ic_web"

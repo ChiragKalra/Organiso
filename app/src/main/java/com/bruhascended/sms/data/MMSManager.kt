@@ -27,8 +27,8 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.ui.conversationDao
-import com.bruhascended.sms.ui.conversationSender
+import com.bruhascended.sms.ui.activeConversationDao
+import com.bruhascended.sms.ui.activeConversationSender
 import com.bruhascended.sms.ui.isMainViewModelNull
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.mainViewModel
@@ -233,7 +233,7 @@ class MMSManager(private val context: Context) {
             con
         }
 
-        val mdb = if (conversationSender == rawNumber) conversationDao
+        val mdb = if (activeConversationSender == rawNumber) activeConversationDao
         else Room.databaseBuilder(
             context, MessageDatabase::class.java, rawNumber
         ).build().manager()

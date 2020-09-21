@@ -1,0 +1,30 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        app:title="Theme"
+        app:key="theme_category"/>
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:icon="@drawable/ic_theme"
+        app:key="dark_theme"
+        app:allowDividerBelow="false"
+        app:title="Dark Theme" />
+
+    <PreferenceCategory
+        app:title="OTP" />
+    <SwitchPreferenceCompat
+        app:defaultValue="true"
+        app:icon="@drawable/ic_report"
+        app:key="copy_otp"
+        app:allowDividerBelow="false"
+        app:title="Automatically Copy OTP"/>
+
+    <PreferenceCategory
+        app:title="Privacy" />
+    <SwitchPreferenceCompat
+        app:defaultValue="true"
+        app:icon="@drawable/ic_report"
+        app:key="report_spam"
+        app:allowDividerBelow="false"
+        app:title="Share anonymous spam reports" />
+
+</PreferenceScreen>

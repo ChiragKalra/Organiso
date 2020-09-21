@@ -1,10 +1,18 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <Preference
-        android:selectable="false"
         android:layout="@layout/view_app_badge"
-        app:key="app_badge"/>
+        android:selectable="false"
+        app:key="app_badge" />
+
+    <Preference
+        app:fragment="com.bruhascended.sms.ui.settings.GeneralFragment"
+        app:allowDividerBelow="false"
+        app:key="general"
+        app:icon="@drawable/ic_account"
+        app:title="General" />
 
     <Preference
         app:allowDividerBelow="false"
@@ -23,13 +31,5 @@
         app:icon="@drawable/ic_info"
         app:key="info_header"
         app:title="Info" />
-
-    <PreferenceCategory
-        app:title="Theme"/>
-    <SwitchPreferenceCompat
-        app:allowDividerBelow="false"
-        app:icon="@drawable/ic_theme"
-        app:key="dark_theme"
-        app:title="Dark Theme" />
 
 </PreferenceScreen>

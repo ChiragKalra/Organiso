@@ -21,8 +21,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
-import androidx.preference.SwitchPreferenceCompat
 import com.bruhascended.sms.BuildConfig
 import com.bruhascended.sms.R
 
@@ -30,7 +28,6 @@ class HeaderFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.header_preferences, rootKey)
         val notifyPref: Preference = findPreference("notifications")!!
-        val themePref: SwitchPreferenceCompat = findPreference("dark_theme")!!
         val appBadgePref: Preference = findPreference("app_badge")!!
 
         appBadgePref.summary = "v${BuildConfig.VERSION_NAME}"
@@ -44,12 +41,6 @@ class HeaderFragment : PreferenceFragmentCompat() {
             }
             requireActivity().startActivity(intent)
             false
-        }
-        themePref.setOnPreferenceChangeListener { _, _ ->
-            val sp = PreferenceManager.getDefaultSharedPreferences(requireActivity())
-            sp.edit().putBoolean("stateChanged", true).apply()
-            requireActivity().recreate()
-            true
         }
     }
 }

@@ -45,8 +45,10 @@ import kotlin.collections.ArrayList
 class NewConversationActivity : AppCompatActivity() {
 
     private lateinit var mContext: Context
-
     private lateinit var mpm: MediaPreviewManager
+
+    private val selectMediaArg = 0
+    private val selectMessageArg = 1
 
     private fun getRecipients(uri: Uri): String {
         val base: String = uri.schemeSpecificPart
@@ -113,7 +115,8 @@ class NewConversationActivity : AppCompatActivity() {
             seekBar,
             playPauseButton,
             videoPlayPauseButton,
-            addMedia
+            addMedia,
+            selectMediaArg
         )
 
         addMedia.setOnClickListener{
@@ -191,7 +194,7 @@ class NewConversationActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 0 && data != null && data.data != null) {
+        if (requestCode == selectMediaArg && data != null && data.data != null) {
             mpm.showMediaPreview(data)
         }
     }

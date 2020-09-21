@@ -25,6 +25,7 @@ import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ui.*
 import com.bruhascended.sms.ml.OrganizerModel
+import com.bruhascended.sms.ml.getOtp
 import com.bruhascended.sms.ui.main.MainViewModel
 
 class IncomingSMSManager(context: Context) {
@@ -70,6 +71,7 @@ class IncomingSMSManager(context: Context) {
         var mProbs: FloatArray? = null
         val prediction = if (senderNameMap.containsKey(rawNumber)) 0
         else if (conversation != null && conversation.forceLabel != -1) conversation.forceLabel
+        else if (!getOtp(body).isNullOrEmpty()) 2
         else {
             mProbs = nn.getPrediction(message)
             if (conversation != null) for (j in 0..4) conversation.probs[j] += mProbs[j]
@@ -109,7 +111,7 @@ class IncomingSMSManager(context: Context) {
             con
         }
 
-        val mdb = if (conversationSender == rawNumber) conversationDao
+        val mdb = if (activeConversationSender == rawNumber) activeConversationDao
         else Room.databaseBuilder(
             mContext, MessageDatabase::class.java, rawNumber
         ).build().manager()

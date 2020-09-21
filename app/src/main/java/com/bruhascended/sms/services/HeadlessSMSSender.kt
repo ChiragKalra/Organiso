@@ -24,14 +24,14 @@ import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.text.TextUtils
 import androidx.room.Room
-import com.bruhascended.sms.ui.conversationDao
-import com.bruhascended.sms.ui.conversationSender
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.ui.activeConversationDao
+import com.bruhascended.sms.ui.activeConversationSender
 import com.bruhascended.sms.ui.isMainViewModelNull
 import com.bruhascended.sms.ui.mainViewModel
 
@@ -102,7 +102,7 @@ class HeadlessSMSSender : Service() {
         mDaos[prediction].insert(con)
 
 
-        val mdb = if (conversationSender == add) conversationDao
+        val mdb = if (activeConversationSender == add) activeConversationDao
         else Room.databaseBuilder(
             applicationContext, MessageDatabase::class.java, add
         ).build().manager()

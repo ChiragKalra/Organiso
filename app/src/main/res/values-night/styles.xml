@@ -1,25 +1,5 @@
 <resources>
-    <style name="LightTheme" parent="AppTheme">
-        <item name="backgroundColor">@color/background_dark</item>
-        <item name="android:textColor">@color/text_primary_dark</item>
-        <item name="android:textColorPrimary">@color/text_primary_dark</item>
-        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
-        <item name="android:textColorHint">@color/text_hint_dark</item>
-        <item name="contactItemBackground">@color/list_item_background_dark</item>
-        <item name="multiChoiceSelectorColor">@color/selection_background_dark</item>
-        <item name="bg_accent">@color/message_bg_accent_dark</item>
-        <item name="android:alertDialogTheme">@style/DarkTheme.AlertDialog</item>
-        <item name="android:navigationBarColor">?backgroundColor</item>
-        <item name="android:editTextStyle">@style/DarkTheme.EditTextTheme</item>
-    </style>
-
-    <style name="LightTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColor">@color/text_primary_dark</item>
-        <item name="android:background">@color/background_dark</item>
-        <item name="android:textColorSecondary">@color/text_hint_dark</item>
-        <item name="android:textColorAlertDialogListItem">@color/text_secondary_dark</item>
-    </style>
+    <style name="LightTheme" parent="DarkTheme"/>
 
     <style name="Splash" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="backgroundColor">@color/background_dark</item>
@@ -28,10 +8,4 @@
         <item name="android:navigationBarColor">?backgroundColor</item>
     </style>
 
-    <style name="DarkTheme.EditTextTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
-        <item name="colorControlNormal">@color/text_secondary_dark</item>
-        <item name="colorControlActivated">@color/colorAccent</item>
-        <item name="android:textColorHint">@color/text_hint_dark</item>
-        <item name="android:textColorPrimary">@color/text_primary_dark</item>
-    </style>
 </resources>

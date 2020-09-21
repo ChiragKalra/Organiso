@@ -12,12 +12,11 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+
+*/
 
 package com.bruhascended.sms
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -31,8 +30,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.bruhascended.sms.analytics.AnalyticsLogger
@@ -49,7 +46,7 @@ import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
+import kotlin.collections.ArrayList
 
 class ConversationActivity : AppCompatActivity() {
     private lateinit var mdb: MessageDao
@@ -59,75 +56,22 @@ class ConversationActivity : AppCompatActivity() {
 
     private lateinit var smsSender: SMSSender
     private lateinit var mmsSender: MMSSender
+    private lateinit var messages: List<Message>
     private var inputManager: InputMethodManager? = null
 
     private lateinit var mpm: MediaPreviewManager
     private lateinit var analyticsLogger: AnalyticsLogger
 
-    private fun showSearchLayout() {
-        searchLayout.apply {
-            alpha = 0f
-            visibility = View.VISIBLE
-            animate()
-                .alpha(1f)
-                .setDuration(300)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        searchEditText.requestFocus()
-                        inputManager?.showSoftInput(
-                            searchEditText,
-                            InputMethodManager.SHOW_IMPLICIT
-                        )
-                        notSupported.visibility = TextView.GONE
-                        sendLayout.visibility = LinearLayout.GONE
-                    }
-                })
-        }
+    private val selectMediaArg = 0
+    private val selectMessageArg = 1
 
-        searchEditText.doOnTextChanged { _, _, _, _ ->
-            val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
-            progress.visibility = View.VISIBLE
-            if (key.isNotEmpty()) {
-                listView.adapter = MessageListViewAdaptor(mContext, mdb.search("%${key}%"))
-            }
-            progress.visibility = View.GONE
-        }
-    }
-
-    private fun hideSearchLayout() {
-        progress.visibility = View.VISIBLE
-        if (!conversation.sender.first().isDigit()) {
-            notSupported.visibility = TextView.VISIBLE
-        } else {
-            sendLayout.visibility = LinearLayout.VISIBLE
-        }
-
-        searchLayout.animate()
-            .alpha(0f)
-            .setDuration(300)
-            .setListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    searchLayout.visibility = View.GONE
-                    inputManager?.hideSoftInputFromWindow(backButton.windowToken, 0)
-                }
-            }).start()
-
-
-        mdb.loadAll().observe(mContext as AppCompatActivity, object : Observer<List<Message>> {
-            override fun onChanged(t: List<Message>?) {
-                listView.adapter = MessageListViewAdaptor(mContext, t!!)
-                progress.visibility = View.GONE
-                mdb.loadAll().removeObserver(this)
-            }
-        })
-    }
 
     private fun setupActivity(intent: Intent) {
         conversation = intent.getSerializableExtra("ye") as Conversation
         smsSender = SMSSender(this, conversation, sendButton)
         mmsSender = MMSSender(this, conversation, sendButton)
         analyticsLogger = AnalyticsLogger(this)
-        conversationSender = conversation.sender
+        activeConversationSender = conversation.sender
 
         setSupportActionBar(toolbar)
         supportActionBar!!.title = conversation.name ?: conversation.sender
@@ -157,7 +101,7 @@ class ConversationActivity : AppCompatActivity() {
         mdb = Room.databaseBuilder(
             this, MessageDatabase::class.java, conversation.sender
         ).allowMainThreadQueries().build().manager()
-        conversationDao = mdb
+        activeConversationDao = mdb
 
         mpm = MediaPreviewManager(
             this,
@@ -166,7 +110,8 @@ class ConversationActivity : AppCompatActivity() {
             seekBar,
             playPauseButton,
             videoPlayPauseButton,
-            addMedia
+            addMedia,
+            selectMediaArg
         )
 
         sendButton.setOnClickListener {
@@ -197,6 +142,7 @@ class ConversationActivity : AppCompatActivity() {
                 conversation.lastMMS = path != null
                 mainViewModel.daos[conversation.label].update(conversation)
             }
+            messages = it
             val editListAdapter = MessageListViewAdaptor(this, it)
             listView.apply {
                 val recyclerViewState = onSaveInstanceState()!!
@@ -234,11 +180,6 @@ class ConversationActivity : AppCompatActivity() {
         setupActivity(intent)
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        if (intent != null) setupActivity(intent)
-        super.onNewIntent(intent)
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val display = conversation.name ?: conversation.sender
         if (item.itemId == android.R.id.home) onBackPressed()
@@ -251,7 +192,7 @@ class ConversationActivity : AppCompatActivity() {
                         moveTo(conversation, 5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }
+                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}.create().show()
             }
             R.id.action_report_spam -> {
                 AlertDialog.Builder(mContext)
@@ -262,7 +203,7 @@ class ConversationActivity : AppCompatActivity() {
                         moveTo(conversation, 4)
                         Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }
+                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}.create().show()
             }
             R.id.action_delete -> {
                 AlertDialog.Builder(mContext)
@@ -273,7 +214,7 @@ class ConversationActivity : AppCompatActivity() {
                         Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         finish()
-                    }
+                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}.create().show()
             }
             R.id.action_move -> {
                 val choices = ArrayList<String>().apply {
@@ -292,12 +233,15 @@ class ConversationActivity : AppCompatActivity() {
                         moveTo(conversation, selection)
                         Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }
+                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}.create().show()
             }
             R.id.action_search -> {
-                showSearchLayout()
-                backButton.setOnClickListener { hideSearchLayout() }
-                null
+                startActivityForResult(
+                    Intent(mContext, SearchActivity::class.java)
+                        .putExtra("type", "messages"),
+                    selectMessageArg
+                )
+                overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
             }
             R.id.action_mute -> {
                 conversation.isMuted = !conversation.isMuted
@@ -308,24 +252,39 @@ class ConversationActivity : AppCompatActivity() {
                         item.title = if (conversation.isMuted) "UnMute" else "Mute"
                     }
                 }
-                null
             }
             R.id.action_call -> {
                 val intent = Intent(Intent.ACTION_DIAL)
                 intent.data = Uri.parse("tel:${conversation.sender}")
                 startActivity(intent)
-                null
             }
-            else -> null
-        }?.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}?.create()?.show()
+            android.R.id.home -> onBackPressed()
+        }
         return false
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 0 && data != null && data.data != null) {
+        if (requestCode == selectMediaArg && data != null && data.data != null) {
             mpm.showMediaPreview(data)
+        } else if (requestCode == selectMessageArg && resultCode == RESULT_OK && data != null) {
+            val id = data.getLongExtra("ID", -1L)
+            if (id == -1L) return
+            val index = messages.indexOfFirst { m -> m.id==id }
+            listView.setItemChecked(index, true)
+            listView.smoothScrollToPosition(index)
         }
+    }
+
+    override fun onBackPressed() {
+        startActivity(
+            Intent(mContext, MainActivity::class.java).apply {
+                putExtra("ye", conversation)
+                flags = Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
+            }
+        )
+        finish()
+        super.onBackPressed()
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
@@ -338,13 +297,6 @@ class ConversationActivity : AppCompatActivity() {
         return super.onPrepareOptionsMenu(menu)
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        startActivity(
-            Intent(this, MainActivity::class.java)
-                .putExtra("label", conversation.label)
-        )
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.conversation, menu)
@@ -352,17 +304,17 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-       conversationSender = null
+       activeConversationSender = null
         super.onPause()
     }
 
     override fun onResume() {
-        conversationSender = conversation.sender
+        activeConversationSender = conversation.sender
         super.onResume()
     }
 
     override fun onDestroy() {
-        conversationSender = null
+        activeConversationSender = null
         super.onDestroy()
     }
 }

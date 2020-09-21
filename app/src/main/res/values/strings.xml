@@ -65,5 +65,6 @@
     <string name="drag_handle">drag handle</string>
     <string name="visible_category">"Visible on Home Screen"</string>
     <string name="hidden_category">"Hidden Away in Menu"</string>
+    <string name="clear_text_button">clear text button</string>
 
 </resources>
