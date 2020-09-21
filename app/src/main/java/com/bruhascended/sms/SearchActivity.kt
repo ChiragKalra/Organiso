@@ -62,14 +62,16 @@ class SearchActivity : AppCompatActivity() {
 
         Thread {
             val res = activeConversationDao.search("%${key}%")
-
             runOnUiThread {
                 searchListView.apply {
                     adapter = MessageListViewAdaptor(mContext, res)
                     visibility = View.VISIBLE
                     progress.visibility = View.GONE
-                    onItemLongClickListener = OnItemLongClickListener { _, _, i, _ ->
-                        setResult(RESULT_OK, Intent("MESSAGE_SELECTED").putExtra("ID", res[i].id))
+                    onItemLongClickListener = OnItemLongClickListener { _, v, i, _ ->
+                        val intent = Intent("MESSAGE_SELECTED")
+                            .putExtra("ID", res[i].id)
+                            .putExtra("POS", v.top)
+                        setResult(RESULT_OK, intent)
                         finish()
                         overridePendingTransition(R.anim.hold, android.R.anim.fade_out)
                         true
