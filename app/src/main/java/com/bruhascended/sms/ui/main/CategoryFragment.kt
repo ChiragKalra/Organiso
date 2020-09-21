@@ -58,8 +58,6 @@ class CategoryFragment(
 
         textView.visibility = TextView.INVISIBLE
 
-        val intent = Intent(mContext, ConversationActivity::class.java)
-
         GlobalScope.launch {
             delay(if (pos == 0) 0 else 500)
             (mContext as Activity).runOnUiThread {
@@ -73,8 +71,10 @@ class CategoryFragment(
                         adapter = ConversationListViewAdaptor(mContext, it.toMutableList())
                         onRestoreInstanceState(listViewState)
                         onItemClickListener = AdapterView.OnItemClickListener { _, _, i, _ ->
-                            intent.putExtra("ye", it[i])
-                            startActivity(intent)
+                            startActivity(
+                                Intent(mContext, ConversationActivity::class.java)
+                                    .putExtra("ye", it[i])
+                            )
                         }
                         setMultiChoiceModeListener(
                             ConversationMultiChoiceModeListener(mContext, listView, label)
