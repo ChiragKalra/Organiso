@@ -185,10 +185,12 @@ class MessageMultiChoiceModeListener(
             val selected = editListAdapter.getSelectedIds()
             for (i in 0 until selected.size()) {
                 if (selected.valueAt(i)) {
-                    shareMenuItem.isVisible = listView.checkedItemCount == 1 &&
-                        editListAdapter.isMedia(editListAdapter.getSelectedIds().keyAt(i))
-                    forwardMenuItem.isVisible = listView.checkedItemCount == 1 &&
-                        !editListAdapter.isMedia(editListAdapter.getSelectedIds().keyAt(i))
+                    try {
+                        shareMenuItem.isVisible = listView.checkedItemCount == 1 &&
+                                editListAdapter.isMedia(editListAdapter.getSelectedIds().keyAt(i))
+                        forwardMenuItem.isVisible = listView.checkedItemCount == 1 &&
+                                !editListAdapter.isMedia(editListAdapter.getSelectedIds().keyAt(i))
+                    } catch (e: Exception) {}
                 }
             }
         }

@@ -46,7 +46,6 @@ import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.collections.ArrayList
 
 class ConversationActivity : AppCompatActivity() {
     private lateinit var mdb: MessageDao
@@ -192,7 +191,7 @@ class ConversationActivity : AppCompatActivity() {
                         moveTo(conversation, 5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}.create().show()
+                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_report_spam -> {
                 AlertDialog.Builder(mContext)
@@ -203,7 +202,7 @@ class ConversationActivity : AppCompatActivity() {
                         moveTo(conversation, 4)
                         Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}.create().show()
+                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_delete -> {
                 AlertDialog.Builder(mContext)
@@ -214,7 +213,7 @@ class ConversationActivity : AppCompatActivity() {
                         Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         finish()
-                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}.create().show()
+                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_move -> {
                 val choices = ArrayList<String>().apply {
@@ -233,7 +232,7 @@ class ConversationActivity : AppCompatActivity() {
                         moveTo(conversation, selection)
                         Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss()}.create().show()
+                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_search -> {
                 startActivityForResult(
@@ -269,19 +268,21 @@ class ConversationActivity : AppCompatActivity() {
             mpm.showMediaPreview(data)
         } else if (requestCode == selectMessageArg && resultCode == RESULT_OK && data != null) {
             val id = data.getLongExtra("ID", -1L)
+            val yTranslate = data.getIntExtra("POS", 0)
             if (id == -1L) return
             val index = messages.indexOfFirst { m -> m.id==id }
             listView.setItemChecked(index, true)
-            listView.smoothScrollToPosition(index)
+            listView.clearFocus()
+            listView.post {
+                listView.setSelectionFromTop(index, yTranslate)
+            }
         }
     }
 
     override fun onBackPressed() {
-        startActivity(
-            Intent(mContext, MainActivity::class.java).apply {
-                putExtra("ye", conversation)
-                flags = Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT
-            }
+        startActivityIfNeeded(
+            Intent(mContext, MainActivity::class.java)
+                .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0
         )
         finish()
         super.onBackPressed()
