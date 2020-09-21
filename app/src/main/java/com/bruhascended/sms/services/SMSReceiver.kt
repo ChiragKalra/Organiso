@@ -28,7 +28,7 @@ import com.bruhascended.sms.ui.MessageNotificationManager
 
 class SMSReceiver : BroadcastReceiver() {
 
-     private lateinit var mContext: Context
+    private lateinit var mContext: Context
 
     private fun saveSms(phoneNumber: String, message: String): Boolean {
         var ret = false

@@ -17,16 +17,17 @@
 package com.bruhascended.sms.services
 
 import android.app.Activity
-import android.app.PendingIntent
 import android.content.*
-import android.provider.Telephony
 import android.telephony.SmsManager
 import android.widget.ImageButton
 import android.widget.Toast
-import com.bruhascended.sms.ui.conversationDao
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.ui.activeConversationDao
 import com.bruhascended.sms.ui.mainViewModel
+import com.klinker.android.send_message.Settings
+import com.klinker.android.send_message.Transaction
+import com.klinker.android.send_message.Message as SMS
 
 /*
 const val MESSAGE_TYPE_ALL = 0
@@ -44,24 +45,15 @@ class SMSSender (
     private val sendButton: ImageButton
 ) {
 
-    private fun addSmsToGlobal(message: Message) {
-        val romsThatDontSaveSms = arrayOf("HUAWEI")
-        if (android.os.Build.MANUFACTURER in romsThatDontSaveSms) {
-            try {
-                val values = ContentValues()
-                values.put("address", message.sender)
-                values.put("body", message.text)
-                values.put("read", 0)
-                values.put("date", message.time)
-                values.put("type", message.type)
-                mContext.contentResolver.insert(Telephony.Sms.CONTENT_URI, values)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
-        }
+    private val sentAction = "SMS_SENT"
+    private val deliveredAction = "SMS_DELIVERED"
+
+    private val settings = Settings().apply {
+        useSystemSending = true
+        deliveryReports = true
     }
 
-    private fun addSmsToDb(smsText: String, date: Long, type: Int, delivered: Boolean, saveToDb: Boolean = false) {
+    private fun addSmsToDb(smsText: String, date: Long, type: Int, delivered: Boolean) {
         Thread {
             val message = Message(
                 null,
@@ -72,10 +64,9 @@ class SMSSender (
                 0,
                 delivered
             )
-            val qs = conversationDao.search(date)
-            for (m in qs) conversationDao.delete(m)
-            conversationDao.insert(message)
-            if (saveToDb) addSmsToGlobal(message)
+            val qs = activeConversationDao.search(date)
+            for (m in qs) activeConversationDao.delete(m)
+            activeConversationDao.insert(message)
 
             if (conversation.id == null) {
                 var found = false
@@ -101,17 +92,18 @@ class SMSSender (
 
     fun sendSMS(smsText: String) {
         sendButton.isEnabled = false
-        val smsManager = SmsManager.getDefault()
         val date = System.currentTimeMillis()
 
-        val sentPI = PendingIntent.getBroadcast(mContext, 0, Intent("SENT"), 0)
-        val deliveredPI = PendingIntent.getBroadcast(mContext, 0, Intent("DELIVERED"), 0)
+        val transaction = Transaction(mContext, settings).apply {
+            setExplicitBroadcastForSentSms(Intent(sentAction))
+            setExplicitBroadcastForDeliveredSms(Intent(deliveredAction))
+        }
 
         addSmsToDb(smsText, date, 6, false)
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent?) {
                 when (resultCode) {
-                    Activity.RESULT_OK -> addSmsToDb(smsText, date, 2, false, saveToDb = true)
+                    Activity.RESULT_OK -> addSmsToDb(smsText, date, 2, false)
                     SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
                         Toast.makeText(
                             mContext,
@@ -131,20 +123,19 @@ class SMSSender (
                 }
                 mContext.unregisterReceiver(this)
             }
-        }, IntentFilter("SENT"))
+        }, IntentFilter(sentAction))
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent?) {
                 when (resultCode) {
                     Activity.RESULT_OK -> addSmsToDb(smsText, date, 4, true)
-                    Activity.RESULT_CANCELED -> addSmsToDb(smsText, date, 4, false)
+                    else -> addSmsToDb(smsText, date, 4, false)
                 }
                 mContext.unregisterReceiver(this)
             }
-        }, IntentFilter("DELIVERED"))
+        }, IntentFilter(deliveredAction))
 
-        smsManager.sendTextMessage(conversation.sender, null, smsText, sentPI, deliveredPI)
-        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
-            .putLong("last", System.currentTimeMillis()).apply()
+        val message = SMS(smsText, conversation.sender)
+        transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
 
         sendButton.isEnabled = true
     }

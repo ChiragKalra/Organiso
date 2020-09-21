@@ -42,18 +42,20 @@ import java.io.FileOutputStream
 import java.util.*
 
 
-class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapter() {
+class MessageListViewAdaptor(
+    context: Context,
+    val messages: List<Message>
+) : BaseAdapter() {
 
     private val mContext: Context = context
-    private var messages: List<Message> = data
     private var mSelectedItemsIds = SparseBooleanArray()
     private val previewCache: MutableMap<Int, String> = mutableMapOf()
     private val picasso = Picasso.get()
 
     init {
         Thread {
-            for (position in data.indices) {
-                val sms = data[position]
+            for (position in messages.indices) {
+                val sms = messages[position]
                 val p = sms.path
                 if (p != null && getMimeType(p).startsWith("video")) {
                     val retriever = MediaMetadataRetriever()
@@ -224,7 +226,10 @@ class MessageListViewAdaptor(context: Context, data: List<Message>) : BaseAdapte
                     "delivered"
                 else when (message.type) {
                     2 -> "sent"
-                    5 -> "failed"
+                    5 -> {
+                        statusTextView.setTextColor(mContext.getColor(R.color.red))
+                        "failed"
+                    }
                     6 -> "queued"
                     else -> "unknown"
                 }

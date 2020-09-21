@@ -28,7 +28,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.ui.conversationDao
+import com.bruhascended.sms.ui.activeConversationDao
 import com.bruhascended.sms.ui.mainViewModel
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
@@ -54,6 +54,9 @@ class MMSSender(
     private lateinit var typeString: String
     private lateinit var uri: Uri
     private lateinit var smsText: String
+    private val settings = Settings().apply { useSystemSending = true}
+
+    private val sentAction = "MMS_SENT"
 
     private fun saveMedia(date: Long): String {
         val name = date.toString() + "." +
@@ -71,9 +74,9 @@ class MMSSender(
     }
 
     private fun addSmsToDb(date: Long, type: Int) {
-        val qs = conversationDao.search(date).first()
+        val qs = activeConversationDao.search(date).first()
         qs.type = type
-        conversationDao.update(qs)
+        activeConversationDao.update(qs)
     }
 
     private fun addMmsToDb(date: Long) {
@@ -87,9 +90,9 @@ class MMSSender(
                 0,
                 path = saveMedia(date)
             )
-            val qs = conversationDao.search(date)
-            for (m in qs) conversationDao.delete(m)
-            conversationDao.insert(message)
+            val qs = activeConversationDao.search(date)
+            for (m in qs) activeConversationDao.delete(m)
+            activeConversationDao.insert(message)
 
             if (conversation.id == null) {
                 var found = false
@@ -144,11 +147,11 @@ class MMSSender(
         mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
             .putLong("last", System.currentTimeMillis()).apply()
 
-        val settings = Settings()
-        settings.useSystemSending = true
 
-        val transaction = Transaction(mContext, settings)
-        transaction.setExplicitBroadcastForSentMms(Intent("DELIVERED"))
+        val transaction = Transaction(mContext, settings).apply {
+            setExplicitBroadcastForSentMms(Intent(sentAction))
+        }
+
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent?) {
                 when (resultCode) {
@@ -180,7 +183,7 @@ class MMSSender(
                 }
                 mContext.unregisterReceiver(this)
             }
-        }, IntentFilter("DELIVERED"))
+        }, IntentFilter(sentAction))
 
         val message = MMS(smsText, conversation.sender)
         val iStream: InputStream = mContext.contentResolver.openInputStream(uri)!!

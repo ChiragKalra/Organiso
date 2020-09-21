@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+
+*/
 
 package com.bruhascended.sms.ui
 
@@ -24,8 +25,8 @@ import java.util.HashMap
 
 val dpMemoryCache = HashMap<String, Bitmap?>()
 
-var conversationSender: String? = null
-lateinit var conversationDao: MessageDao
+var activeConversationSender: String? = null
+lateinit var activeConversationDao: MessageDao
 
 lateinit var mainViewModel: MainViewModel
 fun isMainViewModelNull() = !(::mainViewModel.isInitialized)

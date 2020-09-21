@@ -93,20 +93,53 @@ class SMSManager(
         AnalyticsLogger(mContext).log("conversation_organised", "init")
     }
 
-    private fun saveMessage(ind: Int, sender: String, messages: ArrayList<Message>, i: Int) {
-        val con = Conversation(
-            null,
-            sender,
-            senderNameMap[sender],
-            "",
-            true,
-            messages.last().time,
-            messages.last().text,
-            i,
-            senderForce[sender] ?: -1,
-            senderToProbs[sender] ?: FloatArray(5) { if (it == 0) 1f else 0f }
-        )
-        mainViewModel.daos[i].insert(con)
+    private fun saveMessage(ind: Int, sender: String, messages: ArrayList<Message>, label: Int) {
+        if (isMainViewModelNull()) {
+            mainViewModel = MainViewModel()
+            mainViewModel.daos = Array(6){
+                Room.databaseBuilder(
+                    mContext, ConversationDatabase::class.java,
+                    mContext.resources.getString(labelText[it])
+                ).allowMainThreadQueries().build().manager()
+            }
+        }
+
+        var conversation: Conversation? = null
+        for (i in 0..4) {
+            val got = mainViewModel.daos[i].findBySender(sender)
+            if (got.isNotEmpty()) {
+                conversation = got.first()
+                for (item in got.slice(1 until got.size))
+                    mainViewModel.daos[i].delete(item)
+                break
+            }
+        }
+
+        if (conversation != null) {
+            conversation.apply {
+                read = false
+                time = messages.last().time
+                lastSMS =  messages.last().text
+                lastMMS = false
+                name = senderNameMap[sender]
+                mainViewModel.daos[0].update(this)
+            }
+        } else {
+            val con = Conversation(
+                null,
+                sender,
+                senderNameMap[sender],
+                "",
+                true,
+                messages.last().time,
+                messages.last().text,
+                label,
+                senderForce[sender] ?: -1,
+                senderToProbs[sender] ?: FloatArray(5) { if (it == 0) 1f else 0f }
+            )
+            mainViewModel.daos[label].insert(con)
+        }
+
 
         Room.databaseBuilder(
             mContext, MessageDatabase::class.java, sender

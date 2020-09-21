@@ -7,7 +7,6 @@ import com.bruhascended.sms.ui.settings.category.RecyclerViewAdapter.MyViewHolde
 class ItemMoveCallback(private val mAdapter: ItemTouchHelperContract) :
     ItemTouchHelper.Callback() {
 
-
     override fun isLongPressDragEnabled() = false
     override fun isItemViewSwipeEnabled() = false
 

@@ -88,15 +88,15 @@ fun time (date: Long): Float {
 }
 
 fun getOtp(message: String): String? {
-    val content = message.toLowerCase(Locale.ROOT)
-    val otps = Regex("(?<!\\d)\\d{4,6}(?!\\d)").findAll(content).toList()
+    val sepRegex = Regex("(?<=\\d)[\\s\\-](?=\\d)")
+    val content = message.toLowerCase(Locale.ROOT).replace(sepRegex, "")
+    val otpRegex = Regex("(?<!\\d)\\d{4,6}(?!\\d)")
+    val otps = otpRegex.findAll(content).toList()
 
-    if (otps.size != 1)
-        return null
+    if (otps.size != 1) return null
     val otp = otps.first().groups.first()!!.value
-    if ((content.contains("otp") || content.contains("code")) ||
-        (content.contains("number") &&
-                (content.contains("registration") || content.contains("verification"))))
+    if (content.contains("otp") || content.contains("code") || content.contains("key") ||
+        (content.contains("number") && (content.contains("registration") || content.contains("verification"))))
         return otp
     return null
 }

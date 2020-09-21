@@ -42,6 +42,7 @@ class RecyclerViewAdapter(
         val clearButton: ImageButton = rowView.findViewById(R.id.clearText)
         val hideButton: ImageButton = rowView.findViewById(R.id.hideButton)
         val label: TextView = rowView.findViewById(R.id.label)
+        val labelEditText: TextView = rowView.findViewById(R.id.nameLabel)
         var labelInt: Int = -1
     }
 
@@ -75,8 +76,9 @@ class RecyclerViewAdapter(
                 }
                 false
             }
+            holder.labelEditText.text = string
             holder.editText.apply {
-                hint = string.toUpperCase(Locale.ROOT)
+                hint = string
                 setOnFocusChangeListener { _, _ ->
                     prefs.edit().putString(
                         "custom_label_${holder.labelInt}",
@@ -84,12 +86,19 @@ class RecyclerViewAdapter(
                     ).putBoolean("stateChanged", true).apply()
                 }
                 doOnTextChanged { text, _, _, _ ->
-                    holder.clearButton.visibility = if (text != null && text.isNotEmpty())
-                        View.VISIBLE else View.GONE
+                    if (!text.isNullOrEmpty()) {
+                        holder.labelEditText.animate().alpha(1f).setDuration(300).start()
+                        holder.clearButton.visibility = View.VISIBLE
+                    } else {
+                        holder.labelEditText.animate().alpha(0f).setDuration(300).start()
+                        holder.clearButton.visibility = View.GONE
+                    }
+
                 }
                 setText(prefs.getString("custom_label_${holder.labelInt}", ""))
                 holder.clearButton.setOnClickListener {
                     setText("")
+                    holder.labelEditText.animate().alpha(0f).setDuration(300).start()
                     holder.clearButton.visibility = View.GONE
                     prefs.edit().putString(
                         "custom_label_${holder.labelInt}", ""

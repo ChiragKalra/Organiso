@@ -48,7 +48,7 @@
     </style>
 
     <!-- dark theme -->
-    <style name="DarkTheme" parent="AppTheme">
+    <style name="AppTheme.DarkTheme" parent="AppTheme">
         <item name="backgroundColor">@color/background_dark</item>
         <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
@@ -59,8 +59,10 @@
         <item name="bg_accent">@color/message_bg_accent_dark</item>
         <item name="android:alertDialogTheme">@style/DarkTheme.AlertDialog</item>
         <item name="android:navigationBarColor">?backgroundColor</item>
-        <item name="android:editTextStyle">@style/DarkTheme.EditTextTheme</item>
+        <item name="editTextStyle">@style/DarkTheme.EditTextTheme</item>
     </style>
+
+    <style name="DarkTheme" parent="AppTheme.DarkTheme"/>
 
     <style name="DarkTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="colorAccent">@color/colorAccent</item>
@@ -70,7 +72,7 @@
         <item name="android:textColorAlertDialogListItem">@color/text_secondary_dark</item>
     </style>
 
-    <style name="DarkTheme.EditTextTheme" parent="Theme.AppCompat.DayNight">
+    <style name="DarkTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/text_secondary_dark</item>
         <item name="colorControlActivated">@color/colorAccent</item>
         <item name="android:textColorHint">@color/text_hint_dark</item>
@@ -78,7 +80,7 @@
     </style>
 
     <!-- light theme -->
-    <style name="LightTheme" parent="AppTheme">
+    <style name="AppTheme.LightTheme" parent="AppTheme">
         <item name="backgroundColor">@color/background_light</item>
         <item name="android:textColorPrimary">@color/text_primary_light</item>
         <item name="android:textColor">@color/text_primary_light</item>
@@ -89,9 +91,10 @@
         <item name="bg_accent">@color/message_bg_accent_light</item>
        <item name="android:alertDialogTheme">@style/LightTheme.AlertDialog</item>
         <item name="android:navigationBarColor">?backgroundColor</item>
-        <item name="android:editTextStyle">@style/LightTheme.EditTextTheme</item>
+        <item name="editTextStyle">@style/LightTheme.EditTextTheme</item>
     </style>
 
+    <style name="LightTheme" parent="AppTheme.LightTheme"/>
 
     <style name="LightTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="android:colorEdgeEffect">@color/text_primary_light</item>
@@ -102,7 +105,7 @@
         <item name="android:textColorAlertDialogListItem">@color/text_secondary_light</item>
     </style>
 
-    <style name="LightTheme.EditTextTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="LightTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/text_secondary_light</item>
         <item name="colorControlActivated">@color/colorAccent</item>
         <item name="android:textColorHint">@color/text_hint_light</item>

@@ -12,7 +12,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- */
+
+*/
 
 package com.bruhascended.sms.ui
 
@@ -41,6 +42,7 @@ class MediaPreviewManager(
     private val playPauseButton: ImageButton,
     private val videoPlayPauseButton: ImageButton,
     private val addMedia: ImageButton,
+    private val selectMediaArg: Int
 ) {
     var mmsType = 0
 
@@ -73,7 +75,7 @@ class MediaPreviewManager(
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "audio/*", "video/*"))
-        mActivity.startActivityForResult(intent, 0)
+        mActivity.startActivityForResult(intent, selectMediaArg)
     }
 
     fun hideMediaPreview() {
