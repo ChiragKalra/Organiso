@@ -67,6 +67,7 @@ class ConversationActivity : AppCompatActivity() {
 
     private fun setupActivity(intent: Intent) {
         conversation = intent.getSerializableExtra("ye") as Conversation
+
         smsSender = SMSSender(this, conversation, sendButton)
         mmsSender = MMSSender(this, conversation, sendButton)
         analyticsLogger = AnalyticsLogger(this)
@@ -134,6 +135,7 @@ class ConversationActivity : AppCompatActivity() {
             mpm.loadMedia()
         }
 
+        var moveToSelection = true
         mdb.loadAll().observe(this, {
             if (it.count() > 0) it.last().apply {
                 conversation.lastSMS = text
@@ -142,6 +144,7 @@ class ConversationActivity : AppCompatActivity() {
                 mainViewModel.daos[conversation.label].update(conversation)
             }
             messages = it
+
             val editListAdapter = MessageListViewAdaptor(this, it)
             listView.apply {
                 val recyclerViewState = onSaveInstanceState()!!
@@ -158,6 +161,10 @@ class ConversationActivity : AppCompatActivity() {
                 setMultiChoiceModeListener(
                     MessageMultiChoiceModeListener(mContext, this, mdb, conversation)
                 )
+                if (moveToSelection) {
+                    moveToSelection = false
+                    onActivityResult(selectMessageArg, RESULT_OK, intent)
+                }
             }
             progress.visibility = View.GONE
         })

@@ -28,12 +28,11 @@ fun moveTo(conversation: Conversation, to: Int, mContext: Context? = null) {
             conversation.label = to
             conversation.forceLabel = to
             mainViewModel.daos[to].insert(conversation)
-        } else {
-            val mdb = Room.databaseBuilder(
+        } else Room.databaseBuilder(
                 mContext!!, MessageDatabase::class.java, conversation.sender
-            ).build()
-            mdb.manager().nukeTable()
-            mdb.close()
-        }
+            ).build().apply {
+                manager().nukeTable()
+                close()
+            }
     }.start()
 }

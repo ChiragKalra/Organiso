@@ -66,5 +66,6 @@
     <string name="visible_category">"Visible on Home Screen"</string>
     <string name="hidden_category">"Hidden Away in Menu"</string>
     <string name="clear_text_button">clear text button</string>
+    <string name="deep_search">Deep Search</string>
 
 </resources>

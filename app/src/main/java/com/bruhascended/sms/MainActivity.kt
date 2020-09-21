@@ -153,6 +153,13 @@ class MainActivity : AppCompatActivity() {
                 )
                 overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
             }
+            R.id.action_deep_search -> {
+                startActivity(
+                    Intent(mContext, SearchActivity::class.java)
+                        .putExtra("type", "deep")
+                )
+                overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
+            }
             R.id.action_settings -> {
                 val intent = Intent(mContext, SettingsActivity::class.java)
                 startActivity(intent)

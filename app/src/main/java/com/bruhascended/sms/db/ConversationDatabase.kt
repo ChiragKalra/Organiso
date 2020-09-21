@@ -71,6 +71,9 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations ORDER BY time DESC")
     fun loadAll(): LiveData<List<Conversation>>
 
+    @Query("SELECT * FROM conversations")
+    fun loadAllSync(): List<Conversation>
+
     @RawQuery
     fun findByQuery(query: SupportSQLiteQuery): List<Conversation>
 
