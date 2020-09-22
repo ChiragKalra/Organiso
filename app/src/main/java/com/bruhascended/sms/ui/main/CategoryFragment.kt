@@ -38,10 +38,32 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class CategoryFragment(
-    private var pos: Int = 0,
+class CategoryFragment: Fragment() {
+
+    private val labelArg = "LABEL"
+    private val posArg = "POSITION"
+
     private var label: Int = 0
-) : Fragment() {
+    private var pos: Int = 0
+
+    companion object {
+        fun newInstance(label: Int, pos: Int = 0) : CategoryFragment {
+            return CategoryFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(labelArg, label)
+                    putInt(posArg, pos)
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.apply {
+            label = getInt(labelArg)
+            pos = getInt(posArg)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
