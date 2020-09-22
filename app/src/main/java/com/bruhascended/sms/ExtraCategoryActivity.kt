@@ -40,7 +40,7 @@ class ExtraCategoryActivity : AppCompatActivity() {
         supportActionBar!!.setTitle(labelText[label])
 
         if (savedInstanceState == null) {
-            val newFragment = CategoryFragment(0, label)
+            val newFragment = CategoryFragment.newInstance(label)
             supportFragmentManager.beginTransaction().add(R.id.fragmentContainer, newFragment).commit()
         }
     }
