@@ -1,3 +1,25 @@
+package com.bruhascended.sms.ui.main
+
+import android.os.Bundle
+import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.bruhascended.sms.*
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.ui.ListSelectionManager
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -15,43 +37,20 @@
 
 */
 
-package com.bruhascended.sms.ui.main
-
-import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
-import android.view.ContextThemeWrapper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ListView
-import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.fragment.app.Fragment
-import androidx.preference.PreferenceManager
-import com.bruhascended.sms.ConversationActivity
-import com.bruhascended.sms.R
-import com.bruhascended.sms.ui.mainViewModel
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
-
 class CategoryFragment: Fragment() {
 
     private val labelArg = "LABEL"
     private val posArg = "POSITION"
 
+    private lateinit var selectionManager: ListSelectionManager<Conversation>
+
     private var label: Int = 0
-    private var pos: Int = 0
 
     companion object {
-        fun newInstance(label: Int, pos: Int = 0) : CategoryFragment {
+        fun newInstance(label: Int) : CategoryFragment {
             return CategoryFragment().apply {
                 arguments = Bundle().apply {
                     putInt(labelArg, label)
-                    putInt(posArg, pos)
                 }
             }
         }
@@ -61,56 +60,48 @@ class CategoryFragment: Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.apply {
             label = getInt(labelArg)
-            pos = getInt(posArg)
         }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val mContext = requireActivity()
         val dark = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("dark_theme", false)
         inflater.cloneInContext(ContextThemeWrapper(mContext, if (dark) R.style.DarkTheme else R.style.LightTheme))
         val root = inflater.inflate(R.layout.fragment_main, container, false)
-        val listView: ListView = root.findViewById(R.id.listView)
+        val listView: RecyclerView = root.findViewById(R.id.listView)
         val textView: TextView = root.findViewById(R.id.emptyList)
         val progressView: ProgressBar = root.findViewById(R.id.loading)
 
         textView.visibility = TextView.INVISIBLE
-
-        GlobalScope.launch {
-            delay(if (pos == 0) 0 else 500)
-            (mContext as Activity).runOnUiThread {
-                mainViewModel.daos[label].loadAll().observe(viewLifecycleOwner, {
-                    progressView.visibility = View.GONE
-                    if (it.isEmpty()) textView.visibility = TextView.VISIBLE
-                    else textView.visibility = TextView.INVISIBLE
-
-                    listView.apply {
-                        val listViewState = onSaveInstanceState()!!
-                        adapter = ConversationListViewAdaptor(mContext, it.toMutableList())
-                        onRestoreInstanceState(listViewState)
-                        onItemClickListener = AdapterView.OnItemClickListener { _, _, i, _ ->
-                            startActivity(
-                                Intent(mContext, ConversationActivity::class.java)
-                                    .putExtra("ye", it[i])
-                            )
-                        }
-                        setMultiChoiceModeListener(
-                            ConversationMultiChoiceModeListener(mContext, listView, label)
-                        )
-                        mainViewModel.selection.observe(viewLifecycleOwner, { int ->
-                            if (int == -1) {
-                                choiceMode = ListView.CHOICE_MODE_NONE
-                                choiceMode = ListView.CHOICE_MODE_MULTIPLE_MODAL
-                            }
-                        })
-                    }
-                })
-            }
+        listView.layoutManager = LinearLayoutManager(mContext).apply {
+            orientation = LinearLayoutManager.VERTICAL
         }
+
+        mainViewModel.daos[label].loadAll().observe(viewLifecycleOwner, {
+            if (::selectionManager.isInitialized) selectionManager.close()
+
+            progressView.visibility = View.GONE
+            if (it.isEmpty()) textView.visibility = TextView.VISIBLE
+            else textView.visibility = TextView.INVISIBLE
+
+            listView.apply {
+                isNestedScrollingEnabled = true
+                val listViewState = layoutManager!!.onSaveInstanceState()
+                val mAdaptor = ConversationListViewAdaptor(mContext, it.toMutableList())
+                val mListener =  ConversationSelectionListener(requireContext(), label)
+                selectionManager = ListSelectionManager(
+                    requireActivity() as AppCompatActivity, it, mAdaptor, mListener
+                )
+                mAdaptor.selectionManager = selectionManager
+                mListener.selectionManager = selectionManager
+                adapter = mAdaptor
+                layoutManager!!.onRestoreInstanceState(listViewState)
+            }
+        })
+
+
         return root
     }
 }

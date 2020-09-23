@@ -28,8 +28,8 @@ import android.widget.ImageButton
 import android.widget.Toast
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.ui.activeConversationDao
-import com.bruhascended.sms.ui.mainViewModel
+import com.bruhascended.sms.activeConversationDao
+import com.bruhascended.sms.mainViewModel
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import java.io.*

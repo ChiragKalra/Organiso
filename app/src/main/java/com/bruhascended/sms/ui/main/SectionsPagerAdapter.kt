@@ -31,7 +31,7 @@ class SectionsPagerAdapter(
     ): FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     override fun getItem(position: Int)
-            = CategoryFragment.newInstance(visibleCategories[position], position)
+            = CategoryFragment.newInstance(visibleCategories[position])
 
     override fun getPageTitle(position: Int): String {
         val label = visibleCategories[position]

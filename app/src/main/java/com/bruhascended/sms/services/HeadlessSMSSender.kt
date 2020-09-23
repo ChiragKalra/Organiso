@@ -30,10 +30,10 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.ui.activeConversationDao
-import com.bruhascended.sms.ui.activeConversationSender
-import com.bruhascended.sms.ui.isMainViewModelNull
-import com.bruhascended.sms.ui.mainViewModel
+import com.bruhascended.sms.activeConversationDao
+import com.bruhascended.sms.activeConversationSender
+import com.bruhascended.sms.isMainViewModelNull
+import com.bruhascended.sms.mainViewModel
 
 class HeadlessSMSSender : Service() {
 

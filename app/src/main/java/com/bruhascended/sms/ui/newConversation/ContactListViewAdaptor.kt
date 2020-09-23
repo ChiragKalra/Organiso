@@ -28,11 +28,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.ui.dpMemoryCache
+import com.bruhascended.sms.dpMemoryCache
 
 class ContactListViewAdaptor (
-    private val contacts: Array<Contact>,
-    private val mContext: Context
+    private val mContext: Context,
+    private val contacts: Array<Contact>
 ): RecyclerView.Adapter<ContactListViewAdaptor.MyViewHolder>() {
 
     private val colors: Array<Int> = arrayOf(
@@ -73,20 +73,23 @@ class ContactListViewAdaptor (
         val contact: Contact = contacts[position]
         holder.name.text = contact.name
         holder.number.text = contact.number
-        holder.dp.setBackgroundColor(colors[position % colors.size])
 
         val ad = contact.number
-        if (dpMemoryCache.containsKey(ad)) {
-            val dp = dpMemoryCache[ad]
-            if (dp != null) holder.dp.setImageBitmap(dp)
-            else holder.dp.setImageResource(R.drawable.ic_baseline_person_48)
-        } else Thread {
-            dpMemoryCache[ad] = cm.retrieveContactPhoto(ad)
-            val dp = dpMemoryCache[ad]
-            (mContext as Activity).runOnUiThread {
-                if (dp != null) holder.dp.setImageBitmap(dp)
-            }
-        }.start()
+        holder.dp.apply {
+            setBackgroundColor(colors[position % colors.size])
+            if (dpMemoryCache.containsKey(ad)) {
+                val dp = dpMemoryCache[ad]
+                if (dp != null) setImageBitmap(dp)
+                else setImageResource(R.drawable.ic_baseline_person_48)
+            } else Thread {
+                setImageResource(R.drawable.ic_baseline_person_48)
+                dpMemoryCache[ad] = cm.retrieveContactPhoto(ad)
+                val dp = dpMemoryCache[ad]
+                (mContext as Activity).runOnUiThread {
+                    if (dp != null) setImageBitmap(dp)
+                }
+            }.start()
+        }
     }
 
 }

@@ -30,8 +30,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
-import com.bruhascended.sms.ConversationActivity
-import com.bruhascended.sms.R
+import com.bruhascended.sms.*
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase

@@ -33,8 +33,8 @@ import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.MediaPreviewManager
-import com.bruhascended.sms.ui.isMainViewModelNull
-import com.bruhascended.sms.ui.mainViewModel
+import com.bruhascended.sms.isMainViewModelNull
+import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ui.newConversation.ContactListViewAdaptor
 import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.activity_new_conversation.toolbar
@@ -90,8 +90,8 @@ class NewConversationActivity : AppCompatActivity() {
                     filtered.add(contact)
                 }
             }
-            ContactListViewAdaptor(filtered.toTypedArray(), this)
-        } else ContactListViewAdaptor(contacts, this)
+            ContactListViewAdaptor(this, filtered.toTypedArray())
+        } else ContactListViewAdaptor(this, contacts)
 
         adaptor.onItemClick = clickAction
         contactListView.adapter = adaptor
@@ -104,7 +104,6 @@ class NewConversationActivity : AppCompatActivity() {
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
         setContentView(R.layout.activity_new_conversation)
 
-        val llm = LinearLayoutManager(this)
 
         mContext = this
 
@@ -129,13 +128,15 @@ class NewConversationActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
         supportActionBar!!.title = "New Conversation"
-        llm.orientation = LinearLayoutManager.HORIZONTAL
+        val llm = LinearLayoutManager(this).apply {
+            orientation = LinearLayoutManager.HORIZONTAL
+        }
 
         val observer = Observer<Array<Contact>?> {
             if (it == null) return@Observer
             val contacts = it
 
-            val adaptor = ContactListViewAdaptor(contacts, this)
+            val adaptor = ContactListViewAdaptor(this, contacts)
             adaptor.onItemClick = clickAction
 
             contactListView.layoutManager = llm

@@ -5,17 +5,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?backgroundColor"
     tools:context=".ui.main.CategoryFragment">
 
-    <ListView
-        android:choiceMode="multipleChoiceModal"
-        android:divider="@null"
-        android:dividerHeight="0dp"
+    <androidx.recyclerview.widget.RecyclerView
+        android:scrollbars="none"
+        android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/listView"
-        android:background="?backgroundColor"/>
+        android:background="?backgroundColor"
+        tools:listitem="@layout/item_conversation"/>
 
     <TextView
         android:layout_margin="16dp"
