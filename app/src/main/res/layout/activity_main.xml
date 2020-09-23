@@ -11,11 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:background="?colorPrimary"
+        android:background="@drawable/bg_appbarlayout"
         android:theme="?appBarLayoutStyle">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/mToolbar"
+            android:background="#0000"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:layout_scrollFlags="scroll|enterAlways" />
@@ -24,7 +25,7 @@
             android:id="@+id/tabs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
+            android:background="#0000"
             app:tabMode="scrollable"
             app:tabTextAppearance="?tabTextAppearance" />
     </com.google.android.material.appbar.AppBarLayout>
@@ -46,6 +47,6 @@
         android:backgroundTint="?attr/colorAccent"
         android:tint="#000"
         app:borderWidth="0dp"
-        app:srcCompat="@drawable/ic_baseline_sms_24" />
+        app:srcCompat="@drawable/ic_sms" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

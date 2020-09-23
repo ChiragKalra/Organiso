@@ -109,11 +109,6 @@ class ConversationSelectionListener(
 
         when (item.itemId) {
             R.id.action_select_range -> toggleRange(item)
-            R.id.action_select_all -> {
-                if (selectionManager.isRangeMode)
-                    toggleRange(actionMenu!!.findItem(R.id.action_select_range))
-                selectionManager.selectAll()
-            }
             R.id.action_delete -> {
                 alertDialog.setTitle("Delete selected conversations?")
                     .setPositiveButton("Delete") { dialog, _ ->
@@ -180,7 +175,7 @@ class ConversationSelectionListener(
                 } else {
                     for (selectedItem in selected) {
                         selectedItem.isMuted = true
-                        mainViewModel.daos[selectedItem.label].update(selectedItem)
+                        mainViewModel.daos[label].update(selectedItem)
                     }
                 }
                 selectionManager.close()

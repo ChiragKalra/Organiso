@@ -38,7 +38,7 @@
     </style>
 
     <style name="ActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">?colorPrimary</item>
+        <item name="background">@color/colorPrimaryDark</item>
         <item name="actionModeBackground">?colorPrimary</item>
         <item name="android:background">@color/popupMenuBackground</item>
         <item name="android:textColor">@color/text_primary_dark</item>
@@ -52,6 +52,7 @@
         <item name="backgroundColor">@color/background_dark</item>
         <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
+        <item name="unreadTextColor">@color/text_primary_dark</item>
         <item name="android:textColorSecondary">@color/text_secondary_dark</item>
         <item name="android:textColorHint">@color/text_hint_dark</item>
         <item name="contactItemBackground">@color/list_item_background_dark</item>
@@ -83,6 +84,7 @@
     <style name="AppTheme.LightTheme" parent="AppTheme">
         <item name="backgroundColor">@color/background_light</item>
         <item name="android:textColorPrimary">@color/text_primary_light</item>
+        <item name="unreadTextColor">@color/text_primary_light</item>
         <item name="android:textColor">@color/text_primary_light</item>
         <item name="android:textColorSecondary">@color/text_primary_light</item>
         <item name="android:textColorHint">@color/text_hint_light</item>

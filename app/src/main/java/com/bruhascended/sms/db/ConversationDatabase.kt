@@ -2,6 +2,7 @@ package com.bruhascended.sms.db
 
 import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
+import androidx.recyclerview.widget.DiffUtil
 import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.room.*
 import com.google.gson.Gson
@@ -43,8 +44,14 @@ data class Conversation (
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
+
         other as Conversation
         if (sender != other.sender) return false
+        if (read != other.read) return false
+        if (time != other.time) return false
+        if (lastSMS != other.lastSMS) return false
+        if (lastMMS != other.lastMMS) return false
+        if (isMuted != other.isMuted) return false
         return true
     }
 
@@ -67,6 +74,9 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations WHERE sender LIKE :sender OR name LIKE :sender ORDER BY time DESC")
     fun findBySender(sender: String): List<Conversation>
 
+    @Query("SELECT * FROM conversations LIMIT 1")
+    fun loadSingle(): Conversation?
+
     @Query("SELECT * FROM conversations ORDER BY time DESC")
     fun loadAll(): LiveData<List<Conversation>>
 
@@ -79,6 +89,14 @@ interface ConversationDao {
     @RawQuery
     fun findByQuery(query: SupportSQLiteQuery): List<Conversation>
 
+}
+
+object ConversationComparator : DiffUtil.ItemCallback<Conversation>() {
+    override fun areItemsTheSame(oldItem: Conversation, newItem: Conversation) =
+        oldItem.id == newItem.id
+
+    override fun areContentsTheSame(oldItem: Conversation, newItem: Conversation) =
+        oldItem == newItem
 }
 
 class Converters {

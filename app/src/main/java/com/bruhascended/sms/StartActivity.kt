@@ -60,6 +60,13 @@ class StartActivity : AppCompatActivity() {
         mContext = this
         sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
 
+
+        if (sharedPref.getBoolean(arg, false)) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
         if (PackageManager.PERMISSION_DENIED in
             Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
             ActivityCompat.requestPermissions(this, perms, 1)
@@ -74,14 +81,7 @@ class StartActivity : AppCompatActivity() {
     ) = messages()
 
     private fun messages() {
-        if (sharedPref.getBoolean(arg, false)) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-            return
-        }
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
-            Toast.makeText(this,
-                "Set app as default SMS app for best performance.", Toast.LENGTH_LONG).show()
             val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
             intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
             startActivityForResult(setSmsAppIntent, 1)

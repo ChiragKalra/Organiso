@@ -80,9 +80,9 @@ class ContactListViewAdaptor (
             if (dpMemoryCache.containsKey(ad)) {
                 val dp = dpMemoryCache[ad]
                 if (dp != null) setImageBitmap(dp)
-                else setImageResource(R.drawable.ic_baseline_person_48)
+                else setImageResource(R.drawable.ic_person)
             } else Thread {
-                setImageResource(R.drawable.ic_baseline_person_48)
+                setImageResource(R.drawable.ic_person)
                 dpMemoryCache[ad] = cm.retrieveContactPhoto(ad)
                 val dp = dpMemoryCache[ad]
                 (mContext as Activity).runOnUiThread {

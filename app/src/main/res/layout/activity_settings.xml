@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:background="?attr/colorPrimary"
+        android:background="@drawable/bg_appbarlayout"
         android:theme="?appBarLayoutStyle">
 
         <androidx.appcompat.widget.Toolbar

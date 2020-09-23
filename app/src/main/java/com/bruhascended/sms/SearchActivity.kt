@@ -18,10 +18,7 @@ import androidx.room.Room
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.activeConversationDao
 import com.bruhascended.sms.ui.conversastion.MessageListViewAdaptor
-import com.bruhascended.sms.ui.main.ConversationListViewAdaptor
-import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ui.search.SearchListViewAdaptor
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_search.*

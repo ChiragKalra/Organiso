@@ -1,15 +1,27 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package com.bruhascended.sms.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import com.bruhascended.sms.ui.main.ConversationListViewAdaptor
+import androidx.core.util.rangeTo
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.max
 import kotlin.math.min
 
-class ListSelectionManager<T> (
+abstract class SelectionRecyclerAdaptor<T : Any, V : RecyclerView.ViewHolder>(
+    c: DiffUtil.ItemCallback<T>
+): PagingDataAdapter<T, V>(c) {
+    fun getItemObject(pos: Int): T {
+        return super.getItem(pos)!!
+    }
+}
+
+class ListSelectionManager<T: Any> (
     private val activity: AppCompatActivity,
-    private val list: List<T>,
-    private val adaptor: ConversationListViewAdaptor,
+    private val adaptor: SelectionRecyclerAdaptor<T, RecyclerView.ViewHolder>,
     private val listener: SelectionCallBack<T>,
 ){
 
@@ -19,20 +31,67 @@ class ListSelectionManager<T> (
     }
 
     private var actionMode: ActionMode? = null
-    private val selected = hashSetOf<Int>()
+    private var selected = hashSetOf<Int>()
+    private val selectedItemsSet = hashSetOf<T>()
 
     private var actionBarVisible = false
     private var rangeSelection = false
     private var previousSelection = -1
 
+    private val dataObserver = object: RecyclerView.AdapterDataObserver() {
+        override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+            super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+            val changedSet = hashSetOf<Int>()
+            val low = min(fromPosition+1, toPosition)
+            val high = max(fromPosition+1, toPosition)
+            for (i in selected) {
+                if (i in fromPosition until fromPosition+itemCount) {
+                    changedSet.add(i - fromPosition + toPosition)
+                } else if (i in low .. high) {
+                    if (fromPosition > toPosition) changedSet.add(i+itemCount)
+                    else changedSet.add(i-itemCount)
+                } else {
+                    changedSet.add(i)
+                }
+            }
+            selected = changedSet
+            updateUi()
+        }
+
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            super.onItemRangeInserted(positionStart, itemCount)
+            val changedSet = hashSetOf<Int>()
+            for (i in selected) {
+                if (i >= positionStart) changedSet.add(i+itemCount)
+                else changedSet.add(i)
+            }
+            selected = changedSet
+            updateUi()
+        }
+
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            super.onItemRangeRemoved(positionStart, itemCount)
+            val changedSet = hashSetOf<Int>()
+            for (i in selected) {
+                if (i !in positionStart until positionStart+itemCount) {
+                    if (i > positionStart) changedSet.add(i - itemCount)
+                    else changedSet.add(i)
+                }
+            }
+            selected = changedSet
+        }
+    }
+
     private fun updateUi() {
         if (isActive && !actionBarVisible) {
             actionMode = activity.startSupportActionMode(listener)
             actionBarVisible = true
+            adaptor.registerAdapterDataObserver(dataObserver)
         } else if (!isActive && actionBarVisible) {
             actionMode?.finish()
             actionMode = null
             actionBarVisible = false
+            adaptor.unregisterAdapterDataObserver(dataObserver)
         }
         if (isActive) {
             if (selected.size == 1) listener.onSingleItemSelected(selectedItems.first())
@@ -48,7 +107,11 @@ class ListSelectionManager<T> (
 
     val isRangeMode get() = rangeSelection
     val isActive get() = selected.size > 0
-    val selectedItems: List<T> get() = arrayListOf<T>().apply { for (pos in selected) add(list[pos]) }
+    val selectedItems: List<T> get() = arrayListOf<T>().apply {
+        for (pos in selected) {
+            add(adaptor.getItemObject(pos))
+        }
+    }
 
     fun isSelected(pos: Int) = selected.contains(pos)
 
@@ -61,27 +124,17 @@ class ListSelectionManager<T> (
         if (rangeSelection) {
             previousSelection = if (previousSelection == -1) pos
             else {
-                val low = min(previousSelection+1, pos-1)
-                val high = max(previousSelection+1, pos-1)
+                val low = min(previousSelection + 1, pos - 1)
+                val high = max(previousSelection + 1, pos - 1)
                 for (i in low..high) {
                     if (isSelected(i)) selected.remove(i)
                     else selected.add(i)
                 }
-                adaptor.notifyItemRangeChanged(low, high-low+1)
+                adaptor.notifyItemRangeChanged(low, high - low + 1)
                 -1
             }
         }
         toggleSelection(pos)
-        updateUi()
-    }
-
-    fun selectAll() {
-        for (pos in list.indices) {
-            if (!selected.contains(pos)) {
-                selected.add(pos)
-                adaptor.notifyItemChanged(pos)
-            }
-        }
         updateUi()
     }
 

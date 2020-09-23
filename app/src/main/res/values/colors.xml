@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="colorPrimary">#1E5021</color>
-    <color name="colorPrimaryDark">#1A471C</color>
-    <color name="colorAccent">#F9A825</color>
-    <color name="popupMenuBackground">#40702C</color>
+    <color name="colorPrimary">#1565C0</color>
+    <color name="colorPrimaryDark">#006959</color>
+    <color name="colorAccent">#25F9A4</color>
+    <color name="popupMenuBackground">#347678</color>
 
     <!-- dark mode -->
-    <color name="message_bg_accent_dark">#345936</color>
+    <color name="message_bg_accent_dark">#384C4E</color>
     <color name="background_dark">#000000</color>
     <color name="list_item_background_dark">#202020</color>
     <color name="selection_background_dark">#2E2E2E</color>
 
     <color name="text_primary_dark">#FFFFFF</color>
-    <color name="text_secondary_dark">#90B184</color>
+    <color name="text_secondary_dark">#91C8B7</color>
     <color name="text_hint_dark">#9F9F9F</color>
 
     <!-- light mode -->
-    <color name="message_bg_accent_light">#88EFB1</color>
+    <color name="message_bg_accent_light">#9ECFC9</color>
     <color name="background_light">#FFFFFF</color>
     <color name="list_item_background_light">#DADADA</color>
     <color name="selection_background_light">#EAFFE4</color>
 
     <color name="text_primary_light">#000000</color>
-    <color name="text_secondary_light">#364A2E</color>
+    <color name="text_secondary_light">#1D302E</color>
     <color name="text_hint_light">#393939</color>
 
     <!-- neutral colors -->

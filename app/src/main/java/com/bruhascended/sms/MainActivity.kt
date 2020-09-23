@@ -1,9 +1,11 @@
 package com.bruhascended.sms
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.Telephony
@@ -13,6 +15,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
@@ -87,6 +90,13 @@ class MainActivity : AppCompatActivity() {
     private var searchLayoutVisible = false
     private var promotionsVisible: Boolean = true
 
+    private val perms = arrayOf(
+        Manifest.permission.READ_SMS,
+        Manifest.permission.SEND_SMS,
+        Manifest.permission.RECEIVE_SMS,
+        Manifest.permission.READ_CONTACTS
+    )
+
     override fun onSupportActionModeStarted(mode: ActionMode) {
         actionMode = mode
         super.onSupportActionModeStarted(mode)
@@ -121,6 +131,10 @@ class MainActivity : AppCompatActivity() {
         else setTheme(R.style.LightTheme)
 
         setContentView(R.layout.activity_main)
+
+        if (PackageManager.PERMISSION_DENIED in
+            Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
+            ActivityCompat.requestPermissions(this, perms, 1)
 
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
             val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)

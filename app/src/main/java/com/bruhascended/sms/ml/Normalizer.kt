@@ -16,6 +16,9 @@
 
 package com.bruhascended.sms.ml
 
+import android.content.Context
+import android.text.format.DateFormat
+import android.text.format.DateUtils
 import java.util.*
 import kotlin.math.abs
 
@@ -99,4 +102,28 @@ fun getOtp(message: String): String? {
         (content.contains("number") && (content.contains("registration") || content.contains("verification"))))
         return otp
     return null
+}
+
+fun displayTime(time: Long, mContext: Context): String {
+    val smsTime = Calendar.getInstance().apply { timeInMillis = time }
+    val now = Calendar.getInstance()
+
+    return when {
+        DateUtils.isToday(time) -> DateFormat.format(
+            if (DateFormat.is24HourFormat(mContext)) "H:mm" else "h:mm aa",
+            smsTime
+        ).toString()
+
+        DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "Yesterday"
+
+        now[Calendar.WEEK_OF_YEAR] == smsTime[Calendar.WEEK_OF_YEAR] -> DateFormat.format(
+            "EEEE", smsTime
+        ).toString()
+
+        now[Calendar.YEAR] == smsTime[Calendar.YEAR] -> DateFormat.format(
+            "d MMMM", smsTime
+        ).toString()
+
+        else -> DateFormat.format("dd/MM/yyyy", smsTime).toString()
+    }
 }

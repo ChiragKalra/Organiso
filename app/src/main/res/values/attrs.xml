@@ -3,4 +3,5 @@
     <attr name="multiChoiceSelectorColor" format="reference"/>
     <attr name="contactItemBackground" format="reference"/>
     <attr name="bg_accent" format="reference"/>
+    <attr name="unreadTextColor" format="reference"/>
 </resources>
