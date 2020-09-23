@@ -20,7 +20,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:contentDescription="@string/display_picture"
-            android:src="@drawable/ic_baseline_person_48" />
+            android:src="@drawable/ic_person" />
     </androidx.cardview.widget.CardView>
 
     <TextView

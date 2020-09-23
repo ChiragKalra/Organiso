@@ -11,7 +11,7 @@
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@drawable/bg_appbarlayout"
         android:clickable="true"
         android:elevation="5dp"
         android:focusable="true"
@@ -34,7 +34,7 @@
             android:clickable="true"
             android:contentDescription="@string/back_button"
             android:padding="7dp"
-            android:src="@drawable/ic_baseline_arrow_back_24"
+            android:src="@drawable/ic_arrow_back"
             android:focusable="true" />
 
         <EditText
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
-            android:background="?attr/colorPrimary"
+            android:background="#0000"
             android:clickable="true"
             android:textColor="@color/text_primary_dark"
             android:focusable="true"

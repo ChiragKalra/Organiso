@@ -54,7 +54,6 @@ class SMSManager(
 
     private val messages = HashMap<String, ArrayList<Message>>()
     private val senderToProbs = HashMap<String, FloatArray>()
-    private val senderForce = HashMap<String, Int>()
 
     private var done = 0
     private var index = 0
@@ -73,7 +72,6 @@ class SMSManager(
         nn.close()
         senderNameMap.clear()
         senderToProbs.clear()
-        senderForce.clear()
 
         mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
             .putLong("last", System.currentTimeMillis())
@@ -134,7 +132,7 @@ class SMSManager(
                 messages.last().time,
                 messages.last().text,
                 label,
-                senderForce[sender] ?: -1,
+                if (label == 0) 0 else -1,
                 senderToProbs[sender] ?: FloatArray(5) { if (it == 0) 1f else 0f }
             )
             mainViewModel.daos[label].insert(con)

@@ -158,7 +158,7 @@ class MessageNotificationManager(private val mContext: Context) {
                         copyPI
                     )
                     .addAction(
-                        R.drawable.ic_baseline_delete_24,
+                        R.drawable.ic_delete,
                         mContext.getString(R.string.delete),
                         deletePI
                     )

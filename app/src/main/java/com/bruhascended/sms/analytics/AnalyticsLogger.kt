@@ -40,14 +40,14 @@ class AnalyticsLogger(
 
         val database = FirebaseDatabase.getInstance()
         val myRef = database.getReference("spam_report/${conversation.sender}")
-        myRef.setValue(
+        Thread {
             Room.databaseBuilder(
                 context, MessageDatabase::class.java, conversation.sender
             ).build().apply {
-                manager().loadAllSync()
+                myRef.setValue(manager().loadAllSync())
                 close()
             }
-        )
+        }.start()
     }
 
     fun reportBug (title: String, content: String, fileUri: Uri? = null) {

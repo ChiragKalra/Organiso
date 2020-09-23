@@ -94,7 +94,7 @@
             android:layout_margin="4dp"
             android:background="#0000"
             android:contentDescription="@string/send"
-            android:src="@drawable/ic_baseline_send"
+            android:src="@drawable/ic_send"
             android:tint="?attr/colorAccent" />
     </LinearLayout>
 </LinearLayout>

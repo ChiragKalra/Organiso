@@ -27,15 +27,19 @@ import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.isMainViewModelNull
 import com.bruhascended.sms.mainViewModel
-import com.bruhascended.sms.ui.*
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ml.getOtp
 import com.bruhascended.sms.ui.main.MainViewModel
 
-class IncomingSMSManager(context: Context) {
-    private var mContext: Context = context
+class IncomingSMSManager(
+    private val mContext: Context
+) {
+    private val analyticsLogger = AnalyticsLogger(mContext)
+    private val cm = ContactsManager(mContext)
+    private val nn = OrganizerModel(mContext)
+    private val senderNameMap = cm.getContactsHashMap()
 
-    fun putMessage(sender: String, body: String): Pair<Message, Conversation> {
+    private fun initMainViewModel() {
         if (isMainViewModelNull()) {
             mainViewModel = MainViewModel()
             mainViewModel.daos = Array(6){
@@ -45,10 +49,26 @@ class IncomingSMSManager(context: Context) {
                 ).allowMainThreadQueries().build().manager()
             }
         }
+    }
 
-        val rawNumber = ContactsManager(mContext).getRaw(sender)
-        val nn = OrganizerModel(mContext)
-        val senderNameMap = ContactsManager(mContext).getContactsHashMap()
+    private fun deletePrevious(rawNumber: String): Conversation? {
+        var conversation: Conversation? = null
+        for (i in 0..4) {
+            val got = mainViewModel.daos[i].findBySender(rawNumber)
+            if (got.isNotEmpty()) {
+                conversation = got.first()
+                for (item in got)
+                    mainViewModel.daos[i].delete(item)
+                break
+            }
+        }
+        return conversation
+    }
+
+    fun putMessage(sender: String, body: String): Pair<Message, Conversation> {
+        initMainViewModel()
+
+        val rawNumber = cm.getRaw(sender)
 
         val message = Message(
             null,
@@ -59,18 +79,7 @@ class IncomingSMSManager(context: Context) {
             -1
         )
 
-        AnalyticsLogger(mContext).log("conversation_organised", "background")
-
-        var conversation: Conversation? = null
-        for (i in 0..4) {
-            val got = mainViewModel.daos[i].findBySender(rawNumber)
-            if (got.isNotEmpty()) {
-                conversation = got.first()
-                for (item in got.slice(1 until got.size))
-                    mainViewModel.daos[i].delete(item)
-                break
-            }
-        }
+        var conversation = deletePrevious(rawNumber)
 
         var mProbs: FloatArray? = null
         val prediction = if (senderNameMap.containsKey(rawNumber)) 0
@@ -78,42 +87,38 @@ class IncomingSMSManager(context: Context) {
         else if (!getOtp(body).isNullOrEmpty()) 2
         else {
             mProbs = nn.getPrediction(message)
-            if (conversation != null) for (j in 0..4) conversation.probs[j] += mProbs[j]
+            if (conversation != null) for (j in 0..4) mProbs[j] += conversation.probs[j]
             mProbs.toList().indexOf(mProbs.maxOrNull())
         }
-        nn.close()
 
+        analyticsLogger.log("conversation_organised", "background")
 
-        conversation = if (conversation != null) {
-            conversation.apply {
-                read = false
-                time = message.time
-                lastSMS = message.text
-                label = prediction
-                probs = mProbs ?: probs
-                name = senderNameMap[rawNumber]
-                mainViewModel.daos[prediction].update(this)
+        conversation = conversation?.apply {
+            if (label != prediction) id = null
+            read = false
+            time = message.time
+            lastSMS = message.text
+            if (prediction == 0) forceLabel = 0
+            label = prediction
+            probs = mProbs ?: probs
+            name = senderNameMap[rawNumber]
+        } ?: Conversation(
+            null,
+            rawNumber,
+            senderNameMap[rawNumber],
+            "",
+            false,
+            message.time,
+            message.text,
+            prediction,
+            if (prediction == 0) 0 else -1,
+            FloatArray(5) {
+                if (it == prediction) 1f else 0f
             }
-            conversation
-        } else {
-            val con = Conversation(
-                null,
-                rawNumber,
-                senderNameMap[rawNumber],
-                "",
-                false,
-                message.time,
-                message.text,
-                prediction,
-                -1,
-                FloatArray(5) {
-                    if (it == prediction) 1f else 0f
-                }
-            )
-            mainViewModel.daos[prediction].insert(con)
-            con.id = mainViewModel.daos[prediction].findBySender(rawNumber).first().id
-            con
-        }
+        )
+
+        mainViewModel.daos[prediction].insert(conversation)
+        conversation.id = mainViewModel.daos[prediction].findBySender(rawNumber).first().id
 
         val mdb = if (activeConversationSender == rawNumber) activeConversationDao
         else Room.databaseBuilder(
@@ -123,5 +128,9 @@ class IncomingSMSManager(context: Context) {
         mdb.insert(message)
 
         return mdb.search(message.time).first() to conversation
+    }
+
+    fun close() {
+        nn.close()
     }
 }

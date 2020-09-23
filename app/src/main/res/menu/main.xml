@@ -8,14 +8,14 @@
          android:id="@+id/action_search"
          android:orderInCategory="300"
          android:title="@string/search"
-         android:icon="@drawable/ic_baseline_search_24"
+         android:icon="@drawable/ic_search"
          app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
      <item
          android:id="@+id/action_settings"
          android:orderInCategory="300"
          android:title="@string/settings"
-         android:icon="@drawable/ic_baseline_settings_24"
+         android:icon="@drawable/ic_settings"
          app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_deep_search"
