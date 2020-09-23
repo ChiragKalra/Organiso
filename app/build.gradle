@@ -17,7 +17,13 @@ android {
         minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
-        versionName "0.8-beta.4"
+        versionName "0.9-beta.1"
+
+        kotlinOptions {
+            freeCompilerArgs += [
+                    '-XXLanguage:+UnitConversion',
+            ]
+        }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

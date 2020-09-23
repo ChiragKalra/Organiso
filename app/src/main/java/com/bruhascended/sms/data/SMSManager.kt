@@ -27,9 +27,9 @@ import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ml.OrganizerModel
-import com.bruhascended.sms.ui.isMainViewModelNull
+import com.bruhascended.sms.isMainViewModelNull
 import com.bruhascended.sms.ui.main.MainViewModel
-import com.bruhascended.sms.ui.mainViewModel
+import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ui.start.StartViewModel
 
 val labelText = arrayOf(

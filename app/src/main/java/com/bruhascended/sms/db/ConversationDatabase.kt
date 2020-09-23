@@ -1,3 +1,12 @@
+package com.bruhascended.sms.db
+
+import androidx.lifecycle.LiveData
+import androidx.paging.PagingSource
+import androidx.sqlite.db.SupportSQLiteQuery
+import androidx.room.*
+import com.google.gson.Gson
+import java.io.Serializable
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,15 +23,6 @@
    limitations under the License.
 
 */
-
-package com.bruhascended.sms.db
-
-import androidx.lifecycle.LiveData
-import androidx.sqlite.db.SupportSQLiteQuery
-import androidx.room.*
-import com.google.gson.Gson
-import java.io.Serializable
-
 
 @Entity(tableName = "conversations")
 data class Conversation (
@@ -53,7 +53,6 @@ data class Conversation (
     }
 }
 
-
 @Dao
 interface ConversationDao {
     @Insert
@@ -70,6 +69,9 @@ interface ConversationDao {
 
     @Query("SELECT * FROM conversations ORDER BY time DESC")
     fun loadAll(): LiveData<List<Conversation>>
+
+    @Query("SELECT * FROM conversations ORDER BY time DESC")
+    fun loadAllPaged(): PagingSource<Int, Conversation>
 
     @Query("SELECT * FROM conversations")
     fun loadAllSync(): List<Conversation>

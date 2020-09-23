@@ -18,7 +18,7 @@ package com.bruhascended.sms.db
 
 import android.content.Context
 import androidx.room.Room
-import com.bruhascended.sms.ui.mainViewModel
+import com.bruhascended.sms.mainViewModel
 
 fun moveTo(conversation: Conversation, to: Int, mContext: Context? = null) {
     Thread {

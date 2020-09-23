@@ -1,3 +1,33 @@
+package com.bruhascended.sms
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.os.Bundle
+import android.provider.Telephony
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.preference.PreferenceManager
+import androidx.room.Room
+import androidx.viewpager.widget.ViewPager
+import com.bruhascended.sms.data.ContactsManager
+import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.db.ConversationDatabase
+import com.bruhascended.sms.db.MessageDao
+import com.bruhascended.sms.services.SMSReceiver
+import com.bruhascended.sms.ui.main.MainViewModel
+import com.bruhascended.sms.ui.main.SectionsPagerAdapter
+import com.google.gson.Gson
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.collections.HashMap
+
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -15,41 +45,57 @@
 
 */
 
-package com.bruhascended.sms
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
-import android.os.Bundle
-import android.provider.Telephony
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
-import androidx.room.Room
-import androidx.viewpager.widget.ViewPager
-import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.data.labelText
-import com.bruhascended.sms.db.ConversationDatabase
-import com.bruhascended.sms.services.SMSReceiver
-import com.bruhascended.sms.ui.main.MainViewModel
-import com.bruhascended.sms.ui.main.SectionsPagerAdapter
-import com.bruhascended.sms.ui.mainViewModel
-import com.google.gson.Gson
-import kotlinx.android.synthetic.main.activity_main.*
+val dpMemoryCache = HashMap<String, Bitmap?>()
 
+var activeConversationSender: String? = null
+lateinit var activeConversationDao: MessageDao
+
+lateinit var mainViewModel: MainViewModel
+fun isMainViewModelNull() = !(::mainViewModel.isInitialized)
+
+/*
+ fun updateContacts {
+     if (cur.name == null) {
+         mainViewModel.contacts.observe(
+             mContext as AppCompatActivity,
+             object : Observer<Array<Contact>?> {
+                 override fun onChanged(contacts: Array<Contact>?) {
+                     mainViewModel.contacts.removeObserver(this)
+                     if (contacts == null) return
+                     for (contact in contacts) {
+                         if (contact.number == cur.sender) {
+                             cur.name = contact.name
+                             mainViewModel.daos[cur.label].update(cur)
+                             break
+                         }
+                     }
+                 }
+             }
+         )
+     }
+ } */
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
     private lateinit var hiddenCategories: Array<Int>
 
+    private var actionMode: ActionMode? = null
+
     private lateinit var inputManager: InputMethodManager
     private var searchLayoutVisible = false
     private var promotionsVisible: Boolean = true
+
+    override fun onSupportActionModeStarted(mode: ActionMode) {
+        actionMode = mode
+        super.onSupportActionModeStarted(mode)
+    }
+
+    override fun onActionModeFinished(mode: android.view.ActionMode?) {
+        actionMode = null
+        super.onActionModeFinished(mode)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,9 +153,7 @@ class MainActivity : AppCompatActivity() {
         viewPager.offscreenPageLimit = 5
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
-                if (position != mainViewModel.selection.value) {
-                    mainViewModel.selection.postValue(-1)
-                }
+                actionMode?.finish()
             }
         })
 
@@ -132,8 +176,8 @@ class MainActivity : AppCompatActivity() {
             val label = hiddenCategories[i]
             val customTitle = prefs.getString("custom_label_$label", "")!!
             menu.add(
-                0, label, 400+i,
-                if (customTitle=="") getString(labelText[label]) else customTitle
+                0, label, 400 + i,
+                if (customTitle == "") getString(labelText[label]) else customTitle
             )
         }
         return super.onPrepareOptionsMenu(menu)

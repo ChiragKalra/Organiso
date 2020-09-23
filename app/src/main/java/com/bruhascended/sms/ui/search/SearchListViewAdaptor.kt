@@ -45,8 +45,8 @@ import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.ui.dpMemoryCache
-import com.bruhascended.sms.ui.mainViewModel
+import com.bruhascended.sms.dpMemoryCache
+import com.bruhascended.sms.mainViewModel
 import com.squareup.picasso.Picasso
 import java.io.File
 import java.io.FileOutputStream
