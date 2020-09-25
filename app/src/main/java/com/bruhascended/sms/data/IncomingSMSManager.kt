@@ -18,15 +18,12 @@ package com.bruhascended.sms.data
 
 import android.content.Context
 import androidx.room.Room
-import com.bruhascended.sms.activeConversationDao
-import com.bruhascended.sms.activeConversationSender
+import com.bruhascended.sms.*
 import com.bruhascended.sms.analytics.AnalyticsLogger
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.isMainViewModelNull
-import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.ml.getOtp
 import com.bruhascended.sms.ui.main.MainViewModel
@@ -38,18 +35,6 @@ class IncomingSMSManager(
     private val cm = ContactsManager(mContext)
     private val nn = OrganizerModel(mContext)
     private val senderNameMap = cm.getContactsHashMap()
-
-    private fun initMainViewModel() {
-        if (isMainViewModelNull()) {
-            mainViewModel = MainViewModel()
-            mainViewModel.daos = Array(6){
-                Room.databaseBuilder(
-                    mContext, ConversationDatabase::class.java,
-                    mContext.resources.getString(labelText[it])
-                ).allowMainThreadQueries().build().manager()
-            }
-        }
-    }
 
     private fun deletePrevious(rawNumber: String): Conversation? {
         var conversation: Conversation? = null
@@ -66,7 +51,7 @@ class IncomingSMSManager(
     }
 
     fun putMessage(sender: String, body: String): Pair<Message, Conversation> {
-        initMainViewModel()
+        requireMainViewModel(mContext)
 
         val rawNumber = cm.getRaw(sender)
 

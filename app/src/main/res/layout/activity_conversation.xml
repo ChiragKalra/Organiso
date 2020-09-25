@@ -4,6 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="?backgroundColor"
+    android:id="@+id/conversationLayout"
     android:layout_height="match_parent"
     tools:context=".ConversationActivity">
 
@@ -12,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:translationZ="10dp"
         android:background="@drawable/bg_appbarlayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -26,18 +29,12 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ListView
-        android:choiceMode="multipleChoiceModal"
-        android:id="@+id/listView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="?backgroundColor"
-        android:divider="@null"
-        android:stackFromBottom="true"
-        android:transcriptMode="normal"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
         app:layout_constraintBottom_toTopOf="@id/sendLayout"
         tools:listitem="@layout/item_message" />
 
@@ -72,13 +69,4 @@
         app:layout_constraintBottom_toBottomOf="@+id/sendLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <ProgressBar
-        android:id="@+id/progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/listView"
-        app:layout_constraintEnd_toEndOf="@id/listView"
-        app:layout_constraintStart_toStartOf="@id/listView"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

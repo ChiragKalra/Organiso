@@ -33,7 +33,6 @@ import androidx.room.Room
 import com.bruhascended.sms.*
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ml.getOtp
@@ -107,14 +106,8 @@ class MessageNotificationManager(private val mContext: Context) {
                 ).allowMainThreadQueries().build().manager()
                 mdb.delete(message)
                 if (mdb.loadAllSync().isEmpty()) {
-                    if (isMainViewModelNull()) {
-                        Room.databaseBuilder(
-                            mContext, ConversationDatabase::class.java,
-                            mContext.resources.getString(labelText[conversation.label])
-                        ).allowMainThreadQueries().build().manager()
-                    } else {
-                        mainViewModel.daos[conversation.label]
-                    }.delete(conversation)
+                    requireMainViewModel(context)
+                    mainViewModel.daos[conversation.label].delete(conversation)
                 }
                 NotificationManagerCompat.from(mContext).cancel(id.toInt())
                 Toast.makeText(context, "Deleted", Toast.LENGTH_LONG).show()

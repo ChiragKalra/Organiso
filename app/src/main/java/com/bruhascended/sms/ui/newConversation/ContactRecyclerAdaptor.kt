@@ -30,10 +30,10 @@ import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.dpMemoryCache
 
-class ContactListViewAdaptor (
+class ContactRecyclerAdaptor (
     private val mContext: Context,
     private val contacts: Array<Contact>
-): RecyclerView.Adapter<ContactListViewAdaptor.MyViewHolder>() {
+): RecyclerView.Adapter<ContactRecyclerAdaptor.ContactViewHolder>() {
 
     private val colors: Array<Int> = arrayOf(
         ContextCompat.getColor(mContext, R.color.red),
@@ -48,7 +48,7 @@ class ContactListViewAdaptor (
 
     var onItemClick: ((Contact) -> Unit)? = null
 
-    inner class MyViewHolder(view: View) :
+    inner class ContactViewHolder(view: View) :
         RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.name)
         val number: TextView = view.findViewById(R.id.number)
@@ -63,13 +63,13 @@ class ContactListViewAdaptor (
 
     override fun getItemCount(): Int = contacts.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
         val itemView: View = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_contact, parent, false)
-        return MyViewHolder(itemView)
+        return ContactViewHolder(itemView)
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ContactViewHolder, position: Int) {
         val contact: Contact = contacts[position]
         holder.name.text = contact.name
         holder.number.text = contact.number

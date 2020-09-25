@@ -30,6 +30,7 @@ import com.bruhascended.sms.ml.OrganizerModel
 import com.bruhascended.sms.isMainViewModelNull
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.requireMainViewModel
 import com.bruhascended.sms.ui.start.StartViewModel
 
 val labelText = arrayOf(
@@ -92,16 +93,6 @@ class SMSManager(
     }
 
     private fun saveMessage(ind: Int, sender: String, messages: ArrayList<Message>, label: Int) {
-        if (isMainViewModelNull()) {
-            mainViewModel = MainViewModel()
-            mainViewModel.daos = Array(6){
-                Room.databaseBuilder(
-                    mContext, ConversationDatabase::class.java,
-                    mContext.resources.getString(labelText[it])
-                ).allowMainThreadQueries().build().manager()
-            }
-        }
-
         var conversation: Conversation? = null
         for (i in 0..4) {
             val got = mainViewModel.daos[i].findBySender(sender)
@@ -190,20 +181,12 @@ class SMSManager(
             }
             close()
         }
-        mmsThread = Thread { mmsManager.getMMS(lastDate) }
+        mmsThread = Thread { mmsManager.getAllMMS(lastDate) }
         mmsThread.start()
     }
 
     fun getLabels() {
-        if (isMainViewModelNull()) {
-            mainViewModel = MainViewModel()
-            mainViewModel.daos = Array(6){
-                Room.databaseBuilder(
-                    mContext, ConversationDatabase::class.java,
-                    mContext.resources.getString(labelText[it])
-                ).allowMainThreadQueries().build().manager()
-            }
-        }
+        requireMainViewModel(mContext)
 
         done = sp.getInt("done", 0)
         index = sp.getInt("index", 0)

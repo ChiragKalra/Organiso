@@ -1,29 +1,27 @@
-package com.bruhascended.sms
+package com.bruhascended.sms.ui.conversastion
 
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.AdapterView.OnItemLongClickListener
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
-import androidx.room.Room
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.ui.conversastion.MessageListViewAdaptor
-import com.bruhascended.sms.ui.search.SearchListViewAdaptor
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.bruhascended.sms.R
+import com.bruhascended.sms.activeConversationDao
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_search.*
-import java.util.*
-import kotlin.collections.ArrayList
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
 class SearchActivity : AppCompatActivity() {
@@ -32,9 +30,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var prefs: SharedPreferences
     private lateinit var visibleCategories: Array<Int>
 
-    private var type = 0
-
-    private fun drawAllMessagesListView() {
+    /*private fun drawConversationRecycler() {
         val key = searchEditText.text.toString()
         progress.visibility = View.VISIBLE
 
@@ -83,65 +79,60 @@ class SearchActivity : AppCompatActivity() {
                 else info.visibility = TextView.GONE
             }
         }.start()
-    }
+    }*/
 
-    private fun drawConversationListView() {
-        val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
-        progress.visibility = View.VISIBLE
-
-        Thread {
-            val res = ArrayList<Conversation>()
+    private fun drawMessagesRecycler() {
+        val mAdaptor = MessageRecyclerAdaptor(mContext)
+        searchRecycler.apply {
+            adapter = mAdaptor
+            layoutManager = LinearLayoutManager(mContext).apply {
+                orientation = LinearLayoutManager.VERTICAL
+            }
+            edgeEffectFactory = ScrollEffectFactory()
+            addOnScrollListener(ScrollEffectFactory.OnScrollListener())
+        }
+        searchEditText.setOnEditorActionListener { _, i, _ ->
+            if (i != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener true
+            val key = searchEditText.text.toString().trim()
+            searchRecycler.isVisible = !key.isBlank()
 
             if (!key.isBlank()) {
-                for (i in visibleCategories) {
-                    res.addAll(mainViewModel.daos[i].findBySender("%${key}%"))
-                }
-            }
-            runOnUiThread {
-                searchListView.apply {
-                    //adapter = ConversationListViewAdaptor(mContext, res.toList())
-                    visibility = View.VISIBLE
-                    progress.visibility = View.GONE
-                    onItemClickListener = OnItemClickListener { _, _, i, _ ->
-                        val intent = Intent(mContext, ConversationActivity::class.java)
-                        intent.putExtra("ye", res[i])
-                        startActivity(intent)
+                Thread{
+                    val a = activeConversationDao.search("%$key%", "% $key%").isEmpty()
+                    runOnUiThread{
+                        info.isVisible = a
                     }
-                }
-                if (res.isEmpty()) info.visibility = TextView.VISIBLE
-                else info.visibility = TextView.GONE
+                }.start()
             }
-        }.start()
-    }
 
-    private fun drawMessagesListView() {
-        val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
-        progress.visibility = View.VISIBLE
 
-        Thread {
-            val res = if (!key.isBlank()) activeConversationDao.search("%${key}%")
-            else listOf()
-            runOnUiThread {
-                searchListView.apply {
-                    isStackFromBottom = true
-                    adapter = MessageListViewAdaptor(mContext, res)
-                    visibility = View.VISIBLE
-                    progress.visibility = View.GONE
-                    onItemLongClickListener = OnItemLongClickListener { _, v, i, _ ->
-                        val intent = Intent("MESSAGE_SELECTED")
-                            .putExtra("ID", res[i].id)
-                            .putExtra("POS", v.top)
-                        setResult(RESULT_OK, intent)
-                        finish()
-                        overridePendingTransition(R.anim.hold, android.R.anim.fade_out)
-                        true
-                    }
+            mAdaptor.searchKey = key
+            val flow = Pager(PagingConfig(
+                pageSize = 3,
+                initialLoadSize = 3,
+                prefetchDistance = 12,
+                maxSize = PagingConfig.MAX_SIZE_UNBOUNDED,
+            )) {
+                activeConversationDao.searchPaged("$key%", "% $key%")
+            }.flow.cachedIn(lifecycleScope)
+            lifecycleScope.launch {
+                flow.collectLatest {
+                    mAdaptor.submitData(it)
                 }
-
-                if (res.isEmpty()) info.visibility = TextView.VISIBLE
-                else info.visibility = TextView.GONE
             }
-        }.start()
+
+            mAdaptor.notifyDataSetChanged()
+            mAdaptor.onItemClickListener = {
+                val intent = Intent("MESSAGE_SELECTED")
+                    .putExtra("ID", it.message.id)
+                    .putExtra("POS", it.root.top)
+                setResult(RESULT_OK, intent)
+                finish()
+                overridePendingTransition(R.anim.hold, android.R.anim.fade_out)
+            }
+            mAdaptor.onItemLongClickListener = { false }
+            true
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,11 +142,6 @@ class SearchActivity : AppCompatActivity() {
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        type = when(intent.getStringExtra("type")) {
-            "conversations" -> 0
-            "messages" -> 1
-            else -> 2
-        }
         visibleCategories = Gson().fromJson(
             prefs.getString("visible_categories", ""), Array<Int>::class.java
         )
@@ -165,26 +151,20 @@ class SearchActivity : AppCompatActivity() {
 
         clear_text.setOnClickListener{
             searchEditText.setText("")
+            searchEditText.onEditorAction(EditorInfo.IME_ACTION_SEARCH)
         }
 
-        clear_text.visibility = if (searchEditText.text.isNullOrEmpty()) View.GONE else View.VISIBLE
-
-        var lastChange: Long
-        searchEditText.doOnTextChanged { text, _, _, _ ->
-            clear_text.visibility = if (text.isNullOrEmpty()) View.GONE else View.VISIBLE
-            lastChange = System.currentTimeMillis()
-            Handler(Looper.getMainLooper()).postDelayed({
-                val now = System.currentTimeMillis()
-                if (now - lastChange > 500) when (type) {
-                    0 -> drawConversationListView()
-                    1 -> drawMessagesListView()
-                    2 -> drawAllMessagesListView()
-                }
-            }, 600)
-        }
         backButton.setOnClickListener{
             onBackPressed()
         }
+
+        clear_text.visibility = View.GONE
+        searchEditText.doOnTextChanged { key, _, _, _ ->
+            clear_text.visibility = if (key.isNullOrEmpty()) View.GONE else View.VISIBLE
+        }
+
+        drawMessagesRecycler()
+
     }
 
     override fun onBackPressed() {

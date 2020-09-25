@@ -24,7 +24,7 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/LightTheme">
-        <activity android:name=".SearchActivity"
+        <activity android:name=".ui.conversastion.SearchActivity"
             android:launchMode="singleTop"/>
 
         <provider
@@ -42,13 +42,28 @@
             android:permission="android.permission.BROADCAST_WAP_PUSH">
             <intent-filter>
                 <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
-
                 <data android:mimeType="application/vnd.wap.mms-message" />
             </intent-filter>
         </receiver>
         <receiver
             android:name=".services.MMSReceiver"
             android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED" />
+        <receiver
+            android:exported="false"
+            android:name="com.klinker.android.send_message.SentReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.SMS_SENT" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Your custom receiver which is child of com.klinker.android.send_message.MmsSentReceiver -->
+        <receiver
+            android:exported="false"
+            android:name="com.klinker.android.send_message.MmsSentReceiver">
+            <intent-filter>
+                <action android:name="${applicationId}.MMS_SENT" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".services.SMSReceiver"
             android:enabled="true"
@@ -96,30 +111,22 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="text/plain" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="image/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="audio/*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
                 <data android:mimeType="video/*" />
             </intent-filter>
 

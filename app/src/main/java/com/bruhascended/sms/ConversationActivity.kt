@@ -1,3 +1,45 @@
+package com.bruhascended.sms
+
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.inputmethod.InputMethodManager
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.doOnLayout
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
+import com.bruhascended.sms.analytics.AnalyticsLogger
+import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.db.*
+import com.bruhascended.sms.services.MMSSender
+import com.bruhascended.sms.services.SMSSender
+import com.bruhascended.sms.ui.ListSelectionManager
+import com.bruhascended.sms.ui.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.sms.ui.MediaPreviewManager
+import com.bruhascended.sms.ui.conversastion.MessageRecyclerAdaptor
+import com.bruhascended.sms.ui.conversastion.MessageSelectionListener
+import com.bruhascended.sms.ui.conversastion.ScrollEffectFactory
+import com.bruhascended.sms.ui.conversastion.SearchActivity
+import kotlinx.android.synthetic.main.activity_conversation.*
+import kotlinx.android.synthetic.main.layout_send.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -15,65 +57,134 @@
 
 */
 
-package com.bruhascended.sms
-
-import android.app.AlertDialog
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.inputmethod.InputMethodManager
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
-import androidx.room.Room
-import com.bruhascended.sms.analytics.AnalyticsLogger
-import com.bruhascended.sms.data.labelText
-import com.bruhascended.sms.db.*
-import com.bruhascended.sms.services.MMSSender
-import com.bruhascended.sms.services.SMSSender
-import com.bruhascended.sms.ui.*
-import com.bruhascended.sms.ui.conversastion.MessageListViewAdaptor
-import com.bruhascended.sms.ui.conversastion.MessageMultiChoiceModeListener
-import com.bruhascended.sms.ui.main.MainViewModel
-import kotlinx.android.synthetic.main.activity_conversation.*
-import kotlinx.android.synthetic.main.layout_send.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
+@Suppress("UNCHECKED_CAST")
 class ConversationActivity : AppCompatActivity() {
+
+    companion object {
+        const val selectMediaArg = 0
+        const val selectMessageArg = 1
+    }
+
     private lateinit var mdb: MessageDao
 
+    private lateinit var messages: List<Message>
     private lateinit var mContext: Context
     private lateinit var conversation: Conversation
 
+    private lateinit var mAdaptor: MessageRecyclerAdaptor
+    private lateinit var mLayoutManager: LinearLayoutManager
+
     private lateinit var smsSender: SMSSender
     private lateinit var mmsSender: MMSSender
-    private lateinit var messages: List<Message>
     private var inputManager: InputMethodManager? = null
 
     private lateinit var mpm: MediaPreviewManager
     private lateinit var analyticsLogger: AnalyticsLogger
-
-    private val selectMediaArg = 0
-    private val selectMessageArg = 1
+    private lateinit var selectionManager: ListSelectionManager<Message>
 
 
-    private fun setupActivity(intent: Intent) {
+    private fun init() {
+        mContext = this
+        inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         conversation = intent.getSerializableExtra("ye") as Conversation
-
         smsSender = SMSSender(this, conversation, sendButton)
         mmsSender = MMSSender(this, conversation, sendButton)
         analyticsLogger = AnalyticsLogger(this)
+        requireMainViewModel(this)
+        mdb = Room.databaseBuilder(
+            this, MessageDatabase::class.java, conversation.sender
+        ).allowMainThreadQueries().build().manager()
+        activeConversationDao = mdb
         activeConversationSender = conversation.sender
 
+        mpm = MediaPreviewManager(
+            this,
+            videoView,
+            imagePreview,
+            seekBar,
+            playPauseButton,
+            videoPlayPauseButton,
+            addMedia
+        )
+    }
+
+    private fun setupRecycler(){
+        activeConversationDao.loadAll().observe(this, { messages = it })
+
+        val flow = Pager(PagingConfig(
+            pageSize = 15,
+            initialLoadSize = 15,
+            prefetchDistance = 30,
+            maxSize = PagingConfig.MAX_SIZE_UNBOUNDED,
+        )) {
+            mdb.loadAllPaged()
+        }.flow.cachedIn(lifecycleScope)
+
+        mAdaptor = MessageRecyclerAdaptor(mContext)
+        val mListener =  MessageSelectionListener(mContext, conversation)
+        selectionManager = ListSelectionManager(
+            mContext as AppCompatActivity,
+            mAdaptor as SelectionRecyclerAdaptor<Message, RecyclerView.ViewHolder>,
+            mListener
+        )
+        mAdaptor.selectionManager = selectionManager
+        mListener.selectionManager = selectionManager
+        recyclerView.apply {
+            conversationLayout.doOnLayout {
+                layoutParams.height = sendLayout.top - appBarLayout.bottom
+            }
+            mLayoutManager = LinearLayoutManager(mContext).apply {
+                orientation = LinearLayoutManager.VERTICAL
+                reverseLayout = true
+            }
+            layoutManager = mLayoutManager
+            adapter = mAdaptor
+            recyclerView.edgeEffectFactory = ScrollEffectFactory()
+            addOnScrollListener(ScrollEffectFactory.OnScrollListener())
+        }
+
+        lifecycleScope.launch {
+            flow.collectLatest {
+                mAdaptor.submitData(it)
+            }
+        }
+
+        mAdaptor.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (mLayoutManager.findFirstVisibleItemPosition() == 0) {
+                    super.onItemRangeInserted(positionStart, itemCount)
+                    recyclerView.scrollToPosition(0)
+                } else {
+                    super.onItemRangeInserted(positionStart, itemCount)
+                }
+            }
+        })
+    }
+
+    private fun trackLastMessage() {
+        mdb.loadLast().observe(this, {
+            if (it != null) {
+                conversation.lastSMS = it.text
+                conversation.time = it.time
+                conversation.lastMMS = it.path != null
+                mainViewModel.daos[conversation.label].update(conversation)
+            } else {
+                mainViewModel.daos[conversation.label].delete(conversation)
+            }
+        })
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+            "dark_theme",
+            false
+        )
+        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+        setContentView(R.layout.activity_conversation)
         setSupportActionBar(toolbar)
+        init()
+
         supportActionBar!!.title = conversation.name ?: conversation.sender
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
@@ -83,36 +194,14 @@ class ConversationActivity : AppCompatActivity() {
             notSupported.visibility = TextView.VISIBLE
         }
 
-        if (isMainViewModelNull()) {
-            mainViewModel = MainViewModel()
-            mainViewModel.daos = Array(6){
-                Room.databaseBuilder(
-                    mContext, ConversationDatabase::class.java,
-                    mContext.resources.getString(labelText[it])
-                ).allowMainThreadQueries().build().manager()
-            }
-        }
-
         if (conversation.id != null) {
             conversation.read = true
             mainViewModel.daos[conversation.label].update(conversation)
+        } else {
+            messageEditText.setText(conversation.lastSMS)
+            if (intent.data != null) mpm.showMediaPreview(intent)
+            sendButton.callOnClick()
         }
-
-        mdb = Room.databaseBuilder(
-            this, MessageDatabase::class.java, conversation.sender
-        ).allowMainThreadQueries().build().manager()
-        activeConversationDao = mdb
-
-        mpm = MediaPreviewManager(
-            this,
-            videoView,
-            imagePreview,
-            seekBar,
-            playPauseButton,
-            videoPlayPauseButton,
-            addMedia,
-            selectMediaArg
-        )
 
         sendButton.setOnClickListener {
             if (mpm.mmsType > 0) {
@@ -125,65 +214,12 @@ class ConversationActivity : AppCompatActivity() {
             }
         }
 
-        if (conversation.id == null) {
-            messageEditText.setText(conversation.lastSMS)
-            if (intent.data != null) mpm.showMediaPreview(intent)
-            sendButton.callOnClick()
-        }
-
         addMedia.setOnClickListener{
             mpm.loadMedia()
         }
 
-        var moveToSelection = true
-        mdb.loadAll().observe(this, {
-            if (it.count() > 0) it.last().apply {
-                conversation.lastSMS = text
-                conversation.time = time
-                conversation.lastMMS = path != null
-                mainViewModel.daos[conversation.label].update(conversation)
-            }
-            messages = it
-
-            val editListAdapter = MessageListViewAdaptor(this, it)
-            listView.apply {
-                val recyclerViewState = onSaveInstanceState()!!
-                if (adapter != null && lastVisiblePosition == adapter.count - 1 &&
-                    childCount > 0 && getChildAt(childCount - 1).bottom <= height
-                ) {
-                    adapter = editListAdapter
-                    smoothScrollToPosition(adapter.count - 1)
-                } else {
-                    adapter = editListAdapter
-                    onRestoreInstanceState(recyclerViewState)
-                }
-
-                setMultiChoiceModeListener(
-                    MessageMultiChoiceModeListener(mContext, this, mdb, conversation)
-                )
-                if (moveToSelection) {
-                    moveToSelection = false
-                    onActivityResult(selectMessageArg, RESULT_OK, intent)
-                }
-            }
-            progress.visibility = View.GONE
-        })
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-            "dark_theme",
-            false
-        )
-        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
-
-        setContentView(R.layout.activity_conversation)
-
-        mContext = this
-        inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-
-        setupActivity(intent)
+        setupRecycler()
+        trackLastMessage()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -192,31 +228,31 @@ class ConversationActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_block -> {
                 AlertDialog.Builder(mContext)
-                    .setTitle("Do you want to block $display?")
+                    .setTitle("Block $display?")
                     .setPositiveButton("Block") { dialog, _ ->
                         analyticsLogger.log("${conversation.label}_to_5")
-                        moveTo(conversation, 5)
+                        conversation.moveTo(5)
                         Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_report_spam -> {
                 AlertDialog.Builder(mContext)
-                    .setTitle("Do you want to report $display as spam?")
+                    .setTitle("Report $display as spam?")
                     .setPositiveButton("Report") { dialog, _ ->
                         analyticsLogger.log("${conversation.label}_to_4")
                         analyticsLogger.reportSpam(conversation)
-                        moveTo(conversation, 4)
+                        conversation.moveTo(4)
                         Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_delete -> {
                 AlertDialog.Builder(mContext)
-                    .setTitle("Do you want to delete this conversation?")
+                    .setTitle("Delete this conversation?")
                     .setPositiveButton("Delete") { dialog, _ ->
                         analyticsLogger.log("${conversation.label}_to_-1")
-                        moveTo(conversation, -1)
+                        conversation.moveTo(-1, mContext)
                         Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         finish()
@@ -236,7 +272,7 @@ class ConversationActivity : AppCompatActivity() {
                     }
                     .setPositiveButton("Move") { dialog, _ ->
                         analyticsLogger.log("${conversation.label}_to_$selection")
-                        moveTo(conversation, selection)
+                        conversation.moveTo(selection)
                         Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                     }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
@@ -244,7 +280,7 @@ class ConversationActivity : AppCompatActivity() {
             R.id.action_search -> {
                 startActivityForResult(
                     Intent(mContext, SearchActivity::class.java)
-                        .putExtra("type", "messages"),
+                        .putExtra("full", false),
                     selectMessageArg
                 )
                 overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
@@ -275,13 +311,11 @@ class ConversationActivity : AppCompatActivity() {
             mpm.showMediaPreview(data)
         } else if (requestCode == selectMessageArg && resultCode == RESULT_OK && data != null) {
             val id = data.getLongExtra("ID", -1L)
-            val yTranslate = data.getIntExtra("POS", 0)
             if (id == -1L) return
             val index = messages.indexOfFirst { m -> m.id==id }
-            listView.setItemChecked(index, true)
-            listView.clearFocus()
-            listView.post {
-                listView.setSelectionFromTop(index, yTranslate)
+            recyclerView.apply {
+                scrollToPosition(index)
+                selectionManager.toggleItem(index)
             }
         }
     }
@@ -304,7 +338,6 @@ class ConversationActivity : AppCompatActivity() {
         callItem.isVisible = conversation.sender.first().isDigit()
         return super.onPrepareOptionsMenu(menu)
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.conversation, menu)

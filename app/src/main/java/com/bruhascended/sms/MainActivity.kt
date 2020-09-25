@@ -24,6 +24,7 @@ import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.MessageDao
 import com.bruhascended.sms.services.SMSReceiver
+import com.bruhascended.sms.ui.conversastion.SearchActivity
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
 import com.google.gson.Gson
@@ -57,33 +58,24 @@ lateinit var activeConversationDao: MessageDao
 lateinit var mainViewModel: MainViewModel
 fun isMainViewModelNull() = !(::mainViewModel.isInitialized)
 
-/*
- fun updateContacts {
-     if (cur.name == null) {
-         mainViewModel.contacts.observe(
-             mContext as AppCompatActivity,
-             object : Observer<Array<Contact>?> {
-                 override fun onChanged(contacts: Array<Contact>?) {
-                     mainViewModel.contacts.removeObserver(this)
-                     if (contacts == null) return
-                     for (contact in contacts) {
-                         if (contact.number == cur.sender) {
-                             cur.name = contact.name
-                             mainViewModel.daos[cur.label].update(cur)
-                             break
-                         }
-                     }
-                 }
-             }
-         )
-     }
- } */
+fun requireMainViewModel(mContext: Context) {
+    if (isMainViewModelNull()) {
+        mainViewModel = MainViewModel()
+        mainViewModel.daos = Array(6){
+            Room.databaseBuilder(
+                mContext, ConversationDatabase::class.java,
+                mContext.resources.getString(labelText[it])
+            ).allowMainThreadQueries().build().manager()
+        }
+    }
+}
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
     private lateinit var hiddenCategories: Array<Int>
-
+    private lateinit var cm: ContactsManager
     private var actionMode: ActionMode? = null
 
     private lateinit var inputManager: InputMethodManager
@@ -113,17 +105,11 @@ class MainActivity : AppCompatActivity() {
         startService(Intent(this, SMSReceiver::class.java))
 
         mContext = this
-        mainViewModel = MainViewModel()
-
-        mainViewModel.daos = Array(6) {
-            Room.databaseBuilder(
-                mContext, ConversationDatabase::class.java,
-                mContext.resources.getString(labelText[it])
-            ).allowMainThreadQueries().build().manager()
-        }
+        cm = ContactsManager(this)
+        requireMainViewModel(this)
 
         Thread {
-            mainViewModel.contacts.postValue(ContactsManager(mContext).getContactsList())
+            mainViewModel.contacts.postValue(cm.getContactsList())
         }.start()
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -211,13 +197,6 @@ class MainActivity : AppCompatActivity() {
                 )
                 overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
             }
-            R.id.action_deep_search -> {
-                startActivity(
-                    Intent(mContext, SearchActivity::class.java)
-                        .putExtra("type", "deep")
-                )
-                overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
-            }
             R.id.action_settings -> {
                 val intent = Intent(mContext, SettingsActivity::class.java)
                 startActivity(intent)
@@ -232,6 +211,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        Thread {
+            mainViewModel.contacts.postValue(cm.getContactsList())
+        }.start()
         if (prefs.getBoolean("stateChanged", false)) {
             prefs.edit().putBoolean("stateChanged", false).apply()
             finish()

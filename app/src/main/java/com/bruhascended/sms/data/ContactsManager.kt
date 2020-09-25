@@ -42,7 +42,6 @@ data class Contact (
 
 
 class ContactsManager(context: Context) {
-
     private val mContext = context
     private val map = HashMap<String, String>()
 

@@ -28,14 +28,13 @@ import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bruhascended.sms.ConversationActivity.Companion.selectMediaArg
 import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.MediaPreviewManager
-import com.bruhascended.sms.isMainViewModelNull
-import com.bruhascended.sms.mainViewModel
-import com.bruhascended.sms.ui.newConversation.ContactListViewAdaptor
+import com.bruhascended.sms.ui.newConversation.ContactRecyclerAdaptor
 import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.activity_new_conversation.toolbar
 import kotlinx.android.synthetic.main.layout_send.*
@@ -46,9 +45,6 @@ class NewConversationActivity : AppCompatActivity() {
 
     private lateinit var mContext: Context
     private lateinit var mpm: MediaPreviewManager
-
-    private val selectMediaArg = 0
-    private val selectMessageArg = 1
 
     private fun getRecipients(uri: Uri): String {
         val base: String = uri.schemeSpecificPart
@@ -90,8 +86,8 @@ class NewConversationActivity : AppCompatActivity() {
                     filtered.add(contact)
                 }
             }
-            ContactListViewAdaptor(this, filtered.toTypedArray())
-        } else ContactListViewAdaptor(this, contacts)
+            ContactRecyclerAdaptor(this, filtered.toTypedArray())
+        } else ContactRecyclerAdaptor(this, contacts)
 
         adaptor.onItemClick = clickAction
         contactListView.adapter = adaptor
@@ -114,8 +110,7 @@ class NewConversationActivity : AppCompatActivity() {
             seekBar,
             playPauseButton,
             videoPlayPauseButton,
-            addMedia,
-            selectMediaArg
+            addMedia
         )
 
         addMedia.setOnClickListener{
@@ -136,7 +131,7 @@ class NewConversationActivity : AppCompatActivity() {
             if (it == null) return@Observer
             val contacts = it
 
-            val adaptor = ContactListViewAdaptor(this, contacts)
+            val adaptor = ContactRecyclerAdaptor(this, contacts)
             adaptor.onItemClick = clickAction
 
             contactListView.layoutManager = llm
