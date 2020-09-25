@@ -4,8 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="?backgroundColor"
     android:layout_height="match_parent"
-    tools:context=".SearchActivity">
+    tools:context=".ui.conversastion.SearchActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -40,6 +41,7 @@
         <EditText
             android:id="@+id/searchEditText"
             android:layout_width="0dp"
+            android:imeOptions="actionSearch"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
@@ -71,22 +73,16 @@
             android:focusable="true" />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/searchListView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchRecycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="?backgroundColor"
-        android:clickable="true"
-        android:divider="@null"
-        android:elevation="3dp"
-        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="0.0"
-        tools:layout_editor_absoluteX="0dp"
         tools:listitem="@layout/item_conversation" />
 
     <TextView
+        android:layout_margin="12dp"
         android:elevation="10dp"
         android:id="@+id/info"
         android:text="@string/no_matches"
@@ -94,21 +90,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <ProgressBar
-        android:elevation="20dp"
-        android:id="@+id/progress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/linearLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

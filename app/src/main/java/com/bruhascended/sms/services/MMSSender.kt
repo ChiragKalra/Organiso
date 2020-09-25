@@ -26,6 +26,7 @@ import android.telephony.SmsManager
 import android.webkit.MimeTypeMap
 import android.widget.ImageButton
 import android.widget.Toast
+import com.bruhascended.sms.BuildConfig.APPLICATION_ID
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.activeConversationDao
@@ -56,7 +57,7 @@ class MMSSender(
     private lateinit var smsText: String
     private val settings = Settings().apply { useSystemSending = true}
 
-    private val sentAction = "MMS_SENT"
+    private val sentAction = "${APPLICATION_ID}.MMS_SENT"
 
     private fun saveMedia(date: Long): String {
         val name = date.toString() + "." +

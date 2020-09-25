@@ -1,20 +1,3 @@
-/*
-                    Copyright 2020 Chirag Kalra
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
-*/
-
 package com.bruhascended.sms.ui.main
 
 import android.annotation.SuppressLint
@@ -47,17 +30,18 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationComparator
 import com.bruhascended.sms.dpMemoryCache
 import com.bruhascended.sms.ml.displayTime
+import com.bruhascended.sms.ui.ListSelectionManager.Companion.SelectionRecyclerAdaptor
 import com.bruhascended.sms.ui.ListSelectionManager
-import com.bruhascended.sms.ui.SelectionRecyclerAdaptor
 import com.squareup.picasso.Picasso
 
 @SuppressLint("ResourceType")
 class ConversationRecyclerAdaptor(
     private val mContext: Context
-) : SelectionRecyclerAdaptor<Conversation,
+): SelectionRecyclerAdaptor<Conversation,
         ConversationRecyclerAdaptor.ConversationViewHolder>(ConversationComparator) {
 
     private var cm: ContactsManager = ContactsManager(mContext)
+    private val contacts = cm.getContactsHashMap()
     private val picasso = Picasso.get()
     private var mSelectedItemsIds = SparseBooleanArray()
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -161,6 +145,7 @@ class ConversationRecyclerAdaptor(
                 }
             }
 
+            if (cur.name == null) cur.name = contacts[cur.sender]
             senderTextView.text = cur.name ?: cur.sender
             timeTextView.text = displayTime(cur.time, mContext)
 
@@ -202,7 +187,6 @@ class ConversationRecyclerAdaptor(
                     }
                 } else {
                     setImageResource(R.drawable.ic_person)
-                    isEnabled = false
                 }
             }
         }

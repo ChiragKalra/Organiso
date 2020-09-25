@@ -17,14 +17,19 @@
 package com.bruhascended.sms.services
 
 import android.app.Activity
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.telephony.SmsManager
 import android.widget.ImageButton
 import android.widget.Toast
+import com.bruhascended.sms.activeConversationDao
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.activeConversationDao
 import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.BuildConfig.APPLICATION_ID
+import com.klinker.android.send_message.BroadcastUtils
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import com.klinker.android.send_message.Message as SMS
@@ -39,14 +44,15 @@ const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
 const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
 */
 
-class SMSSender (
+
+class SMSSender(
     private val mContext: Context,
     private var conversation: Conversation,
     private val sendButton: ImageButton
 ) {
 
-    private val sentAction = "SMS_SENT"
-    private val deliveredAction = "SMS_DELIVERED"
+    private val sentAction = "$APPLICATION_ID.SMS_SENT"
+    private val deliveredAction = "$APPLICATION_ID.SMS_DELIVERED"
 
     private val settings = Settings().apply {
         useSystemSending = true
@@ -101,7 +107,7 @@ class SMSSender (
 
         addSmsToDb(smsText, date, 6, false)
         mContext.registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(arg0: Context?, arg1: Intent?) {
+            override fun onReceive(arg0: Context, arg1: Intent?) {
                 when (resultCode) {
                     Activity.RESULT_OK -> addSmsToDb(smsText, date, 2, false)
                     SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
@@ -127,8 +133,8 @@ class SMSSender (
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent?) {
                 when (resultCode) {
-                    Activity.RESULT_OK -> addSmsToDb(smsText, date, 4, true)
-                    else -> addSmsToDb(smsText, date, 4, false)
+                    Activity.RESULT_OK -> addSmsToDb(smsText, date, 2, true)
+                    else -> addSmsToDb(smsText, date, 2, false)
                 }
                 mContext.unregisterReceiver(this)
             }

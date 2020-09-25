@@ -1,10 +1,12 @@
 package com.bruhascended.sms.db
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil
 import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.room.*
+import com.bruhascended.sms.mainViewModel
 import com.google.gson.Gson
 import java.io.Serializable
 
@@ -47,6 +49,7 @@ data class Conversation (
 
         other as Conversation
         if (sender != other.sender) return false
+        if (name != other.name) return false
         if (read != other.read) return false
         if (time != other.time) return false
         if (lastSMS != other.lastSMS) return false
@@ -111,4 +114,19 @@ class Converters {
 @TypeConverters(Converters::class)
 abstract class ConversationDatabase : RoomDatabase() {
     abstract fun manager(): ConversationDao
+}
+
+fun Conversation.moveTo(to: Int, mContext: Context? = null) {
+    mainViewModel.daos[label].delete(this)
+    id = null
+    if (to >= 0) {
+        label = to
+        forceLabel = to
+        mainViewModel.daos[to].insert(this)
+    } else Room.databaseBuilder(
+        mContext!!, MessageDatabase::class.java, sender
+    ).build().apply {
+        manager().nukeTable()
+        close()
+    }
 }

@@ -23,15 +23,12 @@ import android.provider.Telephony
 import android.telephony.TelephonyManager
 import android.webkit.MimeTypeMap
 import androidx.room.Room
+import com.bruhascended.sms.*
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.activeConversationDao
-import com.bruhascended.sms.activeConversationSender
-import com.bruhascended.sms.isMainViewModelNull
 import com.bruhascended.sms.ui.main.MainViewModel
-import com.bruhascended.sms.mainViewModel
 import java.io.*
 import java.lang.Exception
 
@@ -109,7 +106,7 @@ class MMSManager(private val context: Context) {
         return destination.absolutePath
     }
 
-    fun getMMS(lastDate: String) {
+    fun getAllMMS(lastDate: String) {
         context.contentResolver.query(
             Telephony.Mms.CONTENT_URI,
             null,
@@ -179,15 +176,7 @@ class MMSManager(private val context: Context) {
             file
         )
 
-        if (isMainViewModelNull()) {
-            mainViewModel = MainViewModel()
-            mainViewModel.daos = Array(6){
-                Room.databaseBuilder(
-                    context, ConversationDatabase::class.java,
-                    context.resources.getString(labelText[it])
-                ).allowMainThreadQueries().build().manager()
-            }
-        }
+        requireMainViewModel(context)
 
         var conversation: Conversation? = null
         for (i in 0..4) {

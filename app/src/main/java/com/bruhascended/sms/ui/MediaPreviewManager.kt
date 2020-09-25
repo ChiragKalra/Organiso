@@ -24,11 +24,13 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Parcelable
 import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
+import com.bruhascended.sms.ConversationActivity.Companion.selectMediaArg
 import com.bruhascended.sms.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -41,9 +43,16 @@ class MediaPreviewManager(
     private val seekBar: SeekBar,
     private val playPauseButton: ImageButton,
     private val videoPlayPauseButton: ImageButton,
-    private val addMedia: ImageButton,
-    private val selectMediaArg: Int
+    private val addMedia: ImageButton
 ) {
+    companion object {
+        fun getMimeType(url: String): String {
+            val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+            return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: ""
+        }
+    }
+
+
     var mmsType = 0
 
     lateinit var mmsTypeString: String

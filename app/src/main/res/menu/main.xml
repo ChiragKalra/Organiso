@@ -17,9 +17,4 @@
          android:title="@string/settings"
          android:icon="@drawable/ic_settings"
          app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/action_deep_search"
-        android:orderInCategory="300"
-        android:title="@string/deep_search"
-        app:showAsAction="never" />
 </menu>

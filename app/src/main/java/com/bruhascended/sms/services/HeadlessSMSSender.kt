@@ -24,16 +24,13 @@ import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.text.TextUtils
 import androidx.room.Room
+import com.bruhascended.sms.*
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.activeConversationDao
-import com.bruhascended.sms.activeConversationSender
-import com.bruhascended.sms.isMainViewModelNull
-import com.bruhascended.sms.mainViewModel
 
 class HeadlessSMSSender : Service() {
 
@@ -46,20 +43,13 @@ class HeadlessSMSSender : Service() {
     private fun saveSent(add: String, sms: String) {
         val senderNameMap = ContactsManager(applicationContext).getContactsHashMap()
 
-        val mDaos = Array(5){
-            if (isMainViewModelNull())
-                Room.databaseBuilder(
-                    applicationContext, ConversationDatabase::class.java,
-                    applicationContext.resources.getString(labelText[it])
-                ).build().manager()
-            else mainViewModel.daos[it]
-        }
+        requireMainViewModel(applicationContext)
 
         var force = -1
         val probs = FloatArray(5){ if (it == 0) 1f else 0f }
         var conversation: Conversation? = null
         for (i in 0..4) {
-            val got = mDaos[i].findBySender(add)
+            val got = mainViewModel.daos[i].findBySender(add)
             if (got.isNotEmpty()) {
                 force = got.first().forceLabel
                 conversation = got.first()
@@ -84,22 +74,11 @@ class HeadlessSMSSender : Service() {
             force,
             probs
         )
-        if (isMainViewModelNull()) {
-            for (j in 0..4) {
-                val res = mainViewModel.daos[j].findBySender(add)
-                for (item in res) mainViewModel.daos[j].delete(item)
-            }
-        } else {
-            for (j in 0..4) {
-                val temp = Room.databaseBuilder(
-                    applicationContext, ConversationDatabase::class.java,
-                    applicationContext.resources.getString(labelText[j])
-                ).build().manager()
-                val res = temp.findBySender(add)
-                for (item in res) temp.delete(item)
-            }
+        for (j in 0..4) {
+            val res = mainViewModel.daos[j].findBySender(add)
+            for (item in res) mainViewModel.daos[j].delete(item)
         }
-        mDaos[prediction].insert(con)
+        mainViewModel.daos[prediction].insert(con)
 
 
         val mdb = if (activeConversationSender == add) activeConversationDao
