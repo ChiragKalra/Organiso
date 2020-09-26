@@ -77,6 +77,9 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations WHERE sender LIKE :sender OR name LIKE :sender ORDER BY time DESC")
     fun findBySender(sender: String): List<Conversation>
 
+    @Query("SELECT * FROM conversations WHERE name LIKE :key OR name LIKE :altKey OR sender LIKE :key ORDER BY time DESC")
+    fun search(key: String, altKey: String=""): List<Conversation>
+
     @Query("SELECT * FROM conversations LIMIT 1")
     fun loadSingle(): Conversation?
 

@@ -27,6 +27,9 @@
         <activity android:name=".ui.conversastion.SearchActivity"
             android:launchMode="singleTop"/>
 
+        <activity android:name="SearchActivity"
+            android:launchMode="singleTop"/>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.bruhascended.sms.fileProvider"

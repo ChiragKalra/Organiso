@@ -30,15 +30,15 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
-            debuggable false
+            shrinkResources true
+            minifyEnabled true
+
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
                 abiFilters 'armeabi-v7a'
             }
         }
         debug {
-            minifyEnabled false
             debuggable true
             ndk {
                 abiFilters 'armeabi-v7a', "x86_64"

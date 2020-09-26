@@ -15,7 +15,7 @@
 
 */
 
-package com.bruhascended.sms.ui
+package com.bruhascended.sms.ui.common
 
 import android.content.Intent
 import android.graphics.drawable.AnimatedVectorDrawable

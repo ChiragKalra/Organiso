@@ -3,19 +3,14 @@ package com.bruhascended.sms.ui.conversastion
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.BackgroundColorSpan
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageComparator
-import com.bruhascended.sms.ml.displayFullTime
-import com.bruhascended.sms.ui.ListSelectionManager
-import com.bruhascended.sms.ui.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.sms.ui.common.ListSelectionManager
+import com.bruhascended.sms.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -37,17 +32,17 @@ import com.bruhascended.sms.ui.ListSelectionManager.Companion.SelectionRecyclerA
 class MessageRecyclerAdaptor(
     private val mContext: Context
 ): SelectionRecyclerAdaptor<Message, MessageViewHolder>(MessageComparator){
-    private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-    private val highlightColor = mContext.getColor(R.color.textHighLight)
 
     lateinit var selectionManager: ListSelectionManager<Message>
-    var searchKey: String? = null
+    val isSelectionManagerNull get() = !::selectionManager.isInitialized
+    var searchKey: String = ""
 
     override fun getItemViewType(position: Int) = if (getItem(position)?.type == 1) 1 else 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
         return MessageViewHolder(
             mContext,
+            searchKey,
             LayoutInflater.from(parent.context).inflate(
                 if (viewType == 1) R.layout.item_message else R.layout.item_message_out,
                 parent, false
@@ -59,38 +54,10 @@ class MessageRecyclerAdaptor(
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         holder.apply {
             message = getItem(position) ?: return
-            hideMedia()
-
-            messageTextView.text = if (!searchKey.isNullOrBlank()) SpannableString(message.text).apply {
-                var index = message.text.indexOf(searchKey!!, ignoreCase = true)
-                while (index >= 0) {
-                    setSpan(BackgroundColorSpan(highlightColor), index, index+searchKey!!.length, flag)
-                    index = message.text.indexOf(searchKey!!, index+1, ignoreCase = true)
-                }
-            } else message.text
-            timeTextView.text = displayFullTime(message.time, mContext)
-
-            if (message.type != 1) {
-                statusTextView!!.visibility = View.VISIBLE
-                statusTextView.setTextColor(textColor)
-                statusTextView.text =  when {
-                    message.delivered -> "delivered"
-                    message.type == 2 -> "sent"
-                    message.type == 6 -> "queued"
-                    else -> {
-                        statusTextView.setTextColor(mContext.getColor(R.color.red))
-                        "failed"
-                    }
-                }
-            }
-
-            if (message.path != null) {
-                showMedia()
-                if (message.text == "") messageTextView.visibility = View.GONE
-            }
-
+            onBind()
             root.apply {
-                if (::selectionManager.isInitialized && selectionManager.isSelected(position))
+                if (::selectionManager.isInitialized &&
+                    selectionManager.isSelected(position))
                     setBackgroundColor(selectedColor)
                 else background = defaultBackground
                 setOnClickListener{

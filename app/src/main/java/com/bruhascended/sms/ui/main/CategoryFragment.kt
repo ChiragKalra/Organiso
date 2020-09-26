@@ -18,8 +18,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.mainViewModel
-import com.bruhascended.sms.ui.ListSelectionManager
-import com.bruhascended.sms.ui.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.sms.ui.common.ListSelectionManager
+import com.bruhascended.sms.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.sms.ui.common.ScrollEffectFactory
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

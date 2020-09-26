@@ -33,21 +33,25 @@ import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.requireMainViewModel
 import com.bruhascended.sms.ui.start.StartViewModel
 
-val labelText = arrayOf(
-    R.string.tab_text_1,
-    R.string.tab_text_2,
-    R.string.tab_text_3,
-    R.string.tab_text_4,
-    R.string.tab_text_5,
-    R.string.tab_text_6
-)
-
-const val MESSAGE_CHECK_COUNT = 6
 
 class SMSManager(
     private val mContext: Context,
     private val pageViewModel: StartViewModel
 ) {
+
+    companion object {
+        val labelText = arrayOf(
+            R.string.tab_text_1,
+            R.string.tab_text_2,
+            R.string.tab_text_3,
+            R.string.tab_text_4,
+            R.string.tab_text_5,
+            R.string.tab_text_6
+        )
+
+        const val MESSAGE_CHECK_COUNT = 6
+    }
+
     private val nn = OrganizerModel(mContext)
     private val cm = ContactsManager(mContext)
     private val mmsManager = MMSManager(mContext)

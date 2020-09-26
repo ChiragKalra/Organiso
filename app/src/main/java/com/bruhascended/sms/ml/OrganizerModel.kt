@@ -18,7 +18,7 @@ package com.bruhascended.sms.ml
 
 import android.content.Context
 import com.bruhascended.sms.analytics.AnalyticsLogger
-import com.bruhascended.sms.data.MESSAGE_CHECK_COUNT
+import com.bruhascended.sms.data.SMSManager.Companion.MESSAGE_CHECK_COUNT
 import com.bruhascended.sms.db.Message
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate

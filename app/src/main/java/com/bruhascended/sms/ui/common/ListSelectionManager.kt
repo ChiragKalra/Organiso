@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.bruhascended.sms.ui
+package com.bruhascended.sms.ui.common
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode

@@ -18,7 +18,7 @@ package com.bruhascended.sms.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.bruhascended.sms.data.Contact
+import com.bruhascended.sms.data.ContactsManager.Contact
 import com.bruhascended.sms.db.ConversationDao
 
 

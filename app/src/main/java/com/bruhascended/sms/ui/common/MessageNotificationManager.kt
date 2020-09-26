@@ -15,7 +15,7 @@
 
 */
 
-package com.bruhascended.sms.ui
+package com.bruhascended.sms.ui.common
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -31,7 +31,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.bruhascended.sms.*
-import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
@@ -134,6 +134,7 @@ class MessageNotificationManager(private val mContext: Context) {
             otp == null -> {
                 NotificationCompat.Builder(mContext, conversation.label.toString())
                     .setContentText(message.text)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(message.text))
                     .setContentTitle(conversation.name ?: message.sender)
             }
             else -> {

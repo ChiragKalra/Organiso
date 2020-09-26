@@ -13,11 +13,11 @@ import android.widget.ImageView
 import android.widget.Toast
 import com.bruhascended.sms.R
 import com.bruhascended.sms.analytics.AnalyticsLogger
-import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.moveTo
 import com.bruhascended.sms.mainViewModel
-import com.bruhascended.sms.ui.ListSelectionManager
+import com.bruhascended.sms.ui.common.ListSelectionManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
