@@ -1,6 +1,7 @@
 package com.bruhascended.sms
 
 import android.app.AlertDialog
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -225,6 +226,13 @@ class ConversationActivity : AppCompatActivity() {
         if (!conversation.sender.first().isDigit()) {
             sendLayout.visibility = LinearLayout.INVISIBLE
             notSupported.visibility = TextView.VISIBLE
+        }
+
+        val notificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        for (notif in notificationManager.activeNotifications) {
+            if (notif.groupKey == conversation.sender) {
+                notificationManager.cancel(notif.id)
+            }
         }
 
         if (conversation.id != null) {

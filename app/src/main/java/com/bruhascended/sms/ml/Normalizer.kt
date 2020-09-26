@@ -93,7 +93,7 @@ fun time (date: Long): Float {
 fun getOtp(message: String): String? {
     val sepRegex = Regex("(?<=\\d)[\\s\\-](?=\\d)")
     val content = message.toLowerCase(Locale.ROOT).replace(sepRegex, "")
-    val otpRegex = Regex("(?<!\\d)\\d{4,6}(?!\\d)")
+    val otpRegex = Regex("\\b\\d{4,6}\\b")
     val otps = otpRegex.findAll(content).toList()
 
     if (otps.size != 1) return null

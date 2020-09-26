@@ -17,7 +17,7 @@
         app:title="Search"/>
     <SwitchPreferenceCompat
         app:defaultValue="false"
-        app:icon="@drawable/ic_theme"
+        app:icon="@drawable/ic_search_themed"
         app:key="show_hidden_results"
         app:allowDividerBelow="false"
         app:title="Search Hidden Categories" />

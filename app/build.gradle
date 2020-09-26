@@ -17,7 +17,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
-        versionName "0.9-beta.1"
+        versionName "0.95-beta03"
 
         kotlinOptions {
             freeCompilerArgs += [
