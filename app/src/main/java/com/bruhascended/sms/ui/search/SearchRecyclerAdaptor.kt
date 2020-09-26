@@ -77,6 +77,7 @@ class SearchRecyclerAdaptor(
     }
 
     fun refresh() {
+        isLoaded = false
         items.apply {
             val p = removeAt(lastIndex)
             clear()

@@ -108,6 +108,8 @@ class SearchResultViewHolder(
 
                 if (mAdaptor.isLoaded) {
                     loading.isVisible = false
+                    end.isVisible = false
+                    empty.isVisible = false
                     if (mAdaptor.itemCount != 1) end.isVisible = true
                     else empty.isVisible = true
                 } else {
@@ -118,6 +120,8 @@ class SearchResultViewHolder(
 
                 mAdaptor.doOnLoaded = {
                     loading.isVisible = false
+                    end.isVisible = false
+                    empty.isVisible = false
                     mAdaptor.isLoaded = true
 
                     if (mAdaptor.itemCount != 1) end.isVisible = true

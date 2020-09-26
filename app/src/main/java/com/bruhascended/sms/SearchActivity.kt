@@ -12,11 +12,9 @@ import androidx.core.widget.doOnTextChanged
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
-import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ui.common.ScrollEffectFactory
-import com.bruhascended.sms.ui.main.ConversationViewHolder
 import com.bruhascended.sms.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.sms.ui.search.SearchResultViewHolder.ResultItem
 import com.google.gson.Gson
@@ -27,8 +25,7 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
-    private lateinit var visibleCategories: Array<Int>
-    private lateinit var hiddenCategories: Array<Int>
+    private lateinit var categories: Array<Int>
     private lateinit var mAdaptor: SearchRecyclerAdaptor
 
     private var searchThread = Thread{}
@@ -45,46 +42,42 @@ class SearchActivity : AppCompatActivity() {
         mAdaptor.searchKey = key
         mAdaptor.refresh()
         searchThread = Thread {
-            for (categories in arrayOf(visibleCategories, hiddenCategories)) {
-                for (category in categories) {
-                    if (searchThread.isInterrupted) return@Thread
-                    val cons = mainViewModel.daos[category].search("$key%", "% $key%")
-                    if (cons.isNotEmpty()) {
-                        append(mAdaptor, ResultItem(4, categoryHeader = category))
-                        for (con in cons) {
-                            if (searchThread.isInterrupted) return@Thread
-                            append(mAdaptor, ResultItem(0, conversation = con))
-                        }
+            for (category in categories) {
+                if (searchThread.isInterrupted) return@Thread
+                val cons = mainViewModel.daos[category].search("$key%", "% $key%")
+                if (cons.isNotEmpty()) {
+                    append(mAdaptor, ResultItem(4, categoryHeader = category))
+                    for (con in cons) {
+                        if (searchThread.isInterrupted) return@Thread
+                        append(mAdaptor, ResultItem(0, conversation = con))
                     }
                 }
             }
 
-            for (categories in arrayOf(visibleCategories, hiddenCategories)) {
-                for (category in categories) {
-                    var isEmpty = true
+            for (category in categories) {
+                var isEmpty = true
+                if (searchThread.isInterrupted) return@Thread
+                for (con in mainViewModel.daos[category].loadAllSync()) {
+                    var msgs: List<Message>
                     if (searchThread.isInterrupted) return@Thread
-                    for (con in mainViewModel.daos[category].loadAllSync()) {
-                        var msgs: List<Message>
-                        if (searchThread.isInterrupted) return@Thread
-                        Room.databaseBuilder(
-                            mContext, MessageDatabase::class.java, con.sender
-                        ).build().apply {
-                            msgs = manager().search("$key%", "% $key%")
-                            close()
-                        }
-                        if (!msgs.isNullOrEmpty()) {
-                            if (isEmpty) {
-                                isEmpty = false
-                                append(mAdaptor, ResultItem(4, categoryHeader = 10+category))
-                            }
-                            append(mAdaptor, ResultItem(1, conversation = con))
-                            for (msg in msgs) {
-                                if (searchThread.isInterrupted) return@Thread
-                                append(mAdaptor, ResultItem(2, conversation = con, message = msg))
-                            }
-                        }
-                        if (searchThread.isInterrupted) return@Thread
+                    Room.databaseBuilder(
+                        mContext, MessageDatabase::class.java, con.sender
+                    ).build().apply {
+                        msgs = manager().search("$key%", "% $key%")
+                        close()
                     }
+                    if (!msgs.isNullOrEmpty()) {
+                        if (isEmpty) {
+                            isEmpty = false
+                            append(mAdaptor, ResultItem(4, categoryHeader = 10+category))
+                        }
+                        append(mAdaptor, ResultItem(1, conversation = con))
+                        for (msg in msgs) {
+                            if (searchThread.isInterrupted) return@Thread
+                            append(mAdaptor, ResultItem(2, conversation = con, message = msg))
+                        }
+                    }
+                    if (searchThread.isInterrupted) return@Thread
                 }
             }
 
@@ -126,15 +119,17 @@ class SearchActivity : AppCompatActivity() {
             finish()
         }
 
+        searchRecycler.scrollToPosition(0)
         searchRecycler.adapter = mAdaptor
 
-        visibleCategories = Gson().fromJson(
+        val visible = Gson().fromJson(
             prefs.getString("visible_categories", ""), Array<Int>::class.java
         )
-
-        hiddenCategories = Gson().fromJson(
+        val hidden = Gson().fromJson(
             prefs.getString("hidden_categories", ""), Array<Int>::class.java
         )
+        categories = if (prefs.getBoolean("show_hidden_results", false))
+            visible + hidden else visible
 
         clear_text.setOnClickListener{
             searchEditText.setText("")
