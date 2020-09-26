@@ -87,7 +87,6 @@ class SearchActivity : AppCompatActivity() {
                 }.start()
             }
 
-
             mAdaptor.searchKey = key
             val flow = Pager(PagingConfig(
                 pageSize = 3,
@@ -107,7 +106,6 @@ class SearchActivity : AppCompatActivity() {
             mAdaptor.onItemClickListener = {
                 val intent = Intent("MESSAGE_SELECTED")
                     .putExtra("ID", it.message.id)
-                    .putExtra("POS", it.root.top)
                 setResult(RESULT_OK, intent)
                 finish()
                 overridePendingTransition(R.anim.hold, android.R.anim.fade_out)

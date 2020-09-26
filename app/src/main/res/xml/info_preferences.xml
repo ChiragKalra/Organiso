@@ -1,7 +1,8 @@
-<PreferenceScreen
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+        android:layout="@layout/view_category_pref"
         app:title="Contact Us"/>
     <Preference
         app:icon="@drawable/ic_bug_report"
@@ -9,6 +10,7 @@
         app:title="Report a bug" />
 
     <PreferenceCategory
+        android:layout="@layout/view_category_pref"
         app:title="About App" />
     <Preference
         app:icon="@drawable/ic_web"

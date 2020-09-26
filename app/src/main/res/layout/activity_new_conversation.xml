@@ -27,6 +27,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <EditText
+        style="?editTextStyle"
         android:id="@+id/to"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

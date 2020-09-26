@@ -3,7 +3,7 @@
 
     <color name="colorPrimary">#1565C0</color>
     <color name="colorPrimaryDark">#006959</color>
-    <color name="colorAccent">#24DF94</color>
+    <color name="colorAccent">#30FFAC</color>
     <color name="popupMenuBackground">#347678</color>
     <color name="textHighLight">#95E8DC72</color>
 
@@ -16,6 +16,7 @@
     <color name="text_primary_dark">#FFFFFF</color>
     <color name="text_secondary_dark">#91C8B7</color>
     <color name="text_hint_dark">#9F9F9F</color>
+    <color name="headerTextColorDark">#30FFAC</color>
 
     <!-- light mode -->
     <color name="message_bg_accent_light">#9ECFC9</color>
@@ -26,13 +27,14 @@
     <color name="text_primary_light">#000000</color>
     <color name="text_secondary_light">#1D302E</color>
     <color name="text_hint_light">#393939</color>
+    <color name="headerTextColorLight">#24674C</color>
 
     <!-- neutral colors -->
     <color name="red">#C62828</color>
     <color name="yellow">#FF8F00</color>
     <color name="blue">#1565C0</color>
     <color name="purple">#6A1B9A</color>
+    <color name="teal">#00695C</color>
     <color name="green">#2E7D32</color>
     <color name="orange">#D84315</color>
-    <color name="teal">#00695C</color>
 </resources>

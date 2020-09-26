@@ -35,14 +35,13 @@ class MessageRecyclerAdaptor(
 
     lateinit var selectionManager: ListSelectionManager<Message>
     val isSelectionManagerNull get() = !::selectionManager.isInitialized
-    var searchKey: String = ""
+    var searchKey = ""
 
     override fun getItemViewType(position: Int) = if (getItem(position)?.type == 1) 1 else 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
         return MessageViewHolder(
             mContext,
-            searchKey,
             LayoutInflater.from(parent.context).inflate(
                 if (viewType == 1) R.layout.item_message else R.layout.item_message_out,
                 parent, false
@@ -52,6 +51,7 @@ class MessageRecyclerAdaptor(
 
     @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
+        holder.searchKey = searchKey
         holder.apply {
             message = getItem(position) ?: return
             onBind()
