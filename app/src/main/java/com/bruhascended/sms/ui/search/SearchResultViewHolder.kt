@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.TypedValue
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import com.bruhascended.sms.db.Conversation
@@ -31,6 +34,11 @@ class SearchResultViewHolder(
         val message: Message? = null
     )
 
+    object ResultItemComparator : DiffUtil.ItemCallback<ResultItem>() {
+        override fun areItemsTheSame(oldItem: ResultItem, newItem: ResultItem) = oldItem == newItem
+        override fun areContentsTheSame(oldItem: ResultItem, newItem: ResultItem) = oldItem == newItem
+    }
+
     lateinit var item: ResultItem
     private lateinit var conversationViewHolder: ConversationViewHolder
     private lateinit var messageViewHolder: MessageViewHolder
@@ -39,7 +47,7 @@ class SearchResultViewHolder(
     init {
         when(type) {
             0,1 -> conversationViewHolder = ConversationViewHolder(root, sharedResources)
-            2,3 -> messageViewHolder = MessageViewHolder(mContext, mAdaptor.searchKey, root)
+            2,3 -> messageViewHolder = MessageViewHolder(mContext, root)
         }
     }
 
@@ -57,7 +65,7 @@ class SearchResultViewHolder(
                     )
                     root.apply {
                         background = defaultBackground
-                        setOnClickListener { mAdaptor.doOnConversationClick(conversationViewHolder) }
+                        setOnClickListener { mAdaptor.doOnConversationClick(conversation) }
                         setOnLongClickListener { false }
                     }
 
@@ -76,11 +84,12 @@ class SearchResultViewHolder(
             }
             2,3 -> {
                 messageViewHolder.apply {
+                    searchKey = mAdaptor.searchKey
                     message = item.message!!
                     onBind()
                     root.apply {
                         background = defaultBackground
-                        setOnClickListener { mAdaptor.doOnMessageClick(messageViewHolder) }
+                        setOnClickListener { mAdaptor.doOnMessageClick(message.id!! to item.conversation!!) }
                         setOnLongClickListener { false }
                     }
                 }
@@ -91,6 +100,29 @@ class SearchResultViewHolder(
                 val labelText = mContext.getString(labelText[label])
                 labelTextView.text = if (item.categoryHeader>9)
                     "Messages in $labelText" else labelText
+            }
+            5 -> {
+                val loading = root.findViewById<ProgressBar>(R.id.loading)
+                val empty = root.findViewById<TextView>(R.id.noResults)
+                val end = root.findViewById<TextView>(R.id.endOfResults)
+
+                if (mAdaptor.isLoaded) {
+                    loading.isVisible = false
+                    if (mAdaptor.itemCount != 1) end.isVisible = true
+                    else empty.isVisible = true
+                } else {
+                    loading.isVisible = true
+                    end.isVisible = false
+                    empty.isVisible = false
+                }
+
+                mAdaptor.doOnLoaded = {
+                    loading.isVisible = false
+                    mAdaptor.isLoaded = true
+
+                    if (mAdaptor.itemCount != 1) end.isVisible = true
+                    else empty.isVisible = true
+                }
             }
         }
 

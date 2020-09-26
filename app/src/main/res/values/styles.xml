@@ -55,6 +55,7 @@
         <item name="unreadTextColor">@color/text_primary_dark</item>
         <item name="android:textColorSecondary">@color/text_secondary_dark</item>
         <item name="android:textColorHint">@color/text_hint_dark</item>
+        <item name="headerTextColor">@color/headerTextColorDark</item>
         <item name="contactItemBackground">@color/list_item_background_dark</item>
         <item name="multiChoiceSelectorColor">@color/selection_background_dark</item>
         <item name="bg_accent">@color/message_bg_accent_dark</item>
@@ -75,7 +76,7 @@
 
     <style name="DarkTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/text_secondary_dark</item>
-        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/headerTextColorDark</item>
         <item name="android:textColorHint">@color/text_hint_dark</item>
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
     </style>
@@ -84,6 +85,7 @@
     <style name="AppTheme.LightTheme" parent="AppTheme">
         <item name="backgroundColor">@color/background_light</item>
         <item name="android:textColorPrimary">@color/text_primary_light</item>
+        <item name="headerTextColor">@color/headerTextColorLight</item>
         <item name="unreadTextColor">@color/text_primary_light</item>
         <item name="android:textColor">@color/text_primary_light</item>
         <item name="android:textColorSecondary">@color/text_primary_light</item>
@@ -109,7 +111,7 @@
 
     <style name="LightTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/text_secondary_light</item>
-        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/headerTextColorLight</item>
         <item name="android:textColorHint">@color/text_hint_light</item>
         <item name="android:textColorPrimary">@color/text_primary_light</item>
     </style>

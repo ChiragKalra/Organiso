@@ -27,8 +27,8 @@ class ConversationViewHolder(
 
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 
-    val imageView: QuickContactBadge = root.findViewById(R.id.dp)
     private val muteImage: ImageView = root.findViewById(R.id.mutedImage)
+    val imageView: QuickContactBadge = root.findViewById(R.id.dp)
     val senderTextView: TextView = root.findViewById(R.id.sender)
     val messageTextView: TextView = root.findViewById(R.id.lastMessage)
     val timeTextView: TextView = root.findViewById(R.id.time)

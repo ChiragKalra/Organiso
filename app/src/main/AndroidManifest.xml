@@ -24,11 +24,16 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/LightTheme">
-        <activity android:name=".ui.conversastion.SearchActivity"
-            android:launchMode="singleTop"/>
 
-        <activity android:name="SearchActivity"
-            android:launchMode="singleTop"/>
+        <activity
+            android:name=".ui.conversastion.SearchActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateVisible"/>
+
+        <activity
+            android:name="SearchActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateVisible"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -10,19 +10,20 @@
     android:paddingStart="8dp">
 
     <TextView
-        android:textColor="?colorAccent"
         android:id="@+id/label"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_margin="12dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:importantForAutofill="no"
+        android:layout_margin="12dp"
+        android:elevation="8dp"
         android:hint="@string/category_name"
-        app:layout_constraintStart_toStartOf="parent"
+        android:importantForAutofill="no"
+        android:textAlignment="center"
+        android:textColor="?headerTextColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,7 +12,7 @@
     <TextView
         android:layout_marginStart="8dp"
         android:alpha="0"
-        android:textColor="?colorAccent"
+        android:textColor="?headerTextColor"
         android:labelFor="@id/name"
         android:id="@+id/nameLabel"
         android:text="@string/category_name"
@@ -86,7 +86,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/name" />
     <TextView
-        android:textColor="?colorAccent"
+        android:textColor="?headerTextColor"
         android:visibility="gone"
         android:id="@+id/label"
         android:textAlignment="center"

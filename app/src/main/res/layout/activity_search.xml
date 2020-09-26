@@ -59,6 +59,7 @@
             android:textSize="20sp" />
 
         <ImageButton
+            android:visibility="gone"
             android:id="@+id/clear_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -77,6 +78,7 @@
         android:id="@+id/searchRecycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
         tools:listitem="@layout/item_conversation" />

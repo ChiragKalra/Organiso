@@ -23,8 +23,8 @@ class ConversationRecyclerAdaptor(
 
     companion object{
         val colorRes: Array<Int> = arrayOf(
-            R.color.red, R.color.blue, R.color.purple, R.color.green,
-            R.color.teal, R.color.orange, R.color.yellow
+            R.color.red, R.color.purple, R.color.blue, R.color.teal,
+            R.color.green, R.color.yellow, R.color.orange
         )
     }
 
@@ -34,7 +34,10 @@ class ConversationRecyclerAdaptor(
         }
 
         val cm = ContactsManager(mContext)
-        val contacts = cm.getContactsHashMap()
+        var contacts = HashMap<String, String>()
+        init {
+            Thread { contacts = cm.getContactsHashMap() }.start()
+        }
     }
 
     private val sharedResources = ConversationSharedResources(mContext)

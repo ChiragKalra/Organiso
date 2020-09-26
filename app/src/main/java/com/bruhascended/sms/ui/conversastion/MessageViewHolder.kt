@@ -31,7 +31,6 @@ import java.io.FileOutputStream
 @SuppressLint("ResourceType")
 class MessageViewHolder(
     private val mContext: Context,
-    private val searchKey: String,
     val root: View,
 ) : ScrollEffectFactory.ScrollEffectViewHolder(root) {
     private val picasso = Picasso.get()
@@ -46,6 +45,8 @@ class MessageViewHolder(
     private val highlightColor = mContext.getColor(R.color.textHighLight)
 
     lateinit var message: Message
+
+    var searchKey = ""
 
     private val messageTextView: TextView = root.findViewById(R.id.message)
     private val timeTextView: TextView = root.findViewById(R.id.time)

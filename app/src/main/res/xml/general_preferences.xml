@@ -1,6 +1,8 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+        android:layout="@layout/view_category_pref"
         app:title="Theme"
         app:key="theme_category"/>
     <SwitchPreferenceCompat
@@ -11,6 +13,7 @@
         app:title="Dark Theme" />
 
     <PreferenceCategory
+        android:layout="@layout/view_category_pref"
         app:title="Search"/>
     <SwitchPreferenceCompat
         app:defaultValue="false"
@@ -20,6 +23,7 @@
         app:title="Search Hidden Categories" />
 
     <PreferenceCategory
+        android:layout="@layout/view_category_pref"
         app:title="OTP" />
     <SwitchPreferenceCompat
         app:defaultValue="true"
@@ -29,6 +33,7 @@
         app:title="Automatically Copy OTP"/>
 
     <PreferenceCategory
+        android:layout="@layout/view_category_pref"
         app:title="Privacy" />
     <SwitchPreferenceCompat
         app:defaultValue="true"

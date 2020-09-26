@@ -86,7 +86,7 @@
             android:background="#0000"
             android:contentDescription="@string/send"
             android:src="@drawable/add_file"
-            android:tint="?attr/colorAccent" />
+            android:tint="?headerTextColor" />
 
         <ImageButton
             android:id="@+id/sendButton"
@@ -96,6 +96,6 @@
             android:background="#0000"
             android:contentDescription="@string/send"
             android:src="@drawable/ic_send"
-            android:tint="?attr/colorAccent" />
+            android:tint="?headerTextColor" />
     </LinearLayout>
 </LinearLayout>

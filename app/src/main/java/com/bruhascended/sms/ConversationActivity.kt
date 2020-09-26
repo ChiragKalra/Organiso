@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
@@ -110,8 +109,20 @@ class ConversationActivity : AppCompatActivity() {
         )
     }
 
-    private fun setupRecycler(){
-        activeConversationDao.loadAll().observe(this, { messages = it })
+    private var scroll = true
+    private fun setupRecycler() {
+        activeConversationDao.loadAll().observe(this, {
+            messages = it
+            if (scroll) {
+                scroll = false
+                val id = intent?.getLongExtra("ID", -1L) ?: -1L
+                if (id != -1L) {
+                    recyclerView.postDelayed( {
+                        scrollToItem(id)
+                    }, 200)
+                }
+            }
+        })
 
         val flow = Pager(
             PagingConfig(
@@ -176,6 +187,24 @@ class ConversationActivity : AppCompatActivity() {
                 mainViewModel.daos[conversation.label].delete(conversation)
             }
         })
+    }
+
+    private fun scrollToItem(id: Long) {
+        val index = messages.indexOfFirst { m -> m.id==id }
+        recyclerView.apply {
+            scrollToPosition(index)
+            selectionManager.toggleItem(index)
+            mAdaptor.notifyItemChanged(index)
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                        smoothScrollBy(0, measuredHeight / 2 - getChildAt(index).bottom)
+                        removeOnScrollListener(this)
+                    }
+                }
+            })
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -303,7 +332,13 @@ class ConversationActivity : AppCompatActivity() {
                 intent.data = Uri.parse("tel:${conversation.sender}")
                 startActivity(intent)
             }
-            android.R.id.home -> onBackPressed()
+            android.R.id.home -> {
+                startActivityIfNeeded(
+                    Intent(mContext, MainActivity::class.java)
+                        .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0
+                )
+                finish()
+            }
         }
         return false
     }
@@ -314,32 +349,10 @@ class ConversationActivity : AppCompatActivity() {
             mpm.showMediaPreview(data)
         } else if (requestCode == selectMessageArg && resultCode == RESULT_OK && data != null) {
             val id = data.getLongExtra("ID", -1L)
-            if (id == -1L) return
-            val index = messages.indexOfFirst { m -> m.id==id }
-            recyclerView.apply {
-                scrollToPosition(index)
-                selectionManager.toggleItem(index)
-                mAdaptor.notifyItemChanged(index)
-                addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                        super.onScrollStateChanged(recyclerView, newState)
-                        if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
-                            smoothScrollBy(0, measuredHeight / 2 - getChildAt(index).bottom)
-                        }
-                    }
-                })
-            }
+            if (id != -1L) scrollToItem(id)
         }
     }
 
-    override fun onBackPressed() {
-        startActivityIfNeeded(
-            Intent(mContext, MainActivity::class.java)
-                .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0
-        )
-        finish()
-        super.onBackPressed()
-    }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val muteItem = menu.findItem(R.id.action_mute)

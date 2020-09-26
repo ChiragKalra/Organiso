@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.Telephony
-import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -86,12 +85,6 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.READ_CONTACTS
     )
-
-    private fun getResourceId(attribute: Int): Int {
-        val a = TypedValue()
-        theme.resolveAttribute(attribute, a, false)
-        return a.resourceId
-    }
 
     override fun onSupportActionModeStarted(mode: ActionMode) {
         actionMode = mode
@@ -192,6 +185,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> {
+                appBarLayout.setExpanded(false, true)
                 startActivity(Intent(mContext, SearchActivity::class.java))
                 overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
             }
@@ -209,23 +203,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        Thread {
-            mainViewModel.contacts.postValue(cm.getContactsList())
-        }.start()
+        appBarLayout?.setExpanded(true, true)
         if (prefs.getBoolean("stateChanged", false)) {
             prefs.edit().putBoolean("stateChanged", false).apply()
             finish()
             startActivity(intent)
-            overridePendingTransition(R.anim.hold, R.anim.hold)
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
         super.onResume()
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        overridePendingTransition (
-            android.R.anim.slide_in_left,
-            android.R.anim.slide_out_right
-        )
     }
 }
