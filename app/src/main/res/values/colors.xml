@@ -3,7 +3,7 @@
 
     <color name="colorPrimary">#1565C0</color>
     <color name="colorPrimaryDark">#006959</color>
-    <color name="colorAccent">#25F9A4</color>
+    <color name="colorAccent">#24DF94</color>
     <color name="popupMenuBackground">#347678</color>
     <color name="textHighLight">#95E8DC72</color>
 
@@ -29,7 +29,7 @@
 
     <!-- neutral colors -->
     <color name="red">#C62828</color>
-    <color name="yellow">#C6BC63</color>
+    <color name="yellow">#FF8F00</color>
     <color name="blue">#1565C0</color>
     <color name="purple">#6A1B9A</color>
     <color name="green">#2E7D32</color>

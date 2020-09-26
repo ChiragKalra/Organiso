@@ -1,7 +1,6 @@
 package com.bruhascended.sms
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -9,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.Telephony
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -20,16 +20,14 @@ import androidx.preference.PreferenceManager
 import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
 import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.MessageDao
 import com.bruhascended.sms.services.SMSReceiver
-import com.bruhascended.sms.ui.conversastion.SearchActivity
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.collections.HashMap
 
 
 /*
@@ -88,6 +86,12 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.READ_CONTACTS
     )
+
+    private fun getResourceId(attribute: Int): Int {
+        val a = TypedValue()
+        theme.resolveAttribute(attribute, a, false)
+        return a.resourceId
+    }
 
     override fun onSupportActionModeStarted(mode: ActionMode) {
         actionMode = mode
@@ -165,9 +169,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onNewIntent(intent: Intent?) {}
-
     private var addedCategoriesToMenu: Boolean = false
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         if (addedCategoriesToMenu) return super.onPrepareOptionsMenu(menu)
@@ -191,10 +192,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> {
-                startActivity(
-                    Intent(mContext, SearchActivity::class.java)
-                        .putExtra("type", "conversations")
-                )
+                startActivity(Intent(mContext, SearchActivity::class.java))
                 overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
             }
             R.id.action_settings -> {
@@ -218,8 +216,16 @@ class MainActivity : AppCompatActivity() {
             prefs.edit().putBoolean("stateChanged", false).apply()
             finish()
             startActivity(intent)
-            overridePendingTransition(0, 0)
+            overridePendingTransition(R.anim.hold, R.anim.hold)
         }
         super.onResume()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        overridePendingTransition (
+            android.R.anim.slide_in_left,
+            android.R.anim.slide_out_right
+        )
     }
 }

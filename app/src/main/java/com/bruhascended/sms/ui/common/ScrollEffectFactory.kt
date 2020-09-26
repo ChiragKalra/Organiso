@@ -1,11 +1,12 @@
-package com.bruhascended.sms.ui.main
+package com.bruhascended.sms.ui.common
 
+import android.view.View
 import android.widget.EdgeEffect
+import androidx.dynamicanimation.animation.SpringAnimation
+import androidx.dynamicanimation.animation.SpringForce
 import androidx.recyclerview.widget.RecyclerView
 
-
-
-class ScrollEffectFactory : RecyclerView.EdgeEffectFactory() {
+class ScrollEffectFactory:  RecyclerView.EdgeEffectFactory() {
 
     companion object{
         /** The magnitude of rotation while the list is scrolled. */
@@ -21,20 +22,44 @@ class ScrollEffectFactory : RecyclerView.EdgeEffectFactory() {
         private const val FLING_TRANSLATION_MAGNITUDE = 0.25f
 
         fun RecyclerView.forEachVisibleHolder(
-            action: (ConversationRecyclerAdaptor.ConversationViewHolder) -> Unit
+            action: (ScrollEffectViewHolder) -> Unit
         ) {
             for (i in 0 until childCount) {
-                action(getChildViewHolder(getChildAt(i)) as ConversationRecyclerAdaptor.ConversationViewHolder)
+                action(getChildViewHolder(getChildAt(i)) as ScrollEffectViewHolder)
             }
         }
     }
 
+    abstract class ScrollEffectViewHolder(root: View): RecyclerView.ViewHolder(root) {
+        var currentVelocity = 0f
+        /**
+         * A [SpringAnimation] for this RecyclerView item. This animation is used to bring the item back
+         * after the over-scroll effect.
+         */
+        val rotation: SpringAnimation = SpringAnimation(itemView, SpringAnimation.ROTATION)
+            .setSpring(
+                SpringForce()
+                    .setFinalPosition(0f)
+                    .setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY)
+                    .setStiffness(SpringForce.STIFFNESS_LOW)
+            )
+            .addUpdateListener { _, _, velocity ->
+                currentVelocity = velocity
+            }
+
+
+        val translationY: SpringAnimation = SpringAnimation(itemView, SpringAnimation.TRANSLATION_Y)
+            .setSpring(
+                SpringForce()
+                    .setFinalPosition(0f)
+                    .setDampingRatio(SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY)
+                    .setStiffness(SpringForce.STIFFNESS_LOW)
+            )
+    }
 
     class OnScrollListener: RecyclerView.OnScrollListener() {
-
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            recyclerView.forEachVisibleHolder { holder:
-                                                ConversationRecyclerAdaptor.ConversationViewHolder ->
+            recyclerView.forEachVisibleHolder { holder: ScrollEffectViewHolder ->
                 holder.rotation
                     .setStartVelocity(holder.currentVelocity - dx * SCROLL_ROTATION_MAGNITUDE)
                     .start()
@@ -63,8 +88,7 @@ class ScrollEffectFactory : RecyclerView.EdgeEffectFactory() {
                 val rotationDelta = sign * deltaDistance * OVERSCROLL_ROTATION_MAGNITUDE
                 val translationYDelta =
                     sign * recyclerView.width * deltaDistance * OVERSCROLL_TRANSLATION_MAGNITUDE
-                recyclerView.forEachVisibleHolder {
-                        holder: ConversationRecyclerAdaptor.ConversationViewHolder ->
+                recyclerView.forEachVisibleHolder { holder: ScrollEffectViewHolder ->
                     holder.rotation.cancel()
                     holder.translationY.cancel()
                     holder.itemView.rotation += rotationDelta
@@ -76,8 +100,7 @@ class ScrollEffectFactory : RecyclerView.EdgeEffectFactory() {
                 super.onRelease()
                 // The finger is lifted. This is when we should start the animations to bring
                 // the view property values back to their resting states.
-                recyclerView.forEachVisibleHolder {
-                        holder: ConversationRecyclerAdaptor.ConversationViewHolder ->
+                recyclerView.forEachVisibleHolder { holder: ScrollEffectViewHolder ->
                     holder.rotation.start()
                     holder.translationY.start()
                 }
@@ -88,8 +111,7 @@ class ScrollEffectFactory : RecyclerView.EdgeEffectFactory() {
                 val sign = if (direction == DIRECTION_BOTTOM) -1 else 1
                 // The list has reached the edge on fling.
                 val translationVelocity = sign * velocity * FLING_TRANSLATION_MAGNITUDE
-                recyclerView.forEachVisibleHolder {
-                        holder: ConversationRecyclerAdaptor.ConversationViewHolder ->
+                recyclerView.forEachVisibleHolder { holder: ScrollEffectViewHolder ->
                     holder.translationY
                         .setStartVelocity(translationVelocity)
                         .start()

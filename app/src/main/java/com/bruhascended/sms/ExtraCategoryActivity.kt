@@ -20,7 +20,7 @@ package com.bruhascended.sms
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import com.bruhascended.sms.ui.main.CategoryFragment
 import kotlinx.android.synthetic.main.activity_conversation.toolbar
 

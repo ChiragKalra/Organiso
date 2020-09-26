@@ -21,7 +21,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.data.SMSManager.Companion.labelText
 
 class SectionsPagerAdapter(
         private val context: Context,

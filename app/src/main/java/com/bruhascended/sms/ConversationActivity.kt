@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
@@ -22,16 +23,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.bruhascended.sms.analytics.AnalyticsLogger
-import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import com.bruhascended.sms.db.*
 import com.bruhascended.sms.services.MMSSender
 import com.bruhascended.sms.services.SMSSender
-import com.bruhascended.sms.ui.ListSelectionManager
-import com.bruhascended.sms.ui.ListSelectionManager.Companion.SelectionRecyclerAdaptor
-import com.bruhascended.sms.ui.MediaPreviewManager
+import com.bruhascended.sms.ui.common.ListSelectionManager
+import com.bruhascended.sms.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.sms.ui.common.MediaPreviewManager
+import com.bruhascended.sms.ui.common.ScrollEffectFactory
 import com.bruhascended.sms.ui.conversastion.MessageRecyclerAdaptor
 import com.bruhascended.sms.ui.conversastion.MessageSelectionListener
-import com.bruhascended.sms.ui.conversastion.ScrollEffectFactory
 import com.bruhascended.sms.ui.conversastion.SearchActivity
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
@@ -39,6 +40,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -111,12 +113,14 @@ class ConversationActivity : AppCompatActivity() {
     private fun setupRecycler(){
         activeConversationDao.loadAll().observe(this, { messages = it })
 
-        val flow = Pager(PagingConfig(
-            pageSize = 15,
-            initialLoadSize = 15,
-            prefetchDistance = 30,
-            maxSize = PagingConfig.MAX_SIZE_UNBOUNDED,
-        )) {
+        val flow = Pager(
+            PagingConfig(
+                pageSize = 15,
+                initialLoadSize = 15,
+                prefetchDistance = 30,
+                maxSize = PagingConfig.MAX_SIZE_UNBOUNDED,
+            )
+        ) {
             mdb.loadAllPaged()
         }.flow.cachedIn(lifecycleScope)
 
@@ -149,7 +153,7 @@ class ConversationActivity : AppCompatActivity() {
             }
         }
 
-        mAdaptor.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver() {
+        mAdaptor.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 if (mLayoutManager.findFirstVisibleItemPosition() == 0) {
                     super.onItemRangeInserted(positionStart, itemCount)
@@ -279,8 +283,7 @@ class ConversationActivity : AppCompatActivity() {
             }
             R.id.action_search -> {
                 startActivityForResult(
-                    Intent(mContext, SearchActivity::class.java)
-                        .putExtra("full", false),
+                    Intent(mContext, SearchActivity::class.java),
                     selectMessageArg
                 )
                 overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
@@ -316,6 +319,15 @@ class ConversationActivity : AppCompatActivity() {
             recyclerView.apply {
                 scrollToPosition(index)
                 selectionManager.toggleItem(index)
+                mAdaptor.notifyItemChanged(index)
+                addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        super.onScrollStateChanged(recyclerView, newState)
+                        if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                            smoothScrollBy(0, measuredHeight / 2 - getChildAt(index).bottom)
+                        }
+                    }
+                })
             }
         }
     }
@@ -329,8 +341,7 @@ class ConversationActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        if (menu == null) return super.onPrepareOptionsMenu(menu)
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val muteItem = menu.findItem(R.id.action_mute)
         val callItem = menu.findItem(R.id.action_call)
 

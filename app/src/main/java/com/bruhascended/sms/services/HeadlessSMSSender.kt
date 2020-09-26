@@ -26,12 +26,11 @@ import android.text.TextUtils
 import androidx.room.Room
 import com.bruhascended.sms.*
 import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.data.labelText
 import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.ConversationDatabase
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
 
+// TODO FIX
 class HeadlessSMSSender : Service() {
 
     private fun getRecipients(uri: Uri): String {

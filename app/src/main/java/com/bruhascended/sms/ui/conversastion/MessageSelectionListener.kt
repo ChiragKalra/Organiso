@@ -20,8 +20,8 @@ import com.bruhascended.sms.R
 import com.bruhascended.sms.activeConversationDao
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.ui.ListSelectionManager
-import com.bruhascended.sms.ui.MediaPreviewManager.Companion.getMimeType
+import com.bruhascended.sms.ui.common.ListSelectionManager
+import com.bruhascended.sms.ui.common.MediaPreviewManager.Companion.getMimeType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

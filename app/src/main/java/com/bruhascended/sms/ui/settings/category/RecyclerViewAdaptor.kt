@@ -16,7 +16,7 @@ import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
-import com.bruhascended.sms.data.labelText
+import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import java.util.*
 
 const val VISIBLE = 100

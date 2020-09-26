@@ -26,23 +26,19 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
-import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
+import com.bruhascended.sms.data.ContactsManager.Contact
 import com.bruhascended.sms.dpMemoryCache
+import com.bruhascended.sms.ui.main.ConversationRecyclerAdaptor
 
 class ContactRecyclerAdaptor (
     private val mContext: Context,
     private val contacts: Array<Contact>
 ): RecyclerView.Adapter<ContactRecyclerAdaptor.ContactViewHolder>() {
 
-    private val colors: Array<Int> = arrayOf(
-        ContextCompat.getColor(mContext, R.color.red),
-        ContextCompat.getColor(mContext, R.color.blue),
-        ContextCompat.getColor(mContext, R.color.purple),
-        ContextCompat.getColor(mContext, R.color.green),
-        ContextCompat.getColor(mContext, R.color.teal),
-        ContextCompat.getColor(mContext, R.color.orange)
-    )
+    private var colors: Array<Int> = Array(ConversationRecyclerAdaptor.colorRes.size) {
+        ContextCompat.getColor(mContext, ConversationRecyclerAdaptor.colorRes[it])
+    }
 
     private val cm = ContactsManager(mContext)
 

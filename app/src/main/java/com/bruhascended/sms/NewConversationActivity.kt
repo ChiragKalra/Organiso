@@ -29,11 +29,11 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.ConversationActivity.Companion.selectMediaArg
-import com.bruhascended.sms.data.Contact
 import com.bruhascended.sms.data.ContactsManager
+import com.bruhascended.sms.data.ContactsManager.Contact
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.ui.main.MainViewModel
-import com.bruhascended.sms.ui.MediaPreviewManager
+import com.bruhascended.sms.ui.common.MediaPreviewManager
 import com.bruhascended.sms.ui.newConversation.ContactRecyclerAdaptor
 import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.activity_new_conversation.toolbar
