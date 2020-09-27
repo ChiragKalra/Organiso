@@ -19,6 +19,7 @@ import com.bruhascended.sms.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.sms.ui.search.SearchResultViewHolder.ResultItem
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_search.*
+import java.util.*
 
 
 class SearchActivity : AppCompatActivity() {
@@ -37,6 +38,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showResults(key: String) {
+        searchRecycler.scrollToPosition(0)
         searchRecycler.isVisible = true
         searchThread.interrupt()
         mAdaptor.searchKey = key
@@ -119,7 +121,6 @@ class SearchActivity : AppCompatActivity() {
             finish()
         }
 
-        searchRecycler.scrollToPosition(0)
         searchRecycler.adapter = mAdaptor
 
         val visible = Gson().fromJson(
@@ -154,7 +155,7 @@ class SearchActivity : AppCompatActivity() {
 
         searchEditText.setOnEditorActionListener { _, i, _ ->
             if (i != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener true
-            val key = searchEditText.text.toString().trim()
+            val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
 
             searchRecycler.isVisible = !key.isBlank()
             if (key.isBlank()) {
