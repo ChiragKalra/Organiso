@@ -27,7 +27,7 @@
         app:title="OTP" />
     <SwitchPreferenceCompat
         app:defaultValue="true"
-        app:icon="@drawable/ic_report"
+        app:icon="@drawable/ic_copy"
         app:key="copy_otp"
         app:allowDividerBelow="false"
         app:title="Automatically Copy OTP"/>

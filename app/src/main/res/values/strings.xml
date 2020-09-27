@@ -58,5 +58,6 @@
     <string name="deep_search">Deep Search</string>
     <string name="no_results">No Results</string>
     <string name="that_s_all">That\'s All</string>
+    <string name="reset">Reset</string>
 
 </resources>

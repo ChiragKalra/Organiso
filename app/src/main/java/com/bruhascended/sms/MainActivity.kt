@@ -185,9 +185,13 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> {
-                appBarLayout.setExpanded(false, true)
-                startActivity(Intent(mContext, SearchActivity::class.java))
-                overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
+                appBarLayout.apply {
+                    setExpanded(false, true)
+                    postDelayed({
+                        startActivity(Intent(mContext, SearchActivity::class.java))
+                        overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
+                    }, 200)
+                }
             }
             R.id.action_settings -> {
                 val intent = Intent(mContext, SettingsActivity::class.java)
@@ -203,7 +207,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        appBarLayout?.setExpanded(true, true)
+        appBarLayout?.postDelayed( {
+            appBarLayout.setExpanded(true, true)
+        }, 300)
         if (prefs.getBoolean("stateChanged", false)) {
             prefs.edit().putBoolean("stateChanged", false).apply()
             finish()

@@ -20,10 +20,7 @@ package com.bruhascended.sms.ui.settings
 import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.ContextThemeWrapper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -32,7 +29,6 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.ui.settings.category.*
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import kotlin.collections.ArrayList
 
@@ -76,6 +72,7 @@ class CategorySettingsFragment: Fragment(), StartDragListener {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
+        setHasOptionsMenu(true)
         val dark = prefs.getBoolean("dark_theme", false)
         inflater.cloneInContext(
             ContextThemeWrapper(
@@ -86,7 +83,6 @@ class CategorySettingsFragment: Fragment(), StartDragListener {
 
         val root = inflater.inflate(R.layout.fragment_settings_category, container, false)
         recycler = root.findViewById(R.id.recycler)
-        val reset: FloatingActionButton = root.findViewById(R.id.reset)
 
         val visibleCategories = gson.fromJson(
             prefs.getString("visible_categories", ""), Array<Int>::class.java
@@ -101,28 +97,38 @@ class CategorySettingsFragment: Fragment(), StartDragListener {
 
         drawRecyclerView(visibleCategories, hiddenCategories)
 
-        reset.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Reset to default?")
-                .setPositiveButton("Reset") { dialog, _ ->
-                    val vis = Array(4){it}
-                    val hid = Array(2){4+it}
-                    prefs.edit()
-                        .putString("visible_categories", Gson().toJson(vis))
-                        .putString("hidden_categories", Gson().toJson(hid))
-                        .apply {
-                            for (i in 0..5) remove("custom_label_$i")
-                        }.putBoolean("stateChanged", true)
-                        .apply()
-                    drawRecyclerView(vis, hid)
-                    dialog.dismiss()
-                }
-                .setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.dismiss()
-                }.create().show()
-        }
-
         return root
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.category_settings, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_reset -> {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Reset to default?")
+                    .setPositiveButton("Reset") { dialog, _ ->
+                        val vis = Array(4){it}
+                        val hid = Array(2){4+it}
+                        prefs.edit()
+                            .putString("visible_categories", Gson().toJson(vis))
+                            .putString("hidden_categories", Gson().toJson(hid))
+                            .apply {
+                                for (i in 0..5) remove("custom_label_$i")
+                            }.putBoolean("stateChanged", true)
+                            .apply()
+                        drawRecyclerView(vis, hid)
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                    }.create().show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onDestroy() {
