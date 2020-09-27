@@ -27,6 +27,7 @@ import com.bruhascended.sms.ui.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 
 @SuppressLint("ResourceType")
 class MessageViewHolder(
@@ -208,10 +209,11 @@ class MessageViewHolder(
         hideMedia()
 
         messageTextView.text = if (!searchKey.isBlank()) SpannableString(message.text).apply {
-            var index = message.text.indexOf(searchKey, ignoreCase = true)
-            while (index >= 0) {
-                setSpan(BackgroundColorSpan(highlightColor), index, index+searchKey.length, flag)
-                index = message.text.indexOf(searchKey, index+1, ignoreCase = true)
+            val regex = Regex("\\b${searchKey}")
+            val matches = regex.findAll(message.text.toLowerCase(Locale.ROOT))
+            for (match in matches) {
+                val index = match.range
+                setSpan(BackgroundColorSpan(highlightColor), index.first, index.last+1, flag)
             }
         } else message.text
         timeTextView.text = displayFullTime(message.time, mContext)
