@@ -133,12 +133,16 @@ class ListSelectionManager<T: Any> (
                     else selected.add(i)
                 }
                 adaptor.notifyItemRangeChanged(low, high - low + 1)
+                adaptor.notifyItemRangeChanged(previousSelection, 1)
                 -1
             }
         }
         toggleSelection(pos)
         updateUi()
     }
+
+
+    fun isRangeSelection(pos: Int) = pos == previousSelection
 
     fun close() {
         rangeSelection = false

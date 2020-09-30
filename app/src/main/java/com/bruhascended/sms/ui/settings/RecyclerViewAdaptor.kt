@@ -1,4 +1,4 @@
-package com.bruhascended.sms.ui.settings.category
+package com.bruhascended.sms.ui.settings
 
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
@@ -22,9 +22,6 @@ import java.util.*
 const val VISIBLE = 100
 const val HIDDEN = 101
 
-interface StartDragListener {
-    fun requestDrag(viewHolder: RecyclerView.ViewHolder)
-}
 
 class RecyclerViewAdapter(
     private val mContext: Context,
@@ -35,6 +32,10 @@ class RecyclerViewAdapter(
     RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder>(),
     ItemMoveCallback.ItemTouchHelperContract
 {
+
+    interface StartDragListener {
+        fun requestDrag(viewHolder: RecyclerView.ViewHolder)
+    }
 
     inner class MyViewHolder(val rowView: View): RecyclerView.ViewHolder(rowView) {
         val editText: EditText = rowView.findViewById(R.id.name)

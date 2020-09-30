@@ -6,9 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.ui.conversastion.MessageViewHolder
 import com.bruhascended.sms.ui.main.ConversationRecyclerAdaptor.ConversationSharedResources
-import com.bruhascended.sms.ui.main.ConversationViewHolder
 import com.bruhascended.sms.ui.search.SearchResultViewHolder.ResultItem
 
 /*

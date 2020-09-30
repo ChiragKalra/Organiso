@@ -1,5 +1,7 @@
-package com.bruhascended.sms.ui.conversastion
+package com.bruhascended.sms.ui.conversation
 
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
@@ -41,6 +43,7 @@ class MessageViewHolder(
     private val videoPlayPause: ImageButton = root.findViewById(R.id.videoPlayPause)
     private val mediaLayout: LinearLayout = root.findViewById(R.id.mediaLayout)
     private val imageView: ImageView = root.findViewById(R.id.image)
+    private var backgroundAnimator: ValueAnimator? = null
 
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
     private val highlightColor = mContext.getColor(R.color.textHighLight)
@@ -61,16 +64,19 @@ class MessageViewHolder(
 
     var defaultBackground: Drawable
     var selectedColor = 0
+    var backgroundColor = 0
     var textColor = 0
 
     init {
         val tp = mContext.obtainStyledAttributes(intArrayOf(
             R.attr.multiChoiceSelectorColor,
             android.R.attr.selectableItemBackground,
-            R.attr.unreadTextColor
+            R.attr.unreadTextColor,
+            R.attr.backgroundColor
         ))
         defaultBackground = tp.getDrawable(1)!!
         selectedColor = tp.getColor(0, 0)
+        backgroundColor = tp.getColor(3, 0)
         textColor = tp.getColor(2, 0)
         tp.recycle()
     }
@@ -237,6 +243,26 @@ class MessageViewHolder(
             if (message.text == "") messageTextView.visibility = GONE
         }
 
+    }
+
+    fun rangeSelectionAnim() {
+        backgroundAnimator = ValueAnimator.ofObject(
+            ArgbEvaluator(),
+            selectedColor,
+            backgroundColor
+        ).apply {
+            duration = 700
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            addUpdateListener { animator ->
+                root.setBackgroundColor(animator.animatedValue as Int)
+            }
+            start()
+        }
+    }
+
+    fun stopBgAnim() {
+        backgroundAnimator?.cancel()
     }
 
 }

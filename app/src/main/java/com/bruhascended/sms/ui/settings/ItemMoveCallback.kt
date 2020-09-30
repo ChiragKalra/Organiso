@@ -1,8 +1,8 @@
-package com.bruhascended.sms.ui.settings.category
+package com.bruhascended.sms.ui.settings
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.sms.ui.settings.category.RecyclerViewAdapter.MyViewHolder
+import com.bruhascended.sms.ui.settings.RecyclerViewAdapter.MyViewHolder
 
 class ItemMoveCallback(private val mAdapter: ItemTouchHelperContract) :
     ItemTouchHelper.Callback() {

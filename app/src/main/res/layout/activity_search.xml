@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:background="?backgroundColor"
     android:layout_height="match_parent"
-    tools:context=".ui.conversastion.SearchActivity">
+    tools:context=".ui.conversation.SearchActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"

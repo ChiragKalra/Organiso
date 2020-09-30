@@ -48,15 +48,18 @@ class ConversationRecyclerAdaptor(
         val pos = it.absoluteAdapterPosition
         if (selectionManager.isActive) {
             selectionManager.toggleItem(pos)
-            if (selectionManager.isSelected(pos)) {
-                Handler(mContext.mainLooper).postDelayed({
-                    (mContext as AppCompatActivity).runOnUiThread{
-                        if (selectionManager.isSelected(pos))
-                            it.root.setBackgroundColor(it.selectedColor)
-                    }
-                }, 200)
-            } else {
-                it.root.background = it.defaultBackground
+            when {
+                selectionManager.isRangeSelection(pos) ->
+                    it.rangeSelectionAnim()
+                selectionManager.isSelected(pos) ->
+                    Handler(mContext.mainLooper).postDelayed({
+                        (mContext as AppCompatActivity).runOnUiThread{
+                            if (selectionManager.isSelected(pos))
+                                it.root.setBackgroundColor(it.selectedColor)
+                        }
+                    }, 200)
+                else ->
+                    it.root.background = it.defaultBackground
             }
         } else mContext.startActivity(
             Intent(mContext, ConversationActivity::class.java)
@@ -67,10 +70,13 @@ class ConversationRecyclerAdaptor(
     var onItemLongClickListener: (ConversationViewHolder) -> Boolean = {
         val pos = it.absoluteAdapterPosition
         selectionManager.toggleItem(pos)
-        if (selectionManager.isSelected(pos)) {
-            it.root.setBackgroundColor(it.selectedColor)
-        } else {
-            it.root.background = it.defaultBackground
+        when {
+            selectionManager.isRangeSelection(pos) ->
+                it.rangeSelectionAnim()
+            selectionManager.isSelected(pos) ->
+                it.root.setBackgroundColor(it.selectedColor)
+            else ->
+                it.root.background = it.defaultBackground
         }
         true
     }
@@ -91,7 +97,11 @@ class ConversationRecyclerAdaptor(
                 sharedResources.colors[absoluteAdapterPosition % sharedResources.colors.size]
             )
             root.apply {
-                if (selectionManager.isSelected(absoluteAdapterPosition))
+                stopBgAnim()
+                if (::selectionManager.isInitialized &&
+                    selectionManager.isRangeSelection(position)) {
+                    rangeSelectionAnim()
+                } else if (selectionManager.isSelected(absoluteAdapterPosition))
                     setBackgroundColor(selectedColor)
                 else background = defaultBackground
                 setOnClickListener { onItemClickListener(holder) }

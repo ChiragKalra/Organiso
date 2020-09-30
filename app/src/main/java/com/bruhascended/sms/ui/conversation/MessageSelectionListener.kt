@@ -1,4 +1,4 @@
-package com.bruhascended.sms.ui.conversastion
+package com.bruhascended.sms.ui.conversation
 
 import android.annotation.SuppressLint
 import android.app.Activity

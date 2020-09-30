@@ -31,9 +31,8 @@ import com.bruhascended.sms.ui.common.ListSelectionManager
 import com.bruhascended.sms.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
 import com.bruhascended.sms.ui.common.MediaPreviewManager
 import com.bruhascended.sms.ui.common.ScrollEffectFactory
-import com.bruhascended.sms.ui.conversastion.MessageRecyclerAdaptor
-import com.bruhascended.sms.ui.conversastion.MessageSelectionListener
-import com.bruhascended.sms.ui.conversastion.SearchActivity
+import com.bruhascended.sms.ui.conversation.*
+import com.bruhascended.sms.ui.conversation.SearchActivity
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.GlobalScope
@@ -230,8 +229,8 @@ class ConversationActivity : AppCompatActivity() {
 
         val notificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         for (notif in notificationManager.activeNotifications) {
-            if (notif.groupKey == conversation.sender) {
-                notificationManager.cancel(notif.id)
+            if (notif.tag == conversation.sender) {
+                notificationManager.cancel(notif.tag, notif.id)
             }
         }
 

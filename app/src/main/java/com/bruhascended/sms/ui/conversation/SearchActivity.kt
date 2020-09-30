@@ -1,4 +1,4 @@
-package com.bruhascended.sms.ui.conversastion
+package com.bruhascended.sms.ui.conversation
 
 import android.content.Context
 import android.content.Intent

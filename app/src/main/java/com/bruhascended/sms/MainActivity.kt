@@ -69,6 +69,7 @@ fun requireMainViewModel(mContext: Context) {
 
 
 class MainActivity : AppCompatActivity() {
+    private val argSearchResult = 1
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
     private lateinit var hiddenCategories: Array<Int>
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
             val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
             intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
-            startActivityForResult(setSmsAppIntent, 1)
+            startActivity(setSmsAppIntent)
         }
 
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -188,9 +189,9 @@ class MainActivity : AppCompatActivity() {
                 appBarLayout.apply {
                     setExpanded(false, true)
                     postDelayed({
-                        startActivity(Intent(mContext, SearchActivity::class.java))
+                        startActivityForResult(Intent(mContext, SearchActivity::class.java), argSearchResult)
                         overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
-                    }, 200)
+                    }, 100)
                 }
             }
             R.id.action_settings -> {
@@ -206,10 +207,16 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == argSearchResult && resultCode == RESULT_CANCELED) {
+            appBarLayout?.postDelayed({
+                appBarLayout.setExpanded(true, true)
+            }, 200)
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
     override fun onResume() {
-        appBarLayout?.postDelayed( {
-            appBarLayout.setExpanded(true, true)
-        }, 300)
         if (prefs.getBoolean("stateChanged", false)) {
             prefs.edit().putBoolean("stateChanged", false).apply()
             finish()

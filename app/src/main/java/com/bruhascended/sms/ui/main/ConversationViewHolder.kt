@@ -1,5 +1,7 @@
 package com.bruhascended.sms.ui.main
 
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Typeface
@@ -26,8 +28,9 @@ class ConversationViewHolder(
 ) : ScrollEffectFactory.ScrollEffectViewHolder(root) {
 
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-
+    private var backgroundAnimator: ValueAnimator? = null
     private val muteImage: ImageView = root.findViewById(R.id.mutedImage)
+
     val imageView: QuickContactBadge = root.findViewById(R.id.dp)
     val senderTextView: TextView = root.findViewById(R.id.sender)
     val messageTextView: TextView = root.findViewById(R.id.lastMessage)
@@ -37,18 +40,19 @@ class ConversationViewHolder(
 
     var defaultBackground: Drawable
     var selectedColor = 0
+    var backgroundColor = 0
     var textColor = 0
 
     init {
-        val tp = shared.mContext.obtainStyledAttributes(
-            intArrayOf(
-                R.attr.multiChoiceSelectorColor,
-                android.R.attr.selectableItemBackground,
-                R.attr.unreadTextColor
-            )
-        )
+        val tp = shared.mContext.obtainStyledAttributes(intArrayOf(
+            R.attr.multiChoiceSelectorColor,
+            android.R.attr.selectableItemBackground,
+            R.attr.unreadTextColor,
+            R.attr.backgroundColor
+        ))
         defaultBackground = tp.getDrawable(1)!!
         selectedColor = tp.getColor(0, 0)
+        backgroundColor = tp.getColor(3, 0)
         textColor = tp.getColor(2, 0)
         tp.recycle()
     }
@@ -107,4 +111,26 @@ class ConversationViewHolder(
 
         showDisplayPicture()
     }
+
+
+    fun rangeSelectionAnim() {
+        backgroundAnimator = ValueAnimator.ofObject(
+            ArgbEvaluator(),
+            selectedColor,
+            backgroundColor
+        ).apply {
+            duration = 700
+            repeatMode = ValueAnimator.REVERSE
+            repeatCount = ValueAnimator.INFINITE
+            addUpdateListener { animator ->
+                root.setBackgroundColor(animator.animatedValue as Int)
+            }
+            start()
+        }
+    }
+
+    fun stopBgAnim() {
+        backgroundAnimator?.cancel()
+    }
+
 }

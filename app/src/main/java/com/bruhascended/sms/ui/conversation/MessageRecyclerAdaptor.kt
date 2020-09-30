@@ -1,4 +1,4 @@
-package com.bruhascended.sms.ui.conversastion
+package com.bruhascended.sms.ui.conversation
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -56,7 +56,11 @@ class MessageRecyclerAdaptor(
             message = getItem(position) ?: return
             onBind()
             root.apply {
+                stopBgAnim()
                 if (::selectionManager.isInitialized &&
+                    selectionManager.isRangeSelection(position)) {
+                    rangeSelectionAnim()
+                } else if (::selectionManager.isInitialized &&
                     selectionManager.isSelected(position))
                     setBackgroundColor(selectedColor)
                 else background = defaultBackground
@@ -74,15 +78,18 @@ class MessageRecyclerAdaptor(
         val pos = it.absoluteAdapterPosition
         if (selectionManager.isActive) {
             selectionManager.toggleItem(pos)
-            if (selectionManager.isSelected(pos)) {
-                Handler(mContext.mainLooper).postDelayed({
-                    (mContext as AppCompatActivity).runOnUiThread{
-                        if (selectionManager.isSelected(pos))
-                            it.root.setBackgroundColor(it.selectedColor)
-                    }
-                }, 200)
-            } else {
-                it.root.background = it.defaultBackground
+            when {
+                selectionManager.isRangeSelection(pos) ->
+                    it.rangeSelectionAnim()
+                selectionManager.isSelected(pos) ->
+                    Handler(mContext.mainLooper).postDelayed({
+                        (mContext as AppCompatActivity).runOnUiThread{
+                            if (selectionManager.isSelected(pos))
+                                it.root.setBackgroundColor(it.selectedColor)
+                        }
+                    }, 200)
+                else ->
+                    it.root.background = it.defaultBackground
             }
         } // TODO else show time
     }
@@ -90,10 +97,13 @@ class MessageRecyclerAdaptor(
     var onItemLongClickListener: (MessageViewHolder) -> Boolean = {
         val pos = it.absoluteAdapterPosition
         selectionManager.toggleItem(pos)
-        if (selectionManager.isSelected(pos)) {
-            it.root.setBackgroundColor(it.selectedColor)
-        } else {
-            it.root.background = it.defaultBackground
+        when {
+            selectionManager.isRangeSelection(pos) ->
+                it.rangeSelectionAnim()
+            selectionManager.isSelected(pos) ->
+                it.root.setBackgroundColor(it.selectedColor)
+            else ->
+                it.root.background = it.defaultBackground
         }
         true
     }

@@ -28,7 +28,7 @@ import java.io.Serializable
 @Entity(tableName = "messages")
 data class Message (
     @PrimaryKey(autoGenerate = true)
-    val id: Long?,
+    var id: Long?,
     val sender: String,
     val text: String,
     var type: Int,
