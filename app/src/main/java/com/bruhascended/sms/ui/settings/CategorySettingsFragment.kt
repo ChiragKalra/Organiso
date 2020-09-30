@@ -28,12 +28,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
-import com.bruhascended.sms.ui.settings.category.*
 import com.google.gson.Gson
 import kotlin.collections.ArrayList
 
 @Suppress("UNCHECKED_CAST")
-class CategorySettingsFragment: Fragment(), StartDragListener {
+class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListener {
 
     private lateinit var touchHelper: ItemTouchHelper
     private lateinit var prefs: SharedPreferences

@@ -1,12 +1,9 @@
 /*
                     Copyright 2020 Chirag Kalra
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
        http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +26,6 @@ import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.BuildConfig.APPLICATION_ID
-import com.klinker.android.send_message.BroadcastUtils
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import com.klinker.android.send_message.Message as SMS
@@ -57,6 +53,7 @@ class SMSSender(
     private val settings = Settings().apply {
         useSystemSending = true
         deliveryReports = true
+
     }
 
     private fun addSmsToDb(smsText: String, date: Long, type: Int, delivered: Boolean) {
@@ -71,7 +68,10 @@ class SMSSender(
                 delivered
             )
             val qs = activeConversationDao.search(date)
-            for (m in qs) activeConversationDao.delete(m)
+            for (m in qs) {
+                message.id = m.id
+                activeConversationDao.delete(m)
+            }
             activeConversationDao.insert(message)
 
             if (conversation.id == null) {

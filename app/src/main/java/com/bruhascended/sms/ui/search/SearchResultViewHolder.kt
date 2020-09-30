@@ -14,7 +14,7 @@ import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.ui.common.ScrollEffectFactory
-import com.bruhascended.sms.ui.conversastion.MessageViewHolder
+import com.bruhascended.sms.ui.conversation.MessageViewHolder
 import com.bruhascended.sms.ui.main.ConversationRecyclerAdaptor
 import com.bruhascended.sms.ui.main.ConversationViewHolder
 
