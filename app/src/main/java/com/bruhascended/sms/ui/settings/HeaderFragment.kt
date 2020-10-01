@@ -30,7 +30,7 @@ class HeaderFragment : PreferenceFragmentCompat() {
         val notifyPref: Preference = findPreference("notifications")!!
         val appBadgePref: Preference = findPreference("app_badge")!!
 
-        appBadgePref.summary = "v${BuildConfig.VERSION_NAME}"
+        appBadgePref.summary = BuildConfig.VERSION_NAME
 
         notifyPref.setOnPreferenceClickListener {
             val intent = Intent("android.settings.APP_NOTIFICATION_SETTINGS").apply {

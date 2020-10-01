@@ -19,7 +19,7 @@ package com.bruhascended.sms.services
 import android.content.Context
 import android.net.Uri
 import com.bruhascended.sms.data.MMSManager
-import com.bruhascended.sms.ui.common.MessageNotificationManager
+import com.bruhascended.sms.notifications.MessageNotificationManager
 import com.klinker.android.send_message.MmsReceivedReceiver
 
 

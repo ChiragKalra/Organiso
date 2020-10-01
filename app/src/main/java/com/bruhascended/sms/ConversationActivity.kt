@@ -1,7 +1,6 @@
 package com.bruhascended.sms
 
 import android.app.AlertDialog
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -13,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
@@ -39,7 +39,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -227,12 +226,8 @@ class ConversationActivity : AppCompatActivity() {
             notSupported.visibility = TextView.VISIBLE
         }
 
-        val notificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        for (notif in notificationManager.activeNotifications) {
-            if (notif.tag == conversation.sender) {
-                notificationManager.cancel(notif.tag, notif.id)
-            }
-        }
+        val notificationManager = NotificationManagerCompat.from(this)
+        notificationManager.cancel(conversation.id!!.toInt())
 
         if (conversation.id != null) {
             conversation.read = true

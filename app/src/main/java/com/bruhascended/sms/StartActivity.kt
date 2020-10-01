@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bruhascended.sms.data.SMSManager
-import com.bruhascended.sms.ui.common.MessageNotificationManager
+import com.bruhascended.sms.notifications.MessageNotificationManager
 import com.bruhascended.sms.ui.start.StartViewModel
 import kotlinx.android.synthetic.main.activity_start.*
 import java.lang.Math.round

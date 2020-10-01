@@ -23,7 +23,7 @@ import android.content.Intent
 import android.provider.Telephony
 import android.telephony.SmsMessage
 import com.bruhascended.sms.data.IncomingSMSManager
-import com.bruhascended.sms.ui.common.MessageNotificationManager
+import com.bruhascended.sms.notifications.MessageNotificationManager
 
 
 class SMSReceiver : BroadcastReceiver() {
