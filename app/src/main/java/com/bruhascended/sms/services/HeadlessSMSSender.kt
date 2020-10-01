@@ -96,13 +96,11 @@ class HeadlessSMSSender : Service() {
         )
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        if (intent == null) return null
-
+    override fun onBind(intent: Intent): IBinder? {
         val action = intent.action
         if (TelephonyManager.ACTION_RESPOND_VIA_MESSAGE != action) return null
         val extras = intent.extras ?: return null
-        val message = extras.getString(Intent.EXTRA_TEXT)!!
+        val message = extras.getString(Intent.EXTRA_TEXT) ?: extras.getString("sms_body")!!
         val intentUri: Uri = intent.data!!
         val recipients = getRecipients(intentUri)
 

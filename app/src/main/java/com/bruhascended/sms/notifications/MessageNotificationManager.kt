@@ -1,29 +1,31 @@
 package com.bruhascended.sms.notifications
 
 import android.annotation.SuppressLint
-import android.app.*
-import android.content.*
+import android.app.Notification.CATEGORY_MESSAGE
+import android.app.NotificationManager.IMPORTANCE_NONE
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Icon
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.webkit.MimeTypeMap
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.Builder
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import androidx.core.app.RemoteInput
 import androidx.core.graphics.drawable.IconCompat
-import androidx.preference.PreferenceManager
 import androidx.room.Room
-import com.bruhascended.sms.*
+import com.bruhascended.sms.ConversationActivity
+import com.bruhascended.sms.R
+import com.bruhascended.sms.activeConversationSender
 import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.data.SMSManager.Companion.labelText
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.NotificationDatabase
 import com.bruhascended.sms.ml.getOtp
 import java.io.File
-import com.bruhascended.sms.db.Notification as ActiveNotif
+import com.bruhascended.sms.db.Notification
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -42,213 +44,160 @@ import com.bruhascended.sms.db.Notification as ActiveNotif
 
 */
 
+const val NAME_TABLE = "active_notifications"
+const val ACTION_CANCEL = "NOTIFICATION_CANCELED"
+const val ACTION_REPLY = "NOTIFICATION_REPLIED"
+const val ACTION_COPY = "OTP_COPIED"
+const val ACTION_DELETE = "MESSAGE_DELETED"
+const val GROUP_DEFAULT = "MESSAGE_GROUP"
+const val ID_SUMMARY = -1221
+const val KEY_TEXT_REPLY = "key_text_reply"
+
+@SuppressLint("RestrictedApi")
 class MessageNotificationManager(
     private val mContext: Context
 ) {
-
-    companion object {
-        const val tableName = "active_notifications"
-
-        const val ACTION_CANCEL = "NOTIFICATION_CANCELED"
-        const val ACTION_COPY = "OTP_COPIED"
-        const val ACTION_DELETE = "MESSAGE_DELETED"
-    }
-
-    private val defaultGroup = "MESSAGE_GROUP"
-    private val summaryId = -1
     private val cm = ContactsManager(mContext)
-
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+    private val onm = OtpNotificationManager(mContext)
     private val notificationManager = NotificationManagerCompat.from(mContext)
+
     private val ndb = Room.databaseBuilder(
-        mContext, NotificationDatabase::class.java, tableName
+        mContext, NotificationDatabase::class.java, NAME_TABLE
     ).allowMainThreadQueries().build().manager()
-
-    private val descriptionText = arrayOf(
-        R.string.text_1,
-        R.string.text_2,
-        R.string.text_3,
-        R.string.text_4,
-        R.string.text_5
-    )
-
-    private val importance = arrayOf(
-        NotificationManager.IMPORTANCE_MAX,
-        NotificationManager.IMPORTANCE_MAX,
-        NotificationManager.IMPORTANCE_MAX,
-        NotificationManager.IMPORTANCE_NONE,
-        NotificationManager.IMPORTANCE_NONE
-    )
 
     private fun getMimeType(url: String): String {
         val extension = MimeTypeMap.getFileExtensionFromUrl(url)
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: ""
     }
 
-    private fun copyToClipboard(otp: String) {
-        val clipboard =
-            mContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("OTP", otp)
-        clipboard.setPrimaryClip(clip)
-        Handler(Looper.getMainLooper()).post{
-            Toast.makeText(mContext, "OTP Copied To Clipboard", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    @SuppressLint("RestrictedApi")
     private fun getSenderIcon(conversation: Conversation): IconCompat? {
         return when {
-            conversation.sender.first().isLetter() ->
-                IconCompat.createFromIcon(Icon.createWithResource(mContext, R.drawable.ic_bot))
-            conversation.name != null ->
-                IconCompat.createFromIcon(Icon.createWithBitmap(
-                        cm.retrieveContactPhoto(conversation.sender)))
-            else ->
-                IconCompat.createFromIcon(Icon.createWithResource(mContext, R.drawable.ic_person))
+            conversation.sender.first().isLetter() -> IconCompat.createFromIcon(
+                Icon.createWithResource(mContext, R.drawable.ic_bot))
+            conversation.name != null -> IconCompat.createFromIcon(Icon.createWithBitmap(
+                cm.retrieveContactPhoto(conversation.sender)))
+            else -> IconCompat.createFromIcon(Icon.createWithResource(mContext, R.drawable.ic_person))
         }
     }
 
-    private fun sendOtpNotif(otp: String, message: Message, conversation: Conversation, pendingIntent: PendingIntent) {
-        val id = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
+    private fun geUserIcon() = IconCompat.createFromIcon(
+        Icon.createWithResource(mContext, R.drawable.ic_person)
+    )
 
-        val copyPI = PendingIntent.getBroadcast(mContext, 0,
-            Intent(mContext, NotificationActionReceiver::class.java)
-                .setAction(ACTION_COPY)
-                .putExtra("otp", otp),
-            0)
-        val deletePI = PendingIntent.getBroadcast(mContext, 0,
-            Intent(mContext, NotificationActionReceiver::class.java)
-                .setAction(ACTION_DELETE)
-                .putExtra("id", id)
-                .putExtra("message", message)
-                .putExtra("conversation", conversation),
-            0)
 
-        var text = "OTP from ${message.sender}"
-        if (prefs.getBoolean("copy_otp", true)) {
-            text += " (Copied to Clipboard)"
-            copyToClipboard(otp)
+    private fun showSummaryNotification() {
+        val set = hashSetOf<String>()
+        ndb.loadAllSync().forEach { n ->
+            if (notificationManager.getNotificationChannel(n.label.toString())?.importance
+                != IMPORTANCE_NONE) set.add(n.sender)
         }
-        NotificationCompat.Builder(mContext, conversation.label.toString())
-            .setContentTitle(otp)
-            .setContentText(text)
-            .addAction(
-                R.drawable.ic_content_copy,
-                mContext.getString(R.string.copy_otp),
-                copyPI
-            ).addAction(
-                R.drawable.ic_delete,
-                mContext.getString(R.string.delete),
-                deletePI
-            ).setSmallIcon(R.drawable.message)
-            .setCategory(Notification.CATEGORY_MESSAGE)
+        if (set.size < 3) return
+        notificationManager.notify(0,
+            Builder(mContext, "0")
+            .setSmallIcon(R.drawable.message)
             .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
+            .setGroup(GROUP_DEFAULT)
+            .setGroupSummary(true)
             .build()
-
+        )
     }
 
     fun sendSmsNotification(pair: Pair<Message, Conversation>) {
         val conversation: Conversation = pair.second
         val message: Message = pair.first
 
-        if (conversation.isMuted || conversation.sender == activeConversationSender || conversation.label == 5) return
-        val yeah = Intent(mContext, ConversationActivity::class.java)
-            .putExtra("ye", conversation)
-        yeah.flags = Intent.FLAG_ACTIVITY_TASK_ON_HOME
+        if (conversation.isMuted || conversation.sender == activeConversationSender ||
+            conversation.label == 5) return
+
         val contentPI = PendingIntent.getActivity(
-            mContext, 0, yeah, PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val cancelPI = PendingIntent.getBroadcast(
-            mContext, 0,
-            Intent(mContext, NotificationActionReceiver::class.java)
-                .setAction(ACTION_CANCEL)
-                .putExtra("sender", conversation.sender),
+            mContext, conversation.id!!.toInt(),
+            Intent(mContext, ConversationActivity::class.java)
+                .putExtra("ye", conversation)
+                .setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME),
             PendingIntent.FLAG_ONE_SHOT
         )
 
         val otp = getOtp(message.text)
         if (otp != null) {
-            sendOtpNotif(otp, message, conversation, contentPI)
+            onm.sendOtpNotif(otp, message, conversation, contentPI)
             return
         }
 
-        ndb.insert(ActiveNotif(
-            null,
+        val senderPerson = Person.Builder()
+            .setName(conversation.name ?: conversation.sender)
+            .setIcon(getSenderIcon(conversation))
+            .build()
+
+        val userPerson = Person.Builder()
+            .setName("You")
+            .setIcon(getSenderIcon(conversation))
+            .build()
+
+        val cancelPI = PendingIntent.getBroadcast(
+            mContext, conversation.id!!.toInt(),
+            Intent(mContext, NotificationActionReceiver::class.java)
+                .setAction(ACTION_CANCEL)
+                .putExtra("sender", conversation.sender),
+            PendingIntent.FLAG_ONE_SHOT
+        )
+        ndb.insert(Notification(
             conversation.name ?: conversation.sender,
             message.text,
             System.currentTimeMillis(),
             conversation.label,
-            message.path
+            message.path,
+            message.type != 1
         ))
 
-        val sender = Person.Builder()
-            .setName(conversation.name ?: conversation.sender)
-            .setIcon(getSenderIcon(conversation))
-            .setImportant(conversation.label == 0)
-            .build()
-
-        val convStyle = NotificationCompat.MessagingStyle(sender)
+        val conversationStyle = NotificationCompat.MessagingStyle(senderPerson)
         ndb.findBySender(conversation.sender).forEach {
             var msgText = ""
             if (it.path != null) {
-                val mtype = getMimeType(it.path!!)
+                val mType = getMimeType(it.path!!)
                 msgText = when {
-                    mtype.startsWith("audio") -> "Audio: "
-                    mtype.startsWith("video") -> "Video: "
+                    mType.startsWith("audio") -> "Audio: "
+                    mType.startsWith("video") -> "Video: "
                     else -> ""
                 } + it.text
             }
             val msg = NotificationCompat.MessagingStyle.Message(
                 msgText,
                 it.time,
-                sender
+                if (it.fromUser) userPerson else senderPerson
             )
             if (it.path != null && getMimeType(it.path!!).startsWith("photo")) {
                 msg.setData(getMimeType(it.path!!), Uri.fromFile(File(it.path!!)))
             }
-            convStyle.addMessage(msg)
+            conversationStyle.addMessage(msg)
         }
 
-        val notif = NotificationCompat.Builder(mContext, conversation.label.toString())
-            .setCategory(Notification.CATEGORY_MESSAGE)
-            .setGroup(conversation.label.toString())
-            .setSmallIcon(R.drawable.message)
-            .setContentIntent(contentPI)
-            .setDeleteIntent(cancelPI)
-            .setAutoCancel(true)
-            .setStyle(convStyle)
-
-        notificationManager.notify(conversation.id!!.toInt(), notif.build())
-
-        val set = hashSetOf<String>()
-        ndb.loadAllSync().forEach { n ->
-            if (notificationManager.getNotificationChannel(n.label.toString())?.importance
-                != NotificationManager.IMPORTANCE_NONE)
-                set.add(n.sender)
+        val remoteInput: RemoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).run {
+            setLabel("Reply")
+            build()
         }
-        if (set.size < 3) return
-        val summaryNotification = NotificationCompat.Builder(mContext, "0")
-            .setSmallIcon(R.drawable.message)
-            .setGroup(defaultGroup)
-            .setAutoCancel(true)
-            .setGroupSummary(true)
-            .build()
-        notificationManager.notify(0, summaryNotification)
-    }
+        val replyPendingIntent: PendingIntent = PendingIntent.getBroadcast(
+            mContext.applicationContext,
+            conversation.id!!.toInt(),
+            Intent(mContext, NotificationActionReceiver::class.java)
+                .setAction(ACTION_REPLY)
+                .putExtra("sender", conversation.sender),
+            PendingIntent.FLAG_UPDATE_CURRENT)
+        val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
+            R.drawable.ic_reply, "Reply" , replyPendingIntent)
+                .addRemoteInput(remoteInput).build()
 
-    fun createNotificationChannel() {
-        val notificationManager =
-            mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (notificationManager.notificationChannels.isEmpty()) {
-            for (i in 0..4) {
-                val name = mContext.getString(labelText[i])
-                val channel = NotificationChannel(i.toString(), name, importance[i]).apply {
-                    description = mContext.getString(descriptionText[i])
-                }
-                notificationManager.createNotificationChannel(channel)
-            }
-        }
+        notificationManager.notify(conversation.id!!.toInt(),
+            Builder(mContext, conversation.label.toString())
+                .setCategory(CATEGORY_MESSAGE)
+                .setGroup(GROUP_DEFAULT)
+                .setSmallIcon(R.drawable.message)
+                .setContentIntent(contentPI)
+                .setDeleteIntent(cancelPI)
+                .setAutoCancel(true)
+                .addAction(action)
+                .setStyle(conversationStyle)
+                .build()
+        )
+        showSummaryNotification()
     }
 }
