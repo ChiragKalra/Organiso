@@ -1,21 +1,21 @@
 package com.bruhascended.sms.notifications
 
 import android.content.*
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.telephony.TelephonyManager
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.RemoteInput
 import androidx.room.Room
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.db.NotificationDatabase
 import com.bruhascended.sms.mainViewModel
-import com.bruhascended.sms.notifications.MessageNotificationManager.Companion.ACTION_CANCEL
-import com.bruhascended.sms.notifications.MessageNotificationManager.Companion.ACTION_COPY
-import com.bruhascended.sms.notifications.MessageNotificationManager.Companion.ACTION_DELETE
-import com.bruhascended.sms.notifications.MessageNotificationManager.Companion.tableName
 import com.bruhascended.sms.requireMainViewModel
+import com.bruhascended.sms.services.HeadlessSMSSender
 
 class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(mContext: Context, intent: Intent) {
@@ -23,7 +23,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
             ACTION_CANCEL -> {
                 val sender = intent.getStringExtra("sender") ?: return
                 Room.databaseBuilder(
-                    mContext, NotificationDatabase::class.java, tableName
+                    mContext, NotificationDatabase::class.java, NAME_TABLE
                 ).allowMainThreadQueries().build().apply {
                     manager().findBySender(sender).forEach {
                         manager().delete(it)
@@ -57,6 +57,16 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
                 }
                 NotificationManagerCompat.from(mContext).cancel(id)
+            }
+            ACTION_REPLY -> {
+                val sender = intent.getStringExtra("sender") ?: return
+                val replyText = RemoteInput.getResultsFromIntent(intent).getCharSequence(KEY_TEXT_REPLY).toString()
+                mContext.startService(
+                    Intent(mContext, HeadlessSMSSender::class.java)
+                        .setAction(TelephonyManager.ACTION_RESPOND_VIA_MESSAGE)
+                        .setData(Uri.parse("smsto:$sender"))
+                        .putExtra(Intent.EXTRA_TEXT, replyText)
+                )
             }
         }
     }
