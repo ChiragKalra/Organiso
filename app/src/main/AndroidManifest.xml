@@ -61,6 +61,13 @@
             </intent-filter>
         </receiver>
         <receiver
+            android:exported="false"
+            android:name=".notifications.NotificationCancelReceiver">
+            <intent-filter>
+                <action android:name="NOTIFICATION_CANCELED" />
+            </intent-filter>
+        </receiver>
+        <receiver
             android:name=".services.SMSReceiver"
             android:enabled="true"
             android:exported="true"
