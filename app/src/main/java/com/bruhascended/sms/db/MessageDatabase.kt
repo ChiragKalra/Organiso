@@ -75,10 +75,10 @@ interface MessageDao {
     @Query("DELETE FROM messages")
     fun nukeTable()
 
-    @Query("SELECT * FROM messages WHERE text LIKE :key OR text LIKE :altKey ORDER BY time DESC")
+    @Query("SELECT * FROM messages WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
     fun search(key: String, altKey: String=""): List<Message>
 
-    @Query("SELECT * FROM messages WHERE text LIKE :key OR text LIKE :altKey ORDER BY time DESC")
+    @Query("SELECT * FROM messages WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
     fun searchPaged(key: String, altKey: String=""): PagingSource<Int, Message>
 
     @Query("SELECT * FROM messages WHERE time LIKE :time")

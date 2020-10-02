@@ -71,7 +71,7 @@ class SearchResultViewHolder(
 
                     if (type == 1) {
                         senderTextView.apply {
-                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
                             val lp = layoutParams as ConstraintLayout.LayoutParams
                             lp.bottomToBottom = R.id.root
                             layoutParams = lp
@@ -96,12 +96,14 @@ class SearchResultViewHolder(
             }
             4 -> {
                 val labelTextView: TextView = root.findViewById(R.id.label)
-                val label = item.categoryHeader - (if (item.categoryHeader > 9) 10 else 0)
-                val labelText = mContext.getString(labelText[label])
-                labelTextView.text = when {
-                    item.categoryHeader == 42 -> "From Contacts"
-                    item.categoryHeader > 9 -> "Messages in $labelText"
-                    else -> labelText
+                if (item.categoryHeader == 42) labelTextView.text = "From Contacts"
+                else {
+                    val label = item.categoryHeader - (if (item.categoryHeader > 9) 10 else 0)
+                    val labelText = mContext.getString(labelText[label])
+                    labelTextView.text = when {
+                        item.categoryHeader > 9 -> "Messages in $labelText"
+                        else -> labelText
+                    }
                 }
             }
             5 -> {

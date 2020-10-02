@@ -4,8 +4,10 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
@@ -15,6 +17,8 @@ class OtpNotificationManager (
     private val mContext: Context
 ) {
     private val prefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+    private val notificationManager = NotificationManagerCompat.from(mContext)
+
 
     fun sendOtpNotif(otp: String, message: Message, conversation: Conversation, pendingIntent: PendingIntent) {
         val id = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
@@ -30,34 +34,44 @@ class OtpNotificationManager (
                 .putExtra("id", id)
                 .putExtra("message", message)
                 .putExtra("conversation", conversation),
-            PendingIntent.FLAG_ONE_SHOT
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        var text = "OTP from ${message.sender}"
+        var text = "from ${message.sender}"
         if (prefs.getBoolean("copy_otp", true)) {
             text += " (Copied to Clipboard)"
             mContext.sendBroadcast(copyIntent)
         }
 
-        val notificationLayout = RemoteViews(mContext.packageName, R.layout.view_notification_otp)
+        val formattedOtp = "OTP: " + otp.slice(0 until otp.length/2) + " " +
+                otp.slice(otp.length/2 until otp.length)
+        val notificationLayout = RemoteViews(mContext.packageName, R.layout.view_notification_otp).apply{
+            setTextViewText(android.R.id.content, text)
+            setTextViewText(android.R.id.title, formattedOtp)
+        }
+        val notificationLayoutMin = RemoteViews(mContext.packageName, R.layout.view_notification_otp).apply{
+            setTextViewText(android.R.id.title, formattedOtp)
+            setViewVisibility(android.R.id.content, View.GONE)
+        }
 
-        NotificationCompat.Builder(mContext, conversation.label.toString())
-            .setContentTitle(text)
-            .addAction(
-                R.drawable.ic_content_copy,
-                mContext.getString(R.string.copy_otp),
-                copyPI
-            ).addAction(
-                R.drawable.ic_delete,
-                mContext.getString(R.string.delete),
-                deletePI
-            ).setSmallIcon(R.drawable.message)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setCustomContentView(notificationLayout)
-            .setCategory(Notification.CATEGORY_MESSAGE)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
-            .build()
-
+        notificationManager.notify(id,
+            NotificationCompat.Builder(mContext, conversation.label.toString())
+                .addAction(
+                    R.drawable.ic_content_copy,
+                    mContext.getString(R.string.copy_otp),
+                    copyPI
+                ).addAction(
+                    R.drawable.ic_delete,
+                    mContext.getString(R.string.delete),
+                    deletePI
+                ).setSmallIcon(R.drawable.message)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(notificationLayoutMin)
+                .setCustomBigContentView(notificationLayout)
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .build()
+        )
     }
 }

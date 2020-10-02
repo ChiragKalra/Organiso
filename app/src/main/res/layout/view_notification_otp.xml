@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/title"
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:textSize="24sp"
-    style="@style/TextAppearance.Compat.Notification.Line2"
-    android:textStyle="bold"/>
+    android:orientation="vertical"
+    android:background="#0000"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    <TextView
+        android:id="@android:id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:layout_marginBottom="4dp"
+        android:textStyle="bold"
+        style="@style/TextAppearance.Compat.Notification.Title"/>
+
+    <TextView
+        android:id="@android:id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        style="@style/TextAppearance.Compat.Notification.Line2"/>
+</LinearLayout>

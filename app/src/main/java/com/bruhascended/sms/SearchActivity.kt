@@ -29,6 +29,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var prefs: SharedPreferences
     private lateinit var categories: Array<Int>
     private lateinit var mAdaptor: SearchRecyclerAdaptor
+    private lateinit var result: ArrayList<ResultItem>
 
     private var searchThread = Thread{}
 
@@ -39,10 +40,12 @@ class SearchActivity : AppCompatActivity() {
         mAdaptor.searchKey = key
         mAdaptor.refresh()
         searchThread = Thread {
+            val displayedSenders = arrayListOf<String>()
             for (category in categories) {
                 if (searchThread.isInterrupted) return@Thread
                 val cons = mainViewModel.daos[category].search("$key%", "% $key%")
                 if (cons.isNotEmpty()) {ResultItem(4, categoryHeader = category)
+                    cons.forEach { displayedSenders.add(it.sender) }
                     searchRecycler.post {
                         mAdaptor.addItems(listOf(ResultItem(4, categoryHeader = category)))
                         mAdaptor.addItems(
@@ -60,10 +63,10 @@ class SearchActivity : AppCompatActivity() {
                     key !in contact.number.toLowerCase(Locale.ROOT))
                     return@forEach
 
-                repeat(mAdaptor.items.size) {
-                    val i = mAdaptor.items[it]
-                    if (i.type == 0 && i.conversation!!.sender == contact.number)
+                for (sender in displayedSenders) {
+                    if (sender == contact.number) {
                         return@forEach
+                    }
                 }
 
                 if (!otherDisplayed) {
@@ -143,7 +146,7 @@ class SearchActivity : AppCompatActivity() {
 
         mContext = this
 
-        val result = arrayListOf(ResultItem(5))
+        result = arrayListOf(ResultItem(5))
         mAdaptor = SearchRecyclerAdaptor(mContext, result)
         mAdaptor.doOnConversationClick = {
             startActivity(
