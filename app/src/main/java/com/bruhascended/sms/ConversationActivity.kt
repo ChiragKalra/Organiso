@@ -226,8 +226,8 @@ class ConversationActivity : AppCompatActivity() {
             notSupported.visibility = TextView.VISIBLE
         }
 
-        val notificationManager = NotificationManagerCompat.from(this)
-        notificationManager.cancel(conversation.id!!.toInt())
+        if (conversation.id != null)
+            NotificationManagerCompat.from(this).cancel(conversation.id!!.toInt())
 
         if (conversation.id != null) {
             conversation.read = true

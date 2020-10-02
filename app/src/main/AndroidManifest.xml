@@ -62,7 +62,7 @@
         </receiver>
         <receiver
             android:exported="false"
-            android:name=".notifications.NotificationCancelReceiver">
+            android:name=".notifications.NotificationActionReceiver">
             <intent-filter>
                 <action android:name="NOTIFICATION_CANCELED" />
             </intent-filter>

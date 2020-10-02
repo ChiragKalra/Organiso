@@ -25,7 +25,7 @@ import com.bruhascended.sms.ui.search.SearchResultViewHolder.ResultItem
 
 class SearchRecyclerAdaptor(
     private val mContext: Context,
-    val items: ArrayList<ResultItem>
+    private val items: ArrayList<ResultItem>
 ) : RecyclerView.Adapter<SearchResultViewHolder>() {
 
     private val sharedResources = ConversationSharedResources(mContext)
@@ -71,7 +71,7 @@ class SearchRecyclerAdaptor(
             addAll(newItems)
             add(p)
         }
-        notifyItemRangeInserted(itemCount-2, newItems.size)
+        notifyItemRangeInserted(itemCount - 2, newItems.size)
     }
 
     fun refresh() {
