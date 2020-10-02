@@ -1,3 +1,24 @@
+package com.bruhascended.sms.services
+
+import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.Uri
+import android.telephony.SmsManager
+import android.webkit.MimeTypeMap
+import android.widget.Toast
+import com.bruhascended.sms.BuildConfig.APPLICATION_ID
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.activeConversationDao
+import com.bruhascended.sms.mainViewModel
+import com.klinker.android.send_message.Settings
+import com.klinker.android.send_message.Transaction
+import java.io.*
+import com.klinker.android.send_message.Message as MMS
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,28 +35,6 @@
    limitations under the License.
  */
 
-package com.bruhascended.sms.services
-
-import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.net.Uri
-import android.telephony.SmsManager
-import android.webkit.MimeTypeMap
-import android.widget.ImageButton
-import android.widget.Toast
-import com.bruhascended.sms.BuildConfig.APPLICATION_ID
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.activeConversationDao
-import com.bruhascended.sms.mainViewModel
-import com.klinker.android.send_message.Settings
-import com.klinker.android.send_message.Transaction
-import java.io.*
-import com.klinker.android.send_message.Message as MMS
-
 
 /*
 const val MESSAGE_TYPE_ALL = 0
@@ -49,8 +48,7 @@ const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
 
 class MMSSender(
     private val mContext: Context,
-    private var conversation: Conversation,
-    private val sendButton: ImageButton
+    private var conversation: Conversation
 ) {
     private lateinit var typeString: String
     private lateinit var uri: Uri
@@ -142,8 +140,6 @@ class MMSSender(
         uri = data
         typeString = type
 
-        sendButton.isEnabled = false
-
         addMmsToDb(date)
         mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
             .putLong("last", System.currentTimeMillis()).apply()
@@ -191,8 +187,6 @@ class MMSSender(
         message.addMedia(getBytes(iStream), type)
 
         transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
-
-        sendButton.isEnabled = true
     }
 
 }

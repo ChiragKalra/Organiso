@@ -87,8 +87,8 @@ class ConversationActivity : AppCompatActivity() {
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         conversation = intent.getSerializableExtra("ye") as Conversation
-        smsSender = SMSSender(this, conversation, sendButton)
-        mmsSender = MMSSender(this, conversation, sendButton)
+        smsSender = SMSSender(this, arrayOf(conversation))
+        mmsSender = MMSSender(this, conversation)
         analyticsLogger = AnalyticsLogger(this)
         requireMainViewModel(this)
         mdb = Room.databaseBuilder(
@@ -240,11 +240,15 @@ class ConversationActivity : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             if (mpm.mmsType > 0) {
+                sendButton.isEnabled = false
                 mmsSender.sendMMS(messageEditText.text.toString(), mpm.mmsURI, mpm.mmsTypeString)
+                sendButton.isEnabled = true
                 messageEditText.setText("")
                 mpm.hideMediaPreview()
             } else if (messageEditText.text.toString().trim() != "") {
+                sendButton.isEnabled = false
                 smsSender.sendSMS(messageEditText.text.toString())
+                sendButton.isEnabled = true
                 messageEditText.setText("")
             }
         }

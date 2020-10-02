@@ -26,7 +26,7 @@ class ChannelManager(
         NotificationManager.IMPORTANCE_NONE
     )
 
-    fun createNotificationChannel() {
+    fun createNotificationChannels() {
         val notificationManager =
             mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

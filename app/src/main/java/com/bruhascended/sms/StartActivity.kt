@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bruhascended.sms.data.SMSManager
+import com.bruhascended.sms.notifications.ChannelManager
 import com.bruhascended.sms.notifications.MessageNotificationManager
 import com.bruhascended.sms.ui.start.StartViewModel
 import kotlinx.android.synthetic.main.activity_start.*
@@ -148,7 +149,7 @@ class StartActivity : AppCompatActivity() {
             }.start()
         })
 
-        MessageNotificationManager(mContext).createNotificationChannel()
+        ChannelManager(mContext).createNotificationChannels()
 
         Thread {
             val wakeLock: PowerManager.WakeLock =

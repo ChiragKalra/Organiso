@@ -28,7 +28,6 @@ import com.bruhascended.sms.ui.main.SectionsPagerAdapter
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 
-
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -45,7 +44,6 @@ import kotlinx.android.synthetic.main.activity_main.*
    limitations under the License.
 
 */
-
 
 val dpMemoryCache = HashMap<String, Bitmap?>()
 
