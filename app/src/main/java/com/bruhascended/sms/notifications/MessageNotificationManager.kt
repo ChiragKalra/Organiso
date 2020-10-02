@@ -186,18 +186,18 @@ class MessageNotificationManager(
             R.drawable.ic_reply, "Reply" , replyPendingIntent)
                 .addRemoteInput(remoteInput).build()
 
-        notificationManager.notify(conversation.id!!.toInt(),
-            Builder(mContext, conversation.label.toString())
-                .setCategory(CATEGORY_MESSAGE)
-                .setGroup(GROUP_DEFAULT)
-                .setSmallIcon(R.drawable.message)
-                .setContentIntent(contentPI)
-                .setDeleteIntent(cancelPI)
-                .setAutoCancel(true)
-                .addAction(action)
-                .setStyle(conversationStyle)
-                .build()
-        )
+        val notification = Builder(mContext, conversation.label.toString())
+            .setCategory(CATEGORY_MESSAGE)
+            .setGroup(GROUP_DEFAULT)
+            .setSmallIcon(R.drawable.message)
+            .setContentIntent(contentPI)
+            .setDeleteIntent(cancelPI)
+            .setAutoCancel(true)
+            .setStyle(conversationStyle)
+
+        if (conversation.sender.first().isDigit()) notification.addAction(action)
+
+        notificationManager.notify(conversation.id!!.toInt(), notification.build())
         showSummaryNotification()
     }
 }

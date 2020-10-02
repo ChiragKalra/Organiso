@@ -98,8 +98,11 @@ class SearchResultViewHolder(
                 val labelTextView: TextView = root.findViewById(R.id.label)
                 val label = item.categoryHeader - (if (item.categoryHeader > 9) 10 else 0)
                 val labelText = mContext.getString(labelText[label])
-                labelTextView.text = if (item.categoryHeader>9)
-                    "Messages in $labelText" else labelText
+                labelTextView.text = when {
+                    item.categoryHeader == 42 -> "From Contacts"
+                    item.categoryHeader > 9 -> "Messages in $labelText"
+                    else -> labelText
+                }
             }
             5 -> {
                 val loading = root.findViewById<ProgressBar>(R.id.loading)

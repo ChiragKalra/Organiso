@@ -25,7 +25,7 @@ import com.bruhascended.sms.ui.search.SearchResultViewHolder.ResultItem
 
 class SearchRecyclerAdaptor(
     private val mContext: Context,
-    private val items: ArrayList<ResultItem>
+    val items: ArrayList<ResultItem>
 ) : RecyclerView.Adapter<SearchResultViewHolder>() {
 
     private val sharedResources = ConversationSharedResources(mContext)
@@ -40,7 +40,7 @@ class SearchRecyclerAdaptor(
 
     override fun getItemCount() = items.size
 
-    override fun getItemViewType(position: Int) :Int {
+    override fun getItemViewType(position: Int): Int {
         return if (items[position].type == 2) {
             if (items[position].message?.type == 1) 3 else 2
         } else items[position].type
@@ -65,21 +65,21 @@ class SearchRecyclerAdaptor(
         holder.onBind(items[position])
     }
 
-    fun addItem(item: ResultItem) {
+    fun addItems(newItems: List<ResultItem>) {
         items.apply {
             val p = removeAt(lastIndex)
-            add(item)
+            addAll(newItems)
             add(p)
         }
-        notifyItemRangeInserted(itemCount-2, 1)
+        notifyItemRangeInserted(itemCount-2, newItems.size)
     }
 
     fun refresh() {
         isLoaded = false
         items.apply {
-            val p = removeAt(lastIndex)
+            val footer = removeAt(lastIndex)
             clear()
-            add(p)
+            add(footer)
         }
         notifyDataSetChanged()
     }
