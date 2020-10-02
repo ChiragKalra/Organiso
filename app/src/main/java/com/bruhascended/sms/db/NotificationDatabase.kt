@@ -23,13 +23,13 @@ import java.io.Serializable
 
 @Entity(tableName = "notifications")
 data class Notification (
-    @PrimaryKey(autoGenerate = true)
     val sender: String,
     val text: String,
     val time: Long,
     val label: Int,
     var path: String?,
     val fromUser: Boolean,
+    @PrimaryKey(autoGenerate = true)
     var id: Int? = null
 ): Serializable {
     override fun equals(other: Any?): Boolean {

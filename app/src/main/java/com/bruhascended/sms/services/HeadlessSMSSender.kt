@@ -1,3 +1,13 @@
+package com.bruhascended.sms.services
+
+import android.app.Service
+import android.content.Intent
+import android.net.Uri
+import android.os.IBinder
+import android.telephony.TelephonyManager
+import android.text.TextUtils
+import com.bruhascended.sms.db.Conversation
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,22 +24,6 @@
    limitations under the License.
  */
 
-package com.bruhascended.sms.services
-
-import android.app.Service
-import android.content.Intent
-import android.net.Uri
-import android.os.IBinder
-import android.telephony.SmsManager
-import android.telephony.TelephonyManager
-import android.text.TextUtils
-import androidx.room.Room
-import com.bruhascended.sms.*
-import com.bruhascended.sms.data.ContactsManager
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.db.MessageDatabase
-
 // TODO FIX
 class HeadlessSMSSender : Service() {
 
@@ -39,66 +33,8 @@ class HeadlessSMSSender : Service() {
         return if (pos == -1) base else base.substring(0, pos)
     }
 
-    private fun saveSent(add: String, sms: String) {
-        val senderNameMap = ContactsManager(applicationContext).getContactsHashMap()
-
-        requireMainViewModel(applicationContext)
-
-        var force = -1
-        val probs = FloatArray(5){ if (it == 0) 1f else 0f }
-        var conversation: Conversation? = null
-        for (i in 0..4) {
-            val got = mainViewModel.daos[i].findBySender(add)
-            if (got.isNotEmpty()) {
-                force = got.first().forceLabel
-                conversation = got.first()
-                break
-            }
-        }
-
-        if (conversation != null)
-            for (j in 0..4) probs[j] += conversation.probs[j]
-        var prediction = probs.toList().indexOf(probs.maxOrNull())
-        if (force > -1) prediction = force
-
-        val con = Conversation (
-            null,
-            add,
-            senderNameMap[add],
-            "",
-            true,
-            System.currentTimeMillis(),
-            sms,
-            prediction,
-            force,
-            probs
-        )
-        for (j in 0..4) {
-            val res = mainViewModel.daos[j].findBySender(add)
-            for (item in res) mainViewModel.daos[j].delete(item)
-        }
-        mainViewModel.daos[prediction].insert(con)
-
-
-        val mdb = if (activeConversationSender == add) activeConversationDao
-        else Room.databaseBuilder(
-            applicationContext, MessageDatabase::class.java, add
-        ).build().manager()
-        mdb.insert(
-            Message(
-                null,
-                add,
-                sms,
-                2,
-                System.currentTimeMillis(),
-                prediction
-            )
-        )
-    }
-
     override fun onBind(intent: Intent): IBinder? {
-        val action = intent.action
-        if (TelephonyManager.ACTION_RESPOND_VIA_MESSAGE != action) return null
+        if (TelephonyManager.ACTION_RESPOND_VIA_MESSAGE != intent.action) return null
         val extras = intent.extras ?: return null
         val message = extras.getString(Intent.EXTRA_TEXT) ?: extras.getString("sms_body")!!
         val intentUri: Uri = intent.data!!
@@ -106,13 +42,24 @@ class HeadlessSMSSender : Service() {
 
         if (TextUtils.isEmpty(recipients) || TextUtils.isEmpty(message)) return null
 
-        val destinations = TextUtils.split(recipients, ";")
-        val smsManager: SmsManager = SmsManager.getDefault()
-        for (destination in destinations) {
-            smsManager.sendTextMessage(destination, null, message,
-                null, null)
-            saveSent(destination, message)
+        val adds = TextUtils.split(recipients, ";")
+        val conversations = Array(adds.size) {
+            Conversation(
+                null,
+                adds[it],
+                null,
+                "",
+                true,
+                0,
+                "",
+                0,
+                -1,
+                FloatArray(5) { its ->
+                    if (its == 0) 1f else 0f
+                }
+            )
         }
+        SMSSender(this, conversations).sendSMS(message)
         return null
     }
 }

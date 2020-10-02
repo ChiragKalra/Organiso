@@ -180,7 +180,7 @@ class MessageNotificationManager(
             conversation.id!!.toInt(),
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_REPLY)
-                .putExtra("sender", conversation.sender),
+                .putExtra("conversation", conversation),
             PendingIntent.FLAG_UPDATE_CURRENT)
         val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
             R.drawable.ic_reply, "Reply" , replyPendingIntent)

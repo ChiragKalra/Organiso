@@ -59,14 +59,24 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 NotificationManagerCompat.from(mContext).cancel(id)
             }
             ACTION_REPLY -> {
-                val sender = intent.getStringExtra("sender") ?: return
+                val message = intent.getSerializableExtra("message") as Message
+                val conversation = intent.getSerializableExtra("conversation") as Conversation
                 val replyText = RemoteInput.getResultsFromIntent(intent).getCharSequence(KEY_TEXT_REPLY).toString()
                 mContext.startService(
                     Intent(mContext, HeadlessSMSSender::class.java)
                         .setAction(TelephonyManager.ACTION_RESPOND_VIA_MESSAGE)
-                        .setData(Uri.parse("smsto:$sender"))
+                        .setData(Uri.parse("smsto:${conversation.sender}"))
                         .putExtra(Intent.EXTRA_TEXT, replyText)
                 )
+                val newMessage = Message(
+                    null,
+                    message.sender,
+                    replyText,
+                    0,
+                    System.currentTimeMillis(),
+                    0
+                )
+                MessageNotificationManager(mContext).sendSmsNotification(newMessage to conversation)
             }
         }
     }
