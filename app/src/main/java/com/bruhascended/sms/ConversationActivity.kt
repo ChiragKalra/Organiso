@@ -232,7 +232,7 @@ class ConversationActivity : AppCompatActivity() {
         if (conversation.id != null) {
             conversation.read = true
             mainViewModel.daos[conversation.label].update(conversation)
-        } else {
+        } else if (!conversation.lastSMS.isBlank()) {
             messageEditText.setText(conversation.lastSMS)
             if (intent.data != null) mpm.showMediaPreview(intent)
             sendButton.callOnClick()

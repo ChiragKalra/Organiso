@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import com.bruhascended.sms.R
@@ -37,9 +38,11 @@ class OtpNotificationManager (
             text += " (Copied to Clipboard)"
             mContext.sendBroadcast(copyIntent)
         }
+
+        val notificationLayout = RemoteViews(mContext.packageName, R.layout.view_notification_otp)
+
         NotificationCompat.Builder(mContext, conversation.label.toString())
-            .setContentTitle(otp)
-            .setContentText(text)
+            .setContentTitle(text)
             .addAction(
                 R.drawable.ic_content_copy,
                 mContext.getString(R.string.copy_otp),
@@ -49,6 +52,8 @@ class OtpNotificationManager (
                 mContext.getString(R.string.delete),
                 deletePI
             ).setSmallIcon(R.drawable.message)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(notificationLayout)
             .setCategory(Notification.CATEGORY_MESSAGE)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)

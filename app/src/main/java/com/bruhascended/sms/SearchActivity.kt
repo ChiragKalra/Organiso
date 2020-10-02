@@ -12,6 +12,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
+import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.ui.common.ScrollEffectFactory
@@ -31,12 +32,6 @@ class SearchActivity : AppCompatActivity() {
 
     private var searchThread = Thread{}
 
-    private fun append(mAdaptor: SearchRecyclerAdaptor, item: ResultItem) {
-        searchRecycler.post {
-            mAdaptor.addItem(item)
-        }
-    }
-
     private fun showResults(key: String) {
         searchRecycler.scrollToPosition(0)
         searchRecycler.isVisible = true
@@ -47,12 +42,53 @@ class SearchActivity : AppCompatActivity() {
             for (category in categories) {
                 if (searchThread.isInterrupted) return@Thread
                 val cons = mainViewModel.daos[category].search("$key%", "% $key%")
-                if (cons.isNotEmpty()) {
-                    append(mAdaptor, ResultItem(4, categoryHeader = category))
-                    for (con in cons) {
-                        if (searchThread.isInterrupted) return@Thread
-                        append(mAdaptor, ResultItem(0, conversation = con))
+                if (cons.isNotEmpty()) {ResultItem(4, categoryHeader = category)
+                    searchRecycler.post {
+                        mAdaptor.addItems(listOf(ResultItem(4, categoryHeader = category)))
+                        mAdaptor.addItems(
+                            List(cons.size) {
+                                ResultItem(0, conversation = cons[it])
+                            }
+                        )
                     }
+                }
+            }
+
+            var otherDisplayed = false
+            mainViewModel.contacts.value?.forEach {  contact ->
+                if (key !in contact.name.toLowerCase(Locale.ROOT) &&
+                    key !in contact.number.toLowerCase(Locale.ROOT))
+                    return@forEach
+
+                repeat(mAdaptor.items.size) {
+                    val i = mAdaptor.items[it]
+                    if (i.type == 0 && i.conversation!!.sender == contact.number)
+                        return@forEach
+                }
+
+                if (!otherDisplayed) {
+                    otherDisplayed = true
+                    searchRecycler.post {
+                        mAdaptor.addItems(listOf(ResultItem(4, categoryHeader = 42)))
+                    }
+                }
+                searchRecycler.post {
+                    mAdaptor.addItems(listOf(ResultItem(1,
+                        conversation = Conversation(
+                            null,
+                            contact.number,
+                            contact.name,
+                            "",
+                            true,
+                            0,
+                            "",
+                            0,
+                            -1,
+                            FloatArray(5) { its ->
+                                if (its == 0) 1f else 0f
+                            }
+                        )
+                    )))
                 }
             }
 
@@ -71,12 +107,17 @@ class SearchActivity : AppCompatActivity() {
                     if (!msgs.isNullOrEmpty()) {
                         if (isEmpty) {
                             isEmpty = false
-                            append(mAdaptor, ResultItem(4, categoryHeader = 10+category))
+                            searchRecycler.post {
+                                mAdaptor.addItems(listOf(ResultItem(4, categoryHeader = 10+category)))
+                            }
                         }
-                        append(mAdaptor, ResultItem(1, conversation = con))
-                        for (msg in msgs) {
-                            if (searchThread.isInterrupted) return@Thread
-                            append(mAdaptor, ResultItem(2, conversation = con, message = msg))
+                        searchRecycler.post {
+                            mAdaptor.addItems(listOf(ResultItem(1, conversation = con)))
+                            mAdaptor.addItems(
+                                List(msgs.size) {
+                                    ResultItem(2, conversation = con, message = msgs[it])
+                                }
+                            )
                         }
                     }
                     if (searchThread.isInterrupted) return@Thread
