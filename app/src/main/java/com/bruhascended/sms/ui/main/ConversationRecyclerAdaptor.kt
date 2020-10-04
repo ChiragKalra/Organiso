@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bruhascended.sms.ConversationActivity
 import com.bruhascended.sms.R
-import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.ConversationComparator
 import com.bruhascended.sms.ui.common.ListSelectionManager
@@ -28,19 +27,10 @@ class ConversationRecyclerAdaptor(
         )
     }
 
-    class ConversationSharedResources(val mContext: Context) {
-        val colors: Array<Int> = Array(colorRes.size) {
-            ContextCompat.getColor(mContext, colorRes[it])
-        }
-
-        val cm = ContactsManager(mContext)
-        var contacts = HashMap<String, String>()
-        init {
-            Thread { contacts = cm.getContactsHashMap() }.start()
-        }
+    private val colors: Array<Int> = Array(colorRes.size) {
+        ContextCompat.getColor(mContext, colorRes[it])
     }
 
-    private val sharedResources = ConversationSharedResources(mContext)
     lateinit var selectionManager: ListSelectionManager<Conversation>
 
 
@@ -85,17 +75,15 @@ class ConversationRecyclerAdaptor(
         return ConversationViewHolder(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_conversation, parent, false),
-            sharedResources
+            parent.context
         )
     }
 
     override fun onBindViewHolder(holder: ConversationViewHolder, position: Int) {
         holder.apply {
+            imageView.setBackgroundColor(colors[absoluteAdapterPosition % colors.size])
             conversation = getItem(position) ?: return
             onBind()
-            imageView.setBackgroundColor(
-                sharedResources.colors[absoluteAdapterPosition % sharedResources.colors.size]
-            )
             root.apply {
                 stopBgAnim()
                 if (::selectionManager.isInitialized &&

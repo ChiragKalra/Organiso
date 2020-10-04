@@ -1,6 +1,7 @@
 package com.bruhascended.sms
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -11,9 +12,11 @@ import android.provider.Telephony
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
@@ -25,8 +28,12 @@ import com.bruhascended.sms.db.MessageDao
 import com.bruhascended.sms.services.SMSReceiver
 import com.bruhascended.sms.ui.main.MainViewModel
 import com.bruhascended.sms.ui.main.SectionsPagerAdapter
+import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
+import java.io.FileOutputStream
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -44,8 +51,6 @@ import kotlinx.android.synthetic.main.activity_main.*
    limitations under the License.
 
 */
-
-val dpMemoryCache = HashMap<String, Bitmap?>()
 
 var activeConversationSender: String? = null
 lateinit var activeConversationDao: MessageDao
@@ -105,7 +110,19 @@ class MainActivity : AppCompatActivity() {
         requireMainViewModel(this)
 
         Thread {
-            mainViewModel.contacts.postValue(cm.getContactsList())
+            val contacts = cm.getContactsList()
+            mainViewModel.contacts.postValue(contacts)
+            contacts.forEach {
+                for (i in 0..4) {
+                    val q = mainViewModel.daos[i].findBySender(it.number)
+                    if (q.isEmpty()) continue
+                    val res = q.first()
+                    res.dp = it.dp
+                    res.name = it.name
+                    mainViewModel.daos[i].update(res)
+                    break
+                }
+            }
         }.start()
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -185,9 +202,23 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_search -> {
                 appBarLayout.apply {
-                    setExpanded(false, true)
+                    val params = appBarLayout.layoutParams as CoordinatorLayout.LayoutParams
+                    val behavior = params.behavior as AppBarLayout.Behavior
+                    ValueAnimator.ofInt().apply {
+                        interpolator = DecelerateInterpolator()
+                        duration = 150
+                        setIntValues(0, -tabs.height)
+                        addUpdateListener { animation ->
+                            behavior.topAndBottomOffset = animation.animatedValue as Int
+                            requestLayout()
+                        }
+                        start()
+                    }
                     postDelayed({
-                        startActivityForResult(Intent(mContext, SearchActivity::class.java), argSearchResult)
+                        startActivityForResult(
+                            Intent(mContext, SearchActivity::class.java),
+                            argSearchResult
+                        )
                         overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
                     }, 100)
                 }

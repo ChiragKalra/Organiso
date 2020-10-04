@@ -34,7 +34,6 @@
     <string name="no_matches">No matches</string>
     <string name="animated">animated</string>
     <string name="copy_to_clipboard">Copy</string>
-    <string name="select_all">Select All</string>
     <string name="select_range">Select Range</string>
     <string name="mms">mms</string>
     <string name="share">Share</string>
@@ -55,7 +54,6 @@
     <string name="visible_category">"Visible on Home Screen"</string>
     <string name="hidden_category">"Hidden Away in Menu"</string>
     <string name="clear_text_button">clear text button</string>
-    <string name="deep_search">Deep Search</string>
     <string name="no_results">No Results</string>
     <string name="that_s_all">That\'s All</string>
     <string name="reset">Reset</string>

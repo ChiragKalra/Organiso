@@ -26,6 +26,7 @@ import com.bruhascended.sms.db.NotificationDatabase
 import com.bruhascended.sms.ml.getOtp
 import java.io.File
 import com.bruhascended.sms.db.Notification
+import com.bruhascended.sms.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -73,17 +74,19 @@ class MessageNotificationManager(
     private fun getSenderIcon(conversation: Conversation): IconCompat? {
         return when {
             conversation.sender.first().isLetter() -> IconCompat.createFromIcon(
-                Icon.createWithResource(mContext, R.drawable.ic_bot))
+                    Icon.createWithResource(mContext, R.drawable.ic_bot))
+                ?.setTint(mContext.getColor(colorRes[(conversation.id!! % colorRes.size).toInt()]))
             conversation.name != null -> IconCompat.createFromIcon(Icon.createWithBitmap(
                 cm.retrieveContactPhoto(conversation.sender)))
-            else -> IconCompat.createFromIcon(Icon.createWithResource(mContext, R.drawable.ic_person))
+            else -> IconCompat.createFromIcon(
+                Icon.createWithResource(mContext, R.drawable.ic_person))
+                ?.setTint(mContext.getColor(colorRes[(conversation.id!! % colorRes.size).toInt()]))
         }
     }
 
     private fun geUserIcon() = IconCompat.createFromIcon(
         Icon.createWithResource(mContext, R.drawable.ic_person)
     )
-
 
     private fun showSummaryNotification() {
         val set = hashSetOf<String>()
@@ -151,7 +154,7 @@ class MessageNotificationManager(
 
         val conversationStyle = NotificationCompat.MessagingStyle(senderPerson)
         ndb.findBySender(conversation.sender).forEach {
-            var msgText = ""
+            var msgText = it.text
             if (it.path != null) {
                 val mType = getMimeType(it.path!!)
                 msgText = when {
@@ -193,9 +196,10 @@ class MessageNotificationManager(
             .setContentIntent(contentPI)
             .setDeleteIntent(cancelPI)
             .setAutoCancel(true)
-            .setStyle(conversationStyle)
-
-        if (conversation.sender.first().isDigit()) notification.addAction(action)
+            .setStyle(conversationStyle).apply {
+                if (message.type != 1) setNotificationSilent()
+                if (conversation.sender.first().isDigit()) addAction(action)
+        }
 
         notificationManager.notify(conversation.id!!.toInt(), notification.build())
         showSummaryNotification()

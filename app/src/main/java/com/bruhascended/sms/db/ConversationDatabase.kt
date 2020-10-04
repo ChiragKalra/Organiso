@@ -33,7 +33,7 @@ data class Conversation (
     var id: Long?,
     val sender: String,
     var name: String?,
-    var dp: String,
+    var dp: String?,
     var read: Boolean,
     var time: Long,
     var lastSMS: String,

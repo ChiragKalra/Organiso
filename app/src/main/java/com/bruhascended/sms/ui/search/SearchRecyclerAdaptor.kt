@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.ui.main.ConversationRecyclerAdaptor.ConversationSharedResources
 import com.bruhascended.sms.ui.search.SearchResultViewHolder.ResultItem
 
 /*
@@ -27,8 +26,6 @@ class SearchRecyclerAdaptor(
     private val mContext: Context,
     private val items: ArrayList<ResultItem>
 ) : RecyclerView.Adapter<SearchResultViewHolder>() {
-
-    private val sharedResources = ConversationSharedResources(mContext)
 
     var doOnConversationClick: (Conversation) -> Unit = {}
     var doOnMessageClick: (Pair<Long, Conversation>) -> Unit = {}
@@ -57,7 +54,7 @@ class SearchRecyclerAdaptor(
                     5 -> R.layout.item_search_footer
                     else -> R.layout.item_conversation
                 }, parent, false
-            ), sharedResources
+            )
         )
     }
 
