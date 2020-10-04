@@ -11,6 +11,8 @@ import android.provider.ContactsContract
 import io.michaelrocks.libphonenumber.android.NumberParseException
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import io.michaelrocks.libphonenumber.android.Phonenumber
+import java.io.File
+import java.io.FileOutputStream
 import java.io.Serializable
 import java.util.*
 import kotlin.collections.HashMap
@@ -39,7 +41,8 @@ class ContactsManager(context: Context) {
 
     data class Contact (
         val name: String,
-        val number: String
+        val number: String,
+        val dp: String?,
     ): Serializable
 
     private val mContext = context
@@ -157,7 +160,11 @@ class ContactsManager(context: Context) {
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    list.add(Contact(name, getRaw(phoneNo)))
+                    val bm = retrieveContactPhoto(phoneNo)
+                    val des = File(mContext.filesDir, phoneNo)
+                    val dp = if (bm == null) null else des.absolutePath
+                    bm?.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(des))
+                    list.add(Contact(name, getRaw(phoneNo), dp))
                 }
                 pCur?.close()
             }

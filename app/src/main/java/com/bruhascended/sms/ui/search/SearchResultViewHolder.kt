@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import com.bruhascended.sms.R
@@ -23,8 +24,7 @@ class SearchResultViewHolder(
     val mContext: Context,
     val type: Int,
     private val mAdaptor: SearchRecyclerAdaptor,
-    val root: View,
-    private val sharedResources: ConversationRecyclerAdaptor.ConversationSharedResources
+    val root: View
 ): ScrollEffectFactory.ScrollEffectViewHolder(root) {
 
     data class ResultItem(
@@ -43,10 +43,13 @@ class SearchResultViewHolder(
     private lateinit var conversationViewHolder: ConversationViewHolder
     private lateinit var messageViewHolder: MessageViewHolder
 
+    private val colors: Array<Int> = Array(ConversationRecyclerAdaptor.colorRes.size) {
+        ContextCompat.getColor(mContext, ConversationRecyclerAdaptor.colorRes[it])
+    }
 
     init {
         when(type) {
-            0,1 -> conversationViewHolder = ConversationViewHolder(root, sharedResources)
+            0,1 -> conversationViewHolder = ConversationViewHolder(root, mContext)
             2,3 -> messageViewHolder = MessageViewHolder(mContext, root)
         }
     }
@@ -61,7 +64,7 @@ class SearchResultViewHolder(
                     conversation = item.conversation!!
                     onBind()
                     imageView.setBackgroundColor(
-                        sharedResources.colors[pos % sharedResources.colors.size]
+                        colors[pos % colors.size]
                     )
                     root.apply {
                         background = defaultBackground

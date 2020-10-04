@@ -3,7 +3,7 @@ package com.bruhascended.sms.ui.main
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.app.Activity
+import android.content.Context
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.provider.ContactsContract
@@ -17,16 +17,18 @@ import android.widget.QuickContactBadge
 import android.widget.TextView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.dpMemoryCache
 import com.bruhascended.sms.ml.displayTime
 import com.bruhascended.sms.ui.common.ScrollEffectFactory
+import com.squareup.picasso.Picasso
+import java.io.File
 
 @SuppressLint("ResourceType")
 class ConversationViewHolder(
     val root: View,
-    private val shared: ConversationRecyclerAdaptor.ConversationSharedResources,
+    private val mContext: Context,
 ) : ScrollEffectFactory.ScrollEffectViewHolder(root) {
 
+    private val picasso = Picasso.get()
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
     private var backgroundAnimator: ValueAnimator? = null
     private val muteImage: ImageView = root.findViewById(R.id.mutedImage)
@@ -44,7 +46,7 @@ class ConversationViewHolder(
     var textColor = 0
 
     init {
-        val tp = shared.mContext.obtainStyledAttributes(intArrayOf(
+        val tp = mContext.obtainStyledAttributes(intArrayOf(
             R.attr.multiChoiceSelectorColor,
             android.R.attr.selectableItemBackground,
             R.attr.unreadTextColor,
@@ -62,38 +64,20 @@ class ConversationViewHolder(
             isEnabled = true
             assignContactFromPhone(conversation.sender, true)
             setMode(ContactsContract.QuickContact.MODE_LARGE)
-
             when {
                 conversation.sender.first().isLetter() -> {
                     setImageResource(R.drawable.ic_bot)
                     isEnabled = false
                 }
-                conversation.name != null -> {
-                    val ad = conversation.sender
-                    if (dpMemoryCache.containsKey(ad)) {
-                        val dp = dpMemoryCache[ad]
-                        if (dp != null) setImageBitmap(dp)
-                        else setImageResource(R.drawable.ic_person)
-                    } else Thread {
-                        setImageResource(R.drawable.ic_person)
-                        dpMemoryCache[ad] = shared.cm.retrieveContactPhoto(ad)
-                        val dp = dpMemoryCache[ad]
-                        (shared.mContext as Activity).runOnUiThread {
-                            if (dp != null) setImageBitmap(dp)
-                        }
-                    }.start()
-                }
-                else -> {
-                    setImageResource(R.drawable.ic_person)
-                }
+                !conversation.dp.isNullOrBlank() -> picasso.load(File(conversation.dp!!)).into(this)
+                else -> setImageResource(R.drawable.ic_person)
             }
         }
     }
 
     fun onBind() {
-        if (conversation.name == null) conversation.name = shared.contacts[conversation.sender]
         senderTextView.text = conversation.name ?: conversation.sender
-        timeTextView.text = displayTime(conversation.time, shared.mContext)
+        timeTextView.text = displayTime(conversation.time, mContext)
 
         val str = if (conversation.lastMMS)
             SpannableString("Media ${conversation.lastSMS}")
@@ -103,7 +87,7 @@ class ConversationViewHolder(
             str.setSpan(ForegroundColorSpan(textColor), 0, str.length, flag)
         }
         if (conversation.lastMMS) str.apply {
-            val color = shared.mContext.getColor(R.color.colorAccent)
+            val color = mContext.getColor(R.color.colorAccent)
             setSpan(ForegroundColorSpan(color), 0, 6, flag)
         }
         messageTextView.text = str

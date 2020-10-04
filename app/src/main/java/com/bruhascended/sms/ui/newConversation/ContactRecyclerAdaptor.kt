@@ -28,8 +28,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.sms.R
 import com.bruhascended.sms.data.ContactsManager
 import com.bruhascended.sms.data.ContactsManager.Contact
-import com.bruhascended.sms.dpMemoryCache
 import com.bruhascended.sms.ui.main.ConversationRecyclerAdaptor
+import com.squareup.picasso.Picasso
+import java.io.File
 
 class ContactRecyclerAdaptor (
     private val mContext: Context,
@@ -41,6 +42,7 @@ class ContactRecyclerAdaptor (
     }
 
     private val cm = ContactsManager(mContext)
+    private val picasso = Picasso.get()
 
     var onItemClick: ((Contact) -> Unit)? = null
 
@@ -69,22 +71,10 @@ class ContactRecyclerAdaptor (
         val contact: Contact = contacts[position]
         holder.name.text = contact.name
         holder.number.text = contact.number
-
-        val ad = contact.number
         holder.dp.apply {
             setBackgroundColor(colors[position % colors.size])
-            if (dpMemoryCache.containsKey(ad)) {
-                val dp = dpMemoryCache[ad]
-                if (dp != null) setImageBitmap(dp)
-                else setImageResource(R.drawable.ic_person)
-            } else Thread {
-                setImageResource(R.drawable.ic_person)
-                dpMemoryCache[ad] = cm.retrieveContactPhoto(ad)
-                val dp = dpMemoryCache[ad]
-                (mContext as Activity).runOnUiThread {
-                    if (dp != null) setImageBitmap(dp)
-                }
-            }.start()
+            if (contact.dp == null) picasso.load(R.drawable.ic_person).into(this)
+            else picasso.load(File(contact.dp)).into(this)
         }
     }
 

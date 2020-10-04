@@ -107,8 +107,8 @@ class CategoryFragment: Fragment() {
         if (::selectionManager.isInitialized) selectionManager.close()
 
         val flow = Pager(PagingConfig(
-            pageSize = 15,
-            initialLoadSize = 15,
+            pageSize = 1,
+            initialLoadSize = 1,
             prefetchDistance = 30,
             maxSize = PagingConfig.MAX_SIZE_UNBOUNDED,
         )) {

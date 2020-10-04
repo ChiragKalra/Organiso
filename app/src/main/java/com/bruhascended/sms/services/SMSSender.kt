@@ -9,11 +9,14 @@ import android.os.Handler
 import android.os.Looper
 import android.telephony.SmsManager
 import android.widget.Toast
+import androidx.room.Room
 import com.bruhascended.sms.activeConversationDao
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
 import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.BuildConfig.APPLICATION_ID
+import com.bruhascended.sms.activeConversationSender
+import com.bruhascended.sms.db.MessageDatabase
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import com.klinker.android.send_message.Message as SMS
@@ -66,12 +69,15 @@ class SMSSender(
                 0,
                 delivered
             )
-            val qs = activeConversationDao.search(date)
+            val conversationDao = if (activeConversationSender == null) Room.databaseBuilder(
+                mContext, MessageDatabase::class.java, conversation.sender
+            ).allowMainThreadQueries().build().manager() else activeConversationDao
+            val qs = conversationDao.search(date)
             for (m in qs) {
                 message.id = m.id
-                activeConversationDao.delete(m)
+                conversationDao.delete(m)
             }
-            activeConversationDao.insert(message)
+            conversationDao.insert(message)
 
             if (conversation.id == null) {
                 var found = false
@@ -85,11 +91,13 @@ class SMSSender(
                 }
                 conversation.time = date
                 conversation.lastSMS = smsText
+                conversation.read = true
                 if (found) mainViewModel.daos[conversation.label].update(conversation)
                 else mainViewModel.daos[conversation.label].insert(conversation)
             } else {
                 conversation.time = date
                 conversation.lastSMS = smsText
+                conversation.read = true
                 mainViewModel.daos[conversation.label].update(conversation)
             }
         }.start()
@@ -105,7 +113,7 @@ class SMSSender(
 
         conversations.forEach { conversation ->
             addSmsToDb(conversation, smsText, date, 6, false)
-            mContext.registerReceiver(object : BroadcastReceiver() {
+            mContext.applicationContext.registerReceiver(object : BroadcastReceiver() {
                 override fun onReceive(arg0: Context, arg1: Intent?) {
                     when (resultCode) {
                         Activity.RESULT_OK -> addSmsToDb(conversation, smsText, date, 2, false)
@@ -133,7 +141,7 @@ class SMSSender(
                     mContext.unregisterReceiver(this)
                 }
             }, IntentFilter(sentAction))
-            mContext.registerReceiver(object : BroadcastReceiver() {
+            mContext.applicationContext.registerReceiver(object : BroadcastReceiver() {
                 override fun onReceive(arg0: Context?, arg1: Intent?) {
                     when (resultCode) {
                         Activity.RESULT_OK -> addSmsToDb(conversation, smsText, date, 2, true)
