@@ -9,15 +9,51 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
+import androidx.room.Room
+import androidx.work.*
 import com.bruhascended.sms.R
 import com.bruhascended.sms.db.Conversation
 import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.requireMainViewModel
+import java.util.concurrent.TimeUnit
 
 class OtpNotificationManager (
     private val mContext: Context
 ) {
     private val prefs = PreferenceManager.getDefaultSharedPreferences(mContext)
     private val notificationManager = NotificationManagerCompat.from(mContext)
+
+
+    class OtpDeleteWork(
+        private val mContext: Context,
+        workerParams: WorkerParameters
+    ): Worker(mContext, workerParams) {
+
+        override fun doWork(): Result {
+            val time = inputData.getLong("time", 0L)
+            val sender = inputData.getString("sender")!!
+
+            requireMainViewModel(mContext)
+            val conversation = mainViewModel.daos[2].findBySender(sender).first()
+            val mdb = Room.databaseBuilder(
+                mContext, MessageDatabase::class.java, sender
+            ).build()
+            val message = mdb.manager().search(time).first()
+            mdb.close()
+
+            mContext.sendBroadcast(
+                Intent(mContext, NotificationActionReceiver::class.java)
+                    .setAction(ACTION_DELETE)
+                    .putExtra("id", id)
+                    .putExtra("show_toast", false)
+                    .putExtra("message", message)
+                    .putExtra("conversation", conversation)
+            )
+            return Result.success()
+        }
+    }
 
 
     fun sendOtpNotif(otp: String, message: Message, conversation: Conversation, pendingIntent: PendingIntent) {
@@ -41,6 +77,17 @@ class OtpNotificationManager (
         if (prefs.getBoolean("copy_otp", true)) {
             text += " (Copied to Clipboard)"
             mContext.sendBroadcast(copyIntent)
+        }
+
+        if (prefs.getBoolean("delete_otp", false)) {
+            val request = OneTimeWorkRequest.Builder(OtpDeleteWork::class.java)
+                .setInitialDelay(15, TimeUnit.MINUTES)
+                .setInputData(Data.Builder()
+                    .putLong("time", message.time)
+                    .putString("sender", conversation.sender)
+                    .build()
+                ).build()
+            WorkManager.getInstance(mContext).enqueue(request)
         }
 
         val formattedOtp = "OTP: " + otp.slice(0 until otp.length/2) + " " +

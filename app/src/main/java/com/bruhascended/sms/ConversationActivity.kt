@@ -178,10 +178,15 @@ class ConversationActivity : AppCompatActivity() {
     private fun trackLastMessage() {
         mdb.loadLast().observe(this, {
             if (it != null) {
-                conversation.lastSMS = it.text
-                conversation.time = it.time
-                conversation.lastMMS = it.path != null
-                mainViewModel.daos[conversation.label].update(conversation)
+                if (conversation.lastSMS != it.text ||
+                    conversation.time != it.time ||
+                    conversation.lastMMS != (it.path != null)
+                ) {
+                    conversation.lastSMS = it.text
+                    conversation.time = it.time
+                    conversation.lastMMS = it.path != null
+                    mainViewModel.daos[conversation.label].update(conversation)
+                }
             } else {
                 mainViewModel.daos[conversation.label].delete(conversation)
             }
@@ -230,8 +235,10 @@ class ConversationActivity : AppCompatActivity() {
             NotificationManagerCompat.from(this).cancel(conversation.id!!.toInt())
 
         if (conversation.id != null) {
-            conversation.read = true
-            mainViewModel.daos[conversation.label].update(conversation)
+            if (!conversation.read) {
+                conversation.read = true
+                mainViewModel.daos[conversation.label].update(conversation)
+            }
         } else if (!conversation.lastSMS.isBlank()) {
             messageEditText.setText(conversation.lastSMS)
             if (intent.data != null) mpm.showMediaPreview(intent)
@@ -252,11 +259,9 @@ class ConversationActivity : AppCompatActivity() {
                 messageEditText.setText("")
             }
         }
-
         addMedia.setOnClickListener{
             mpm.loadMedia()
         }
-
         setupRecycler()
         trackLastMessage()
     }
@@ -382,10 +387,5 @@ class ConversationActivity : AppCompatActivity() {
     override fun onResume() {
         activeConversationSender = conversation.sender
         super.onResume()
-    }
-
-    override fun onDestroy() {
-        activeConversationSender = null
-        super.onDestroy()
     }
 }

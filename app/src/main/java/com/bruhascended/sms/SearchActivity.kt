@@ -59,8 +59,8 @@ class SearchActivity : AppCompatActivity() {
 
             var otherDisplayed = false
             mainViewModel.contacts.value?.forEach {  contact ->
-                if (key !in contact.name.toLowerCase(Locale.ROOT) &&
-                    key !in contact.number.toLowerCase(Locale.ROOT))
+                val name = contact.name.toLowerCase(Locale.ROOT)
+                if (!Regex("\\b${key}").matches(name))
                     return@forEach
 
                 for (sender in displayedSenders) {

@@ -33,7 +33,7 @@ data class Conversation (
     var id: Long?,
     val sender: String,
     var name: String?,
-    var dp: String?,
+    var dp: String,
     var read: Boolean,
     var time: Long,
     var lastSMS: String,
@@ -48,6 +48,7 @@ data class Conversation (
         if (javaClass != other?.javaClass) return false
 
         other as Conversation
+        if (dp != other.dp) return false
         if (sender != other.sender) return false
         if (name != other.name) return false
         if (read != other.read) return false
@@ -128,7 +129,7 @@ fun Conversation.moveTo(to: Int, mContext: Context? = null) {
         mainViewModel.daos[to].insert(this)
     } else Room.databaseBuilder(
         mContext!!, MessageDatabase::class.java, sender
-    ).build().apply {
+    ).allowMainThreadQueries().build().apply {
         manager().nukeTable()
         close()
     }

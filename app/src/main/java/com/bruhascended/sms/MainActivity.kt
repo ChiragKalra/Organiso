@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.Telephony
 import android.view.Menu
@@ -31,9 +30,6 @@ import com.bruhascended.sms.ui.main.SectionsPagerAdapter
 import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.File
-import java.io.FileOutputStream
-
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -78,6 +74,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var hiddenCategories: Array<Int>
     private lateinit var cm: ContactsManager
     private var actionMode: ActionMode? = null
+    private var contactThread: Thread? = null
 
     private lateinit var inputManager: InputMethodManager
     private var searchLayoutVisible = false
@@ -89,6 +86,23 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.READ_CONTACTS
     )
+
+    private fun updateContacts() {
+        val contacts = cm.getContactsList()
+        mainViewModel.contacts.postValue(contacts)
+        contacts.forEach {
+            for (i in 0..4) {
+                val q = mainViewModel.daos[i].findBySender(it.number)
+                if (q.isEmpty()) continue
+                val res = q.first()
+                if (res.name != it.name) {
+                    res.name = it.name
+                    mainViewModel.daos[i].update(res)
+                }
+                break
+            }
+        }
+    }
 
     override fun onSupportActionModeStarted(mode: ActionMode) {
         actionMode = mode
@@ -108,22 +122,8 @@ class MainActivity : AppCompatActivity() {
         mContext = this
         cm = ContactsManager(this)
         requireMainViewModel(this)
-
-        Thread {
-            val contacts = cm.getContactsList()
-            mainViewModel.contacts.postValue(contacts)
-            contacts.forEach {
-                for (i in 0..4) {
-                    val q = mainViewModel.daos[i].findBySender(it.number)
-                    if (q.isEmpty()) continue
-                    val res = q.first()
-                    res.dp = it.dp
-                    res.name = it.name
-                    mainViewModel.daos[i].update(res)
-                    break
-                }
-            }
-        }.start()
+        contactThread = Thread { updateContacts() }
+        contactThread?.start()
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
         if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
@@ -246,6 +246,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        if (contactThread?.isAlive != true) {
+            contactThread = Thread { updateContacts() }
+            contactThread?.start()
+        }
         if (prefs.getBoolean("stateChanged", false)) {
             prefs.edit().putBoolean("stateChanged", false).apply()
             finish()

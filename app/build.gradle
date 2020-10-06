@@ -17,7 +17,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
-        versionName "0.966-beta04"
+        versionName "0.967-beta04"
 
         kotlinOptions {
             freeCompilerArgs += [
@@ -66,10 +66,11 @@ dependencies {
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'androidx.room:room-runtime:2.3.0-alpha02'
     implementation "androidx.room:room-ktx:2.3.0-alpha02"
-    implementation "androidx.paging:paging-runtime:3.0.0-alpha06"
+    implementation "androidx.paging:paging-runtime:3.0.0-alpha07"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.work:work-runtime:2.3.4'
 
     kapt "androidx.room:room-compiler:2.3.0-alpha02"
 
