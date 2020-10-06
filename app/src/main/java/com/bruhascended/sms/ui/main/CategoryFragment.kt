@@ -1,5 +1,6 @@
 package com.bruhascended.sms.ui.main
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -44,6 +45,16 @@ import kotlinx.coroutines.launch
 @Suppress("UNCHECKED_CAST")
 class CategoryFragment: Fragment() {
 
+    companion object {
+        fun newInstance(label: Int) : CategoryFragment {
+            return CategoryFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(labelArg, label)
+                }
+            }
+        }
+    }
+
     private val labelArg = "LABEL"
     private val posArg = "POSITION"
 
@@ -55,32 +66,30 @@ class CategoryFragment: Fragment() {
 
     private val dataObserver = object: RecyclerView.AdapterDataObserver() {
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-            if (mLayoutManager.findFirstVisibleItemPosition() == 0) {
-                super.onItemRangeInserted(positionStart, itemCount)
+            super.onItemRangeInserted(positionStart, itemCount)
+            if (mLayoutManager.findFirstVisibleItemPosition() == 0 && positionStart==0) {
                 recyclerView.scrollToPosition(0)
-            } else {
-                super.onItemRangeInserted(positionStart, itemCount)
             }
         }
 
         override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
-            if (mLayoutManager.findFirstVisibleItemPosition() == 0) {
-                super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+            super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+            if (mLayoutManager.findFirstVisibleItemPosition() == 0 && toPosition==0) {
                 recyclerView.scrollToPosition(0)
-            } else {
-                super.onItemRangeMoved(fromPosition, toPosition, itemCount)
             }
         }
     }
 
     private var label: Int = 0
 
-    companion object {
-        fun newInstance(label: Int) : CategoryFragment {
-            return CategoryFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(labelArg, label)
-                }
+    class FooterDecoration(private val footerHeight: Int) : RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+            val adapter = parent.adapter ?: return
+            when (parent.getChildAdapterPosition(view)) {
+                adapter.itemCount - 1 ->
+                    outRect.bottom = footerHeight
+                else ->
+                    outRect.set(0, 0, 0, 0)
             }
         }
     }
@@ -107,10 +116,10 @@ class CategoryFragment: Fragment() {
         if (::selectionManager.isInitialized) selectionManager.close()
 
         val flow = Pager(PagingConfig(
-            pageSize = 1,
-            initialLoadSize = 1,
+            pageSize = 3,
+            initialLoadSize = 3,
             prefetchDistance = 30,
-            maxSize = PagingConfig.MAX_SIZE_UNBOUNDED,
+            maxSize = 120,
         )) {
             mainViewModel.daos[label].loadAllPaged()
         }.flow.cachedIn(mContext.lifecycleScope)
@@ -135,17 +144,21 @@ class CategoryFragment: Fragment() {
             layoutManager = mLayoutManager
             isNestedScrollingEnabled = true
             adapter = mAdaptor
+            val height = mContext.resources.displayMetrics.density * 84
+            addItemDecoration(FooterDecoration(height.toInt()))
             edgeEffectFactory = ScrollEffectFactory()
             addOnScrollListener(ScrollEffectFactory.OnScrollListener())
         }
 
+        if (mainViewModel.daos[label].loadSingle()==null) textView.visibility = TextView.VISIBLE
+        else textView.visibility = TextView.INVISIBLE
+
         mContext.lifecycleScope.launch {
             flow.collectLatest {
-                if (mainViewModel.daos[label].loadSingle()==null) textView.visibility = TextView.VISIBLE
-                else textView.visibility = TextView.INVISIBLE
                 mAdaptor.submitData(it)
             }
         }
         return root
     }
+
 }

@@ -64,12 +64,13 @@ class ConversationViewHolder(
             isEnabled = true
             assignContactFromPhone(conversation.sender, true)
             setMode(ContactsContract.QuickContact.MODE_LARGE)
+            val dp = File(mContext.filesDir, conversation.sender)
             when {
                 conversation.sender.first().isLetter() -> {
                     setImageResource(R.drawable.ic_bot)
                     isEnabled = false
                 }
-                !conversation.dp.isNullOrBlank() -> picasso.load(File(conversation.dp!!)).into(this)
+                dp.exists() -> picasso.load(dp).into(this)
                 else -> setImageResource(R.drawable.ic_person)
             }
         }

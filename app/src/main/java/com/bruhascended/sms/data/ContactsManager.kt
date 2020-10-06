@@ -41,14 +41,13 @@ class ContactsManager(context: Context) {
 
     data class Contact (
         val name: String,
-        val number: String,
-        val dp: String?,
+        val number: String
     ): Serializable
 
     private val mContext = context
     private val map = HashMap<String, String>()
 
-    fun retrieveContactPhoto(number: String): Bitmap? {
+    private fun retrieveContactPhoto(number: String): Bitmap? {
         val contentResolver = mContext.contentResolver
         var contactId: String? = null
         val uri: Uri = Uri.withAppendedPath(
@@ -160,11 +159,7 @@ class ContactsManager(context: Context) {
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    val bm = retrieveContactPhoto(phoneNo)
-                    val des = File(mContext.filesDir, phoneNo)
-                    val dp = if (bm == null) null else des.absolutePath
-                    bm?.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(des))
-                    list.add(Contact(name, getRaw(phoneNo), dp))
+                    list.add(Contact(name, getRaw(phoneNo)))
                 }
                 pCur?.close()
             }
@@ -172,6 +167,13 @@ class ContactsManager(context: Context) {
         cur?.close()
         val arr = list.toTypedArray()
         arr.sortBy {it.name}
+        Thread {
+            arr.forEach {
+                val bm = retrieveContactPhoto(it.number)
+                val des = File(mContext.filesDir, it.number)
+                bm?.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(des))
+            }
+        }.start()
         return arr
     }
 }

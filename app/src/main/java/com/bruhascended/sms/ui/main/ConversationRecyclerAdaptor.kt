@@ -33,8 +33,7 @@ class ConversationRecyclerAdaptor(
 
     lateinit var selectionManager: ListSelectionManager<Conversation>
 
-
-    var onItemClickListener: (ConversationViewHolder) -> Unit = {
+    private fun onItemClickListener(it: ConversationViewHolder) {
         val pos = it.absoluteAdapterPosition
         if (selectionManager.isActive) {
             selectionManager.toggleItem(pos)
@@ -51,10 +50,17 @@ class ConversationRecyclerAdaptor(
                 else ->
                     it.root.background = it.defaultBackground
             }
-        } else mContext.startActivity(
-            Intent(mContext, ConversationActivity::class.java)
-                .putExtra("ye", it.conversation)
-        )
+        } else {
+            val holder = it
+            it.root.apply {
+                setOnClickListener {  }
+                postDelayed({setOnClickListener{onItemClickListener(holder)}}, 500)
+            }
+            mContext.startActivity(
+                Intent(mContext, ConversationActivity::class.java)
+                    .putExtra("ye", it.conversation)
+            )
+        }
     }
 
     var onItemLongClickListener: (ConversationViewHolder) -> Boolean = {

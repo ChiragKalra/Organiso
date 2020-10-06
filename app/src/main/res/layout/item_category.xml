@@ -25,18 +25,19 @@
         android:importantForAutofill="no" />
 
     <EditText
+        android:background="@drawable/bg_contact"
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         android:importantForAutofill="no"
         android:inputType="textCapCharacters"
         android:maxLength="20"
-        android:paddingStart="8dp"
-        android:paddingTop="12dp"
-        android:paddingEnd="8dp"
+        android:padding="8dp"
+        android:foregroundGravity="center_vertical"
         android:textAllCaps="true"
         android:theme="?editTextStyle"
         app:layout_constraintBottom_toBottomOf="parent"

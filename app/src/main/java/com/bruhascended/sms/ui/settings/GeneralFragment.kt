@@ -1,3 +1,18 @@
+package com.bruhascended.sms.ui.settings
+
+import android.os.Build
+import android.os.Bundle
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
+import androidx.preference.SwitchPreferenceCompat
+import androidx.room.Room
+import com.bruhascended.sms.R
+import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.ml.getOtp
+import com.bruhascended.sms.requireMainViewModel
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -15,21 +30,12 @@
 
 */
 
-package com.bruhascended.sms.ui.settings
-
-import android.os.Build
-import android.os.Bundle
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
-import androidx.preference.SwitchPreferenceCompat
-import androidx.preference.PreferenceCategory
-import com.bruhascended.sms.R
-
 class GeneralFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.general_preferences, rootKey)
 
         val themePref: SwitchPreferenceCompat = findPreference("dark_theme")!!
+        val deleteOtpPref: SwitchPreferenceCompat = findPreference("delete_otp")!!
         val themeCategory: PreferenceCategory = findPreference("theme_category")!!
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -42,6 +48,42 @@ class GeneralFragment : PreferenceFragmentCompat() {
                 requireActivity().recreate()
                 true
             }
+        }
+
+        deleteOtpPref.setOnPreferenceChangeListener { _, state ->
+            if (state as Boolean) {
+                deleteOtpPref.setOnPreferenceChangeListener { _, _ ->  true}
+                Thread {
+                    for (con in mainViewModel.daos[2].loadAllSync()) {
+                        Room.databaseBuilder(
+                            requireContext(), MessageDatabase::class.java, con.sender
+                        ).build().apply {
+                            manager().loadAllSync().forEach {
+                                if (getOtp(it.text) != null && it.type==1) {
+                                    manager().delete(it)
+                                }
+                            }
+                            val it = manager().loadLastSync()
+                            if (it == null) {
+                                requireMainViewModel(requireContext())
+                                mainViewModel.daos[2].delete(con)
+                            } else {
+                                if (con.lastSMS != it.text ||
+                                    con.time != it.time ||
+                                    con.lastMMS != (it.path != null)
+                                ) {
+                                    con.lastSMS = it.text
+                                    con.time = it.time
+                                    con.lastMMS = it.path != null
+                                    mainViewModel.daos[2].update(con)
+                                }
+                            }
+                            close()
+                        }
+                    }
+                }.start()
+            }
+            true
         }
     }
 }

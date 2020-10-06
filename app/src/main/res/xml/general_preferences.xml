@@ -31,6 +31,13 @@
         app:key="copy_otp"
         app:allowDividerBelow="false"
         app:title="Automatically Copy OTP"/>
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:icon="@drawable/ic_themed_delete"
+        app:key="delete_otp"
+        app:allowDividerBelow="false"
+        app:summaryOn="OTP will be deleted after 15 minutes."
+        app:title="Automatically Delete OTP"/>
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"

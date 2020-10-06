@@ -1,3 +1,5 @@
+package com.bruhascended.sms.ui.newConversation
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,9 +16,6 @@
    limitations under the License.
  */
 
-package com.bruhascended.sms.ui.newConversation
-
-import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -71,10 +70,11 @@ class ContactRecyclerAdaptor (
         val contact: Contact = contacts[position]
         holder.name.text = contact.name
         holder.number.text = contact.number
+        val dp = File(mContext.filesDir, contact.number)
         holder.dp.apply {
             setBackgroundColor(colors[position % colors.size])
-            if (contact.dp == null) picasso.load(R.drawable.ic_person).into(this)
-            else picasso.load(File(contact.dp)).into(this)
+            if (dp.exists()) picasso.load(dp).into(this)
+            else setImageResource(R.drawable.ic_person)
         }
     }
 
