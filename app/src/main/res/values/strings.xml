@@ -57,5 +57,6 @@
     <string name="no_results">No Results</string>
     <string name="that_s_all">That\'s All</string>
     <string name="reset">Reset</string>
+    <string name="add_to_contacts">Add To Contacts</string>
 
 </resources>

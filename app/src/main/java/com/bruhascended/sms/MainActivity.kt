@@ -87,8 +87,8 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.READ_CONTACTS
     )
 
-    private fun updateContacts() {
-        val contacts = cm.getContactsList()
+    private fun updateContacts(loadDp: Boolean) {
+        val contacts = cm.getContactsList(loadDp)
         mainViewModel.contacts.postValue(contacts)
         contacts.forEach {
             for (i in 0..4) {
@@ -106,12 +106,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportActionModeStarted(mode: ActionMode) {
         actionMode = mode
+        appBarLayout.setBackgroundColor(getColor(R.color.colorPrimary))
         super.onSupportActionModeStarted(mode)
     }
 
-    override fun onActionModeFinished(mode: android.view.ActionMode?) {
+    override fun onSupportActionModeFinished(mode: ActionMode) {
         actionMode = null
-        super.onActionModeFinished(mode)
+        appBarLayout.setBackgroundResource(R.drawable.bg_appbarlayout)
+        super.onSupportActionModeFinished(mode)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         mContext = this
         cm = ContactsManager(this)
         requireMainViewModel(this)
-        contactThread = Thread { updateContacts() }
+        contactThread = Thread { updateContacts(true) }
         contactThread?.start()
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -247,7 +249,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         if (contactThread?.isAlive != true) {
-            contactThread = Thread { updateContacts() }
+            contactThread = Thread { updateContacts(false) }
             contactThread?.start()
         }
         if (prefs.getBoolean("stateChanged", false)) {

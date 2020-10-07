@@ -1,5 +1,4 @@
 <resources>
-    <!-- default theme -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -38,7 +37,7 @@
     </style>
 
     <style name="ActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">@color/colorPrimaryDark</item>
+        <item name="background">@color/colorPrimary</item>
         <item name="actionModeBackground">?colorPrimary</item>
         <item name="android:background">@color/popupMenuBackground</item>
         <item name="android:textColor">@color/text_primary_dark</item>

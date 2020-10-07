@@ -59,7 +59,8 @@ class GeneralFragment : PreferenceFragmentCompat() {
                             requireContext(), MessageDatabase::class.java, con.sender
                         ).build().apply {
                             manager().loadAllSync().forEach {
-                                if (getOtp(it.text) != null && it.type==1) {
+                                if (getOtp(it.text) != null && it.type==1 &&
+                                    System.currentTimeMillis()-it.time > 15*60*1000) {
                                     manager().delete(it)
                                 }
                             }

@@ -19,6 +19,11 @@
         app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
     <item
+        android:id="@+id/action_contact"
+        android:orderInCategory="300"
+        android:title="@string/add_to_contacts"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_move"
         android:orderInCategory="300"
         android:title="@string/move_to"

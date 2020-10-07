@@ -1,3 +1,13 @@
+package com.bruhascended.sms
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
+import com.bruhascended.sms.ui.settings.HeaderFragment
+import kotlinx.android.synthetic.main.activity_conversation.*
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,17 +24,6 @@
    limitations under the License.
 
 */
-
-package com.bruhascended.sms
-
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
-import com.bruhascended.sms.ui.settings.HeaderFragment
-import kotlinx.android.synthetic.main.activity_conversation.*
-
 
 class SettingsActivity : AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -82,8 +81,8 @@ class SettingsActivity : AppCompatActivity(),
         supportFragmentManager.beginTransaction()
             .setCustomAnimations(
                 R.anim.slide_in_right,
-                android.R.anim.fade_out,
-                android.R.anim.fade_in,
+                R.anim.slide_out_left,
+                android.R.anim.slide_in_left,
                 android.R.anim.slide_out_right,
             ).replace(R.id.settings, fragment)
             .addToBackStack(null)
