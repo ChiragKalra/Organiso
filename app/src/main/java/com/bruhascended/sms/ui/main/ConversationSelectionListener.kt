@@ -11,6 +11,7 @@ import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.sms.R
 import com.bruhascended.sms.analytics.AnalyticsLogger
 import com.bruhascended.sms.data.SMSManager.Companion.labelText
@@ -45,6 +46,7 @@ class ConversationSelectionListener(
     private lateinit var muteItem: MenuItem
     private var unMuteItem = false
     private val analyticsLogger = AnalyticsLogger(mContext)
+    private val notificationManager = NotificationManagerCompat.from(mContext)
 
     lateinit var selectionManager: ListSelectionManager<Conversation>
 
@@ -114,6 +116,7 @@ class ConversationSelectionListener(
                         for (selectedItem in selected) {
                             selectedItem.moveTo(-1, mContext)
                             analyticsLogger.log("${selectedItem.label}_to_-1")
+                            notificationManager.cancel(selectedItem.id!!.toInt())
                         }
                         Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -126,6 +129,7 @@ class ConversationSelectionListener(
                         for (selectedItem in selected) {
                             selectedItem.moveTo(5)
                             analyticsLogger.log("${selectedItem.label}_to_5")
+                            notificationManager.cancel(selectedItem.id!!.toInt())
                         }
                         Toast.makeText(mContext,"Senders Blocked", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -139,6 +143,7 @@ class ConversationSelectionListener(
                             selectedItem.moveTo(4)
                             analyticsLogger.reportSpam(selectedItem)
                             analyticsLogger.log("${selectedItem.label}_to_4")
+                            notificationManager.cancel(selectedItem.id!!.toInt())
                         }
                         Toast.makeText(mContext, "Senders Reported Spam", Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -175,6 +180,7 @@ class ConversationSelectionListener(
                     for (selectedItem in selected) {
                         selectedItem.isMuted = true
                         mainViewModel.daos[label].update(selectedItem)
+                        notificationManager.cancel(selectedItem.id!!.toInt())
                     }
                 }
                 selectionManager.close()

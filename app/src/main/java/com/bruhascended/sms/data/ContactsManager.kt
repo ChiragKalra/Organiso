@@ -132,7 +132,7 @@ class ContactsManager(context: Context) {
         return map
     }
 
-    fun getContactsList(): Array<Contact> {
+    fun getContactsList(loadDp: Boolean = true): Array<Contact> {
         val list = HashSet<Contact>()
 
         val cr: ContentResolver = mContext.contentResolver
@@ -167,7 +167,7 @@ class ContactsManager(context: Context) {
         cur?.close()
         val arr = list.toTypedArray()
         arr.sortBy {it.name}
-        Thread {
+        if (loadDp) Thread {
             arr.forEach {
                 val bm = retrieveContactPhoto(it.number)
                 val des = File(mContext.filesDir, it.number)

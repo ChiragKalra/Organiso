@@ -116,10 +116,10 @@ class CategoryFragment: Fragment() {
         if (::selectionManager.isInitialized) selectionManager.close()
 
         val flow = Pager(PagingConfig(
-            pageSize = 3,
-            initialLoadSize = 3,
-            prefetchDistance = 30,
-            maxSize = 120,
+            pageSize = 1,
+            initialLoadSize = 1,
+            prefetchDistance = 80,
+            maxSize = 200,
         )) {
             mainViewModel.daos[label].loadAllPaged()
         }.flow.cachedIn(mContext.lifecycleScope)

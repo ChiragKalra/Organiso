@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
@@ -31,7 +32,8 @@ import com.bruhascended.sms.ui.common.ListSelectionManager
 import com.bruhascended.sms.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
 import com.bruhascended.sms.ui.common.MediaPreviewManager
 import com.bruhascended.sms.ui.common.ScrollEffectFactory
-import com.bruhascended.sms.ui.conversation.*
+import com.bruhascended.sms.ui.conversation.MessageRecyclerAdaptor
+import com.bruhascended.sms.ui.conversation.MessageSelectionListener
 import com.bruhascended.sms.ui.conversation.SearchActivity
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
@@ -39,6 +41,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -116,7 +119,7 @@ class ConversationActivity : AppCompatActivity() {
                 scroll = false
                 val id = intent?.getLongExtra("ID", -1L) ?: -1L
                 if (id != -1L) {
-                    recyclerView.postDelayed( {
+                    recyclerView.postDelayed({
                         scrollToItem(id)
                     }, 200)
                 }
@@ -343,6 +346,13 @@ class ConversationActivity : AppCompatActivity() {
                 intent.data = Uri.parse("tel:${conversation.sender}")
                 startActivity(intent)
             }
+            R.id.action_contact -> {
+                val intent = Intent(
+                    ContactsContract.Intents.SHOW_OR_CREATE_CONTACT,
+                    Uri.parse("tel:" + conversation.sender)
+                )
+                startActivity(intent)
+            }
             android.R.id.home -> {
                 startActivityIfNeeded(
                     Intent(mContext, MainActivity::class.java)
@@ -368,9 +378,12 @@ class ConversationActivity : AppCompatActivity() {
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val muteItem = menu.findItem(R.id.action_mute)
         val callItem = menu.findItem(R.id.action_call)
+        val contactItem = menu.findItem(R.id.action_contact)
 
         muteItem.title = if (conversation.isMuted) "UnMute" else "Mute"
         callItem.isVisible = conversation.sender.first().isDigit()
+        contactItem.isVisible = conversation.sender.first().isDigit()
+        if (conversation.name != null) contactItem.title = "View Contact"
         return super.onPrepareOptionsMenu(menu)
     }
 
