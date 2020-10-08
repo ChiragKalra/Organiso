@@ -113,7 +113,7 @@ class SMSSender(
 
         conversations.forEach { conversation ->
             addSmsToDb(conversation, smsText, date, 6, false)
-            mContext.applicationContext.registerReceiver(object : BroadcastReceiver() {
+            mContext.registerReceiver(object : BroadcastReceiver() {
                 override fun onReceive(arg0: Context, arg1: Intent?) {
                     when (resultCode) {
                         Activity.RESULT_OK -> addSmsToDb(conversation, smsText, date, 2, false)
@@ -141,7 +141,7 @@ class SMSSender(
                     mContext.unregisterReceiver(this)
                 }
             }, IntentFilter(sentAction))
-            mContext.applicationContext.registerReceiver(object : BroadcastReceiver() {
+            mContext.registerReceiver(object : BroadcastReceiver() {
                 override fun onReceive(arg0: Context?, arg1: Intent?) {
                     when (resultCode) {
                         Activity.RESULT_OK -> addSmsToDb(conversation, smsText, date, 2, true)
