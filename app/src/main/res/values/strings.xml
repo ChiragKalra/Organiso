@@ -12,6 +12,8 @@
     <string name="text_5">Probably fraud</string>
     <string name="tab_text_6">Blocked</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="new_conversation">New Conversation</string>
+    <string name="new_short">New</string>
 
     <!-- Preference Titles -->
 
@@ -58,5 +60,6 @@
     <string name="that_s_all">That\'s All</string>
     <string name="reset">Reset</string>
     <string name="add_to_contacts">Add To Contacts</string>
+    <string name="add_to_home">Add to Home</string>
 
 </resources>

@@ -114,9 +114,9 @@ class ConversationSelectionListener(
                 alertDialog.setTitle("Delete selected conversations?")
                     .setPositiveButton("Delete") { dialog, _ ->
                         for (selectedItem in selected) {
+                            notificationManager.cancel(selectedItem.id!!.toInt())
                             selectedItem.moveTo(-1, mContext)
                             analyticsLogger.log("${selectedItem.label}_to_-1")
-                            notificationManager.cancel(selectedItem.id!!.toInt())
                         }
                         Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
                         dialog.dismiss()

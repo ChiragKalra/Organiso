@@ -24,6 +24,11 @@
         android:title="@string/add_to_contacts"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_create_shortcut"
+        android:orderInCategory="300"
+        android:title="@string/add_to_home"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_move"
         android:orderInCategory="300"
         android:title="@string/move_to"

@@ -37,8 +37,7 @@
     </style>
 
     <style name="ActionMode" parent="@style/Widget.AppCompat.ActionMode">
-        <item name="background">@color/colorPrimary</item>
-        <item name="actionModeBackground">?colorPrimary</item>
+        <item name="background">@drawable/bg_appbarlayout</item>
         <item name="android:background">@color/popupMenuBackground</item>
         <item name="android:textColor">@color/text_primary_dark</item>
         <item name="popupMenuBackground">@color/popupMenuBackground</item>
@@ -48,6 +47,8 @@
 
     <!-- dark theme -->
     <style name="AppTheme.DarkTheme" parent="AppTheme">
+        <item name="android:windowBackground">?backgroundColor</item>
+
         <item name="backgroundColor">@color/background_dark</item>
         <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
@@ -82,6 +83,8 @@
 
     <!-- light theme -->
     <style name="AppTheme.LightTheme" parent="AppTheme">
+        <item name="android:windowBackground">?backgroundColor</item>
+
         <item name="backgroundColor">@color/background_light</item>
         <item name="android:textColorPrimary">@color/text_primary_light</item>
         <item name="headerTextColor">@color/headerTextColorLight</item>

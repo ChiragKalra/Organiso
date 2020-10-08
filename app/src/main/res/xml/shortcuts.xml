@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="compose"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_add"
+        android:shortcutShortLabel="@string/new_short"
+        android:shortcutLongLabel="@string/new_conversation">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.bruhascended.sms"
+            android:targetClass="com.bruhascended.sms.NewConversationActivity" />
+        <categories android:name="android.shortcut.new_conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_search"
+        android:shortcutShortLabel="@string/search">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.bruhascended.sms"
+            android:targetClass="com.bruhascended.sms.SearchActivity" />
+        <categories android:name="android.shortcut.search" />
+    </shortcut>
+</shortcuts>
