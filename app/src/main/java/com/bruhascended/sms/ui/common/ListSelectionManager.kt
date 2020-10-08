@@ -34,7 +34,6 @@ class ListSelectionManager<T: Any> (
 
     private var actionMode: ActionMode? = null
     private var selected = hashSetOf<Int>()
-    private val selectedItemsSet = hashSetOf<T>()
 
     private var actionBarVisible = false
     private var rangeSelection = false

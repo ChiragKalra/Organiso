@@ -137,6 +137,8 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        requireMainViewModel(this)
+
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
@@ -214,6 +216,10 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         setResult(RESULT_CANCELED)
+        if (intent.action != null) startActivityIfNeeded(
+            Intent(mContext, MainActivity::class.java)
+                .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0
+        )
         finish()
         overridePendingTransition(R.anim.hold, android.R.anim.fade_out)
     }

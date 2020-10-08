@@ -116,7 +116,8 @@ fun displayTime(time: Long, mContext: Context): String {
 
         DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "Yesterday"
 
-        now[Calendar.WEEK_OF_YEAR] == smsTime[Calendar.WEEK_OF_YEAR] -> DateFormat.format(
+        now[Calendar.WEEK_OF_YEAR] == smsTime[Calendar.WEEK_OF_YEAR] &&
+                now[Calendar.YEAR] == smsTime[Calendar.YEAR] -> DateFormat.format(
             "EEEE", smsTime
         ).toString()
 

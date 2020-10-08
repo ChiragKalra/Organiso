@@ -3,9 +3,15 @@ package com.bruhascended.sms
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.*
+import android.graphics.drawable.Icon
+import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
@@ -14,6 +20,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
@@ -35,13 +43,13 @@ import com.bruhascended.sms.ui.common.ScrollEffectFactory
 import com.bruhascended.sms.ui.conversation.MessageRecyclerAdaptor
 import com.bruhascended.sms.ui.conversation.MessageSelectionListener
 import com.bruhascended.sms.ui.conversation.SearchActivity
+import com.bruhascended.sms.ui.main.ConversationRecyclerAdaptor
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -85,15 +93,82 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var analyticsLogger: AnalyticsLogger
     private lateinit var selectionManager: ListSelectionManager<Message>
 
+    private fun getRoundedCornerBitmap(bitmap: Bitmap): Bitmap {
+        val output = Bitmap.createBitmap(
+            bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(output)
+        val color = -0xbdbdbe
+        val paint = Paint()
+        val rect = Rect(0, 0, bitmap.width, bitmap.height)
+        val rectF = RectF(rect)
+        val roundPx = bitmap.width.toFloat()
+        paint.isAntiAlias = true
+        canvas.drawARGB(0, 0, 0, 0)
+        paint.color = color
+        canvas.drawRoundRect(rectF, roundPx, roundPx, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas.drawBitmap(bitmap, rect, rect, paint)
+        return output
+    }
+
+    private fun getSenderIcon(): Icon {
+        val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
+            setTint(mContext.getColor(ConversationRecyclerAdaptor.colorRes[(conversation.id!! % ConversationRecyclerAdaptor.colorRes.size).toInt()]))
+        }
+
+        return when {
+            conversation.sender.first().isLetter() -> {
+                val bot = ContextCompat.getDrawable(mContext, R.drawable.ic_bot)
+                val finalDrawable = LayerDrawable(arrayOf(bg, bot))
+                finalDrawable.setLayerGravity(1, Gravity.CENTER)
+                Icon.createWithBitmap(finalDrawable.toBitmap())
+            }
+            conversation.dp.isNotBlank() -> {
+                val dp = getRoundedCornerBitmap(BitmapFactory.decodeFile(conversation.dp)!!)
+                Icon.createWithBitmap(dp)
+            }
+            else -> {
+                val person = ContextCompat.getDrawable(mContext, R.drawable.ic_person)
+                val finalDrawable = LayerDrawable(arrayOf(bg, person))
+                finalDrawable.setLayerGravity(1, Gravity.CENTER)
+                Icon.createWithBitmap(finalDrawable.toBitmap())
+            }
+        }
+    }
+
 
     private fun init() {
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        conversation = intent.getSerializableExtra("ye") as Conversation
+        conversation = intent.getSerializableExtra("ye") as Conversation? ?:
+            Conversation(
+                null,
+                intent.getStringExtra("sender")!!,
+                intent.getStringExtra("name"),
+                "",
+                true,
+                0,
+                "",
+                0,
+                -1,
+                FloatArray(5){0F}
+            )
+
+        requireMainViewModel(this)
+        if (conversation.lastSMS.isBlank()) {
+            for (i in 0..4) {
+                val res = mainViewModel.daos[i].findBySender(conversation.sender)
+                if (res.isNotEmpty()) {
+                    conversation = res.first()
+                    break
+                }
+            }
+        }
+
         smsSender = SMSSender(this, arrayOf(conversation))
         mmsSender = MMSSender(this, conversation)
         analyticsLogger = AnalyticsLogger(this)
-        requireMainViewModel(this)
         mdb = Room.databaseBuilder(
             this, MessageDatabase::class.java, conversation.sender
         ).allowMainThreadQueries().build().manager()
@@ -128,10 +203,10 @@ class ConversationActivity : AppCompatActivity() {
 
         val flow = Pager(
             PagingConfig(
-                pageSize = 15,
-                initialLoadSize = 15,
-                prefetchDistance = 30,
-                maxSize = PagingConfig.MAX_SIZE_UNBOUNDED,
+                pageSize = 1,
+                initialLoadSize = 1,
+                prefetchDistance = 60,
+                maxSize = 200,
             )
         ) {
             mdb.loadAllPaged()
@@ -352,6 +427,25 @@ class ConversationActivity : AppCompatActivity() {
                     Uri.parse("tel:" + conversation.sender)
                 )
                 startActivity(intent)
+            }
+            R.id.action_create_shortcut -> {
+                val shortcutManager = getSystemService(ShortcutManager::class.java)!!
+
+                if (shortcutManager.isRequestPinShortcutSupported) {
+                    val pinShortcutInfo =
+                        ShortcutInfo.Builder(mContext, conversation.sender)
+                            .setIcon(getSenderIcon())
+                            .setShortLabel(conversation.name ?: conversation.sender)
+                            .setIntent(
+                                Intent(mContext, ConversationActivity::class.java)
+                                    .setAction("android.intent.action.VIEW")
+                                    .putExtra("name", conversation.name)
+                                    .putExtra("sender", conversation.sender))
+                            .setCategories(setOf("android.shortcut.conversation"))
+                        .build()
+
+                    shortcutManager.requestPinShortcut(pinShortcutInfo, null)
+                }
             }
             android.R.id.home -> {
                 startActivityIfNeeded(

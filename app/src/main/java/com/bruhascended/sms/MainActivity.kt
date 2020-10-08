@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.drawable.TransitionDrawable
 import android.os.Bundle
 import android.provider.Telephony
 import android.view.Menu
@@ -106,13 +107,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportActionModeStarted(mode: ActionMode) {
         actionMode = mode
-        appBarLayout.setBackgroundColor(getColor(R.color.colorPrimary))
+        val trans: TransitionDrawable = appBarLayout.background as TransitionDrawable
+        trans.startTransition(300)
         super.onSupportActionModeStarted(mode)
     }
 
     override fun onSupportActionModeFinished(mode: ActionMode) {
         actionMode = null
-        appBarLayout.setBackgroundResource(R.drawable.bg_appbarlayout)
+        val trans: TransitionDrawable = appBarLayout.background as TransitionDrawable
+        trans.reverseTransition(150)
         super.onSupportActionModeFinished(mode)
     }
 
@@ -208,7 +211,7 @@ class MainActivity : AppCompatActivity() {
                     val behavior = params.behavior as AppBarLayout.Behavior
                     ValueAnimator.ofInt().apply {
                         interpolator = DecelerateInterpolator()
-                        duration = 150
+                        duration = 300
                         setIntValues(0, -tabs.height)
                         addUpdateListener { animation ->
                             behavior.topAndBottomOffset = animation.animatedValue as Int
@@ -216,13 +219,11 @@ class MainActivity : AppCompatActivity() {
                         }
                         start()
                     }
-                    postDelayed({
-                        startActivityForResult(
-                            Intent(mContext, SearchActivity::class.java),
-                            argSearchResult
-                        )
-                        overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
-                    }, 100)
+                    startActivityForResult(
+                        Intent(mContext, SearchActivity::class.java),
+                        argSearchResult
+                    )
+                    overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
                 }
             }
             R.id.action_settings -> {
@@ -242,7 +243,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == argSearchResult && resultCode == RESULT_CANCELED) {
             appBarLayout?.postDelayed({
                 appBarLayout.setExpanded(true, true)
-            }, 200)
+            }, 300)
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
