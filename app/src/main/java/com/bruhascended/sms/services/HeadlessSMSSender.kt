@@ -24,7 +24,6 @@ import com.bruhascended.sms.db.Conversation
    limitations under the License.
  */
 
-// TODO FIX
 class HeadlessSMSSender : Service() {
 
     private fun getRecipients(uri: Uri): String {

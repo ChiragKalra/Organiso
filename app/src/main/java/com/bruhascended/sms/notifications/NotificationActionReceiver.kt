@@ -73,7 +73,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     System.currentTimeMillis(),
                     0
                 )
-                MessageNotificationManager(mContext).sendSmsNotification(newMessage to conversation)
+                MessageNotificationManager(mContext.applicationContext).sendSmsNotification(newMessage to conversation)
             }
         }
     }
