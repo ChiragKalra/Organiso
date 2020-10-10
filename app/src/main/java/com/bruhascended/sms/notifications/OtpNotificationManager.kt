@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
@@ -117,6 +118,9 @@ class OtpNotificationManager (
                 .setCustomBigContentView(notificationLayout)
                 .setCategory(Notification.CATEGORY_MESSAGE)
                 .setAutoCancel(true)
+                .setExtras(Bundle().apply {
+                    putBoolean("OTP", true)
+                })
                 .setContentIntent(pendingIntent)
                 .build()
         )

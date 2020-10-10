@@ -105,7 +105,6 @@ class SMSSender(
 
     fun sendSMS(smsText: String) {
         val date = System.currentTimeMillis()
-
         val transaction = Transaction(mContext, settings).apply {
             setExplicitBroadcastForSentSms(Intent(sentAction))
             setExplicitBroadcastForDeliveredSms(Intent(deliveredAction))

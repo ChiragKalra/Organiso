@@ -33,7 +33,10 @@ class HeadlessSMSSender : Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        if (TelephonyManager.ACTION_RESPOND_VIA_MESSAGE != intent.action) return null
+        if (intent.action !in arrayOf(Intent.ACTION_SENDTO,
+                TelephonyManager.ACTION_RESPOND_VIA_MESSAGE)) {
+            return null
+        }
         val extras = intent.extras ?: return null
         val message = extras.getString(Intent.EXTRA_TEXT) ?: extras.getString("sms_body")!!
         val intentUri: Uri = intent.data!!
@@ -41,7 +44,8 @@ class HeadlessSMSSender : Service() {
 
         if (TextUtils.isEmpty(recipients) || TextUtils.isEmpty(message)) return null
 
-        val adds = TextUtils.split(recipients, ";")
+        val number = extras.get(Intent.EXTRA_PHONE_NUMBER) as String?
+        val adds = if (number == null) TextUtils.split(recipients, ";") else arrayOf(number)
         val conversations = Array(adds.size) {
             Conversation(
                 null,

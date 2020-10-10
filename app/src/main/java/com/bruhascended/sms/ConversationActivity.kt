@@ -203,10 +203,10 @@ class ConversationActivity : AppCompatActivity() {
 
         val flow = Pager(
             PagingConfig(
-                pageSize = 1,
-                initialLoadSize = 1,
+                pageSize = 15,
+                initialLoadSize = 15,
                 prefetchDistance = 60,
-                maxSize = 200,
+                maxSize = 180,
             )
         ) {
             mdb.loadAllPaged()
@@ -308,9 +308,6 @@ class ConversationActivity : AppCompatActivity() {
             sendLayout.visibility = LinearLayout.INVISIBLE
             notSupported.visibility = TextView.VISIBLE
         }
-
-        if (conversation.id != null)
-            NotificationManagerCompat.from(this).cancel(conversation.id!!.toInt())
 
         if (conversation.id != null) {
             if (!conversation.read) {
@@ -492,6 +489,8 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        if (conversation.id != null)
+            NotificationManagerCompat.from(this).cancel(conversation.id!!.toInt())
         activeConversationSender = conversation.sender
         super.onResume()
     }

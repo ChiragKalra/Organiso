@@ -22,6 +22,7 @@ import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.ui.common.ListSelectionManager
 import com.bruhascended.sms.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
 import com.bruhascended.sms.ui.common.ScrollEffectFactory
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -46,10 +47,11 @@ import kotlinx.coroutines.launch
 class CategoryFragment: Fragment() {
 
     companion object {
-        fun newInstance(label: Int) : CategoryFragment {
+        fun newInstance(label: Int, pos: Int) : CategoryFragment {
             return CategoryFragment().apply {
                 arguments = Bundle().apply {
                     putInt(labelArg, label)
+                    putInt(posArg, pos)
                 }
             }
         }
@@ -81,6 +83,7 @@ class CategoryFragment: Fragment() {
     }
 
     private var label: Int = 0
+    private var position: Int = 0
 
     class FooterDecoration(private val footerHeight: Int) : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
@@ -98,6 +101,7 @@ class CategoryFragment: Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.apply {
             label = getInt(labelArg)
+            position = getInt(posArg)
         }
     }
 
@@ -116,10 +120,10 @@ class CategoryFragment: Fragment() {
         if (::selectionManager.isInitialized) selectionManager.close()
 
         val flow = Pager(PagingConfig(
-            pageSize = 1,
-            initialLoadSize = 1,
+            pageSize = 10,
+            initialLoadSize = 10,
             prefetchDistance = 80,
-            maxSize = 200,
+            maxSize = 180,
         )) {
             mainViewModel.daos[label].loadAllPaged()
         }.flow.cachedIn(mContext.lifecycleScope)
@@ -154,6 +158,7 @@ class CategoryFragment: Fragment() {
         else textView.visibility = TextView.INVISIBLE
 
         mContext.lifecycleScope.launch {
+            delay(if (position == 0) 0 else 300)
             flow.collectLatest {
                 mAdaptor.submitData(it)
             }
