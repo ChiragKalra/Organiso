@@ -15,7 +15,7 @@ import com.bruhascended.sms.db.MessageDatabase
 import com.bruhascended.sms.db.NotificationDatabase
 import com.bruhascended.sms.mainViewModel
 import com.bruhascended.sms.requireMainViewModel
-import com.bruhascended.sms.services.SMSSender
+import com.bruhascended.sms.services.HeadlessSMSSender
 
 class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(mContext: Context, intent: Intent) {
@@ -64,7 +64,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
             ACTION_REPLY -> {
                 val conversation = intent.getSerializableExtra("conversation") as Conversation
                 val replyText = RemoteInput.getResultsFromIntent(intent).getCharSequence(KEY_TEXT_REPLY).toString()
-                SMSSender(mContext, arrayOf(conversation)).sendSMS(replyText)
+
                 val newMessage = Message(
                     null,
                     conversation.sender,
@@ -73,7 +73,15 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     System.currentTimeMillis(),
                     0
                 )
-                MessageNotificationManager(mContext.applicationContext).sendSmsNotification(newMessage to conversation)
+                MessageNotificationManager(mContext).sendSmsNotification(newMessage to conversation)
+
+                mContext.startService(
+                    Intent(mContext, HeadlessSMSSender::class.java).apply {
+                        action = Intent.ACTION_SENDTO
+                        putExtra(Intent.EXTRA_TEXT, replyText)
+                        putExtra(Intent.EXTRA_PHONE_NUMBER, conversation.sender)
+                    }
+                )
             }
         }
     }

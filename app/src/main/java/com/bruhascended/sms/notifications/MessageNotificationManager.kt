@@ -1,9 +1,11 @@
 package com.bruhascended.sms.notifications
 
 import android.app.Notification.CATEGORY_MESSAGE
+import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.LayerDrawable
@@ -30,6 +32,7 @@ import com.bruhascended.sms.db.NotificationDatabase
 import com.bruhascended.sms.ml.getOtp
 import com.bruhascended.sms.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 import java.io.File
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -131,12 +134,12 @@ class MessageNotificationManager(
     }
 
     private fun showSummaryNotification() {
-        val set = hashSetOf<String>()
-        ndb.loadAllSync().forEach { n ->
-            if (notificationManager.getNotificationChannel(n.label.toString())?.importance
-                != IMPORTANCE_NONE) set.add(n.sender)
+        val mNM = mContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        var active = 0
+        mNM.activeNotifications.forEach {
+            if (!it.notification.extras.getBoolean("OTP", false)) active++
         }
-        if (set.size < 3) return
+        if (active < 3) return
         notificationManager.notify(
             0,
             Builder(mContext, "0")

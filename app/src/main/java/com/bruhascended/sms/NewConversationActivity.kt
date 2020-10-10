@@ -179,7 +179,7 @@ class NewConversationActivity : AppCompatActivity() {
         }
         Thread {
             if (isMainViewModelNull()) {
-                mainViewModel = MainViewModel()
+                requireMainViewModel(this)
                 mainViewModel.contacts.postValue(ContactsManager(this).getContactsList())
             }
             runOnUiThread{

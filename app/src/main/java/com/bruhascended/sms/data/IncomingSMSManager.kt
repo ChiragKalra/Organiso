@@ -1,3 +1,18 @@
+package com.bruhascended.sms.data
+
+import android.content.Context
+import androidx.room.Room
+import com.bruhascended.sms.activeConversationDao
+import com.bruhascended.sms.activeConversationSender
+import com.bruhascended.sms.analytics.AnalyticsLogger
+import com.bruhascended.sms.db.Conversation
+import com.bruhascended.sms.db.Message
+import com.bruhascended.sms.db.MessageDatabase
+import com.bruhascended.sms.mainViewModel
+import com.bruhascended.sms.ml.OrganizerModel
+import com.bruhascended.sms.ml.getOtp
+import com.bruhascended.sms.requireMainViewModel
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,19 +29,6 @@
    limitations under the License.
  */
 
-package com.bruhascended.sms.data
-
-import android.content.Context
-import androidx.room.Room
-import com.bruhascended.sms.*
-import com.bruhascended.sms.analytics.AnalyticsLogger
-import com.bruhascended.sms.db.Conversation
-import com.bruhascended.sms.db.ConversationDatabase
-import com.bruhascended.sms.db.Message
-import com.bruhascended.sms.db.MessageDatabase
-import com.bruhascended.sms.ml.OrganizerModel
-import com.bruhascended.sms.ml.getOtp
-import com.bruhascended.sms.ui.main.MainViewModel
 
 class IncomingSMSManager(
     private val mContext: Context
@@ -44,7 +46,6 @@ class IncomingSMSManager(
                 conversation = got.first()
                 for (item in got)
                     mainViewModel.daos[i].delete(item)
-                break
             }
         }
         return conversation
@@ -103,7 +104,8 @@ class IncomingSMSManager(
         )
 
         mainViewModel.daos[prediction].insert(conversation)
-        conversation.id = mainViewModel.daos[prediction].findBySender(rawNumber).first().id
+        if (conversation.id == null)
+            conversation.id = mainViewModel.daos[prediction].findBySender(rawNumber).first().id
 
         val mdb = if (activeConversationSender == rawNumber) activeConversationDao
         else Room.databaseBuilder(
