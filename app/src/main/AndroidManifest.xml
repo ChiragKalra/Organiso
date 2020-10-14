@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.bruhascended.sms">
+    package="com.bruhascended.organiso">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -27,7 +27,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.bruhascended.sms.fileProvider"
+            android:authorities="com.bruhascended.organiso.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -45,7 +45,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".services.MMSReceiver"
+            android:name="com.bruhascended.organiso.services.MMSReceiver"
             android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED" />
         <receiver
             android:name="com.klinker.android.send_message.SentReceiver"
@@ -62,14 +62,14 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".notifications.NotificationActionReceiver"
+            android:name="com.bruhascended.organiso.notifications.NotificationActionReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="NOTIFICATION_CANCELED" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".services.SMSReceiver"
+            android:name="com.bruhascended.organiso.services.SMSReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
@@ -81,7 +81,7 @@
 
         <service android:name="com.android.mms.transaction.TransactionService" />
         <service
-            android:name=".services.HeadlessSMSSender"
+            android:name="com.bruhascended.organiso.services.HeadlessSMSSender"
             android:exported="true"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
             <intent-filter>
@@ -94,18 +94,22 @@
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO" />
+            </intent-filter>
         </service>
 
         <activity
-            android:name=".ui.conversation.SearchActivity"
+            android:name="com.bruhascended.organiso.ui.conversation.SearchActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateVisible" />
         <activity
-            android:name=".SearchActivity"
+            android:name="com.bruhascended.organiso.SearchActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateVisible" />
         <activity
-            android:name=".NewConversationActivity"
+            android:name="com.bruhascended.organiso.NewConversationActivity"
             android:enabled="true"
             android:exported="true"
             android:launchMode="singleTop">
@@ -152,25 +156,25 @@
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
         <activity
-            android:name=".ConversationActivity"
+            android:name="com.bruhascended.organiso.ConversationActivity"
             android:launchMode="standard">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
         <activity
-            android:name=".ExtraCategoryActivity"
+            android:name="com.bruhascended.organiso.ExtraCategoryActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
         <activity
-            android:name=".StartActivity"
+            android:name="com.bruhascended.organiso.StartActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:launchMode="singleTop"
             android:theme="@style/Splash">
@@ -183,7 +187,7 @@
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="com.bruhascended.organiso.MainActivity"
             android:clearTaskOnLaunch="false"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:finishOnTaskLaunch="false"
@@ -191,22 +195,22 @@
             android:launchMode="singleTop"
             android:noHistory="false" />
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.bruhascended.organiso.SettingsActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:label="@string/title_activity_settings"
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
         <activity
-            android:name=".BugReportActivity"
+            android:name="com.bruhascended.organiso.BugReportActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:label="Report A Bug"
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SettingsActivity" />
+                android:value="com.bruhascended.organiso.SettingsActivity" />
         </activity>
     </application>
 

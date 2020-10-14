@@ -1,0 +1,14 @@
+/app/src/androidTest/
+/app/src/test/
+/.idea/
+/.gradle/
+/gradlew
+/gradlew.bat
+/app/release/
+/app/proguard-rules.pro
+/app/build/
+/app/google-services.json
+/build/
+/build.gradle
+/gradle.properties
+/local.properties

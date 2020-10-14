@@ -8,7 +8,7 @@
         app:key="app_badge" />
 
     <Preference
-        app:fragment="com.bruhascended.sms.ui.settings.GeneralFragment"
+        app:fragment="com.bruhascended.organiso.ui.settings.GeneralFragment"
         app:allowDividerBelow="false"
         app:key="general"
         app:icon="@drawable/ic_account"
@@ -21,13 +21,13 @@
         app:title="Notifications" />
 
     <Preference
-        app:fragment="com.bruhascended.sms.ui.settings.CategorySettingsFragment"
+        app:fragment="com.bruhascended.organiso.ui.settings.CategorySettingsFragment"
         app:icon="@drawable/ic_category"
         app:key="category_header"
         app:title="Customise Categories" />
 
     <Preference
-        app:fragment="com.bruhascended.sms.ui.settings.InfoFragment"
+        app:fragment="com.bruhascended.organiso.ui.settings.InfoFragment"
         app:icon="@drawable/ic_info"
         app:key="info_header"
         app:title="Info" />

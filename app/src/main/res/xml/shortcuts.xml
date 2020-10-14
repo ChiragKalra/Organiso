@@ -8,8 +8,8 @@
         android:shortcutLongLabel="@string/new_conversation">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.bruhascended.sms"
-            android:targetClass="com.bruhascended.sms.NewConversationActivity" />
+            android:targetPackage="com.bruhascended.organiso"
+            android:targetClass="com.bruhascended.organiso.NewConversationActivity" />
         <categories android:name="android.shortcut.new_conversation" />
     </shortcut>
     <shortcut
@@ -19,8 +19,8 @@
         android:shortcutShortLabel="@string/search">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.bruhascended.sms"
-            android:targetClass="com.bruhascended.sms.SearchActivity" />
+            android:targetPackage="com.bruhascended.organiso"
+            android:targetClass="com.bruhascended.organiso.SearchActivity" />
         <categories android:name="android.shortcut.search" />
     </shortcut>
 </shortcuts>

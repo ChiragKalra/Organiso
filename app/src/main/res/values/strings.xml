@@ -61,5 +61,6 @@
     <string name="reset">Reset</string>
     <string name="add_to_contacts">Add To Contacts</string>
     <string name="add_to_home">Add to Home</string>
+    <string name="remove_address">remove address</string>
 
 </resources>

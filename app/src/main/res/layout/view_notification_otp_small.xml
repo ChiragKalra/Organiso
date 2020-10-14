@@ -15,12 +15,4 @@
         android:textSize="22sp"
         android:textStyle="bold"
         style="@style/TextAppearance.Compat.Notification.Title"/>
-
-    <TextView
-        android:layout_marginTop="4dp"
-        android:id="@android:id/content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        style="@style/TextAppearance.Compat.Notification.Line2"/>
 </LinearLayout>

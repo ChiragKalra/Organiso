@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?backgroundColor"
     tools:context=".ui.main.CategoryFragment">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -12,7 +13,7 @@
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?backgroundColor"
+        android:background="#0000"
         tools:listitem="@layout/item_conversation"/>
 
     <TextView
@@ -25,7 +26,7 @@
         android:text="@string/this_category_has_no_messages_yet"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="?backgroundColor"/>
+        app:layout_constraintTop_toTopOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
