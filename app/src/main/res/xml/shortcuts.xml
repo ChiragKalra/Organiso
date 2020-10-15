@@ -3,7 +3,7 @@
     <shortcut
         android:shortcutId="compose"
         android:enabled="true"
-        android:icon="@drawable/ic_shortcut_add"
+        android:icon="@drawable/shortcut_add"
         android:shortcutShortLabel="@string/new_short"
         android:shortcutLongLabel="@string/new_conversation">
         <intent
@@ -15,7 +15,7 @@
     <shortcut
         android:shortcutId="search"
         android:enabled="true"
-        android:icon="@drawable/ic_shortcut_search"
+        android:icon="@drawable/shortcut_search"
         android:shortcutShortLabel="@string/search">
         <intent
             android:action="android.intent.action.VIEW"

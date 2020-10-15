@@ -176,7 +176,7 @@ class NewConversationActivity : AppCompatActivity() {
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
         setContentView(R.layout.activity_new_conversation)
 
-        mContext = applicationContext
+        mContext = this
 
         mpm = MediaPreviewManager(
             this,
