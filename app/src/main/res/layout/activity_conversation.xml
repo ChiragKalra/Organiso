@@ -53,8 +53,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/sendLayout" />
 
-    <include layout="@layout/layout_send"/>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/goToBottom"
+        android:foregroundGravity="center"
+        android:layout_width="32dp"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:elevation="10dp"
+        android:alpha="0"
+        android:translationY="48dp"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/go_to_bottom"
+        android:foreground="@drawable/ic_arrow_down"
+        android:backgroundTint="?attr/colorAccent"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
+    <include layout="@layout/layout_send"/>
 
     <ImageButton
         android:visibility="gone"
@@ -67,6 +82,6 @@
         android:src="@drawable/ic_play"
         android:tint="?attr/colorAccent"
         app:layout_constraintBottom_toBottomOf="@+id/sendLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

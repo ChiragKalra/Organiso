@@ -144,6 +144,7 @@ class MessageNotificationManager(
         notificationManager.notify(
             0,
             Builder(mContext, "0")
+                .setContentTitle("$active conversation(s)")
                 .setSmallIcon(R.drawable.message)
                 .setAutoCancel(true)
                 .setGroup(GROUP_DEFAULT)

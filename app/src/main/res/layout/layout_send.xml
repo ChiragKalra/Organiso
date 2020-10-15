@@ -10,6 +10,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="8dp"
+    android:elevation="12dp"
     android:background="?contactItemBackground"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"

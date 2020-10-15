@@ -14,6 +14,7 @@ import android.provider.ContactsContract
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -92,6 +93,22 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var mpm: MediaPreviewManager
     private lateinit var analyticsLogger: AnalyticsLogger
     private lateinit var selectionManager: ListSelectionManager<Message>
+
+    private var goToBottomVisible = false
+    private val goToBottomScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            val dp = resources.displayMetrics.density
+            if (mLayoutManager.findFirstVisibleItemPosition() > 5 && !goToBottomVisible) {
+                goToBottomVisible = true
+                goToBottom.animate().alpha(1f).translationY(0f)
+                    .setInterpolator(AccelerateDecelerateInterpolator()).start()
+            } else if (mLayoutManager.findFirstVisibleItemPosition() <= 5 && goToBottomVisible) {
+                goToBottomVisible = false
+                goToBottom.animate().alpha(0f).translationY(48*dp)
+                    .setInterpolator(AccelerateDecelerateInterpolator()).start()
+            }
+        }
+    }
 
     private fun getRoundedCornerBitmap(bitmap: Bitmap): Bitmap {
         val output = Bitmap.createBitmap(
@@ -232,6 +249,10 @@ class ConversationActivity : AppCompatActivity() {
             adapter = mAdaptor
             recyclerView.edgeEffectFactory = ScrollEffectFactory()
             addOnScrollListener(ScrollEffectFactory.OnScrollListener())
+            addOnScrollListener(goToBottomScrollListener)
+            goToBottom.setOnClickListener {
+                smoothScrollToPosition(0)
+            }
         }
 
         lifecycleScope.launch {

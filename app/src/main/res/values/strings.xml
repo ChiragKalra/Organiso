@@ -62,5 +62,6 @@
     <string name="add_to_contacts">Add To Contacts</string>
     <string name="add_to_home">Add to Home</string>
     <string name="remove_address">remove address</string>
+    <string name="go_to_bottom">Go to bottom</string>
 
 </resources>
