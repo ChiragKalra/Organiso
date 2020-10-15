@@ -33,7 +33,6 @@ import com.bruhascended.organiso.ml.getOtp
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 import java.io.File
 
-
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -99,6 +98,7 @@ class MessageNotificationManager(
     }
 
     private fun getSenderIcon(conversation: Conversation): IconCompat {
+        val dp = File(mContext.filesDir, conversation.sender)
         val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
             setTint(mContext.getColor(colorRes[(conversation.id!! % colorRes.size).toInt()]))
         }
@@ -110,9 +110,9 @@ class MessageNotificationManager(
                 finalDrawable.setLayerGravity(1, Gravity.CENTER)
                 IconCompat.createWithBitmap(finalDrawable.toBitmap())
             }
-            conversation.dp.isNotBlank() -> {
-                val dp = getRoundedCornerBitmap(BitmapFactory.decodeFile(conversation.dp)!!)
-                IconCompat.createWithBitmap(dp)
+            dp.exists() -> {
+                val bm = getRoundedCornerBitmap(BitmapFactory.decodeFile(dp.absolutePath))
+                IconCompat.createWithBitmap(bm)
             }
             else -> {
                 val person = ContextCompat.getDrawable(mContext, R.drawable.ic_person)

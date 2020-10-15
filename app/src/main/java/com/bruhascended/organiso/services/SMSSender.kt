@@ -46,7 +46,7 @@ const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
 
 class SMSSender(
     private val mContext: Context,
-    private var conversations: Array<Conversation>
+    private val conversations: Array<Conversation>
 ) {
 
     private val sentAction = "$APPLICATION_ID.SMS_SENT"
@@ -64,7 +64,6 @@ class SMSSender(
         Thread {
             val message = Message(
                 retryIndex,
-                conversation.sender,
                 smsText,
                 type,
                 date,

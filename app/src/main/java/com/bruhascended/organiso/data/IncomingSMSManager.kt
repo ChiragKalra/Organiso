@@ -58,7 +58,6 @@ class IncomingSMSManager(
 
         val message = Message(
             null,
-            rawNumber,
             body,
             1,
             System.currentTimeMillis(),
@@ -92,7 +91,6 @@ class IncomingSMSManager(
             null,
             rawNumber,
             senderNameMap[rawNumber],
-            "",
             false,
             message.time,
             message.text,

@@ -33,7 +33,6 @@ data class Conversation (
     var id: Long?,
     val sender: String,
     var name: String?,
-    var dp: String,
     var read: Boolean,
     var time: Long,
     var lastSMS: String,
@@ -48,7 +47,6 @@ data class Conversation (
         if (javaClass != other?.javaClass) return false
 
         other as Conversation
-        if (dp != other.dp) return false
         if (sender != other.sender) return false
         if (name != other.name) return false
         if (read != other.read) return false

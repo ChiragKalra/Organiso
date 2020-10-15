@@ -37,7 +37,6 @@ data class Notification (
         if (javaClass != other?.javaClass) return false
 
         other as Message
-        if (sender != other.sender) return false
         if (text != other.text) return false
         if (time != other.time) return false
         if (path != other.path) return false

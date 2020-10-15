@@ -40,7 +40,7 @@ import com.klinker.android.send_message.Message as MMS
 
 class MMSSender(
     private val mContext: Context,
-    private var conversations: Array<Conversation>
+    private val conversations: Array<Conversation>
 ) {
     private lateinit var typeString: String
     private lateinit var uri: Uri
@@ -78,7 +78,6 @@ class MMSSender(
         Thread {
             val message = Message(
                 retryIndex,
-                conversation.sender,
                 smsText,
                 6,
                 date,

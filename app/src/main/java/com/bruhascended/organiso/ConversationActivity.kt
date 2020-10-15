@@ -51,6 +51,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.File
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -134,6 +135,7 @@ class ConversationActivity : AppCompatActivity() {
             setTint(mContext.getColor(ConversationRecyclerAdaptor.colorRes[(conversation.id!! % ConversationRecyclerAdaptor.colorRes.size).toInt()]))
         }
 
+        val dp = File(mContext.filesDir, conversation.sender)
         return when {
             conversation.sender.first().isLetter() -> {
                 val bot = ContextCompat.getDrawable(mContext, R.drawable.ic_bot)
@@ -141,9 +143,9 @@ class ConversationActivity : AppCompatActivity() {
                 finalDrawable.setLayerGravity(1, Gravity.CENTER)
                 Icon.createWithBitmap(finalDrawable.toBitmap())
             }
-            conversation.dp.isNotBlank() -> {
-                val dp = getRoundedCornerBitmap(BitmapFactory.decodeFile(conversation.dp)!!)
-                Icon.createWithBitmap(dp)
+            dp.exists() -> {
+                val bm = getRoundedCornerBitmap(BitmapFactory.decodeFile(dp.absolutePath))
+                Icon.createWithBitmap(bm)
             }
             else -> {
                 val person = ContextCompat.getDrawable(mContext, R.drawable.ic_person)
@@ -162,7 +164,6 @@ class ConversationActivity : AppCompatActivity() {
                 null,
                 intent.getStringExtra("sender")!!,
                 intent.getStringExtra("name"),
-                "",
                 true,
                 0,
                 "",

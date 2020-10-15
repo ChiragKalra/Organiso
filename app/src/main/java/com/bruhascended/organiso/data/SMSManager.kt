@@ -94,6 +94,8 @@ class SMSManager(
     }
 
     private fun saveMessage(ind: Int, sender: String, messages: ArrayList<Message>, label: Int) {
+        if (sender.isBlank()) return
+
         var conversation: Conversation? = null
         for (i in 0..4) {
             val got = mainViewModel.daos[i].findBySender(sender)
@@ -119,7 +121,6 @@ class SMSManager(
                 null,
                 sender,
                 senderNameMap[sender],
-                "",
                 true,
                 messages.last().time,
                 messages.last().text,
@@ -168,7 +169,6 @@ class SMSManager(
                         name = cm.getRaw(name)
                         val message = Message(
                             null,
-                            name,
                             messageContent,
                             getString(typeID).toInt(),
                             getString(dateID).toLong(),

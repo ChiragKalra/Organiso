@@ -120,7 +120,6 @@ class NewConversationActivity : AppCompatActivity() {
                     null,
                     adds[it].number,
                     null,
-                    "",
                     true,
                     0,
                     "",
@@ -177,7 +176,7 @@ class NewConversationActivity : AppCompatActivity() {
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
         setContentView(R.layout.activity_new_conversation)
 
-        mContext = this
+        mContext = applicationContext
 
         mpm = MediaPreviewManager(
             this,
@@ -243,7 +242,6 @@ class NewConversationActivity : AppCompatActivity() {
                             null,
                             adds[it].number,
                             null,
-                            "",
                             true,
                             0,
                             "",
@@ -266,6 +264,8 @@ class NewConversationActivity : AppCompatActivity() {
                         Intent(mContext, MainActivity::class.java)
                             .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0
                     )
+
+                    messageEditText.text = null
                 } else if (sender.isNotBlank()) {
                     var name: String? = null
 
@@ -281,7 +281,6 @@ class NewConversationActivity : AppCompatActivity() {
                             null,
                             sender,
                             name,
-                            "",
                             true,
                             0,
                             messageEditText.text.toString().trim(),

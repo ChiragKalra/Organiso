@@ -36,7 +36,6 @@ import kotlin.collections.toTypedArray
    limitations under the License.
  */
 
-
 class ContactsManager(context: Context) {
 
     data class Contact (
@@ -89,12 +88,12 @@ class ContactsManager(context: Context) {
             try {
                 val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.createInstance(mContext)
                 val numberProto: Phonenumber.PhoneNumber = phoneUtil.parse(number, "")
-                numberProto.nationalNumber.toString().filter { it.isDigit() }
+                numberProto.nationalNumber.toString().filter { it.isLetterOrDigit() }
             } catch (e: NumberParseException) {
-                number.filter { it.isDigit() }
+                number.filter { it.isLetterOrDigit() }
             }
         } else {
-            number.filter { it.isDigit() }
+            number.filter { it.isLetterOrDigit() }
         }
     }
 

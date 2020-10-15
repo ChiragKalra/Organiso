@@ -28,7 +28,7 @@ class FeatureExtractor (context: Context) {
         val fileStr = mContext.assets.open("words.csv").bufferedReader().use{
             it.readText()
         }
-        return fileStr.split("\r\n").dropLast(1)
+        return fileStr.split("\n").dropLast(1)
     }
 
     private fun getFeatures(k: Int, l: Int, message: Message, wordFeatures: List<String>) : Array<Float> {

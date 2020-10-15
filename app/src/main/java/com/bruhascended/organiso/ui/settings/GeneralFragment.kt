@@ -31,6 +31,7 @@ import com.bruhascended.organiso.requireMainViewModel
 */
 
 class GeneralFragment : PreferenceFragmentCompat() {
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.general_preferences, rootKey)
 
@@ -50,13 +51,14 @@ class GeneralFragment : PreferenceFragmentCompat() {
             }
         }
 
+        val mContext = requireContext().applicationContext
         deleteOtpPref.setOnPreferenceChangeListener { _, state ->
             if (state as Boolean) {
                 deleteOtpPref.setOnPreferenceChangeListener { _, _ ->  true}
                 Thread {
                     for (con in mainViewModel.daos[2].loadAllSync()) {
                         Room.databaseBuilder(
-                            requireContext(), MessageDatabase::class.java, con.sender
+                            mContext, MessageDatabase::class.java, con.sender
                         ).build().apply {
                             manager().loadAllSync().forEach {
                                 if (getOtp(it.text) != null && it.type==1 &&
@@ -66,7 +68,7 @@ class GeneralFragment : PreferenceFragmentCompat() {
                             }
                             val it = manager().loadLastSync()
                             if (it == null) {
-                                requireMainViewModel(requireContext())
+                                requireMainViewModel(mContext)
                                 mainViewModel.daos[2].delete(con)
                             } else {
                                 if (con.lastSMS != it.text ||

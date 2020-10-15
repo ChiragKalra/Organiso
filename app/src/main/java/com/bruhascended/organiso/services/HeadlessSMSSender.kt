@@ -51,7 +51,6 @@ class HeadlessSMSSender : Service() {
                 null,
                 adds[it],
                 null,
-                "",
                 true,
                 0,
                 "",

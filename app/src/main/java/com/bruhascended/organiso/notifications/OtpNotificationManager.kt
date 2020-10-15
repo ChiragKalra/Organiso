@@ -73,7 +73,7 @@ class OtpNotificationManager (
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        var text = "from ${message.sender}"
+        var text = "from ${conversation.sender}"
         if (prefs.getBoolean("copy_otp", true)) {
             text += " (Copied to Clipboard)"
             mContext.sendBroadcast(copyIntent)

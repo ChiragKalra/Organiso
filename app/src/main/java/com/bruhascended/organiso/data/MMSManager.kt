@@ -165,7 +165,6 @@ class MMSManager(private val context: Context) {
 
         val message = Message(
             null,
-            sender.second,
             body,
             if (sentByUser) 2 else 1,
             date,
@@ -190,9 +189,11 @@ class MMSManager(private val context: Context) {
         conversation = if (conversation != null) {
             conversation.apply {
                 read = false
-                time = message.time
-                lastSMS = message.text
-                lastMMS = true
+                if (time < message.time) {
+                    time = message.time
+                    lastSMS = message.text
+                    lastMMS = true
+                }
                 label = 0
                 forceLabel = 0
                 name = senderNameMap[rawNumber]
@@ -204,7 +205,6 @@ class MMSManager(private val context: Context) {
                 null,
                 rawNumber,
                 senderNameMap[rawNumber],
-                "",
                 false,
                 message.time,
                 message.text,

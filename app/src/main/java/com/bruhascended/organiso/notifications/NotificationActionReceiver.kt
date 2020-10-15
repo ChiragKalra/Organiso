@@ -67,7 +67,6 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
                 val newMessage = Message(
                     null,
-                    conversation.sender,
                     replyText,
                     0,
                     System.currentTimeMillis(),

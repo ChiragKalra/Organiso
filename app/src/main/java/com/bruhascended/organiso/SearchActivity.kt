@@ -81,7 +81,6 @@ class SearchActivity : AppCompatActivity() {
                             null,
                             contact.number,
                             contact.name,
-                            "",
                             true,
                             0,
                             "",
