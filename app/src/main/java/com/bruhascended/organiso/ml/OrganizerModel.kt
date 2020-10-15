@@ -71,7 +71,6 @@ class OrganizerModel (context: Context) {
             val out = Array(1){FloatArray(5)}
             tflite.run(inputData, out)
 
-            messages[i].label = out[0].toList().indexOf(out[0].maxOrNull())
             for (j in 0..4) probs[j] += out[0][j]
 
             AnalyticsLogger(mContext).log("message_organised")

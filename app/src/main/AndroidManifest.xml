@@ -36,15 +36,6 @@
         </provider>
 
         <receiver
-            android:name="com.android.mms.transaction.PushReceiver"
-            android:permission="android.permission.BROADCAST_WAP_PUSH">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
-
-                <data android:mimeType="application/vnd.wap.mms-message" />
-            </intent-filter>
-        </receiver>
-        <receiver
             android:name=".services.MMSReceiver"
             android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED" />
         <receiver
@@ -52,18 +43,9 @@
             android:taskAffinity="${applicationId}.SMS_SENT" />
         <receiver
             android:name="com.klinker.android.send_message.MmsSentReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="${applicationId}.MMS_SENT" />
-            </intent-filter>
-        </receiver>
+            android:taskAffinity="${applicationId}.MMS_SENT"/>
         <receiver
-            android:name="com.bruhascended.organiso.notifications.NotificationActionReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="NOTIFICATION_CANCELED" />
-            </intent-filter>
-        </receiver>
+            android:name="com.bruhascended.organiso.notifications.NotificationActionReceiver"/>
         <receiver
             android:name="com.bruhascended.organiso.services.SMSReceiver"
             android:enabled="true"
@@ -72,6 +54,15 @@
             <intent-filter android:priority="2147483645">
                 <action android:name="android.provider.Telephony.SMS_DELIVER" />
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.android.mms.transaction.PushReceiver"
+            android:permission="android.permission.BROADCAST_WAP_PUSH">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+
+                <data android:mimeType="application/vnd.wap.mms-message" />
             </intent-filter>
         </receiver>
 
@@ -104,56 +95,6 @@
             android:name="com.bruhascended.organiso.SearchActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateVisible" />
-        <activity
-            android:name="com.bruhascended.organiso.NewConversationActivity"
-            android:enabled="true"
-            android:exported="true"
-            android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SENDTO" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="sms" />
-                <data android:scheme="smsto" />
-                <data android:scheme="mms" />
-                <data android:scheme="mmsto" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="image/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="audio/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="video/*" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.bruhascended.organiso.MainActivity" />
-        </activity>
         <activity
             android:name="com.bruhascended.organiso.ConversationActivity"
             android:launchMode="standard">
@@ -207,6 +148,56 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bruhascended.organiso.SettingsActivity" />
+        </activity>
+        <activity
+            android:name="com.bruhascended.organiso.NewConversationActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="sms" />
+                <data android:scheme="smsto" />
+                <data android:scheme="mms" />
+                <data android:scheme="mmsto" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="video/*" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
     </application>
 

@@ -11,6 +11,12 @@
     <string name="new_conversation">New Conversation</string>
     <string name="new_short">New</string>
     <string name="info">Info</string>
+    <string name="general">General</string>
+    <string name="notifications">Notifications</string>
+    <string name="customise_categories">Customise Categories</string>
+    <string name="privacy">Privacy</string>
+    <string name="theme">Theme</string>
+    <string name="otp">OTP</string>
 
     <!-- Actions -->
     <string name="delete">Delete</string>
@@ -61,6 +67,10 @@
     <string name="go_to_bottom">Go to bottom</string>
     <string name="remove_address">Remove Address Button</string>
     <string name="animated">Transition</string>
+    <string name="attach_file">Attach File</string>
+    <string name="custom_category_label">custom category label</string>
+    <string name="toggle_visibility">Toggle Visibility</string>
+    <string name="play_button">Play/Pause Button</string>
 
     <!-- Descriptions -->
     <string name="you">You</string>
@@ -129,5 +139,21 @@
     <string name="senders_reported_spam">Sender(s) Reported Spam</string>
     <string name="conversations_moved">Conversation(s) Moved</string>
     <string name="cant_hide_last_category">Can\'t hide last category</string>
+
+    <!-- Settings -->
+    <string name="dark_theme">Dark Theme</string>
+    <string name="search_hidden_categories">Search Hidden Categories</string>
+    <string name="auto_copy_otp">Automatically Copy OTP</string>
+    <string name="auto_delete_otp">Automatically Delete OTP</string>
+    <string name="otp_auto_delete_after">OTP will be deleted after 15 minutes.</string>
+    <string name="upload_spam_reports">Send anonymous spam reports</string>
+    <string name="send_reports_summary">Send a copy of reported spam messages to us so we can improve our spam detection and protect users like you.</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="report_bug">Report a bug</string>
+    <string name="about_app">About App</string>
+    <string name="visit_app_website">Visit app website</string>
+    <string name="visit_github">Check out the source code</string>
+    <string name="license">License</string>
+
 
 </resources>

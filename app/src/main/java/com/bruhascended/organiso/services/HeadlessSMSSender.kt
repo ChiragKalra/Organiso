@@ -48,15 +48,8 @@ class HeadlessSMSSender : Service() {
         val adds = if (number == null) TextUtils.split(recipients, ";") else arrayOf(number)
         val conversations = Array(adds.size) {
             Conversation(
-                null,
                 adds[it],
-                null,
-                true,
-                0,
-                "",
-                0,
-                -1,
-                FloatArray(5) { its ->
+                probs = FloatArray(5) { its ->
                     if (its == 0) 1f else 0f
                 }
             )

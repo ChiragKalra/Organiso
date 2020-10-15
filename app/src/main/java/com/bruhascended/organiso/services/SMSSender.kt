@@ -63,13 +63,8 @@ class SMSSender(
         date: Long, type: Int, delivered: Boolean, retryIndex: Long?
     ) {
         Thread {
-            val message = Message(
-                retryIndex,
-                smsText,
-                type,
-                date,
-                0,
-                delivered
+            val message = Message (
+                smsText, type, date, id = retryIndex, delivered = delivered
             )
             val conversationDao = if (activeConversationSender == null) Room.databaseBuilder(
                 mContext, MessageDatabase::class.java, conversation.sender

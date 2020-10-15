@@ -78,7 +78,8 @@
         app:srcCompat="@drawable/add_file"
         android:backgroundTint="@color/colorAccent"
         app:layout_constraintEnd_toStartOf="@id/submit"
-        app:layout_constraintTop_toBottomOf="@id/full" />
+        app:layout_constraintTop_toBottomOf="@id/full"
+        android:contentDescription="@string/attach_file" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/submit"
@@ -90,7 +91,8 @@
         app:srcCompat="@drawable/ic_send"
         android:backgroundTint="@color/colorAccent"
         app:layout_constraintTop_toBottomOf="@id/full"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="@string/send" />
 
 
 

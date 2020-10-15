@@ -17,6 +17,7 @@
         tools:listitem="@layout/item_conversation"/>
 
     <TextView
+        android:visibility="gone"
         android:layout_margin="16dp"
         android:textColor="?android:textColor"
         android:textSize="16sp"

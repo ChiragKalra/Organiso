@@ -56,13 +56,7 @@ class IncomingSMSManager(
 
         val rawNumber = cm.getRaw(sender)
 
-        val message = Message(
-            null,
-            body,
-            1,
-            System.currentTimeMillis(),
-            -1
-        )
+        val message = Message(body, 1, System.currentTimeMillis())
 
         var conversation = deletePrevious(rawNumber)
 
@@ -88,15 +82,14 @@ class IncomingSMSManager(
             probs = mProbs ?: probs
             name = senderNameMap[rawNumber]
         } ?: Conversation(
-            null,
             rawNumber,
             senderNameMap[rawNumber],
-            false,
-            message.time,
-            message.text,
-            prediction,
-            if (prediction == 0) 0 else -1,
-            FloatArray(5) {
+            read = false,
+            time = message.time,
+            lastSMS = message.text,
+            label = prediction,
+            forceLabel = if (prediction == 0) 0 else -1,
+            probs = FloatArray(5) {
                 if (it == prediction) 1f else 0f
             }
         )

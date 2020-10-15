@@ -119,15 +119,13 @@ class SMSManager(
             }
         } else {
             val con = Conversation(
-                null,
                 sender,
                 senderNameMap[sender],
-                true,
-                messages.last().time,
-                messages.last().text,
-                label,
-                if (label == 0) 0 else -1,
-                senderToProbs[sender] ?: FloatArray(5) { if (it == 0) 1f else 0f }
+                time = messages.last().time,
+                lastSMS = messages.last().text,
+                label = label,
+                forceLabel = if (label == 0) 0 else -1,
+                probs = senderToProbs[sender] ?: FloatArray(5) { if (it == 0) 1f else 0f }
             )
             mainViewModel.daos[label].insert(con)
         }
@@ -169,13 +167,8 @@ class SMSManager(
                     if (name != null && !messageContent.isNullOrEmpty()) {
                         name = cm.getRaw(name)
                         val message = Message(
-                            null,
-                            messageContent,
-                            getString(typeID).toInt(),
-                            getString(dateID).toLong(),
-                            -1
+                            messageContent, getString(typeID).toInt(), getString(dateID).toLong()
                         )
-
                         if (messages.containsKey(name)) messages[name]?.add(message)
                         else messages[name] = arrayListOf(message)
                     }

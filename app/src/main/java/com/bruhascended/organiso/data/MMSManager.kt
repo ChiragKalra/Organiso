@@ -162,15 +162,7 @@ class MMSManager(private val context: Context) {
         val sentByUser = sender.first
         val rawNumber = cm.getRaw(sender.second)
 
-        val message = Message(
-            null,
-            body,
-            if (sentByUser) 2 else 1,
-            date,
-            0,
-            false,
-            file
-        )
+        val message = Message(body, if (sentByUser) 2 else 1, date, path = file)
 
         requireMainViewModel(context)
 
@@ -201,15 +193,13 @@ class MMSManager(private val context: Context) {
             conversation
         } else {
             val con = Conversation(
-                null,
                 rawNumber,
                 senderNameMap[rawNumber],
-                false,
-                message.time,
-                message.text,
-                0,
-                0,
-                FloatArray(5) {
+                read = false,
+                time = message.time,
+                lastSMS = message.text,
+                forceLabel = 0,
+                probs = FloatArray(5) {
                     if (it == 0) 1f else 0f
                 },
                 lastMMS = true

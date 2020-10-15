@@ -38,7 +38,7 @@
             android:layout_height="48dp"
             android:layout_margin="4dp"
             android:background="#0000"
-            android:contentDescription="@string/send"
+            android:contentDescription="@string/play_button"
             android:src="@drawable/ic_play"
             android:tint="?attr/colorAccent" />
         <SeekBar
@@ -85,7 +85,7 @@
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
             android:background="#0000"
-            android:contentDescription="@string/send"
+            android:contentDescription="@string/attach_file"
             android:src="@drawable/add_file"
             android:tint="?headerTextColor" />
 

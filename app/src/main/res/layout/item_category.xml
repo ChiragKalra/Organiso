@@ -21,7 +21,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/name"
         app:layout_constraintStart_toStartOf="@id/name"
-        android:importantForAutofill="no" />
+        android:importantForAutofill="no"
+        android:contentDescription="@string/custom_category_label" />
 
     <EditText
         android:background="@drawable/bg_contact"
@@ -64,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="2dp"
         android:background="#0000"
-        android:contentDescription="@string/drag_handle"
+        android:contentDescription="@string/toggle_visibility"
         android:padding="8dp"
         android:src="@drawable/ic_visible"
         android:tint="?android:textColor"

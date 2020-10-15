@@ -13,7 +13,6 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bruhascended.organiso.ConversationActivity.Companion.selectMediaArg
 import com.bruhascended.organiso.data.ContactsManager
 import com.bruhascended.organiso.data.ContactsManager.Contact
 import com.bruhascended.organiso.db.Conversation
@@ -119,15 +118,8 @@ class NewConversationActivity : MediaPreviewActivity() {
         sendButton.setOnClickListener {
             val conversations = Array(adds.size) {
                 Conversation(
-                    null,
                     adds[it].number,
-                    null,
-                    true,
-                    0,
-                    "",
-                    0,
-                    -1,
-                    FloatArray(5) { its ->
+                    probs = FloatArray(5) { its ->
                         if (its == 0) 1f else 0f
                     }
                 )
@@ -232,15 +224,8 @@ class NewConversationActivity : MediaPreviewActivity() {
                     to.onEditorAction(EditorInfo.IME_ACTION_DONE)
                     val conversations = Array(adds.size) {
                         Conversation(
-                            null,
                             adds[it].number,
-                            null,
-                            true,
-                            0,
-                            "",
-                            0,
-                            -1,
-                            FloatArray(5) { its ->
+                            probs = FloatArray(5) { its ->
                                 if (its == 0) 1f else 0f
                             }
                         )
@@ -271,15 +256,10 @@ class NewConversationActivity : MediaPreviewActivity() {
                     val intent = Intent(this, ConversationActivity::class.java)
                     intent.putExtra("ye",
                         Conversation(
-                            null,
                             sender,
                             name,
-                            true,
-                            0,
-                            messageEditText.text.toString().trim(),
-                            0,
-                            -1,
-                            FloatArray(5) { its ->
+                            lastSMS = messageEditText.text.toString().trim(),
+                            probs = FloatArray(5) { its ->
                                 if (its == 0) 1f else 0f
                             }
                         )

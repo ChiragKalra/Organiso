@@ -27,12 +27,11 @@ import java.io.Serializable
 
 @Entity(tableName = "messages")
 data class Message (
-    @PrimaryKey(autoGenerate = true)
-    var id: Long?,
     val text: String,
     var type: Int,
     val time: Long,
-    var label: Int,
+    @PrimaryKey(autoGenerate = true)
+    var id: Long? = null,
     var delivered: Boolean = false,
     var path: String? = null
 ): Serializable {

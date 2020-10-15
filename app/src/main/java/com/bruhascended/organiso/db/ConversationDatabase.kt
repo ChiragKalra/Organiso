@@ -29,16 +29,16 @@ import java.io.Serializable
 
 @Entity(tableName = "conversations")
 data class Conversation (
-    @PrimaryKey(autoGenerate = true)
-    var id: Long?,
     val sender: String,
-    var name: String?,
-    var read: Boolean,
-    var time: Long,
-    var lastSMS: String,
-    var label: Int,
-    var forceLabel: Int,
-    var probs: FloatArray,
+    var name: String? = null,
+    @PrimaryKey(autoGenerate = true)
+    var id: Long? = null,
+    var label: Int = 0,
+    var forceLabel: Int = -1,
+    var probs: FloatArray = FloatArray(5){0F},
+    var read: Boolean = true,
+    var time: Long = 0,
+    var lastSMS: String = "",
     var isMuted: Boolean = false,
     var lastMMS: Boolean = false
 ): Serializable {

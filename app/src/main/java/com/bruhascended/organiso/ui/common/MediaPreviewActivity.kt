@@ -14,8 +14,8 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
-import com.bruhascended.organiso.ConversationActivity.Companion.selectMediaArg
 import com.bruhascended.organiso.R
+import com.bruhascended.organiso.selectMediaArg
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

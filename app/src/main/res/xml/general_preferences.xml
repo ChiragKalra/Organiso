@@ -3,50 +3,51 @@
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="Theme"
+        app:title="@string/theme"
         app:key="theme_category"/>
     <SwitchPreferenceCompat
         app:defaultValue="false"
         app:icon="@drawable/ic_theme"
         app:key="dark_theme"
         app:allowDividerBelow="false"
-        app:title="Dark Theme" />
+        app:title="@string/dark_theme" />
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="Search"/>
+        app:title="@string/search"/>
     <SwitchPreferenceCompat
         app:defaultValue="false"
         app:icon="@drawable/ic_search_themed"
         app:key="show_hidden_results"
         app:allowDividerBelow="false"
-        app:title="Search Hidden Categories" />
+        app:title="@string/search_hidden_categories" />
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="OTP" />
+        app:title="@string/otp" />
     <SwitchPreferenceCompat
         app:defaultValue="true"
         app:icon="@drawable/ic_copy"
         app:key="copy_otp"
         app:allowDividerBelow="false"
-        app:title="Automatically Copy OTP"/>
+        app:title="@string/auto_copy_otp"/>
     <SwitchPreferenceCompat
         app:defaultValue="false"
         app:icon="@drawable/ic_themed_delete"
         app:key="delete_otp"
         app:allowDividerBelow="false"
-        app:summaryOn="OTP will be deleted after 15 minutes."
-        app:title="Automatically Delete OTP"/>
+        app:summaryOn="@string/otp_auto_delete_after"
+        app:title="@string/auto_delete_otp"/>
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="Privacy" />
+        app:title="@string/privacy" />
     <SwitchPreferenceCompat
         app:defaultValue="true"
         app:icon="@drawable/ic_report"
         app:key="report_spam"
         app:allowDividerBelow="false"
-        app:title="Share anonymous spam reports" />
+        android:summary="@string/send_reports_summary"
+        app:title="@string/upload_spam_reports" />
 
 </PreferenceScreen>

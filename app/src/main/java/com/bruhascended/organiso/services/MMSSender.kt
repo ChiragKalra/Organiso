@@ -77,13 +77,8 @@ class MMSSender(
 
     private fun addMmsToDb(conversation: Conversation, date: Long, retryIndex: Long?) {
         Thread {
-            val message = Message(
-                retryIndex,
-                smsText,
-                6,
-                date,
-                0,
-                path = saveMedia(date)
+            val message = Message (
+                smsText, 6, date, id = retryIndex, path = saveMedia(date)
             )
 
             val conversationDao = if (activeConversationSender == null) Room.databaseBuilder(

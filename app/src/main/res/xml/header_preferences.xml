@@ -12,24 +12,24 @@
         app:allowDividerBelow="false"
         app:key="general"
         app:icon="@drawable/ic_account"
-        app:title="General" />
+        app:title="@string/general" />
 
     <Preference
         app:allowDividerBelow="false"
         app:key="notifications"
         app:icon="@drawable/ic_notifications"
-        app:title="Notifications" />
+        app:title="@string/notifications" />
 
     <Preference
         app:fragment="com.bruhascended.organiso.ui.settings.CategorySettingsFragment"
         app:icon="@drawable/ic_category"
         app:key="category_header"
-        app:title="Customise Categories" />
+        app:title="@string/customise_categories" />
 
     <Preference
         app:fragment="com.bruhascended.organiso.ui.settings.InfoFragment"
         app:icon="@drawable/ic_info"
         app:key="info_header"
-        app:title="Info" />
+        app:title="@string/info" />
 
 </PreferenceScreen>

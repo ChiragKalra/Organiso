@@ -3,27 +3,27 @@
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="Contact Us"/>
+        app:title="@string/contact_us"/>
     <Preference
         app:icon="@drawable/ic_bug_report"
         app:key="report_bug"
-        app:title="Report a bug" />
+        app:title="@string/report_bug" />
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="About App" />
+        app:title="@string/about_app" />
     <Preference
         app:icon="@drawable/ic_web"
         app:key="website"
-        app:title="Visit app website" />
+        app:title="@string/visit_app_website" />
     <Preference
         app:icon="@drawable/github"
         app:key="github"
-        app:title="Check out the source code" />
+        app:title="@string/visit_github" />
     <Preference
         app:fragment="com.bruhascended.sms.ui.settings.LicenseFragment"
         app:icon="@drawable/ic_policy"
         app:key="license"
-        app:title="License" />
+        app:title="@string/license" />
 
 </PreferenceScreen>

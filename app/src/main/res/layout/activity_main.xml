@@ -47,6 +47,7 @@
         android:backgroundTint="?attr/colorAccent"
         android:tint="#000"
         app:borderWidth="0dp"
-        app:srcCompat="@drawable/ic_sms" />
+        app:srcCompat="@drawable/ic_sms"
+        android:contentDescription="@string/new_conversation" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
