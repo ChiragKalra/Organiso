@@ -35,7 +35,7 @@ data class Conversation (
     var id: Long? = null,
     var label: Int = 0,
     var forceLabel: Int = -1,
-    var probs: FloatArray = FloatArray(5){0F},
+    var probabilities: FloatArray = FloatArray(5) { if (it == 0) 1F else 0F },
     var read: Boolean = true,
     var time: Long = 0,
     var lastSMS: String = "",

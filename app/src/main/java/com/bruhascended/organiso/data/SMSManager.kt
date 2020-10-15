@@ -125,7 +125,8 @@ class SMSManager(
                 lastSMS = messages.last().text,
                 label = label,
                 forceLabel = if (label == 0) 0 else -1,
-                probs = senderToProbs[sender] ?: FloatArray(5) { if (it == 0) 1f else 0f }
+                probabilities = senderToProbs[sender] ?:
+                FloatArray(5) { if (it == 0) 1f else 0f }
             )
             mainViewModel.daos[label].insert(con)
         }

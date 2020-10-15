@@ -128,7 +128,7 @@ class MMSManager(private val context: Context) {
         }
     }
 
-    fun putMMS(mmsId: String, date: Long = System.currentTimeMillis()):
+    fun putMMS(mmsId: String, date: Long = System.currentTimeMillis(), init: Boolean = true):
             Pair<Message, Conversation>? {
         val selectionPart = "mid=$mmsId"
         val partUri = Uri.parse("content://mms/part")
@@ -179,7 +179,7 @@ class MMSManager(private val context: Context) {
 
         conversation = if (conversation != null) {
             conversation.apply {
-                read = false
+                read = init
                 if (time < message.time) {
                     time = message.time
                     lastSMS = message.text
@@ -195,13 +195,10 @@ class MMSManager(private val context: Context) {
             val con = Conversation(
                 rawNumber,
                 senderNameMap[rawNumber],
-                read = false,
+                read = init,
                 time = message.time,
                 lastSMS = message.text,
                 forceLabel = 0,
-                probs = FloatArray(5) {
-                    if (it == 0) 1f else 0f
-                },
                 lastMMS = true
             )
             mainViewModel.daos[0].insert(con)

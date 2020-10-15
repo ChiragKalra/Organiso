@@ -46,14 +46,7 @@ class HeadlessSMSSender : Service() {
 
         val number = extras.get(Intent.EXTRA_PHONE_NUMBER) as String?
         val adds = if (number == null) TextUtils.split(recipients, ";") else arrayOf(number)
-        val conversations = Array(adds.size) {
-            Conversation(
-                adds[it],
-                probs = FloatArray(5) { its ->
-                    if (its == 0) 1f else 0f
-                }
-            )
-        }
+        val conversations = Array(adds.size) { Conversation(adds[it]) }
         SMSSender(this, conversations).sendSMS(message)
         return null
     }

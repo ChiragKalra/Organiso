@@ -77,13 +77,7 @@ class SearchActivity : AppCompatActivity() {
                 }
                 searchRecycler.post {
                     mAdaptor.addItems(listOf(ResultItem(1,
-                        conversation = Conversation(
-                            contact.number,
-                            contact.name,
-                            probs = FloatArray(5) { its ->
-                                if (its == 0) 1f else 0f
-                            }
-                        )
+                        conversation = Conversation(contact.number, contact.name)
                     )))
                 }
             }

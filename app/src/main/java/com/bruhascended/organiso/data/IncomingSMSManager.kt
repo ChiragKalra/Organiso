@@ -66,7 +66,8 @@ class IncomingSMSManager(
         else if (!getOtp(body).isNullOrEmpty()) 2
         else {
             mProbs = nn.getPrediction(message)
-            if (conversation != null) for (j in 0..4) mProbs[j] += conversation.probs[j]
+            if (conversation != null)
+                for (j in 0..4) mProbs[j] += conversation.probabilities[j]
             mProbs.toList().indexOf(mProbs.maxOrNull())
         }
 
@@ -79,7 +80,7 @@ class IncomingSMSManager(
             lastSMS = message.text
             if (prediction == 0) forceLabel = 0
             label = prediction
-            probs = mProbs ?: probs
+            probabilities = mProbs ?: probabilities
             name = senderNameMap[rawNumber]
         } ?: Conversation(
             rawNumber,
@@ -88,10 +89,7 @@ class IncomingSMSManager(
             time = message.time,
             lastSMS = message.text,
             label = prediction,
-            forceLabel = if (prediction == 0) 0 else -1,
-            probs = FloatArray(5) {
-                if (it == prediction) 1f else 0f
-            }
+            forceLabel = if (prediction == 0) 0 else -1
         )
 
         mainViewModel.daos[prediction].insert(conversation)

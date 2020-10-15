@@ -117,12 +117,7 @@ class NewConversationActivity : MediaPreviewActivity() {
         }
         sendButton.setOnClickListener {
             val conversations = Array(adds.size) {
-                Conversation(
-                    adds[it].number,
-                    probs = FloatArray(5) { its ->
-                        if (its == 0) 1f else 0f
-                    }
-                )
+                Conversation(adds[it].number)
             }
             val smsSender = SMSSender(mContext, conversations)
             val mmsSender = MMSSender(mContext, conversations)
@@ -223,12 +218,7 @@ class NewConversationActivity : MediaPreviewActivity() {
                 if (adds.isNotEmpty()) {
                     to.onEditorAction(EditorInfo.IME_ACTION_DONE)
                     val conversations = Array(adds.size) {
-                        Conversation(
-                            adds[it].number,
-                            probs = FloatArray(5) { its ->
-                                if (its == 0) 1f else 0f
-                            }
-                        )
+                        Conversation(adds[it].number)
                     }
 
                     val msg = messageEditText.text.toString().trim()
@@ -256,12 +246,8 @@ class NewConversationActivity : MediaPreviewActivity() {
                     val intent = Intent(this, ConversationActivity::class.java)
                     intent.putExtra("ye",
                         Conversation(
-                            sender,
-                            name,
-                            lastSMS = messageEditText.text.toString().trim(),
-                            probs = FloatArray(5) { its ->
-                                if (its == 0) 1f else 0f
-                            }
+                            sender, name,
+                            lastSMS = messageEditText.text.toString().trim()
                         )
                     )
                     if (mmsType > 0) intent.data = mmsURI
