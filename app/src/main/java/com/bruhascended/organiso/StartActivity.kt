@@ -1,7 +1,6 @@
 package com.bruhascended.organiso
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -14,12 +13,10 @@ import android.provider.Telephony
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.ViewModelProvider
 import com.bruhascended.organiso.data.SMSManager
 import com.bruhascended.organiso.notifications.ChannelManager
-import com.bruhascended.organiso.ui.start.StartViewModel
 import kotlinx.android.synthetic.main.activity_start.*
-import java.lang.Math.round
+import kotlin.math.roundToInt
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -39,7 +36,6 @@ import java.lang.Math.round
 
 class StartActivity : AppCompatActivity() {
     private lateinit var mContext: Context
-    private lateinit var pageViewModel: StartViewModel
     private lateinit var sharedPref: SharedPreferences
 
     private val arg = "InitDataOrganized"
@@ -49,6 +45,12 @@ class StartActivity : AppCompatActivity() {
         Manifest.permission.SEND_SMS,
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.READ_CONTACTS
+    )
+
+    private val discStrings = arrayOf(
+        R.string.getting_your_msgs,
+        R.string.organising_your_msgs,
+        R.string.done
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,47 +108,55 @@ class StartActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_start)
 
-        pageViewModel = ViewModelProvider(this).get(StartViewModel::class.java).apply {
-        progress.value = 0f
-        disc.value = 0
-    }
-        pageViewModel.progress.observe(this, {
-            if (it > 0) {
-                if (progressBar.indeterminateMode) {
-                    progressBar.indeterminateMode = false
-                    pageViewModel.disc.postValue(1)
-                }
-                progressText.text = getString(R.string.x_percent, round(it))
-                progressBar.progress = it
-            }
-        })
+        val smsManager = SMSManager(mContext)
 
-        pageViewModel.disc.observe(this, {
-            infoText.text = getString(pageViewModel.discStrings[it])
-            if (it == 2) etaText.visibility = View.INVISIBLE
-        })
+        var progress = 0f
+
+        smsManager.onProgressListener = {
+            runOnUiThread {
+                progress = it
+                if (it > 0) {
+                    if (progressBar.indeterminateMode) {
+                        progressBar.indeterminateMode = false
+                        smsManager.onStatusChangeListener(1)
+                    }
+                    progressText.text = getString(R.string.x_percent, it.roundToInt())
+                    progressBar.progress = it
+                }
+            }
+        }
+
+        smsManager.onStatusChangeListener = {
+            runOnUiThread {
+                infoText.text = getString(discStrings[it])
+                if (it == 2) etaText.visibility = View.INVISIBLE
+            }
+        }
+        smsManager.onStatusChangeListener(0)
 
         var preTimer: CountDownTimer? = null
-        pageViewModel.eta.observe(this, {
-            preTimer?.cancel()
-            preTimer = object : CountDownTimer(it, 1000) {
-                override fun onTick(millisUntilFinished: Long) {
-                    val sec = (millisUntilFinished / 1000) % 60
-                    val min = (millisUntilFinished / 1000) / 60
-                    if ((0 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
-                        etaText.text = when {
-                            min > 0 -> getString(R.string.x_mins_remaining, min)
-                            sec > 9 -> getString(R.string.less_than_min_remaining)
-                            sec > 3 -> getString(R.string.just_few_secs)
-                            else -> getString(R.string.finishing_up)
-                        }
-                    } else etaText.text = ""
-                }
-                override fun onFinish() {}
-            }.start()
-        })
+        smsManager.onEtaChangeListener =  {
+            runOnUiThread {
+                preTimer?.cancel()
+                preTimer = object : CountDownTimer(it, 1000) {
+                    override fun onTick(millisUntilFinished: Long) {
+                        val sec = (millisUntilFinished / 1000) % 60
+                        val min = (millisUntilFinished / 1000) / 60
+                        if ((0 < progress) && (progress < 100)) {
+                            etaText.text = when {
+                                min > 0 -> getString(R.string.x_mins_remaining, min)
+                                sec > 9 -> getString(R.string.less_than_min_remaining)
+                                sec > 3 -> getString(R.string.just_few_secs)
+                                else -> getString(R.string.finishing_up)
+                            }
+                        } else etaText.text = ""
+                    }
+                    override fun onFinish() {}
+                }.start()
+            }
+        }
 
-        ChannelManager(mContext).createNotificationChannels()
+        ChannelManager(this).createNotificationChannels()
 
         val wakeLock: PowerManager.WakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -155,15 +165,15 @@ class StartActivity : AppCompatActivity() {
                 }
             }
         Thread {
-            SMSManager(mContext, pageViewModel).apply {
+            smsManager.apply {
                 getMessages()
                 getLabels()
             }
-            startActivity(Intent(mContext, MainActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
             wakeLock.release()
 
             sharedPref.edit().putBoolean(arg, true).apply()
-            (mContext as Activity).finish()
+            finish()
         }.start()
     }
 }

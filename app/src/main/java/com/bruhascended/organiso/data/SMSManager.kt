@@ -1,3 +1,17 @@
+package com.bruhascended.organiso.data
+
+import android.content.Context
+import android.net.Uri
+import androidx.room.Room
+import com.bruhascended.organiso.R
+import com.bruhascended.organiso.analytics.AnalyticsLogger
+import com.bruhascended.organiso.db.Conversation
+import com.bruhascended.organiso.db.Message
+import com.bruhascended.organiso.db.MessageDatabase
+import com.bruhascended.organiso.ml.OrganizerModel
+import com.bruhascended.organiso.mainViewModel
+import com.bruhascended.organiso.requireMainViewModel
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -15,25 +29,8 @@
 
 */
 
-package com.bruhascended.organiso.data
-
-import android.content.Context
-import android.net.Uri
-import androidx.room.Room
-import com.bruhascended.organiso.R
-import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDatabase
-import com.bruhascended.organiso.ml.OrganizerModel
-import com.bruhascended.organiso.mainViewModel
-import com.bruhascended.organiso.requireMainViewModel
-import com.bruhascended.organiso.ui.start.StartViewModel
-
-
 class SMSManager(
     private val mContext: Context,
-    private val pageViewModel: StartViewModel
 ) {
 
     companion object {
@@ -68,8 +65,12 @@ class SMSManager(
 
     private lateinit var mmsThread: Thread
 
+    var onStatusChangeListener: (Int) -> Unit = {}
+    var onProgressListener: (Float) -> Unit = {}
+    var onEtaChangeListener: (Long) -> Unit = {}
+
     private fun finish() {
-        pageViewModel.disc.postValue(2)
+        onStatusChangeListener(2)
 
         nn.close()
         senderNameMap.clear()
@@ -87,8 +88,8 @@ class SMSManager(
         timeTaken = (System.currentTimeMillis()-startTime)
         val per = done * 100f / total
         val eta = (System.currentTimeMillis()-startTime) * (100/per-1)
-        pageViewModel.progress.postValue(per)
-        pageViewModel.eta.postValue(eta.toLong())
+        onProgressListener(per)
+        onEtaChangeListener(eta.toLong())
 
         AnalyticsLogger(mContext).log("conversation_organised", "init")
     }
