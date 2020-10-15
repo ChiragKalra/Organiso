@@ -111,10 +111,10 @@ class SMSSender(
 
     fun sendSMS(smsText: String, retryIndex: Long? = null) {
         val date = System.currentTimeMillis()
-        val transaction = Transaction(mContext, settings).apply {
+        val transaction = Transaction(mContext, settings)/*.apply {
             setExplicitBroadcastForSentSms(Intent(sentAction))
             setExplicitBroadcastForDeliveredSms(Intent(deliveredAction))
-        }
+        }*/
 
         conversations.forEach { conversation ->
             addSmsToDb(conversation, smsText, date, 6, false, retryIndex)

@@ -45,15 +45,11 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name="com.bruhascended.organiso.services.MMSReceiver"
+            android:name=".services.MMSReceiver"
             android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED" />
         <receiver
-            android:name="com.klinker.android.send_message.SentReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="${applicationId}.SMS_SENT" />
-            </intent-filter>
-        </receiver>
+            android:name=".services.SmsSentReceiverProxy"
+            android:taskAffinity="${applicationId}.SMS_SENT" />
         <receiver
             android:name="com.klinker.android.send_message.MmsSentReceiver"
             android:exported="false">
