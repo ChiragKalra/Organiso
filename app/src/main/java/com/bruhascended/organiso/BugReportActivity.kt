@@ -1,20 +1,3 @@
-/*
-                    Copyright 2020 Chirag Kalra
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
-*/
-
 package com.bruhascended.organiso
 
 import android.content.Intent
@@ -33,6 +16,22 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/*
+                    Copyright 2020 Chirag Kalra
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
 
 class BugReportActivity : AppCompatActivity() {
 
@@ -115,10 +114,10 @@ class BugReportActivity : AppCompatActivity() {
                     full.text.toString(),
                     fileUri
                 )
-                Toast.makeText(this, "Bug Report sent", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.bug_report_sent), Toast.LENGTH_SHORT).show()
                 finish()
             } else {
-                Toast.makeText(this, "empty field(s)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.empty_fields), Toast.LENGTH_SHORT).show()
             }
         }
     }

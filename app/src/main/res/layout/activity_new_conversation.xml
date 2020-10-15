@@ -101,6 +101,7 @@
         android:id="@+id/videoPlayPauseButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:elevation="15dp"
         android:background="#0000"
         android:contentDescription="@string/send"
         android:src="@drawable/ic_play"

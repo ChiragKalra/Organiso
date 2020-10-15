@@ -115,7 +115,7 @@ class RecyclerViewAdapter(
             holder.hideButton.setOnClickListener {
                 if (data.indexOf(HIDDEN) > holder.absoluteAdapterPosition) {
                     if (data.indexOf(HIDDEN) == 2) {
-                        Toast.makeText(mContext, "Cant hide last category", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(mContext, context.getString(R.string.cant_hide_last_category), Toast.LENGTH_SHORT).show()
                     } else {
                         onRowMoved(holder.absoluteAdapterPosition, 7)
                         holder.hideButton.setImageResource(R.drawable.ic_visible)

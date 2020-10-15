@@ -23,7 +23,7 @@ import com.bruhascended.organiso.activeConversationDao
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.MediaPreviewManager.Companion.getMimeType
+import com.bruhascended.organiso.ui.common.MediaPreviewActivity.Companion.getMimeType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -122,16 +122,16 @@ class MessageSelectionListener(
         when (item.itemId) {
             R.id.action_delete -> {
                 AlertDialog.Builder(mContext)
-                    .setTitle("Delete selected messages?")
-                    .setPositiveButton("Delete") { dialog, _ ->
+                    .setTitle(mContext.getString(R.string.delete_msgs_query))
+                    .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         Thread {
                             for (selectedItem in selected)
                                 activeConversationDao.delete(selectedItem)
                         }.start()
-                        Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, mContext.getString(R.string.deleted), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         selectionManager.close()
-                    }.setNegativeButton("Cancel") { dialog, _ ->
+                    }.setNegativeButton(mContext.getString(R.string.cancel)) { dialog, _ ->
                         dialog.dismiss()
                     }.create().show()
             }
@@ -144,14 +144,14 @@ class MessageSelectionListener(
                 }
                 val clip = ClipData.newPlainText("none", sb.toString())
                 clipboard.setPrimaryClip(clip)
-                Toast.makeText(mContext, "Copied", Toast.LENGTH_LONG).show()
+                Toast.makeText(mContext, mContext.getString(R.string.copied), Toast.LENGTH_LONG).show()
                 mode.finish()
             }
             R.id.action_share -> {
                 mContext.startActivity(
                     Intent.createChooser(
                         getSharable(selected.first()),
-                        "Share"
+                        mContext.getString(R.string.share)
                     )
                 )
                 mode.finish()

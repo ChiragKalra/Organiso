@@ -99,12 +99,14 @@ class SearchResultViewHolder(
             }
             4 -> {
                 val labelTextView: TextView = root.findViewById(R.id.label)
-                if (item.categoryHeader == 42) labelTextView.text = "From Contacts"
+                if (item.categoryHeader == 42)
+                    labelTextView.text = context.getString(R.string.from_contacts)
                 else {
                     val label = item.categoryHeader - (if (item.categoryHeader > 9) 10 else 0)
                     val labelText = mContext.getString(labelText[label])
                     labelTextView.text = when {
-                        item.categoryHeader > 9 -> "Messages in $labelText"
+                        item.categoryHeader > 9 ->
+                            mContext.getString(R.string.messages_in_label, labelText)
                         else -> labelText
                     }
                 }

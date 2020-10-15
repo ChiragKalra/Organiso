@@ -1,6 +1,5 @@
 package com.bruhascended.organiso
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -8,8 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.inputmethod.EditorInfo
-import android.widget.ProgressBar
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.*
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
@@ -22,8 +20,7 @@ import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
-import com.bruhascended.organiso.ui.common.MediaPreviewManager
-import com.bruhascended.organiso.ui.common.MediaPreviewManager.Companion.getMimeType
+import com.bruhascended.organiso.ui.common.MediaPreviewActivity
 import com.bruhascended.organiso.ui.newConversation.AddressRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor
 import kotlinx.android.synthetic.main.activity_new_conversation.*
@@ -48,14 +45,20 @@ import kotlin.collections.ArrayList
    limitations under the License.
  */
 
-class NewConversationActivity : AppCompatActivity() {
+class NewConversationActivity : MediaPreviewActivity() {
 
     private lateinit var mContext: Context
-    private lateinit var mpm: MediaPreviewManager
     private lateinit var contacts: Array<Contact>
     private val adds = arrayListOf<Contact>()
     private lateinit var cm: ContactsManager
     private lateinit var addressRecyclerAdaptor: AddressRecyclerAdaptor
+
+    override lateinit var mVideoView: VideoView
+    override lateinit var mImagePreview: ImageView
+    override lateinit var mSeekBar: SeekBar
+    override lateinit var mPlayPauseButton: ImageButton
+    override lateinit var mVideoPlayPauseButton: ImageButton
+    override lateinit var mAddMedia: ImageButton
 
     private val clickAction = { contact: Contact ->
         to.text = null
@@ -92,14 +95,13 @@ class NewConversationActivity : AppCompatActivity() {
                     messageEditText.setText(str)
                 }
                 intent.type != "multi" -> {
-                    mpm.showMediaPreview(intent)
+                    showMediaPreview(intent)
                 }
             }
         }
     }
 
     @Suppress("UNCHECKED_CAST")
-    @SuppressLint("SetTextI18n")
     private fun processMultiData(intent: Intent) {
         if (Intent.ACTION_SEND != intent.action || intent.type != "multi") return
 
@@ -108,7 +110,7 @@ class NewConversationActivity : AppCompatActivity() {
 
         val msgs = intent.getSerializableExtra("data") as Array<Message>
         messageEditText.apply {
-            setText("${msgs.size} messages")
+            setText(getString(R.string.messages, msgs.size))
             setBackgroundColor(Color.TRANSPARENT)
             isFocusable = false
             isCursorVisible = false
@@ -153,9 +155,9 @@ class NewConversationActivity : AppCompatActivity() {
 
         val adaptor = if (key.isNotEmpty()) {
             for (contact in contacts) {
-                if ((key in contact.name.toLowerCase(Locale.ROOT) && key.first()
+                if ((Regex("\\b${key}").matches(contact.number) && key.first()
                         .isLetter()) or
-                    (key in contact.number.toLowerCase(Locale.ROOT) && key.first()
+                    (Regex("\\b${key}").matches(contact.name) && key.first()
                         .isDigit())
                 ) {
                     filtered.add(contact)
@@ -169,7 +171,6 @@ class NewConversationActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
         val dark = PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean("dark_theme", false)
@@ -177,20 +178,12 @@ class NewConversationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_new_conversation)
 
         mContext = this
-
-        mpm = MediaPreviewManager(
-            this,
-            videoView,
-            imagePreview,
-            seekBar,
-            playPauseButton,
-            videoPlayPauseButton,
-            addMedia
-        )
-
-        addMedia.setOnClickListener{
-            mpm.loadMedia()
-        }
+        mVideoView = videoView
+        mImagePreview = imagePreview
+        mSeekBar = seekBar
+        mPlayPauseButton = playPauseButton
+        mVideoPlayPauseButton = videoPlayPauseButton
+        mAddMedia = addMedia
 
         cm = ContactsManager(this)
 
@@ -231,7 +224,7 @@ class NewConversationActivity : AppCompatActivity() {
             if (to.text.isNotBlank()) displaySearch(contacts)
 
             sendButton.setOnClickListener {
-                if (messageEditText.text.toString().trim() == "" && mpm.mmsType == 0)
+                if (messageEditText.text.toString().trim() == "" && mmsType == 0)
                     return@setOnClickListener
 
                 val sender: String = to.text.toString().trim()
@@ -254,10 +247,10 @@ class NewConversationActivity : AppCompatActivity() {
                     }
 
                     val msg = messageEditText.text.toString().trim()
-                    if (mpm.mmsType == 0) SMSSender(mContext, conversations).sendSMS(msg)
+                    if (mmsType == 0) SMSSender(mContext, conversations).sendSMS(msg)
                     else {
                         MMSSender(mContext, conversations)
-                            .sendMMS(msg, mpm.mmsURI, mpm.mmsTypeString)
+                            .sendMMS(msg, mmsURI, mmsTypeString)
                     }
 
                     startActivityIfNeeded(
@@ -291,7 +284,7 @@ class NewConversationActivity : AppCompatActivity() {
                             }
                         )
                     )
-                    if (mpm.mmsType > 0) intent.data = mpm.mmsURI
+                    if (mmsType > 0) intent.data = mmsURI
                     startActivity(intent)
                     this.finish()
                 }
@@ -316,12 +309,8 @@ class NewConversationActivity : AppCompatActivity() {
                 mainViewModel.contacts.observe(this, observer)
             }
         }.start()
+
+        super.onCreate(savedInstanceState)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == selectMediaArg && data != null && data.data != null) {
-            mpm.showMediaPreview(data)
-        }
-    }
 }

@@ -7,14 +7,11 @@ import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
 import androidx.room.Room
-import com.bruhascended.organiso.activeConversationDao
-import com.bruhascended.organiso.activeConversationSender
+import com.bruhascended.organiso.*
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.db.MessageDatabase
 import com.bruhascended.organiso.db.NotificationDatabase
-import com.bruhascended.organiso.mainViewModel
-import com.bruhascended.organiso.requireMainViewModel
 import com.bruhascended.organiso.services.SMSSender
 
 class NotificationActionReceiver : BroadcastReceiver() {
@@ -38,7 +35,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 val clip = ClipData.newPlainText("OTP", otp)
                 clipboard.setPrimaryClip(clip)
                 Handler(Looper.getMainLooper()).post{
-                    Toast.makeText(mContext, "OTP Copied To Clipboard", Toast.LENGTH_LONG).show()
+                    Toast.makeText(mContext, mContext.getString(R.string.otp_copied), Toast.LENGTH_LONG).show()
                 }
             }
             ACTION_DELETE -> {
@@ -56,7 +53,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 }
                 if (toast) {
                     Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, mContext.getString(R.string.deleted), Toast.LENGTH_LONG).show()
                     }
                 }
                 NotificationManagerCompat.from(mContext).cancel(id)
@@ -74,15 +71,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 )
                 MessageNotificationManager(mContext).sendSmsNotification(newMessage to conversation)
 
-                /*mContext.applicationContext.startService(
-                    Intent(mContext, HeadlessSMSSender::class.java).apply {
-                        action = Intent.ACTION_SENDTO
-                        putExtra(Intent.EXTRA_TEXT, replyText)
-                        putExtra(Intent.EXTRA_PHONE_NUMBER, conversation.sender)
-                    }
-                )*/
-                SMSSender(mContext.applicationContext, arrayOf(conversation))
-                    .sendSMS(replyText)
+                SMSSender(mContext.applicationContext, arrayOf(conversation)).sendSMS(replyText)
             }
         }
     }

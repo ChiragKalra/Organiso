@@ -32,7 +32,7 @@ class LicenseFragment : PreferenceFragmentCompat() {
     }
 
     override fun onDestroy() {
-        requireActivity().title = "Info"
+        requireActivity().title = getString(R.string.info)
         super.onDestroy()
     }
 }

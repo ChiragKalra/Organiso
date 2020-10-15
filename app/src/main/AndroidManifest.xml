@@ -197,7 +197,7 @@
         <activity
             android:name="com.bruhascended.organiso.SettingsActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
-            android:label="@string/title_activity_settings"
+            android:label="@string/settings"
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -206,7 +206,7 @@
         <activity
             android:name="com.bruhascended.organiso.BugReportActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
-            android:label="Report A Bug"
+            android:label="@string/report_a_bug"
             android:launchMode="singleTop">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

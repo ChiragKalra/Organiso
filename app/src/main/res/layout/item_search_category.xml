@@ -15,7 +15,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         android:elevation="8dp"
-        android:hint="@string/category_name"
         android:importantForAutofill="no"
         android:textAlignment="center"
         android:textColor="?headerTextColor"

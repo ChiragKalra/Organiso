@@ -230,20 +230,21 @@ class MessageViewHolder(
             statusTextView!!.visibility = VISIBLE
             statusTextView.setTextColor(textColor)
             statusTextView.text =  when {
-                message.delivered -> "delivered"
-                message.type == 2 -> "sent"
-                message.type == 6 -> "queued"
+                message.delivered -> mContext.getString(R.string.delivered)
+                message.type == 2 -> mContext.getString(R.string.sent)
+                message.type == 6 -> mContext.getString(R.string.queued)
                 else -> {
                     failed = true
                     statusTextView.setTextColor(mContext.getColor(R.color.red))
-                    if (retryEnabled) "failed. tap to retry" else "failed"
+                    if (retryEnabled) mContext.getString(R.string.failed_retry)
+                    else mContext.getString(R.string.failed)
                 }
             }
         }
 
         if (message.path != null) {
             showMedia()
-            if (message.text == "") messageTextView.visibility = GONE
+            if (message.text.isBlank()) messageTextView.visibility = GONE
         }
 
     }

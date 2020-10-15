@@ -144,7 +144,7 @@ class MessageNotificationManager(
         notificationManager.notify(
             0,
             Builder(mContext, "0")
-                .setContentTitle("$active conversation(s)")
+                .setContentTitle(mContext.getString(R.string.x_active_conversations, active))
                 .setSmallIcon(R.drawable.message)
                 .setAutoCancel(true)
                 .setGroup(GROUP_DEFAULT)
@@ -184,7 +184,7 @@ class MessageNotificationManager(
             .build()
 
         val userPerson = Person.Builder()
-            .setName("You")
+            .setName(mContext.getString(R.string.you))
             .setIcon(getUserIcon())
             .build()
 
@@ -217,8 +217,8 @@ class MessageNotificationManager(
             if (it.path != null) {
                 val mType = getMimeType(it.path!!)
                 msgText = when {
-                    mType.startsWith("audio") -> "Audio: "
-                    mType.startsWith("video") -> "Video: "
+                    mType.startsWith("audio") -> mContext.getString(R.string.audio_col)
+                    mType.startsWith("video") -> mContext.getString(R.string.video_col)
                     else -> ""
                 } + it.text
             }
@@ -234,7 +234,7 @@ class MessageNotificationManager(
         }
 
         val remoteInput: RemoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).run {
-            setLabel("Reply")
+            setLabel(mContext.getString(R.string.reply))
             build()
         }
         val replyPendingIntent: PendingIntent = PendingIntent.getBroadcast(
@@ -246,7 +246,7 @@ class MessageNotificationManager(
             PendingIntent.FLAG_UPDATE_CURRENT
         )
         val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
-            R.drawable.ic_reply, "Reply", replyPendingIntent
+            R.drawable.ic_reply, mContext.getString(R.string.reply), replyPendingIntent
         ).addRemoteInput(remoteInput).build()
 
         val notification = Builder(mContext, conversation.label.toString())

@@ -1,3 +1,12 @@
+package com.bruhascended.organiso
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
+import com.bruhascended.organiso.data.SMSManager.Companion.labelText
+import com.bruhascended.organiso.ui.main.CategoryFragment
+import kotlinx.android.synthetic.main.activity_conversation.toolbar
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,16 +23,6 @@
    limitations under the License.
 
 */
-
-package com.bruhascended.organiso
-
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
-import com.bruhascended.organiso.data.SMSManager.Companion.labelText
-import com.bruhascended.organiso.ui.main.CategoryFragment
-import kotlinx.android.synthetic.main.activity_conversation.toolbar
-
 
 class ExtraCategoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

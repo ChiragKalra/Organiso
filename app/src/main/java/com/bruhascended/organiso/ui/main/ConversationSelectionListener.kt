@@ -104,48 +104,48 @@ class ConversationSelectionListener(
         val selected = selectionManager.selectedItems
 
         val alertDialog = AlertDialog.Builder(mContext)
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(mContext.getString(R.string.cancel)) { dialog, _ ->
                 dialog.dismiss()
             }
 
         when (item.itemId) {
             R.id.action_select_range -> toggleRange(item)
             R.id.action_delete -> {
-                alertDialog.setTitle("Delete selected conversations?")
-                    .setPositiveButton("Delete") { dialog, _ ->
+                alertDialog.setTitle(mContext.getString(R.string.delete_conversations_query))
+                    .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         for (selectedItem in selected) {
                             notificationManager.cancel(selectedItem.id!!.toInt())
                             selectedItem.moveTo(-1, mContext)
                             analyticsLogger.log("${selectedItem.label}_to_-1")
                         }
-                        Toast.makeText(mContext, "Deleted", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, mContext.getString(R.string.deleted), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         selectionManager.close()
                     }.create().show()
             }
             R.id.action_block -> {
-                alertDialog.setTitle("Block selected conversations?")
-                    .setPositiveButton("Block") { dialog, _ ->
+                alertDialog.setTitle(mContext.getString(R.string.block_conversations_query))
+                    .setPositiveButton(mContext.getString(R.string.block)) { dialog, _ ->
                         for (selectedItem in selected) {
                             selectedItem.moveTo(5)
                             analyticsLogger.log("${selectedItem.label}_to_5")
                             notificationManager.cancel(selectedItem.id!!.toInt())
                         }
-                        Toast.makeText(mContext,"Senders Blocked", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, mContext.getString(R.string.senders_blocked), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         selectionManager.close()
                     }.create().show()
             }
             R.id.action_report_spam -> {
-                alertDialog.setTitle("Report selected conversations?")
-                    .setPositiveButton("Report") { dialog, _ ->
+                alertDialog.setTitle(mContext.getString(R.string.report_conversations_query))
+                    .setPositiveButton(mContext.getString(R.string.report)) { dialog, _ ->
                         for (selectedItem in selected) {
                             selectedItem.moveTo(4)
                             analyticsLogger.reportSpam(selectedItem)
                             analyticsLogger.log("${selectedItem.label}_to_4")
                             notificationManager.cancel(selectedItem.id!!.toInt())
                         }
-                        Toast.makeText(mContext, "Senders Reported Spam", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, mContext.getString(R.string.senders_reported_spam), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         selectionManager.close()
                     }.create().show()
@@ -157,15 +157,15 @@ class ConversationSelectionListener(
                     }
                 }.toTypedArray()
                 var selection = 0
-                alertDialog.setTitle("Move this conversation to")
+                alertDialog.setTitle(mContext.getString(R.string.move_conversations_to))
                     .setSingleChoiceItems(choices, selection) { _, select ->
                         selection = select + if (select>=label) 1 else 0
-                    }.setPositiveButton("Move") { dialog, _ ->
+                    }.setPositiveButton(mContext.getString(R.string.move)) { dialog, _ ->
                         for (selectedItem in selected) {
                             selectedItem.moveTo(selection)
                             analyticsLogger.log("${selectedItem.label}_to_$selection")
                         }
-                        Toast.makeText(mContext, "Conversations Moved", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, mContext.getString(R.string.conversations_moved), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         selectionManager.close()
                     }.create().show()

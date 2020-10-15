@@ -81,7 +81,7 @@ class ConversationViewHolder(
         timeTextView.text = displayTime(conversation.time, mContext)
 
         val str = if (conversation.lastMMS)
-            SpannableString("Media ${conversation.lastSMS}")
+            SpannableString(mContext.getString(R.string.media_message, conversation.lastSMS))
         else SpannableString(conversation.lastSMS)
         if (!conversation.read) {
             str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)

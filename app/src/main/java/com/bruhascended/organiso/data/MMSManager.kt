@@ -31,13 +31,12 @@ import java.io.*
 import java.lang.Exception
 
 
-@SuppressLint("Recycle")
+@SuppressLint("Recycle", "MissingPermission", "HardwareIds")
 class MMSManager(private val context: Context) {
     private val cm = ContactsManager(context)
     private val senderNameMap = cm.getContactsHashMap()
 
     private val tMgr = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    @SuppressLint("MissingPermission", "HardwareIds")
     private var mPhoneNumber = cm.getRaw(tMgr.line1Number)
 
     private fun getAddressNumber(id: String): Pair<Boolean, String> {

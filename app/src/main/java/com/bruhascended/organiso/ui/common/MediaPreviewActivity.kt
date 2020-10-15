@@ -1,3 +1,25 @@
+package com.bruhascended.organiso.ui.common
+
+import android.content.Intent
+import android.graphics.drawable.AnimatedVectorDrawable
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.Bundle
+import android.os.Handler
+import android.os.Parcelable
+import android.view.View
+import android.webkit.MimeTypeMap
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.SeekBar
+import android.widget.VideoView
+import androidx.appcompat.app.AppCompatActivity
+import com.bruhascended.organiso.ConversationActivity.Companion.selectMediaArg
+import com.bruhascended.organiso.R
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -15,36 +37,7 @@
 
 */
 
-package com.bruhascended.organiso.ui.common
-
-import android.content.Intent
-import android.graphics.drawable.AnimatedVectorDrawable
-import android.media.MediaPlayer
-import android.net.Uri
-import android.os.Handler
-import android.os.Parcelable
-import android.view.View
-import android.webkit.MimeTypeMap
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.SeekBar
-import android.widget.VideoView
-import androidx.appcompat.app.AppCompatActivity
-import com.bruhascended.organiso.ConversationActivity.Companion.selectMediaArg
-import com.bruhascended.organiso.R
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
-class MediaPreviewManager(
-    private val mActivity: AppCompatActivity,
-    private val videoView: VideoView,
-    private val imagePreview: ImageView,
-    private val seekBar: SeekBar,
-    private val playPauseButton: ImageButton,
-    private val videoPlayPauseButton: ImageButton,
-    private val addMedia: ImageButton
-) {
+abstract class MediaPreviewActivity : AppCompatActivity() {
     companion object {
         fun getMimeType(url: String): String {
             val extension = MimeTypeMap.getFileExtensionFromUrl(url)
@@ -52,13 +45,17 @@ class MediaPreviewManager(
         }
     }
 
-
-    var mmsType = 0
-
-    lateinit var mmsTypeString: String
-    lateinit var mmsURI: Uri
-
     private val mp = MediaPlayer()
+    protected abstract var mVideoView: VideoView
+    protected abstract var mImagePreview: ImageView
+    protected abstract var mSeekBar: SeekBar
+    protected abstract var mPlayPauseButton: ImageButton
+    protected abstract var mVideoPlayPauseButton: ImageButton
+    protected abstract var mAddMedia: ImageButton
+
+    protected var mmsType = 0
+    protected lateinit var mmsTypeString: String
+    protected lateinit var mmsURI: Uri
 
     private fun fadeAway(vararg views: View) {
         for (view in views) view.apply {
@@ -70,7 +67,7 @@ class MediaPreviewManager(
                     .start()
                 GlobalScope.launch {
                     delay(400)
-                    mActivity.runOnUiThread {
+                    runOnUiThread {
                         alpha = 1f
                         visibility = View.GONE
                     }
@@ -79,28 +76,43 @@ class MediaPreviewManager(
         }
     }
 
-    fun loadMedia() {
+    private fun loadMedia() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "audio/*", "video/*"))
-        mActivity.startActivityForResult(intent, selectMediaArg)
+        startActivityForResult(intent, selectMediaArg)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == selectMediaArg && data != null && data.data != null) {
+            showMediaPreview(data)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        mAddMedia.setOnClickListener{
+            loadMedia()
+        }
     }
 
     fun hideMediaPreview() {
-        videoView.stopPlayback()
+        mVideoView.stopPlayback()
         mp.reset()
-        fadeAway(videoView, imagePreview, seekBar, playPauseButton, videoPlayPauseButton)
+        fadeAway(mVideoView, mImagePreview, mSeekBar, mPlayPauseButton, mVideoPlayPauseButton)
         mmsType = 0
-        addMedia.setImageResource(R.drawable.close_to_add)
-        (addMedia.drawable as AnimatedVectorDrawable).start()
-        addMedia.setOnClickListener {
+        mAddMedia.setImageResource(R.drawable.close_to_add)
+        (mAddMedia.drawable as AnimatedVectorDrawable).start()
+        mAddMedia.setOnClickListener {
             loadMedia()
         }
     }
 
     fun showMediaPreview(data: Intent) {
-        addMedia.apply {
+        mAddMedia.apply {
             setImageResource(R.drawable.close)
             setOnClickListener {
                 hideMediaPreview()
@@ -108,31 +120,32 @@ class MediaPreviewManager(
         }
 
         mmsURI = data.data ?: data.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
-        mmsTypeString = mActivity.contentResolver.getType(mmsURI)!!
+        mmsTypeString = contentResolver.getType(mmsURI)!!
         mmsType = when {
             mmsTypeString.startsWith("image") -> {
-                imagePreview.visibility = View.VISIBLE
-                imagePreview.setImageURI(mmsURI)
+                mImagePreview.visibility = View.VISIBLE
+                mImagePreview.setImageURI(mmsURI)
                 1
             }
             mmsTypeString.startsWith("audio") -> {
-                seekBar.visibility = View.VISIBLE
-                playPauseButton.visibility = View.VISIBLE
+                mSeekBar.visibility = View.VISIBLE
+                mPlayPauseButton.visibility = View.VISIBLE
+                val mContext = this
                 mp.apply {
-                    setDataSource(mActivity, mmsURI)
+                    setDataSource(mContext, mmsURI)
                     prepareAsync()
                     setOnPreparedListener {
-                        seekBar.max = mp.duration / 500
+                        mSeekBar.max = mp.duration / 500
 
-                        val mHandler = Handler(mActivity.mainLooper)
-                        mActivity.runOnUiThread(object : Runnable {
+                        val mHandler = Handler(mainLooper)
+                        runOnUiThread(object : Runnable {
                             override fun run() {
-                                seekBar.progress = currentPosition / 500
+                                mSeekBar.progress = currentPosition / 500
                                 mHandler.postDelayed(this, 500)
                             }
                         })
 
-                        seekBar.setOnSeekBarChangeListener(object :
+                        mSeekBar.setOnSeekBarChangeListener(object :
                             SeekBar.OnSeekBarChangeListener {
                             override fun onStopTrackingTouch(seekBar: SeekBar) {}
                             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -143,7 +156,7 @@ class MediaPreviewManager(
                             }
                         })
 
-                        playPauseButton.apply {
+                        mPlayPauseButton.apply {
                             setOnClickListener {
                                 if (isPlaying) {
                                     pause()
@@ -159,18 +172,18 @@ class MediaPreviewManager(
                 2
             }
             mmsTypeString.startsWith("video") -> {
-                videoView.apply {
+                mVideoView.apply {
                     visibility = View.VISIBLE
-                    videoPlayPauseButton.visibility = View.VISIBLE
+                    mVideoPlayPauseButton.visibility = View.VISIBLE
                     setVideoURI(mmsURI)
                     setOnPreparedListener { mp -> mp.isLooping = true }
-                    videoPlayPauseButton.setOnClickListener {
+                    mVideoPlayPauseButton.setOnClickListener {
                         if (isPlaying) {
                             pause()
-                            videoPlayPauseButton.setImageResource(R.drawable.ic_play)
+                            mVideoPlayPauseButton.setImageResource(R.drawable.ic_play)
                         } else {
                             start()
-                            videoPlayPauseButton.setImageResource(R.drawable.ic_pause)
+                            mVideoPlayPauseButton.setImageResource(R.drawable.ic_pause)
                         }
                     }
                 }
@@ -180,4 +193,6 @@ class MediaPreviewManager(
         }
         if (mmsType == 0) hideMediaPreview()
     }
+
+
 }

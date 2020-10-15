@@ -15,6 +15,7 @@ import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.mainViewModel
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
+import com.bruhascended.organiso.R
 import com.bruhascended.organiso.activeConversationSender
 import com.bruhascended.organiso.db.MessageDatabase
 import com.klinker.android.send_message.Settings
@@ -127,7 +128,7 @@ class SMSSender(
                             Handler(Looper.getMainLooper()).post {
                                 Toast.makeText(
                                     mContext,
-                                    "Service provider error",
+                                    mContext.getString(R.string.service_provider_error),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -137,7 +138,17 @@ class SMSSender(
                             Handler(Looper.getMainLooper()).post {
                                 Toast.makeText(
                                     mContext,
-                                    "No service",
+                                    mContext.getString(R.string.no_service),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            addSmsToDb(conversation, smsText, date, 5, false, retryIndex)
+                        }
+                        else -> {
+                            Handler(Looper.getMainLooper()).post {
+                                Toast.makeText(
+                                    mContext,
+                                    mContext.getString(R.string.error),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }

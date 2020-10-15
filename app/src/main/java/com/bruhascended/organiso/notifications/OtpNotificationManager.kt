@@ -73,9 +73,9 @@ class OtpNotificationManager (
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        var text = "from ${conversation.sender}"
+        var text = mContext.getString(R.string.from_sender, conversation.sender)
         if (prefs.getBoolean("copy_otp", true)) {
-            text += " (Copied to Clipboard)"
+            text += mContext.getString(R.string.copied)
             mContext.sendBroadcast(copyIntent)
         }
 
@@ -91,7 +91,8 @@ class OtpNotificationManager (
             WorkManager.getInstance(mContext).enqueue(request)
         }
 
-        val formattedOtp = "OTP: " + otp.slice(0 until otp.length/2) + " " +
+        val formattedOtp = mContext.getString(R.string.otp_col) +
+                otp.slice(0 until otp.length/2) + " " +
                 otp.slice(otp.length/2 until otp.length)
         val notificationLayout = RemoteViews(mContext.packageName,
             R.layout.view_notification_otp).apply{

@@ -107,8 +107,8 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
         return when (item.itemId) {
             R.id.action_reset -> {
                 AlertDialog.Builder(requireContext())
-                    .setTitle("Reset to default?")
-                    .setPositiveButton("Reset") { dialog, _ ->
+                    .setTitle(getString(R.string.reset_to_default_query))
+                    .setPositiveButton(getString(R.string.reset)) { dialog, _ ->
                         val vis = Array(4){it}
                         val hid = Array(2){4+it}
                         prefs.edit()
@@ -121,7 +121,7 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
                         drawRecyclerView(vis, hid)
                         dialog.dismiss()
                     }
-                    .setNegativeButton("Cancel") { dialog, _ ->
+                    .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
                         dialog.dismiss()
                     }.create().show()
                 true

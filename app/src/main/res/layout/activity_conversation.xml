@@ -72,6 +72,7 @@
     <include layout="@layout/layout_send"/>
 
     <ImageButton
+        android:elevation="15dp"
         android:visibility="gone"
         android:layout_marginBottom="74dp"
         android:id="@+id/videoPlayPauseButton"
@@ -82,6 +83,7 @@
         android:src="@drawable/ic_play"
         android:tint="?attr/colorAccent"
         app:layout_constraintBottom_toBottomOf="@+id/sendLayout"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

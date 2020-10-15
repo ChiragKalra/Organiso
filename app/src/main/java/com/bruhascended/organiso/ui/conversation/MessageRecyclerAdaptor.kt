@@ -14,7 +14,7 @@ import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.ui.common.ListSelectionManager
 import com.bruhascended.organiso.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
-import com.bruhascended.organiso.ui.common.MediaPreviewManager.Companion.getMimeType
+import com.bruhascended.organiso.ui.common.MediaPreviewActivity.Companion.getMimeType
 import java.io.File
 
 /*

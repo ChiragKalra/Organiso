@@ -16,9 +16,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -39,7 +37,7 @@ import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.ui.common.ListSelectionManager
 import com.bruhascended.organiso.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
-import com.bruhascended.organiso.ui.common.MediaPreviewManager
+import com.bruhascended.organiso.ui.common.MediaPreviewActivity
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
 import com.bruhascended.organiso.ui.conversation.MessageSelectionListener
@@ -71,7 +69,7 @@ import java.io.File
 */
 
 @Suppress("UNCHECKED_CAST")
-class ConversationActivity : AppCompatActivity() {
+class ConversationActivity : MediaPreviewActivity() {
 
     companion object {
         const val selectMediaArg = 0
@@ -91,11 +89,18 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var mmsSender: MMSSender
     private var inputManager: InputMethodManager? = null
 
-    private lateinit var mpm: MediaPreviewManager
     private lateinit var analyticsLogger: AnalyticsLogger
     private lateinit var selectionManager: ListSelectionManager<Message>
 
     private var goToBottomVisible = false
+
+    override lateinit var mVideoView: VideoView
+    override lateinit var mImagePreview: ImageView
+    override lateinit var mSeekBar: SeekBar
+    override lateinit var mPlayPauseButton: ImageButton
+    override lateinit var mVideoPlayPauseButton: ImageButton
+    override lateinit var mAddMedia: ImageButton
+
     private val goToBottomScrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             val dp = resources.displayMetrics.density
@@ -192,15 +197,12 @@ class ConversationActivity : AppCompatActivity() {
         activeConversationDao = mdb
         activeConversationSender = conversation.sender
 
-        mpm = MediaPreviewManager(
-            this,
-            videoView,
-            imagePreview,
-            seekBar,
-            playPauseButton,
-            videoPlayPauseButton,
-            addMedia
-        )
+        mVideoView = videoView
+        mImagePreview = imagePreview
+        mSeekBar = seekBar
+        mPlayPauseButton = playPauseButton
+        mVideoPlayPauseButton = videoPlayPauseButton
+        mAddMedia = addMedia
     }
 
     private var scroll = true
@@ -317,7 +319,6 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
             "dark_theme",
             false
@@ -337,12 +338,12 @@ class ConversationActivity : AppCompatActivity() {
         }
 
         sendButton.setOnClickListener {
-            if (mpm.mmsType > 0) {
+            if (mmsType > 0) {
                 sendButton.isEnabled = false
-                mmsSender.sendMMS(messageEditText.text.toString(), mpm.mmsURI, mpm.mmsTypeString)
+                mmsSender.sendMMS(messageEditText.text.toString(), mmsURI, mmsTypeString)
                 sendButton.isEnabled = true
                 messageEditText.setText("")
-                mpm.hideMediaPreview()
+                hideMediaPreview()
             } else if (messageEditText.text.toString().trim() != "") {
                 sendButton.isEnabled = false
                 smsSender.sendSMS(messageEditText.text.toString())
@@ -358,18 +359,17 @@ class ConversationActivity : AppCompatActivity() {
             }
         } else if (!conversation.lastSMS.isBlank()) {
             messageEditText.setText(conversation.lastSMS)
-            if (intent.data != null) mpm.showMediaPreview(intent)
+            if (intent.data != null) showMediaPreview(intent)
             sendButton.callOnClick()
         } else if (intent.data != null) {
-            mpm.showMediaPreview(intent)
+            showMediaPreview(intent)
             sendButton.callOnClick()
         }
 
-        addMedia.setOnClickListener{
-            mpm.loadMedia()
-        }
         setupRecycler()
         trackLastMessage()
+
+        super.onCreate(savedInstanceState)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -378,35 +378,35 @@ class ConversationActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_block -> {
                 AlertDialog.Builder(mContext)
-                    .setTitle("Block $display?")
-                    .setPositiveButton("Block") { dialog, _ ->
+                    .setTitle(getString(R.string.block_sender_query, display))
+                    .setPositiveButton(getString(R.string.block)) { dialog, _ ->
                         analyticsLogger.log("${conversation.label}_to_5")
                         conversation.moveTo(5)
-                        Toast.makeText(mContext, "Sender Blocked", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, getString(R.string.sender_blocked), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
+                    }.setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_report_spam -> {
                 AlertDialog.Builder(mContext)
-                    .setTitle("Report $display as spam?")
-                    .setPositiveButton("Report") { dialog, _ ->
+                    .setTitle(getString(R.string.report_sender_as_spam_query, display))
+                    .setPositiveButton(getString(R.string.report)) { dialog, _ ->
                         analyticsLogger.log("${conversation.label}_to_4")
                         analyticsLogger.reportSpam(conversation)
                         conversation.moveTo(4)
-                        Toast.makeText(mContext, "Sender Reported Spam", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, getString(R.string.reported_spam), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
+                    }.setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_delete -> {
                 AlertDialog.Builder(mContext)
-                    .setTitle("Delete this conversation?")
-                    .setPositiveButton("Delete") { dialog, _ ->
+                    .setTitle(getString(R.string.delete_conversation_query))
+                    .setPositiveButton(getString(R.string.delete)) { dialog, _ ->
                         analyticsLogger.log("${conversation.label}_to_-1")
                         conversation.moveTo(-1, mContext)
-                        Toast.makeText(mContext, "Conversation Deleted", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, getString(R.string.conversation_deleted), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
                         finish()
-                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
+                    }.setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_move -> {
                 val choices = ArrayList<String>().apply {
@@ -416,16 +416,16 @@ class ConversationActivity : AppCompatActivity() {
                 }.toTypedArray()
                 var selection = 0
                 AlertDialog.Builder(mContext)
-                    .setTitle("Move this conversation to")
+                    .setTitle(getString(R.string.move_conversation_to))
                     .setSingleChoiceItems(choices, selection) { _, select ->
                         selection = select + if (select >= conversation.label) 1 else 0
                     }
-                    .setPositiveButton("Move") { dialog, _ ->
+                    .setPositiveButton(getText(R.string.move)) { dialog, _ ->
                         analyticsLogger.log("${conversation.label}_to_$selection")
                         conversation.moveTo(selection)
-                        Toast.makeText(mContext, "Conversation Moved", Toast.LENGTH_LONG).show()
+                        Toast.makeText(mContext, getString(R.string.conversation_moved), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
-                    }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().show()
+                    }.setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }.create().show()
             }
             R.id.action_search -> {
                 startActivityForResult(
@@ -435,12 +435,15 @@ class ConversationActivity : AppCompatActivity() {
                 overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
             }
             R.id.action_mute -> {
-                conversation.isMuted = !conversation.isMuted
-                mainViewModel.daos[conversation.label].update(conversation)
-                GlobalScope.launch {
-                    delay(300)
-                    runOnUiThread {
-                        item.title = if (conversation.isMuted) "UnMute" else "Mute"
+                conversation.apply {
+                    isMuted = !isMuted
+                    mainViewModel.daos[label].update(this)
+                    GlobalScope.launch {
+                        delay(300)
+                        runOnUiThread {
+                            item.title = if (isMuted)
+                                getString(R.string.unMute) else getString(R.string.mute)
+                        }
                     }
                 }
             }
@@ -488,9 +491,7 @@ class ConversationActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == selectMediaArg && data != null && data.data != null) {
-            mpm.showMediaPreview(data)
-        } else if (requestCode == selectMessageArg && resultCode == RESULT_OK && data != null) {
+        if (requestCode == selectMessageArg && resultCode == RESULT_OK && data != null) {
             val id = data.getLongExtra("ID", -1L)
             if (id != -1L) scrollToItem(id)
         }
@@ -501,10 +502,12 @@ class ConversationActivity : AppCompatActivity() {
         val callItem = menu.findItem(R.id.action_call)
         val contactItem = menu.findItem(R.id.action_contact)
 
-        muteItem.title = if (conversation.isMuted) "UnMute" else "Mute"
-        callItem.isVisible = conversation.sender.first().isDigit()
-        contactItem.isVisible = conversation.sender.first().isDigit()
-        if (conversation.name != null) contactItem.title = "View Contact"
+        conversation.apply {
+            muteItem.title = if (isMuted) getString(R.string.unMute) else getString(R.string.mute)
+            callItem.isVisible = sender.first().isDigit()
+            contactItem.isVisible = sender.first().isDigit()
+            if (name != null) contactItem.title = getString(R.string.view_contact)
+        }
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -514,7 +517,7 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-       activeConversationSender = null
+        activeConversationSender = null
         super.onPause()
     }
 

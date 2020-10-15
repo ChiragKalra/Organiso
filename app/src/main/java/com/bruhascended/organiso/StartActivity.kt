@@ -1,7 +1,6 @@
 package com.bruhascended.organiso
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -93,7 +92,6 @@ class StartActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    @SuppressLint("SetTextI18n")
     private fun organise() {
         if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
                 Configuration.UI_MODE_NIGHT_YES ) {
@@ -102,6 +100,7 @@ class StartActivity : AppCompatActivity() {
         } else {
             setTheme(R.style.LightTheme)
             window.statusBarColor = getColor(R.color.background_light)
+            // TODO FIX
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
 
@@ -117,13 +116,13 @@ class StartActivity : AppCompatActivity() {
                     progressBar.indeterminateMode = false
                     pageViewModel.disc.postValue(1)
                 }
-                progressText.text = "${round(it)}%"
+                progressText.text = getString(R.string.x_percent, round(it))
                 progressBar.progress = it
             }
         })
 
         pageViewModel.disc.observe(this, {
-            infoText.text = pageViewModel.discStrings[it]
+            infoText.text = getString(pageViewModel.discStrings[it])
             if (it == 2) etaText.visibility = View.INVISIBLE
         })
 
@@ -131,16 +130,15 @@ class StartActivity : AppCompatActivity() {
         pageViewModel.eta.observe(this, {
             preTimer?.cancel()
             preTimer = object : CountDownTimer(it, 1000) {
-                @SuppressLint("SetTextI18n")
                 override fun onTick(millisUntilFinished: Long) {
                     val sec = (millisUntilFinished / 1000) % 60
                     val min = (millisUntilFinished / 1000) / 60
                     if ((0 < pageViewModel.progress.value!!) && (pageViewModel.progress.value!! < 100)) {
                         etaText.text = when {
-                            min > 0 -> "ETA ${min}min"
-                            sec > 9 -> "Less than a minute remaining"
-                            sec > 3 -> "Just a few more seconds"
-                            else -> "Finishing Up"
+                            min > 0 -> getString(R.string.x_mins_remaining, min)
+                            sec > 9 -> getString(R.string.less_than_min_remaining)
+                            sec > 3 -> getString(R.string.just_few_secs)
+                            else -> getString(R.string.finishing_up)
                         }
                     } else etaText.text = ""
                 }
@@ -150,18 +148,17 @@ class StartActivity : AppCompatActivity() {
 
         ChannelManager(mContext).createNotificationChannels()
 
-        Thread {
-            val wakeLock: PowerManager.WakeLock =
-                (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                    newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMS Organiser::MyWakelock").apply {
-                        acquire(10*60*1000L)
-                    }
+        val wakeLock: PowerManager.WakeLock =
+            (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Organiso::MyWakelock").apply {
+                    acquire(10*60*1000L)
                 }
+            }
+        Thread {
             SMSManager(mContext, pageViewModel).apply {
                 getMessages()
                 getLabels()
             }
-
             startActivity(Intent(mContext, MainActivity::class.java))
             wakeLock.release()
 

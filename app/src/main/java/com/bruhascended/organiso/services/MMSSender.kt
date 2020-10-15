@@ -11,6 +11,7 @@ import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.room.Room
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
+import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.activeConversationDao
@@ -156,7 +157,7 @@ class MMSSender(
                         SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
                             Toast.makeText(
                                 mContext,
-                                "Service provider error",
+                                mContext.getString(R.string.service_provider_error),
                                 Toast.LENGTH_SHORT
                             ).show()
                             updateDbMms(it, date, 5)
@@ -164,7 +165,7 @@ class MMSSender(
                         SmsManager.RESULT_ERROR_NO_SERVICE -> {
                             Toast.makeText(
                                 mContext,
-                                "No service",
+                                mContext.getString(R.string.no_service),
                                 Toast.LENGTH_SHORT
                             ).show()
                             updateDbMms(it, date, 5)
@@ -172,7 +173,7 @@ class MMSSender(
                         else -> {
                             Toast.makeText(
                                 mContext,
-                                "Error",
+                                mContext.getString(R.string.error),
                                 Toast.LENGTH_SHORT
                             ).show()
                             updateDbMms(it, date, 5)
