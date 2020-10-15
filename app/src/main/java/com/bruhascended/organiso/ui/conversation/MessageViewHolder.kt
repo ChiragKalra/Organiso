@@ -24,7 +24,7 @@ import androidx.core.content.FileProvider
 import androidx.core.view.doOnDetach
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.ml.displayFullTime
+import com.bruhascended.organiso.ui.common.DateTimeProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
 import java.io.File
@@ -37,6 +37,7 @@ class MessageViewHolder(
     val root: View,
 ) : ScrollEffectFactory.ScrollEffectViewHolder(root) {
     private val picasso = Picasso.get()
+    private val dtp = DateTimeProvider(mContext)
     private val contentIntent = Intent(Intent.ACTION_QUICK_VIEW)
 
     private val playPause: ImageButton = root.findViewById(R.id.playPause)
@@ -223,7 +224,7 @@ class MessageViewHolder(
                 setSpan(BackgroundColorSpan(highlightColor), index.first, index.last+1, flag)
             }
         } else message.text
-        timeTextView.text = displayFullTime(message.time, mContext)
+        timeTextView.text = dtp.getFull(message.time)
         timeTextView.alpha = 0f
 
         if (message.type != 1) {

@@ -17,7 +17,7 @@ import android.widget.QuickContactBadge
 import android.widget.TextView
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.ml.displayTime
+import com.bruhascended.organiso.ui.common.DateTimeProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
 import java.io.File
@@ -29,6 +29,7 @@ class ConversationViewHolder(
 ) : ScrollEffectFactory.ScrollEffectViewHolder(root) {
 
     private val picasso = Picasso.get()
+    private val dtp = DateTimeProvider(mContext)
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
     private var backgroundAnimator: ValueAnimator? = null
     private val muteImage: ImageView = root.findViewById(R.id.mutedImage)
@@ -78,7 +79,7 @@ class ConversationViewHolder(
 
     fun onBind() {
         senderTextView.text = conversation.name ?: conversation.sender
-        timeTextView.text = displayTime(conversation.time, mContext)
+        timeTextView.text = dtp.getCondensed(conversation.time)
 
         val str = if (conversation.lastMMS)
             SpannableString(mContext.getString(R.string.media_message, conversation.lastSMS))

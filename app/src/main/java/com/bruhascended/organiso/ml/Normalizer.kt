@@ -1,3 +1,8 @@
+package com.bruhascended.organiso.ml
+
+import java.util.*
+import kotlin.math.abs
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -13,15 +18,6 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-
-package com.bruhascended.organiso.ml
-
-import android.content.Context
-import android.text.format.DateFormat
-import android.text.format.DateUtils
-import java.util.*
-import kotlin.math.abs
-
 
 fun Boolean.toFloat() = if (this) 1f else 0f
 
@@ -106,51 +102,4 @@ fun getOtp(message: String): String? {
             return otp
     }
     return null
-}
-
-fun displayTime(time: Long, mContext: Context): String {
-    val smsTime = Calendar.getInstance().apply { timeInMillis = time }
-    val now = Calendar.getInstance()
-
-    return when {
-        DateUtils.isToday(time) -> DateFormat.format(
-            if (DateFormat.is24HourFormat(mContext)) "H:mm" else "h:mm aa",
-            smsTime
-        ).toString()
-
-        DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "Yesterday"
-
-        now[Calendar.WEEK_OF_YEAR] == smsTime[Calendar.WEEK_OF_YEAR] &&
-                now[Calendar.YEAR] == smsTime[Calendar.YEAR] -> DateFormat.format(
-            "EEEE", smsTime
-        ).toString()
-
-        now[Calendar.YEAR] == smsTime[Calendar.YEAR] -> DateFormat.format(
-            "d MMMM", smsTime
-        ).toString()
-
-        else -> DateFormat.format("dd/MM/yyyy", smsTime).toString()
-    }
-}
-
-
-fun displayFullTime(time: Long, mContext:Context): String {
-    val smsTime = Calendar.getInstance().apply {
-        timeInMillis = time
-    }
-
-    val now = Calendar.getInstance()
-
-    val timeString = DateFormat.format(
-        if (DateFormat.is24HourFormat(mContext)) "H:mm" else "h:mm aa",
-        smsTime
-    ).toString()
-    return when {
-        DateUtils.isToday(time) -> timeString
-        DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "$timeString,\nYesterday"
-        now[Calendar.YEAR] == smsTime[Calendar.YEAR] ->
-            timeString + ",\n" + DateFormat.format("d MMMM", smsTime).toString()
-        else ->
-            timeString + ",\n" + DateFormat.format("dd/MM/yyyy", smsTime).toString()
-    }
 }
