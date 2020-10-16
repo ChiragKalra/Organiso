@@ -1,5 +1,6 @@
 package com.bruhascended.organiso.ui.conversation
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -10,14 +11,17 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bruhascended.organiso.EXTRA_SENDER
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.activeConversationDao
+import com.bruhascended.organiso.db.MessageDao
+import com.bruhascended.organiso.db.MessageDbProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_search.*
@@ -26,15 +30,24 @@ import kotlinx.coroutines.launch
 
 
 class SearchActivity : AppCompatActivity() {
+
+    class ThisViewModel(mApp: Application): AndroidViewModel(mApp) {
+        // TODO
+    }
+
     private lateinit var inputManager: InputMethodManager
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
     private lateinit var visibleCategories: Array<Int>
+    private lateinit var activeConversationDao: MessageDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
+
+        val sender = intent.getStringExtra(EXTRA_SENDER)!!
+        activeConversationDao = MessageDbProvider(this).of(sender).manager()
 
         if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
         else setTheme(R.style.LightTheme)
@@ -92,7 +105,7 @@ class SearchActivity : AppCompatActivity() {
                 pageSize = 3,
                 initialLoadSize = 3,
                 prefetchDistance = 12,
-                maxSize = PagingConfig.MAX_SIZE_UNBOUNDED,
+                maxSize = 120,
             )) {
                 activeConversationDao.searchPaged("$key%", "% $key%")
             }.flow.cachedIn(lifecycleScope)

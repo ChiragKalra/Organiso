@@ -158,6 +158,7 @@ class NewConversationActivity : MediaPreviewActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         val dark = PreferenceManager.getDefaultSharedPreferences(this)
             .getBoolean("dark_theme", false)
@@ -275,8 +276,6 @@ class NewConversationActivity : MediaPreviewActivity() {
                 mainViewModel.contacts.observe(this, observer)
             }
         }.start()
-
-        super.onCreate(savedInstanceState)
     }
 
 }

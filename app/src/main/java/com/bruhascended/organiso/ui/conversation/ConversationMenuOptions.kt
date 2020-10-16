@@ -13,6 +13,7 @@ import android.provider.ContactsContract
 import android.view.Gravity
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -47,7 +48,8 @@ import java.io.File
 class ConversationMenuOptions(
     private val mContext: Context,
     private val conversation: Conversation,
-    private val analyticsLogger: AnalyticsLogger
+    private val analyticsLogger: AnalyticsLogger,
+    private val searchResult: ActivityResultLauncher<Intent>
 ) {
 
     private fun getRoundedCornerBitmap(bitmap: Bitmap): Bitmap {
@@ -176,8 +178,10 @@ class ConversationMenuOptions(
                         .create().show()
                 }
                 R.id.action_search -> {
-                    startActivityForResult(
-                        Intent(mContext, SearchActivity::class.java), selectMessageArg
+                    searchResult.launch(
+                        Intent(mContext, SearchActivity::class.java).apply {
+                            putExtra(EXTRA_SENDER, conversation.sender)
+                        }
                     )
                     overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
                 }

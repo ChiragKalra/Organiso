@@ -2,12 +2,12 @@ package com.bruhascended.organiso.data
 
 import android.content.Context
 import android.net.Uri
-import androidx.room.Room
+import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDatabase
+import com.bruhascended.organiso.db.MessageDbProvider
 import com.bruhascended.organiso.ml.OrganizerModel
 import com.bruhascended.organiso.mainViewModel
 import com.bruhascended.organiso.requireMainViewModel
@@ -34,7 +34,7 @@ class SMSManager(
 ) {
 
     companion object {
-        val labelText = arrayOf(
+        val labelText = arrayOf (
             R.string.tab_text_1,
             R.string.tab_text_2,
             R.string.tab_text_3,
@@ -42,6 +42,13 @@ class SMSManager(
             R.string.tab_text_5,
             R.string.tab_text_6
         )
+
+        const val EXTRA_MESSAGE = "MESSAGE"
+        const val EXTRA_MESSAGE_DATE = "MESSAGE_DATE"
+        const val EXTRA_MESSAGE_TYPE = "MESSAGE_TYPE"
+        const val ACTION_NEW_MESSAGE = "$APPLICATION_ID.NEW_MESSAGE"
+        const val ACTION_OVERWRITE_MESSAGE = "$APPLICATION_ID.OVERWRITE_MESSAGE"
+        const val ACTION_UPDATE_STATUS_MESSAGE = "$APPLICATION_ID.UPDATE_MESSAGE"
 
         const val MESSAGE_CHECK_COUNT = 6
     }
@@ -131,10 +138,7 @@ class SMSManager(
             mainViewModel.daos[label].insert(con)
         }
 
-
-        Room.databaseBuilder(
-            mContext, MessageDatabase::class.java, sender
-        ).build().apply {
+        MessageDbProvider(mContext).of(sender).apply {
             manager().insertAll(messages.toList())
             close()
         }

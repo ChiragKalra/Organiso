@@ -19,9 +19,8 @@ import androidx.appcompat.view.ActionMode
 import androidx.core.content.FileProvider
 import com.bruhascended.organiso.NewConversationActivity
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.activeConversationDao
-import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
+import com.bruhascended.organiso.db.MessageDao
 import com.bruhascended.organiso.ui.common.ListSelectionManager
 import com.bruhascended.organiso.ui.common.MediaPreviewActivity.Companion.getMimeType
 import kotlinx.coroutines.GlobalScope
@@ -50,7 +49,7 @@ import java.io.File
 @SuppressLint("InflateParams")
 class MessageSelectionListener(
     private val mContext: Context,
-    private val conversation: Conversation
+    private val messageDao: MessageDao,
 ): ListSelectionManager.SelectionCallBack<Message> {
 
     private lateinit var shareMenuItem: MenuItem
@@ -126,7 +125,7 @@ class MessageSelectionListener(
                     .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         Thread {
                             for (selectedItem in selected)
-                                activeConversationDao.delete(selectedItem)
+                                messageDao.delete(selectedItem)
                         }.start()
                         Toast.makeText(mContext, mContext.getString(R.string.deleted), Toast.LENGTH_LONG).show()
                         dialog.dismiss()

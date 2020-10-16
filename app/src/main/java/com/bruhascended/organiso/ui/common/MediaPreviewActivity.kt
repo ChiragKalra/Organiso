@@ -15,7 +15,6 @@ import android.widget.SeekBar
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.selectMediaArg
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -81,18 +80,18 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "audio/*", "video/*"))
-        startActivityForResult(intent, selectMediaArg)
+        startActivityForResult(intent, ARG_MEDIA)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == selectMediaArg && data != null && data.data != null) {
+        if (requestCode == ARG_MEDIA && data != null && data.data != null) {
             showMediaPreview(data)
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onStart() {
+        super.onStart()
 
         mAddMedia.setOnClickListener{
             loadMedia()
@@ -196,3 +195,5 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
 
 
 }
+
+const val ARG_MEDIA = 0

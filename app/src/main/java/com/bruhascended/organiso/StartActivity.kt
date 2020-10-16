@@ -11,6 +11,7 @@ import android.os.CountDownTimer
 import android.os.PowerManager
 import android.provider.Telephony
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.bruhascended.organiso.data.SMSManager
@@ -73,25 +74,25 @@ class StartActivity : AppCompatActivity() {
 
     }
 
-    override fun onRequestPermissionsResult(
+    override fun onRequestPermissionsResult (
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
-    ) = messages()
+    ) {
+        messages()
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 
     private fun messages() {
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
             val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
             intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
-            startActivityForResult(setSmsAppIntent, 1)
+            registerForActivityResult(StartActivityForResult()) {
+                organise()
+            }.launch(setSmsAppIntent)
         } else {
             organise()
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        organise()
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun organise() {

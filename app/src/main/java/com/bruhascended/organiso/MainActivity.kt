@@ -24,7 +24,6 @@ import androidx.viewpager.widget.ViewPager
 import com.bruhascended.organiso.data.ContactsManager
 import com.bruhascended.organiso.data.SMSManager.Companion.labelText
 import com.bruhascended.organiso.db.ConversationDatabase
-import com.bruhascended.organiso.db.MessageDao
 import com.bruhascended.organiso.services.SMSReceiver
 import com.bruhascended.organiso.ui.main.MainViewModel
 import com.bruhascended.organiso.ui.main.SectionsPagerAdapter
@@ -49,8 +48,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 */
 
-var activeConversationSender: String? = null
-lateinit var activeConversationDao: MessageDao
+const val ARG_SP_DEF = "DEFAULT"
 
 lateinit var mainViewModel: MainViewModel
 fun isMainViewModelNull() = !(::mainViewModel.isInitialized)

@@ -9,14 +9,13 @@ import android.net.Uri
 import android.telephony.SmsManager
 import android.webkit.MimeTypeMap
 import android.widget.Toast
-import androidx.room.Room
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.activeConversationDao
 import com.bruhascended.organiso.activeConversationSender
-import com.bruhascended.organiso.db.MessageDatabase
+import com.bruhascended.organiso.data.SMSManager
+import com.bruhascended.organiso.db.MessageDbProvider
 import com.bruhascended.organiso.mainViewModel
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
@@ -66,57 +65,75 @@ class MMSSender(
     }
 
     private fun updateDbMms(conversation: Conversation, date: Long, type: Int) {
-        val conversationDao = if (activeConversationSender == null) Room.databaseBuilder(
-            mContext, MessageDatabase::class.java, conversation.sender
-        ).allowMainThreadQueries().build().manager() else activeConversationDao
-
-        val qs = conversationDao.search(date).first()
-        qs.type = type
-        conversationDao.update(qs)
+        if (activeConversationSender != conversation.sender) {
+            MessageDbProvider(mContext).of(conversation.sender).apply {
+                val conversationDao = manager()
+                val qs = conversationDao.search(date).first()
+                qs.type = type
+                conversationDao.update(qs)
+                close()
+            }
+        } else {
+            mContext.sendBroadcast (
+                Intent(SMSManager.ACTION_UPDATE_STATUS_MESSAGE).apply {
+                    setPackage(mContext.applicationInfo.packageName)
+                    putExtra(SMSManager.EXTRA_MESSAGE_DATE, date)
+                    putExtra(SMSManager.EXTRA_MESSAGE_TYPE, type)
+                }
+            )
+        }
     }
 
     private fun addMmsToDb(conversation: Conversation, date: Long, retryIndex: Long?) {
-        Thread {
-            val message = Message (
-                smsText, 6, date, id = retryIndex, path = saveMedia(date)
-            )
+        val message = Message (
+            smsText, 6, date, id = retryIndex, path = saveMedia(date)
+        )
 
-            val conversationDao = if (activeConversationSender == null) Room.databaseBuilder(
-                mContext, MessageDatabase::class.java, conversation.sender
-            ).allowMainThreadQueries().build().manager() else activeConversationDao
-            val qs = conversationDao.search(date)
-            for (m in qs) {
-                message.id = m.id
-                conversationDao.delete(m)
+        if (activeConversationSender != conversation.sender) {
+            MessageDbProvider(mContext).of(conversation.sender).apply {
+                val conversationDao = manager()
+                val qs = conversationDao.search(date)
+                for (m in qs) {
+                    message.id = m.id
+                    conversationDao.delete(m)
+                }
+                if (retryIndex != null) conversationDao.delete(message)
+                conversationDao.insert(message)
+                close()
             }
-            if (retryIndex != null) conversationDao.delete(message)
-            conversationDao.insert(message)
+        } else {
+            mContext.sendBroadcast (
+                Intent(SMSManager.ACTION_OVERWRITE_MESSAGE).apply {
+                    setPackage(mContext.applicationInfo.packageName)
+                    putExtra(SMSManager.EXTRA_MESSAGE, message)
+                }
+            )
+        }
 
-            var newCon = conversation
-            if (conversation.id == null) {
-                for (i in 0..4) {
-                    val res = mainViewModel.daos[i].findBySender(conversation.sender)
-                    if (res.isNotEmpty()) {
-                        conversations[
-                                conversations.indexOf(conversations.first {
-                                    it.sender == conversation.sender
-                                })
-                        ] = res[0]
-                        newCon = res[0]
-                        break
-                    }
+        var newCon = conversation
+        if (conversation.id == null) {
+            for (i in 0..4) {
+                val res = mainViewModel.daos[i].findBySender(conversation.sender)
+                if (res.isNotEmpty()) {
+                    conversations[
+                            conversations.indexOf(conversations.first {
+                                it.sender == conversation.sender
+                            })
+                    ] = res[0]
+                    newCon = res[0]
+                    break
                 }
             }
+        }
 
-            newCon.apply {
-                time = date
-                lastSMS = smsText
-                lastMMS = true
-                read = true
-                if (newCon.id != null) mainViewModel.daos[label].update(this)
-                else mainViewModel.daos[label].insert(this)
-            }
-        }.start()
+        newCon.apply {
+            time = date
+            lastSMS = smsText
+            lastMMS = true
+            read = true
+            if (newCon.id != null) mainViewModel.daos[label].update(this)
+            else mainViewModel.daos[label].insert(this)
+        }
     }
 
     private fun getBytes(inputStream: InputStream): ByteArray {

@@ -1,29 +1,35 @@
 package com.bruhascended.organiso
 
+import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.bruhascended.organiso.analytics.AnalyticsLogger
+import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_NEW_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_UPDATE_STATUS_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDao
-import com.bruhascended.organiso.db.MessageDatabase
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.ui.common.ListSelectionManager
@@ -31,6 +37,7 @@ import com.bruhascended.organiso.ui.common.ListSelectionManager.Companion.Select
 import com.bruhascended.organiso.ui.common.MediaPreviewActivity
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
+import com.bruhascended.organiso.ui.conversation.ConversationViewModel
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
 import com.bruhascended.organiso.ui.conversation.MessageSelectionListener
 import kotlinx.android.synthetic.main.activity_conversation.*
@@ -55,17 +62,15 @@ import kotlinx.coroutines.launch
 
 */
 
+const val EXTRA_SENDER = "SENDER"
 
-const val selectMediaArg = 0
-const val selectMessageArg = 1
+var activeConversationSender: String? = null
 
 @Suppress("UNCHECKED_CAST")
 class ConversationActivity : MediaPreviewActivity() {
 
-    private lateinit var mdb: MessageDao
-    private lateinit var messages: List<Message>
     private lateinit var mContext: Context
-    private lateinit var conversation: Conversation
+    private lateinit var mViewModel: ConversationViewModel
     private lateinit var mAdaptor: MessageRecyclerAdaptor
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var analyticsLogger: AnalyticsLogger
@@ -73,9 +78,8 @@ class ConversationActivity : MediaPreviewActivity() {
     private lateinit var conversationMenuOptions: ConversationMenuOptions
     private lateinit var smsSender: SMSSender
     private lateinit var mmsSender: MMSSender
-
     private var inputManager: InputMethodManager? = null
-    private var goToBottomVisible = false
+
     private var scroll = true
 
     override lateinit var mVideoView: VideoView
@@ -85,41 +89,79 @@ class ConversationActivity : MediaPreviewActivity() {
     override lateinit var mVideoPlayPauseButton: ImageButton
     override lateinit var mAddMedia: ImageButton
 
-    private val goToBottomScrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            val dp = resources.displayMetrics.density
-            if (mLayoutManager.findFirstVisibleItemPosition() > 5 && !goToBottomVisible) {
-                goToBottomVisible = true
-                goToBottom.animate().alpha(1f).translationY(0f)
-                    .setInterpolator(AccelerateDecelerateInterpolator()).start()
-            } else if (mLayoutManager.findFirstVisibleItemPosition() <= 5 && goToBottomVisible) {
-                goToBottomVisible = false
-                goToBottom.animate().alpha(0f).translationY(48*dp)
-                    .setInterpolator(AccelerateDecelerateInterpolator()).start()
+
+    private val messageUpdatedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(p0: Context, intent: Intent) {
+            when (intent.action) {
+                ACTION_NEW_MESSAGE -> {
+                    val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
+                    mViewModel.dao.insert(message)
+                }
+                ACTION_OVERWRITE_MESSAGE -> {
+                    val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
+                    val qs = mViewModel.dao.search(message.time)
+                    for (m in qs) {
+                        message.id = m.id
+                        mViewModel.dao.delete(m)
+                    }
+                    if (message.id != null) mViewModel.dao.delete(message)
+                    mViewModel.dao.insert(message)
+                }
+                ACTION_UPDATE_STATUS_MESSAGE -> {
+                    val date = intent.getLongExtra(EXTRA_MESSAGE_DATE, 0)
+                    val type = intent.getIntExtra(EXTRA_MESSAGE_TYPE, 0)
+                    val qs = mViewModel.dao.search(date).first()
+                    qs.type = type
+                    mViewModel.dao.update(qs)
+                }
             }
         }
     }
 
+    private fun toggleGoToBottomButtonVisibility(){
+        val dp = resources.displayMetrics.density
+        if (mLayoutManager.findFirstVisibleItemPosition() > 5 && !mViewModel.goToBottomVisible) {
+            mViewModel.goToBottomVisible = true
+            goToBottom.animate().alpha(1f).translationY(0f)
+                .setInterpolator(AccelerateDecelerateInterpolator()).start()
+        } else if (mLayoutManager.findFirstVisibleItemPosition() <= 5 && mViewModel.goToBottomVisible) {
+            mViewModel.goToBottomVisible = false
+            goToBottom.animate().alpha(0f).translationY(48*dp)
+                .setInterpolator(AccelerateDecelerateInterpolator()).start()
+        }
+    }
+
     private fun trackLastMessage() {
-        mdb.loadLast().observe(this, {
-            if (it != null) {
-                if (conversation.lastSMS != it.text ||
-                    conversation.time != it.time ||
-                    conversation.lastMMS != (it.path != null)
-                ) {
-                    conversation.lastSMS = it.text
-                    conversation.time = it.time
-                    conversation.lastMMS = it.path != null
-                    mainViewModel.daos[conversation.label].update(conversation)
+        mViewModel.loadLast().observe(this, {
+            mViewModel.apply {
+                if (it != null) {
+                    if (conversation.lastSMS != it.text ||
+                        conversation.time != it.time ||
+                        conversation.lastMMS != (it.path != null)
+                    ) {
+                        conversation.lastSMS = it.text
+                        conversation.time = it.time
+                        conversation.lastMMS = it.path != null
+                        mainViewModel.daos[conversation.label].update(conversation)
+                    }
+                } else {
+                    mainViewModel.daos[conversation.label].delete(conversation)
                 }
-            } else {
-                mainViewModel.daos[conversation.label].delete(conversation)
             }
         })
     }
 
+    private val scrollToItemAfterSearch = registerForActivityResult(StartActivityForResult()) {
+        it.apply {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                val id = data!!.getLongExtra("ID", -1L)
+                if (id != -1L) scrollToItem(id)
+            }
+        }
+    }
+
     private fun scrollToItem(id: Long) {
-        val index = messages.indexOfFirst { m -> m.id==id }
+        val index = mViewModel.messages.indexOfFirst { m -> m.id==id }
         recyclerView.apply {
             scrollToPosition(index)
             selectionManager.toggleItem(index)
@@ -137,8 +179,8 @@ class ConversationActivity : MediaPreviewActivity() {
     }
 
     private fun setupRecycler() {
-        activeConversationDao.loadAll().observe(this, {
-            messages = it
+        mViewModel.loadAll().observe(this, {
+            mViewModel.messages = it
             if (scroll) {
                 scroll = false
                 val id = intent?.getLongExtra("ID", -1L) ?: -1L
@@ -150,19 +192,8 @@ class ConversationActivity : MediaPreviewActivity() {
             }
         })
 
-        val flow = Pager(
-            PagingConfig(
-                pageSize = 15,
-                initialLoadSize = 15,
-                prefetchDistance = 60,
-                maxSize = 180,
-            )
-        ) {
-            mdb.loadAllPaged()
-        }.flow.cachedIn(lifecycleScope)
-
         mAdaptor = MessageRecyclerAdaptor(mContext, smsSender, mmsSender)
-        val mListener =  MessageSelectionListener(mContext, conversation)
+        val mListener =  MessageSelectionListener(mContext, mViewModel.dao)
         selectionManager = ListSelectionManager(
             mContext as AppCompatActivity,
             mAdaptor as SelectionRecyclerAdaptor<Message, RecyclerView.ViewHolder>,
@@ -182,14 +213,17 @@ class ConversationActivity : MediaPreviewActivity() {
             adapter = mAdaptor
             recyclerView.edgeEffectFactory = ScrollEffectFactory()
             addOnScrollListener(ScrollEffectFactory.OnScrollListener())
-            addOnScrollListener(goToBottomScrollListener)
-            goToBottom.setOnClickListener {
-                smoothScrollToPosition(0)
-            }
+            addOnScrollListener(
+                object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        toggleGoToBottomButtonVisibility()
+                    }
+                }
+            )
         }
 
         lifecycleScope.launch {
-            flow.collectLatest {
+            mViewModel.pagingFlow.cachedIn(lifecycleScope).collectLatest {
                 mAdaptor.submitData(it)
             }
         }
@@ -213,6 +247,8 @@ class ConversationActivity : MediaPreviewActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
             "dark_theme",
             false
@@ -220,32 +256,40 @@ class ConversationActivity : MediaPreviewActivity() {
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
         setContentView(R.layout.activity_conversation)
         setSupportActionBar(toolbar)
+
+        val temp by viewModels<ConversationViewModel>()
+        mViewModel = temp
+        mViewModel.init (
+            intent.getSerializableExtra("ye") as Conversation?
+                ?: Conversation(intent.getStringExtra("sender")!!, intent.getStringExtra("name"))
+        )
+
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        conversation = intent.getSerializableExtra("ye") as Conversation? ?:
-                Conversation(intent.getStringExtra("sender")!!, intent.getStringExtra("name"))
 
         requireMainViewModel(this)
-        if (conversation.lastSMS.isBlank()) {
+        if (mViewModel.conversation.lastSMS.isBlank()) {
             for (i in 0..4) {
-                val res = mainViewModel.daos[i].findBySender(conversation.sender)
+                val res = mainViewModel.daos[i].findBySender(mViewModel.conversation.sender)
                 if (res.isNotEmpty()) {
-                    conversation = res.first()
+                    mViewModel.conversation = res.first()
                     break
                 }
             }
         }
 
-        smsSender = SMSSender(this, arrayOf(conversation))
-        mmsSender = MMSSender(this, arrayOf(conversation))
+        smsSender = SMSSender(this, arrayOf(mViewModel.conversation))
+        mmsSender = MMSSender(this, arrayOf(mViewModel.conversation))
         analyticsLogger = AnalyticsLogger(this)
-        mdb = Room.databaseBuilder(
-            this, MessageDatabase::class.java, conversation.sender
-        ).allowMainThreadQueries().build().manager()
-        activeConversationDao = mdb
-        activeConversationSender = conversation.sender
+        activeConversationSender = mViewModel.conversation.sender
 
-        conversationMenuOptions = ConversationMenuOptions(this, conversation, analyticsLogger)
+        conversationMenuOptions = ConversationMenuOptions(
+            this, mViewModel.conversation, analyticsLogger, scrollToItemAfterSearch
+        )
+
+        supportActionBar!!.title = mViewModel.conversation.name ?: mViewModel.conversation.sender
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
 
         mVideoView = videoView
         mImagePreview = imagePreview
@@ -254,11 +298,7 @@ class ConversationActivity : MediaPreviewActivity() {
         mVideoPlayPauseButton = videoPlayPauseButton
         mAddMedia = addMedia
 
-        supportActionBar!!.title = conversation.name ?: conversation.sender
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
-
-        if (!conversation.sender.first().isDigit()) {
+        if (!mViewModel.conversation.sender.first().isDigit()) {
             sendLayout.visibility = LinearLayout.INVISIBLE
             notSupported.visibility = TextView.VISIBLE
         }
@@ -278,13 +318,13 @@ class ConversationActivity : MediaPreviewActivity() {
             }
         }
 
-        if (conversation.id != null) {
-            if (!conversation.read) {
-                conversation.read = true
-                mainViewModel.daos[conversation.label].update(conversation)
+        if (mViewModel.conversation.id != null) {
+            if (!mViewModel.conversation.read) {
+                mViewModel.conversation.read = true
+                mainViewModel.daos[mViewModel.conversation.label].update(mViewModel.conversation)
             }
-        } else if (!conversation.lastSMS.isBlank()) {
-            messageEditText.setText(conversation.lastSMS)
+        } else if (!mViewModel.conversation.lastSMS.isBlank()) {
+            messageEditText.setText(mViewModel.conversation.lastSMS)
             if (intent.data != null) showMediaPreview(intent)
             sendButton.callOnClick()
         } else if (intent.data != null) {
@@ -293,27 +333,22 @@ class ConversationActivity : MediaPreviewActivity() {
         }
 
         setupRecycler()
+        goToBottom.setOnClickListener {
+            recyclerView.smoothScrollToPosition(0)
+        }
+        toggleGoToBottomButtonVisibility()
         trackLastMessage()
-        super.onCreate(savedInstanceState)
     }
 
     override fun onOptionsItemSelected(item: MenuItem)
             = conversationMenuOptions.onOptionsItemSelected(item)
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == selectMessageArg && resultCode == RESULT_OK && data != null) {
-            val id = data.getLongExtra("ID", -1L)
-            if (id != -1L) scrollToItem(id)
-        }
-    }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val muteItem = menu.findItem(R.id.action_mute)
         val callItem = menu.findItem(R.id.action_call)
         val contactItem = menu.findItem(R.id.action_contact)
 
-        conversation.apply {
+        mViewModel.conversation.apply {
             muteItem.title = if (isMuted) getString(R.string.unMute) else getString(R.string.mute)
             callItem.isVisible = sender.first().isDigit()
             contactItem.isVisible = sender.first().isDigit()
@@ -327,15 +362,21 @@ class ConversationActivity : MediaPreviewActivity() {
         return true
     }
 
-    override fun onPause() {
-        activeConversationSender = null
-        super.onPause()
+    override fun onStart() {
+        if (mViewModel.conversation.id != null)
+            NotificationManagerCompat.from(this).cancel(mViewModel.conversation.id!!.toInt())
+        activeConversationSender = mViewModel.conversation.sender
+        registerReceiver(messageUpdatedReceiver, IntentFilter().apply {
+            addAction(ACTION_OVERWRITE_MESSAGE)
+            addAction(ACTION_UPDATE_STATUS_MESSAGE)
+            addAction(ACTION_NEW_MESSAGE)
+        })
+        super.onStart()
     }
 
-    override fun onResume() {
-        if (conversation.id != null)
-            NotificationManagerCompat.from(this).cancel(conversation.id!!.toInt())
-        activeConversationSender = conversation.sender
-        super.onResume()
+    override fun onStop() {
+        activeConversationSender = null
+        unregisterReceiver(messageUpdatedReceiver)
+        super.onStop()
     }
 }

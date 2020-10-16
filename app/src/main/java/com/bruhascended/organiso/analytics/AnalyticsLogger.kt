@@ -20,10 +20,9 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import androidx.preference.PreferenceManager
-import androidx.room.Room
 import com.bruhascended.organiso.BuildConfig
 import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.MessageDatabase
+import com.bruhascended.organiso.db.MessageDbProvider
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -41,9 +40,7 @@ class AnalyticsLogger(
         val database = FirebaseDatabase.getInstance()
         val myRef = database.getReference("spam_report/${conversation.sender}")
         Thread {
-            Room.databaseBuilder(
-                context, MessageDatabase::class.java, conversation.sender
-            ).build().apply {
+            MessageDbProvider(context).of(conversation.sender).apply {
                 myRef.setValue(manager().loadAllSync())
                 close()
             }

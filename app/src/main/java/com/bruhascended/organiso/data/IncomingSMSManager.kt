@@ -1,13 +1,13 @@
 package com.bruhascended.organiso.data
 
 import android.content.Context
-import androidx.room.Room
-import com.bruhascended.organiso.activeConversationDao
-import com.bruhascended.organiso.activeConversationSender
+import android.content.Intent
 import com.bruhascended.organiso.analytics.AnalyticsLogger
+import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_NEW_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDatabase
+import com.bruhascended.organiso.db.MessageDbProvider
 import com.bruhascended.organiso.mainViewModel
 import com.bruhascended.organiso.ml.OrganizerModel
 import com.bruhascended.organiso.ml.getOtp
@@ -28,7 +28,6 @@ import com.bruhascended.organiso.requireMainViewModel
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-
 
 class IncomingSMSManager(
     private val mContext: Context
@@ -51,10 +50,8 @@ class IncomingSMSManager(
         return conversation
     }
 
-    fun putMessage(sender: String, body: String): Pair<Message, Conversation> {
+    fun putMessage(rawNumber: String, body: String, active: Boolean): Pair<Message, Conversation>? {
         requireMainViewModel(mContext)
-
-        val rawNumber = cm.getRaw(sender)
 
         val message = Message(body, 1, System.currentTimeMillis())
 
@@ -96,14 +93,19 @@ class IncomingSMSManager(
         if (conversation.id == null)
             conversation.id = mainViewModel.daos[prediction].findBySender(rawNumber).first().id
 
-        val mdb = if (activeConversationSender == rawNumber) activeConversationDao
-        else Room.databaseBuilder(
-            mContext, MessageDatabase::class.java, rawNumber
-        ).build().manager()
-
-        mdb.insert(message)
-
-        return mdb.search(message.time).first() to conversation
+        return if (active) {
+            mContext.sendBroadcast(Intent(ACTION_NEW_MESSAGE).apply{
+                putExtra(EXTRA_MESSAGE, message)
+                setPackage(mContext.applicationInfo.packageName)
+            })
+            null
+        } else {
+            val mdb = MessageDbProvider(mContext).of(rawNumber)
+            mdb.manager().insert(message)
+            val a = mdb.manager().search(message.time).first() to conversation
+            mdb.close()
+            a
+        }
     }
 
     fun close() {

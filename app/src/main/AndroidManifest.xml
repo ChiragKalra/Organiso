@@ -40,10 +40,18 @@
             android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED" />
         <receiver
             android:name=".services.SmsSentReceiverProxy"
-            android:taskAffinity="${applicationId}.SMS_SENT" />
+            android:exported="false">
+            <intent-filter>
+                <action android:name="${applicationId}.SMS_SENT"/>
+            </intent-filter>
+        </receiver>
         <receiver
             android:name="com.klinker.android.send_message.MmsSentReceiver"
-            android:taskAffinity="${applicationId}.MMS_SENT"/>
+            android:exported="false">
+            <intent-filter>
+                <action android:name="${applicationId}.MMS_SENT"/>
+            </intent-filter>
+        </receiver>
         <receiver
             android:name="com.bruhascended.organiso.notifications.NotificationActionReceiver"/>
         <receiver

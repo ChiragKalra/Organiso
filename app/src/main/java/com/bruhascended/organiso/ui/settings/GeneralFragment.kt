@@ -6,9 +6,8 @@ import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
-import androidx.room.Room
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.MessageDatabase
+import com.bruhascended.organiso.db.MessageDbProvider
 import com.bruhascended.organiso.mainViewModel
 import com.bruhascended.organiso.ml.getOtp
 import com.bruhascended.organiso.requireMainViewModel
@@ -57,9 +56,7 @@ class GeneralFragment : PreferenceFragmentCompat() {
                 deleteOtpPref.setOnPreferenceChangeListener { _, _ ->  true}
                 Thread {
                     for (con in mainViewModel.daos[2].loadAllSync()) {
-                        Room.databaseBuilder(
-                            mContext, MessageDatabase::class.java, con.sender
-                        ).build().apply {
+                        MessageDbProvider(mContext).of(con.sender).apply {
                             manager().loadAllSync().forEach {
                                 if (getOtp(it.text) != null && it.type==1 &&
                                     System.currentTimeMillis()-it.time > 15*60*1000) {

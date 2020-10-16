@@ -1,3 +1,16 @@
+package com.bruhascended.organiso.services
+
+import android.content.BroadcastReceiver
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.provider.Telephony
+import android.telephony.SmsMessage
+import com.bruhascended.organiso.activeConversationSender
+import com.bruhascended.organiso.data.ContactsManager
+import com.bruhascended.organiso.data.IncomingSMSManager
+import com.bruhascended.organiso.notifications.MessageNotificationManager
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -13,18 +26,6 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-
-package com.bruhascended.organiso.services
-
-import android.content.BroadcastReceiver
-import android.content.ContentValues
-import android.content.Context
-import android.content.Intent
-import android.provider.Telephony
-import android.telephony.SmsMessage
-import com.bruhascended.organiso.data.IncomingSMSManager
-import com.bruhascended.organiso.notifications.MessageNotificationManager
-
 
 class SMSReceiver : BroadcastReceiver() {
 
@@ -52,21 +53,34 @@ class SMSReceiver : BroadcastReceiver() {
             context.packageName == Telephony.Sms.getDefaultSmsPackage(context)) return
 
         val mnm = MessageNotificationManager(context)
+        val cm = ContactsManager(context)
         mContext = context
         val bundle = intent.extras
         if (bundle != null) Thread {
             val pduObjects = bundle["pdus"] as Array<*>
             val smm = IncomingSMSManager(context)
-            var sender = ""
-            var content = ""
+            val senders = hashMapOf<String, String>()
 
             for (aObject in pduObjects) {
                 val currentSMS = SmsMessage.createFromPdu(aObject as ByteArray, bundle.getString("format"))
-                sender = currentSMS.displayOriginatingAddress.toString()
-                content += currentSMS.messageBody.toString()
+                val sender = currentSMS.displayOriginatingAddress.toString()
+                val content = currentSMS.messageBody.toString()
+                if (sender in senders) {
+                    senders[sender] += content
+                } else {
+                    senders[sender] = content
+                }
             }
-            mnm.sendSmsNotification(smm.putMessage(sender, content))
-            saveSms(sender, content)
+
+            senders.forEach {
+                it.apply {
+                    val sender = cm.getRaw(key)
+                    if (activeConversationSender == sender) smm.putMessage(sender, value, true)
+                    else mnm.sendSmsNotification(smm.putMessage(sender, value, false)!!)
+                    saveSms(sender, value)
+                }
+            }
+            smm.close()
         }.start()
     }
 }

@@ -9,12 +9,11 @@ import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
-import androidx.room.Room
 import androidx.work.*
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDatabase
+import com.bruhascended.organiso.db.MessageDbProvider
 import com.bruhascended.organiso.mainViewModel
 import com.bruhascended.organiso.requireMainViewModel
 import java.util.concurrent.TimeUnit
@@ -37,9 +36,7 @@ class OtpNotificationManager (
 
             requireMainViewModel(mContext)
             val conversation = mainViewModel.daos[2].findBySender(sender).first()
-            val mdb = Room.databaseBuilder(
-                mContext, MessageDatabase::class.java, sender
-            ).build()
+            val mdb = MessageDbProvider(mContext).of(sender)
             val message = mdb.manager().search(time).first()
             mdb.close()
 

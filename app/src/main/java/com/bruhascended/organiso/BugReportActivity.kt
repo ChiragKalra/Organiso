@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.bruhascended.organiso.analytics.AnalyticsLogger
@@ -41,7 +42,21 @@ class BugReportActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "image/*"
-        startActivityForResult(intent, 0)
+        registerForActivityResult(StartActivityForResult()) {
+            it.data.apply {
+                if (this != null && data != null) {
+                    fileUri = data!!
+                    fileName.text = getFileName(fileUri!!)
+                    fileName.visibility = View.VISIBLE
+                    addFile.apply {
+                        setImageResource(R.drawable.close)
+                        setOnClickListener {
+                            hideMediaPreview()
+                        }
+                    }
+                }
+            }
+        }.launch(intent)
     }
 
     private fun fadeAway(vararg views: View) {
@@ -118,21 +133,6 @@ class BugReportActivity : AppCompatActivity() {
                 finish()
             } else {
                 Toast.makeText(this, getString(R.string.empty_fields), Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 0 && data != null && data.data != null) {
-            fileUri = data.data!!
-            fileName.text = getFileName(fileUri!!)
-            fileName.visibility = View.VISIBLE
-            addFile.apply {
-                setImageResource(R.drawable.close)
-                setOnClickListener {
-                    hideMediaPreview()
-                }
             }
         }
     }

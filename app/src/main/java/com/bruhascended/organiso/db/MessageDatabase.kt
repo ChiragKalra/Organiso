@@ -1,3 +1,13 @@
+package com.bruhascended.organiso.db
+
+import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.paging.PagingSource
+import androidx.recyclerview.widget.DiffUtil
+import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
+import java.io.Serializable
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,16 +24,6 @@
    limitations under the License.
 
 */
-
-package com.bruhascended.organiso.db
-
-import androidx.lifecycle.LiveData
-import androidx.paging.PagingSource
-import androidx.recyclerview.widget.DiffUtil
-import androidx.room.*
-import androidx.sqlite.db.SupportSQLiteQuery
-import java.io.Serializable
-
 
 @Entity(tableName = "messages")
 data class Message (
@@ -98,7 +98,6 @@ interface MessageDao {
 
     @RawQuery
     fun findByQuery(query: SupportSQLiteQuery): List<Message>
-
 }
 
 object MessageComparator : DiffUtil.ItemCallback<Message>() {
@@ -113,4 +112,14 @@ object MessageComparator : DiffUtil.ItemCallback<Message>() {
 @Database(entities = [Message::class], version = 1, exportSchema = false)
 abstract class MessageDatabase: RoomDatabase() {
     abstract fun manager(): MessageDao
+}
+
+class MessageDbProvider(
+    private val mContext: Context
+) {
+    fun of(sender: String, mainThread: Boolean = true) = Room.databaseBuilder(
+        mContext, MessageDatabase::class.java, sender
+    ).apply {
+        if (mainThread) allowMainThreadQueries()
+    }.build()
 }

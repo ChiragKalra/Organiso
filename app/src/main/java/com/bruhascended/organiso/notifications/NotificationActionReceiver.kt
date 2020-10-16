@@ -8,10 +8,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
 import androidx.room.Room
 import com.bruhascended.organiso.*
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDatabase
-import com.bruhascended.organiso.db.NotificationDatabase
+import com.bruhascended.organiso.db.*
 import com.bruhascended.organiso.services.SMSSender
 
 class NotificationActionReceiver : BroadcastReceiver() {
@@ -43,13 +40,13 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 val toast = intent.getBooleanExtra("show_toast", true)
                 val message = intent.getSerializableExtra("message") as Message
                 val conversation = intent.getSerializableExtra("conversation") as Conversation
-                val mdb = if (activeConversationSender != conversation.sender) Room.databaseBuilder(
-                    mContext, MessageDatabase::class.java, conversation.sender
-                ).allowMainThreadQueries().build().manager() else activeConversationDao
-                mdb.delete(message)
-                if (mdb.loadLastSync() == null) {
-                    requireMainViewModel(mContext)
-                    mainViewModel.daos[conversation.label].delete(conversation)
+                MessageDbProvider(mContext).of(conversation.sender).apply {
+                    manager().delete(message)
+                    if (manager().loadLastSync() == null) {
+                        requireMainViewModel(mContext)
+                        mainViewModel.daos[conversation.label].delete(conversation)
+                    }
+                    close()
                 }
                 if (toast) {
                     Handler(Looper.getMainLooper()).post {

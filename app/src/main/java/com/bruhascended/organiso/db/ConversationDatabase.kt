@@ -125,9 +125,7 @@ fun Conversation.moveTo(to: Int, mContext: Context? = null) {
         label = to
         forceLabel = to
         mainViewModel.daos[to].insert(this)
-    } else Room.databaseBuilder(
-        mContext!!, MessageDatabase::class.java, sender
-    ).allowMainThreadQueries().build().apply {
+    } else MessageDbProvider(mContext!!).of(sender).apply {
         manager().nukeTable()
         close()
     }
