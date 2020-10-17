@@ -9,11 +9,12 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bruhascended.organiso.ConversationActivity
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.ConversationComparator
 import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
 
 @SuppressLint("ResourceType")
 class ConversationRecyclerAdaptor(
@@ -58,7 +59,7 @@ class ConversationRecyclerAdaptor(
             }
             mContext.startActivity(
                 Intent(mContext, ConversationActivity::class.java)
-                    .putExtra("ye", it.conversation)
+                    .putExtra(EXTRA_CONVERSATION, it.conversation)
             )
         }
     }

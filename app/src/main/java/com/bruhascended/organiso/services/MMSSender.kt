@@ -10,13 +10,17 @@ import android.telephony.SmsManager
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
+import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
+import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_UPDATE_STATUS_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.activeConversationSender
-import com.bruhascended.organiso.data.SMSManager
-import com.bruhascended.organiso.db.MessageDbProvider
-import com.bruhascended.organiso.mainViewModel
+import com.bruhascended.organiso.db.MessageDbFactory
+import com.bruhascended.organiso.db.MainDaoProvider
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import java.io.*
@@ -66,7 +70,7 @@ class MMSSender(
 
     private fun updateDbMms(conversation: Conversation, date: Long, type: Int) {
         if (activeConversationSender != conversation.sender) {
-            MessageDbProvider(mContext).of(conversation.sender).apply {
+            MessageDbFactory(mContext).of(conversation.sender).apply {
                 val conversationDao = manager()
                 val qs = conversationDao.search(date).first()
                 qs.type = type
@@ -75,10 +79,10 @@ class MMSSender(
             }
         } else {
             mContext.sendBroadcast (
-                Intent(SMSManager.ACTION_UPDATE_STATUS_MESSAGE).apply {
+                Intent(ACTION_UPDATE_STATUS_MESSAGE).apply {
                     setPackage(mContext.applicationInfo.packageName)
-                    putExtra(SMSManager.EXTRA_MESSAGE_DATE, date)
-                    putExtra(SMSManager.EXTRA_MESSAGE_TYPE, type)
+                    putExtra(EXTRA_MESSAGE_DATE, date)
+                    putExtra(EXTRA_MESSAGE_TYPE, type)
                 }
             )
         }
@@ -90,7 +94,7 @@ class MMSSender(
         )
 
         if (activeConversationSender != conversation.sender) {
-            MessageDbProvider(mContext).of(conversation.sender).apply {
+            MessageDbFactory(mContext).of(conversation.sender).apply {
                 val conversationDao = manager()
                 val qs = conversationDao.search(date)
                 for (m in qs) {
@@ -103,9 +107,9 @@ class MMSSender(
             }
         } else {
             mContext.sendBroadcast (
-                Intent(SMSManager.ACTION_OVERWRITE_MESSAGE).apply {
+                Intent(ACTION_OVERWRITE_MESSAGE).apply {
                     setPackage(mContext.applicationInfo.packageName)
-                    putExtra(SMSManager.EXTRA_MESSAGE, message)
+                    putExtra(EXTRA_MESSAGE, message)
                 }
             )
         }
@@ -113,7 +117,7 @@ class MMSSender(
         var newCon = conversation
         if (conversation.id == null) {
             for (i in 0..4) {
-                val res = mainViewModel.daos[i].findBySender(conversation.sender)
+                val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(conversation.sender)
                 if (res.isNotEmpty()) {
                     conversations[
                             conversations.indexOf(conversations.first {
@@ -131,8 +135,8 @@ class MMSSender(
             lastSMS = smsText
             lastMMS = true
             read = true
-            if (newCon.id != null) mainViewModel.daos[label].update(this)
-            else mainViewModel.daos[label].insert(this)
+            if (newCon.id != null) MainDaoProvider(mContext).getMainDaos()[label].update(this)
+            else MainDaoProvider(mContext).getMainDaos()[label].insert(this)
         }
     }
 

@@ -3,7 +3,7 @@ package com.bruhascended.organiso
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import com.bruhascended.organiso.data.SMSManager.Companion.labelText
+import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.ui.main.CategoryFragment
 import kotlinx.android.synthetic.main.activity_conversation.toolbar
 
@@ -36,7 +36,7 @@ class ExtraCategoryActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.setTitle(labelText[label])
+        supportActionBar!!.setTitle(ARR_LABEL_STR[label])
 
         if (savedInstanceState == null) {
             val newFragment = CategoryFragment.newInstance(label, 0)

@@ -8,12 +8,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
+import com.bruhascended.organiso.db.Contact
 import io.michaelrocks.libphonenumber.android.NumberParseException
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import io.michaelrocks.libphonenumber.android.Phonenumber
 import java.io.File
 import java.io.FileOutputStream
-import java.io.Serializable
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.set
@@ -37,11 +37,6 @@ import kotlin.collections.toTypedArray
  */
 
 class ContactsManager(context: Context) {
-
-    data class Contact (
-        var name: String,
-        val number: String
-    ): Serializable
 
     private val mContext = context
     private val map = HashMap<String, String>()

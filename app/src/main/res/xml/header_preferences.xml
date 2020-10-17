@@ -8,7 +8,6 @@
         app:key="app_badge" />
 
     <Preference
-        app:fragment="com.bruhascended.organiso.ui.settings.GeneralFragment"
         app:allowDividerBelow="false"
         app:key="general"
         app:icon="@drawable/ic_account"
@@ -21,15 +20,13 @@
         app:title="@string/notifications" />
 
     <Preference
-        app:fragment="com.bruhascended.organiso.ui.settings.CategorySettingsFragment"
         app:icon="@drawable/ic_category"
-        app:key="category_header"
+        app:key="category"
         app:title="@string/customise_categories" />
 
     <Preference
-        app:fragment="com.bruhascended.organiso.ui.settings.InfoFragment"
         app:icon="@drawable/ic_info"
-        app:key="info_header"
+        app:key="info"
         app:title="@string/info" />
 
 </PreferenceScreen>

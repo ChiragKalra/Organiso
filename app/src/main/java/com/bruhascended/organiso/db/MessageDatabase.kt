@@ -53,7 +53,6 @@ data class Message (
     }
 }
 
-
 @Dao
 interface MessageDao {
     @Insert
@@ -108,13 +107,12 @@ object MessageComparator : DiffUtil.ItemCallback<Message>() {
         oldItem == newItem
 }
 
-
 @Database(entities = [Message::class], version = 1, exportSchema = false)
 abstract class MessageDatabase: RoomDatabase() {
     abstract fun manager(): MessageDao
 }
 
-class MessageDbProvider(
+class MessageDbFactory(
     private val mContext: Context
 ) {
     fun of(sender: String, mainThread: Boolean = true) = Room.databaseBuilder(

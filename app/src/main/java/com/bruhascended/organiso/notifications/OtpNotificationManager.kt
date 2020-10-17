@@ -13,9 +13,11 @@ import androidx.work.*
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbProvider
-import com.bruhascended.organiso.mainViewModel
-import com.bruhascended.organiso.requireMainViewModel
+import com.bruhascended.organiso.db.MessageDbFactory
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_COPY
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.DELAY_OTP_DELETE
+import com.bruhascended.organiso.db.MainDaoProvider
 import java.util.concurrent.TimeUnit
 
 class OtpNotificationManager (
@@ -34,9 +36,8 @@ class OtpNotificationManager (
             val sender = inputData.getString("sender")!!
             val id = inputData.getInt("id", 0)
 
-            requireMainViewModel(mContext)
-            val conversation = mainViewModel.daos[2].findBySender(sender).first()
-            val mdb = MessageDbProvider(mContext).of(sender)
+            val conversation = MainDaoProvider(mContext).getMainDaos()[2].findBySender(sender).first()
+            val mdb = MessageDbFactory(mContext).of(sender)
             val message = mdb.manager().search(time).first()
             mdb.close()
 

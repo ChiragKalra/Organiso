@@ -18,10 +18,10 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bruhascended.organiso.EXTRA_SENDER
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.MessageDao
-import com.bruhascended.organiso.db.MessageDbProvider
+import com.bruhascended.organiso.db.MessageDbFactory
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_search.*
@@ -30,10 +30,6 @@ import kotlinx.coroutines.launch
 
 
 class SearchActivity : AppCompatActivity() {
-
-    class ThisViewModel(mApp: Application): AndroidViewModel(mApp) {
-        // TODO
-    }
 
     private lateinit var inputManager: InputMethodManager
     private lateinit var mContext: Context
@@ -47,7 +43,7 @@ class SearchActivity : AppCompatActivity() {
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         val sender = intent.getStringExtra(EXTRA_SENDER)!!
-        activeConversationDao = MessageDbProvider(this).of(sender).manager()
+        activeConversationDao = MessageDbFactory(this).of(sender).manager()
 
         if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
         else setTheme(R.style.LightTheme)

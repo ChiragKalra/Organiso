@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.room.Room
 import com.bruhascended.organiso.db.*
 import kotlinx.coroutines.flow.Flow
 
@@ -26,8 +25,11 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
     val sender: String
         get() = mConversation.sender
 
-    val name: String?
+    var name: String?
         get() = mConversation.name
+        set(value) {
+            mConversation.name = value
+        }
 
     val lastSms: String
         get() = mConversation.sender
@@ -47,14 +49,12 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
     fun loadLast() = mdb.loadLast()
     fun loadAll() = mdb.loadAll()
 
-
-
     fun init (conversation: Conversation) {
         if (::mConversation.isInitialized) return
 
         mConversation = conversation
 
-        mdb = MessageDbProvider(getApplication()).of(sender).manager()
+        mdb = MessageDbFactory(getApplication()).of(sender).manager()
 
         mPagingFlow = Pager(
             PagingConfig(

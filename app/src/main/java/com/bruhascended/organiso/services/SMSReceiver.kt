@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.telephony.SmsMessage
-import com.bruhascended.organiso.activeConversationSender
+import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.data.ContactsManager
 import com.bruhascended.organiso.data.IncomingSMSManager
 import com.bruhascended.organiso.notifications.MessageNotificationManager

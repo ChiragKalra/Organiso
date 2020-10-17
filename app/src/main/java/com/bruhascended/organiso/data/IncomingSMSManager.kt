@@ -3,15 +3,18 @@ package com.bruhascended.organiso.data
 import android.content.Context
 import android.content.Intent
 import com.bruhascended.organiso.analytics.AnalyticsLogger
+import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.EVENT_CONVERSATION_ORGANISED
+import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.PARAM_BACKGROUND
 import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_NEW_MESSAGE
 import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.LABEL_PERSONAL
+import com.bruhascended.organiso.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbProvider
-import com.bruhascended.organiso.mainViewModel
+import com.bruhascended.organiso.db.MessageDbFactory
 import com.bruhascended.organiso.ml.OrganizerModel
 import com.bruhascended.organiso.ml.getOtp
-import com.bruhascended.organiso.requireMainViewModel
+import com.bruhascended.organiso.db.MainDaoProvider
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -36,29 +39,29 @@ class IncomingSMSManager(
     private val cm = ContactsManager(mContext)
     private val nn = OrganizerModel(mContext)
     private val senderNameMap = cm.getContactsHashMap()
+    private val mMainDaoProvider = MainDaoProvider(mContext)
 
     private fun deletePrevious(rawNumber: String): Conversation? {
         var conversation: Conversation? = null
         for (i in 0..4) {
-            val got = mainViewModel.daos[i].findBySender(rawNumber)
+            val got = mMainDaoProvider.getMainDaos()[i].findBySender(rawNumber)
             if (got.isNotEmpty()) {
                 conversation = got.first()
                 for (item in got)
-                    mainViewModel.daos[i].delete(item)
+                    mMainDaoProvider.getMainDaos()[i].delete(item)
             }
         }
         return conversation
     }
 
     fun putMessage(rawNumber: String, body: String, active: Boolean): Pair<Message, Conversation>? {
-        requireMainViewModel(mContext)
 
-        val message = Message(body, 1, System.currentTimeMillis())
+        val message = Message(body, MESSAGE_TYPE_INBOX, System.currentTimeMillis())
 
         var conversation = deletePrevious(rawNumber)
 
         var mProbs: FloatArray? = null
-        val prediction = if (senderNameMap.containsKey(rawNumber)) 0
+        val prediction = if (senderNameMap.containsKey(rawNumber)) LABEL_PERSONAL
         else if (conversation != null && conversation.forceLabel != -1) conversation.forceLabel
         else if (!getOtp(body).isNullOrEmpty()) 2
         else {
@@ -68,14 +71,14 @@ class IncomingSMSManager(
             mProbs.toList().indexOf(mProbs.maxOrNull())
         }
 
-        analyticsLogger.log("conversation_organised", "background")
+        analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, PARAM_BACKGROUND)
 
         conversation = conversation?.apply {
             if (label != prediction) id = null
             read = false
             time = message.time
             lastSMS = message.text
-            if (prediction == 0) forceLabel = 0
+            if (prediction == LABEL_PERSONAL) forceLabel = LABEL_PERSONAL
             label = prediction
             probabilities = mProbs ?: probabilities
             name = senderNameMap[rawNumber]
@@ -86,12 +89,12 @@ class IncomingSMSManager(
             time = message.time,
             lastSMS = message.text,
             label = prediction,
-            forceLabel = if (prediction == 0) 0 else -1
+            forceLabel = if (prediction == LABEL_PERSONAL) 0 else -1
         )
 
-        mainViewModel.daos[prediction].insert(conversation)
+        mMainDaoProvider.getMainDaos()[prediction].insert(conversation)
         if (conversation.id == null)
-            conversation.id = mainViewModel.daos[prediction].findBySender(rawNumber).first().id
+            conversation.id = mMainDaoProvider.getMainDaos()[prediction].findBySender(rawNumber).first().id
 
         return if (active) {
             mContext.sendBroadcast(Intent(ACTION_NEW_MESSAGE).apply{
@@ -100,7 +103,7 @@ class IncomingSMSManager(
             })
             null
         } else {
-            val mdb = MessageDbProvider(mContext).of(rawNumber)
+            val mdb = MessageDbFactory(mContext).of(rawNumber)
             mdb.manager().insert(message)
             val a = mdb.manager().search(message.time).first() to conversation
             mdb.close()

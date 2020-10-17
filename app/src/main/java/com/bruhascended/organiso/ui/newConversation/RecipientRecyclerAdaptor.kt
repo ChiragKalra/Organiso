@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.data.ContactsManager.Contact
+import com.bruhascended.organiso.db.Contact
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import kotlin.math.abs
 
@@ -30,10 +30,10 @@ import kotlin.math.abs
    limitations under the License.
  */
 
-class AddressRecyclerAdaptor (
+class RecipientRecyclerAdaptor (
     private val mContext: Context,
     private val contacts: ArrayList<Contact>
-): RecyclerView.Adapter<AddressRecyclerAdaptor.AddressViewHolder>() {
+): RecyclerView.Adapter<RecipientRecyclerAdaptor.RecipientViewHolder>() {
 
     private var colors: Array<Int> = Array(ConversationRecyclerAdaptor.colorRes.size) {
         ContextCompat.getColor(mContext, ConversationRecyclerAdaptor.colorRes[it])
@@ -41,7 +41,7 @@ class AddressRecyclerAdaptor (
 
     var onItemClick: ((Contact) -> Unit)? = null
 
-    inner class AddressViewHolder(val root: View) :
+    inner class RecipientViewHolder(val root: View) :
         RecyclerView.ViewHolder(root) {
         val name: TextView = root.findViewById(R.id.name)
         val remove: ImageButton = root.findViewById(R.id.remove)
@@ -49,13 +49,13 @@ class AddressRecyclerAdaptor (
 
     override fun getItemCount(): Int = contacts.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddressViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipientViewHolder {
         val itemView: View = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_send_address, parent, false)
-        return AddressViewHolder(itemView)
+        return RecipientViewHolder(itemView)
     }
 
-    override fun onBindViewHolder(holder: AddressViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecipientViewHolder, position: Int) {
         val contact: Contact = contacts[position]
         holder.apply {
             name.text = if (contact.name.isBlank()) contact.number else contact.name

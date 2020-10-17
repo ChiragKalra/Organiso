@@ -6,7 +6,7 @@ import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil
 import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.room.*
-import com.bruhascended.organiso.mainViewModel
+import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
 import com.google.gson.Gson
 import java.io.Serializable
 
@@ -118,14 +118,23 @@ abstract class ConversationDatabase : RoomDatabase() {
     abstract fun manager(): ConversationDao
 }
 
-fun Conversation.moveTo(to: Int, mContext: Context? = null) {
-    mainViewModel.daos[label].delete(this)
+class ConversationDbFactory (private val mContext: Context) {
+    fun of (label: Int, mainThread: Boolean = true) = Room.databaseBuilder(
+        mContext, ConversationDatabase::class.java, mContext.getString(ARR_LABEL_STR[label])
+    ).apply {
+        if (mainThread) allowMainThreadQueries()
+    }.build()
+}
+
+
+fun Conversation.moveTo(to: Int, mContext: Context) {
+    MainDaoProvider(mContext).getMainDaos()[label].delete(this)
     id = null
     if (to >= 0) {
         label = to
         forceLabel = to
-        mainViewModel.daos[to].insert(this)
-    } else MessageDbProvider(mContext!!).of(sender).apply {
+        MainDaoProvider(mContext).getMainDaos()[to].insert(this)
+    } else MessageDbFactory(mContext).of(sender).apply {
         manager().nukeTable()
         close()
     }

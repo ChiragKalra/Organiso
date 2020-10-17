@@ -18,10 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bruhascended.organiso.*
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.data.SMSManager
+import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.moveTo
+import com.bruhascended.organiso.db.MainDaoProvider
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -45,7 +47,7 @@ import java.io.File
 
 */
 
-class ConversationMenuOptions(
+class ConversationMenuOptions (
     private val mContext: Context,
     private val conversation: Conversation,
     private val analyticsLogger: AnalyticsLogger,
@@ -107,7 +109,7 @@ class ConversationMenuOptions(
                         .setTitle(getString(R.string.block_sender_query, display))
                         .setPositiveButton(getString(R.string.block)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_5")
-                            conversation.moveTo(5)
+                            conversation.moveTo(5, mContext)
                             Toast.makeText(
                                 mContext,
                                 getString(R.string.sender_blocked),
@@ -124,7 +126,7 @@ class ConversationMenuOptions(
                         .setPositiveButton(getString(R.string.report)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_4")
                             analyticsLogger.reportSpam(conversation)
-                            conversation.moveTo(4)
+                            conversation.moveTo(4, mContext)
                             Toast.makeText(
                                 mContext,
                                 getString(R.string.reported_spam),
@@ -155,7 +157,8 @@ class ConversationMenuOptions(
                 R.id.action_move -> {
                     val choices = ArrayList<String>().apply {
                         for (i in 0..3) {
-                            if (i != conversation.label) add(mContext.resources.getString(SMSManager.labelText[i]))
+                            if (i != conversation.label)
+                                add(mContext.resources.getString(ARR_LABEL_STR[i]))
                         }
                     }.toTypedArray()
                     var selection = 0
@@ -166,7 +169,7 @@ class ConversationMenuOptions(
                         }
                         .setPositiveButton(getText(R.string.move)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_$selection")
-                            conversation.moveTo(selection)
+                            conversation.moveTo(selection, mContext)
                             Toast.makeText(
                                 mContext,
                                 getString(R.string.conversation_moved),
@@ -188,7 +191,7 @@ class ConversationMenuOptions(
                 R.id.action_mute -> {
                     conversation.apply {
                         isMuted = !isMuted
-                        mainViewModel.daos[label].update(this)
+                        MainDaoProvider(mContext).getMainDaos()[label].update(this)
                         GlobalScope.launch {
                             delay(300)
                             runOnUiThread {
@@ -221,8 +224,7 @@ class ConversationMenuOptions(
                                 .setIntent(
                                     Intent(mContext, ConversationActivity::class.java)
                                         .setAction("android.intent.action.VIEW")
-                                        .putExtra("name", conversation.name)
-                                        .putExtra("sender", conversation.sender)
+                                        .putExtra(EXTRA_SENDER, conversation.sender)
                                 )
                                 .setCategories(setOf("android.shortcut.conversation"))
                                 .build()

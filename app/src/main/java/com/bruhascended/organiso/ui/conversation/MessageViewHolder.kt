@@ -24,7 +24,7 @@ import androidx.core.content.FileProvider
 import androidx.core.view.doOnDetach
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.ui.common.DateTimeProvider
+import com.bruhascended.organiso.data.DateTimeProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
 import java.io.File

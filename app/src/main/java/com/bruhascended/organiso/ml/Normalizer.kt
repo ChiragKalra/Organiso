@@ -86,6 +86,7 @@ fun time (date: Long): Float {
     return abs(abs(seriesTime-240) -(60*12)) / 720f
 }
 
+// returns null if message has no otp otherwise returns the 4-6 digit OTP
 fun getOtp(message: String): String? {
     val sepRegex = Regex("(?<=\\d)[\\s\\-](?=\\d)")
     val content = message.toLowerCase(Locale.ROOT).replace(sepRegex, "")

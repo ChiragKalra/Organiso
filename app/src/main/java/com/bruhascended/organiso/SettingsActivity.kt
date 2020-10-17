@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import com.bruhascended.organiso.ui.settings.HeaderFragment
 import kotlinx.android.synthetic.main.activity_conversation.*
 
@@ -28,10 +29,15 @@ import kotlinx.android.synthetic.main.activity_conversation.*
 class SettingsActivity : AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
+    companion object {
+        const val ARG_TITLE = "title"
+        const val KEY_FRAGMENT_REQUEST = "key"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-            "dark_theme",
+            PREF_DARK_THEME,
             false
         )
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
@@ -47,7 +53,7 @@ class SettingsActivity : AppCompatActivity(),
                 .replace(R.id.settings, HeaderFragment())
                 .commit()
         } else {
-            title = savedInstanceState.getCharSequence("title")
+            title = savedInstanceState.getCharSequence(ARG_TITLE)
         }
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0)
@@ -57,7 +63,7 @@ class SettingsActivity : AppCompatActivity(),
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putCharSequence("title", title)
+        outState.putCharSequence(ARG_TITLE, title)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -71,12 +77,13 @@ class SettingsActivity : AppCompatActivity(),
     ): Boolean {
         val args = pref.extras
         val fragment = supportFragmentManager.fragmentFactory.instantiate(
-                classLoader,
-                pref.fragment
-            ).apply {
-                arguments = args
-                setTargetFragment(caller, 0)
-            }
+            classLoader,
+            pref.fragment
+        ).apply {
+            arguments = args
+        }
+        supportFragmentManager
+
         // Replace the existing Fragment with the new Fragment
         supportFragmentManager.beginTransaction()
             .setCustomAnimations(

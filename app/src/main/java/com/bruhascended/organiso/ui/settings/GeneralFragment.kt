@@ -7,10 +7,11 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.MessageDbProvider
-import com.bruhascended.organiso.mainViewModel
+import com.bruhascended.organiso.data.SMSManager.Companion.LABEL_TRANSACTIONS
+import com.bruhascended.organiso.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
+import com.bruhascended.organiso.db.MessageDbFactory
 import com.bruhascended.organiso.ml.getOtp
-import com.bruhascended.organiso.requireMainViewModel
+import com.bruhascended.organiso.db.MainDaoProvider
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -31,11 +32,19 @@ import com.bruhascended.organiso.requireMainViewModel
 
 class GeneralFragment : PreferenceFragmentCompat() {
 
+    companion object {
+        const val PREF_DARK_THEME = "dark_theme"
+        const val PREF_DELETE_OTP = "delete_otp"
+        const val PREF_SEND_SPAM = "report_spam"
+
+        const val ARG_STATE_CHANGED = "stateChanged"
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.general_preferences, rootKey)
 
-        val themePref: SwitchPreferenceCompat = findPreference("dark_theme")!!
-        val deleteOtpPref: SwitchPreferenceCompat = findPreference("delete_otp")!!
+        val themePref: SwitchPreferenceCompat = findPreference(PREF_DARK_THEME)!!
+        val deleteOtpPref: SwitchPreferenceCompat = findPreference(PREF_DELETE_OTP)!!
         val themeCategory: PreferenceCategory = findPreference("theme_category")!!
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -44,7 +53,7 @@ class GeneralFragment : PreferenceFragmentCompat() {
         } else {
             themePref.setOnPreferenceChangeListener { _, _ ->
                 val sp = PreferenceManager.getDefaultSharedPreferences(requireActivity())
-                sp.edit().putBoolean("stateChanged", true).apply()
+                sp.edit().putBoolean(ARG_STATE_CHANGED, true).apply()
                 requireActivity().recreate()
                 true
             }
@@ -55,18 +64,17 @@ class GeneralFragment : PreferenceFragmentCompat() {
             if (state as Boolean) {
                 deleteOtpPref.setOnPreferenceChangeListener { _, _ ->  true}
                 Thread {
-                    for (con in mainViewModel.daos[2].loadAllSync()) {
-                        MessageDbProvider(mContext).of(con.sender).apply {
+                    for (con in MainDaoProvider(mContext).getMainDaos()[LABEL_TRANSACTIONS].loadAllSync()) {
+                        MessageDbFactory(mContext).of(con.sender).apply {
                             manager().loadAllSync().forEach {
-                                if (getOtp(it.text) != null && it.type==1 &&
+                                if (getOtp(it.text) != null && it.type== MESSAGE_TYPE_INBOX &&
                                     System.currentTimeMillis()-it.time > 15*60*1000) {
                                     manager().delete(it)
                                 }
                             }
                             val it = manager().loadLastSync()
                             if (it == null) {
-                                requireMainViewModel(mContext)
-                                mainViewModel.daos[2].delete(con)
+                                MainDaoProvider(mContext).getMainDaos()[2].delete(con)
                             } else {
                                 if (con.lastSMS != it.text ||
                                     con.time != it.time ||
@@ -75,7 +83,7 @@ class GeneralFragment : PreferenceFragmentCompat() {
                                     con.lastSMS = it.text
                                     con.time = it.time
                                     con.lastMMS = it.path != null
-                                    mainViewModel.daos[2].update(con)
+                                    MainDaoProvider(mContext).getMainDaos()[2].update(con)
                                 }
                             }
                             close()

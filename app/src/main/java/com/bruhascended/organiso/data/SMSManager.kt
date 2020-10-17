@@ -5,12 +5,13 @@ import android.net.Uri
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.analytics.AnalyticsLogger
+import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.EVENT_CONVERSATION_ORGANISED
+import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.PARAM_INIT
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbProvider
+import com.bruhascended.organiso.db.MessageDbFactory
 import com.bruhascended.organiso.ml.OrganizerModel
-import com.bruhascended.organiso.mainViewModel
-import com.bruhascended.organiso.requireMainViewModel
+import com.bruhascended.organiso.db.MainDaoProvider
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -29,12 +30,25 @@ import com.bruhascended.organiso.requireMainViewModel
 
 */
 
-class SMSManager(
-    private val mContext: Context,
-) {
+class SMSManager(private val mContext: Context) {
 
     companion object {
-        val labelText = arrayOf (
+        const val EXTRA_MESSAGE = "MESSAGE"
+        const val EXTRA_MESSAGE_DATE = "MESSAGE_DATE"
+        const val EXTRA_MESSAGE_TYPE = "MESSAGE_TYPE"
+        const val ACTION_NEW_MESSAGE = "$APPLICATION_ID.NEW_MESSAGE"
+        const val ACTION_OVERWRITE_MESSAGE = "$APPLICATION_ID.OVERWRITE_MESSAGE"
+        const val ACTION_UPDATE_STATUS_MESSAGE = "$APPLICATION_ID.UPDATE_MESSAGE"
+
+        const val MESSAGE_TYPE_ALL = 0
+        const val MESSAGE_TYPE_INBOX = 1
+        const val MESSAGE_TYPE_SENT = 2
+        const val MESSAGE_TYPE_DRAFT = 3
+        const val MESSAGE_TYPE_OUTBOX = 4
+        const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
+        const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
+
+        val ARR_LABEL_STR = arrayOf (
             R.string.tab_text_1,
             R.string.tab_text_2,
             R.string.tab_text_3,
@@ -43,14 +57,12 @@ class SMSManager(
             R.string.tab_text_6
         )
 
-        const val EXTRA_MESSAGE = "MESSAGE"
-        const val EXTRA_MESSAGE_DATE = "MESSAGE_DATE"
-        const val EXTRA_MESSAGE_TYPE = "MESSAGE_TYPE"
-        const val ACTION_NEW_MESSAGE = "$APPLICATION_ID.NEW_MESSAGE"
-        const val ACTION_OVERWRITE_MESSAGE = "$APPLICATION_ID.OVERWRITE_MESSAGE"
-        const val ACTION_UPDATE_STATUS_MESSAGE = "$APPLICATION_ID.UPDATE_MESSAGE"
-
-        const val MESSAGE_CHECK_COUNT = 6
+        const val LABEL_PERSONAL = 0
+        const val LABEL_IMPORTANT = 1
+        const val LABEL_TRANSACTIONS = 2
+        const val LABEL_PROMOTIONS = 3
+        const val LABEL_SPAM = 4
+        const val LABEL_BLOCKED = 5
     }
 
     private val nn = OrganizerModel(mContext)
@@ -98,7 +110,7 @@ class SMSManager(
         onProgressListener(per)
         onEtaChangeListener(eta.toLong())
 
-        AnalyticsLogger(mContext).log("conversation_organised", "init")
+        AnalyticsLogger(mContext).log(EVENT_CONVERSATION_ORGANISED, PARAM_INIT)
     }
 
     private fun saveMessage(ind: Int, sender: String, messages: ArrayList<Message>, label: Int) {
@@ -106,11 +118,11 @@ class SMSManager(
 
         var conversation: Conversation? = null
         for (i in 0..4) {
-            val got = mainViewModel.daos[i].findBySender(sender)
+            val got = MainDaoProvider(mContext).getMainDaos()[i].findBySender(sender)
             if (got.isNotEmpty()) {
                 conversation = got.first()
                 for (item in got.slice(1 until got.size))
-                    mainViewModel.daos[i].delete(item)
+                    MainDaoProvider(mContext).getMainDaos()[i].delete(item)
                 break
             }
         }
@@ -122,7 +134,7 @@ class SMSManager(
                 lastSMS =  messages.last().text
                 lastMMS = false
                 name = senderNameMap[sender]
-                mainViewModel.daos[0].update(this)
+                MainDaoProvider(mContext).getMainDaos()[LABEL_PERSONAL].update(this)
             }
         } else {
             val con = Conversation(
@@ -135,10 +147,10 @@ class SMSManager(
                 probabilities = senderToProbs[sender] ?:
                 FloatArray(5) { if (it == 0) 1f else 0f }
             )
-            mainViewModel.daos[label].insert(con)
+            MainDaoProvider(mContext).getMainDaos()[label].insert(con)
         }
 
-        MessageDbProvider(mContext).of(sender).apply {
+        MessageDbFactory(mContext).of(sender).apply {
             manager().insertAll(messages.toList())
             close()
         }
@@ -186,8 +198,6 @@ class SMSManager(
     }
 
     fun getLabels() {
-        requireMainViewModel(mContext)
-
         done = sp.getInt("done", 0)
         index = sp.getInt("index", 0)
         senderNameMap = ContactsManager(mContext).getContactsHashMap()

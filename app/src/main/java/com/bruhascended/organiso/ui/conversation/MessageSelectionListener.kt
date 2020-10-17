@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.FileProvider
 import com.bruhascended.organiso.NewConversationActivity
+import com.bruhascended.organiso.NewConversationActivity.Companion.EXTRA_MESSAGES
+import com.bruhascended.organiso.NewConversationActivity.Companion.TYPE_MULTI
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.db.MessageDao
@@ -44,7 +46,6 @@ import java.io.File
    limitations under the License.
 
 */
-
 
 @SuppressLint("InflateParams")
 class MessageSelectionListener(
@@ -168,8 +169,8 @@ class MessageSelectionListener(
                             data = Uri.fromFile(File(path))
                         }
                     } else {
-                        type = "multi"
-                        putExtra("data", selectionManager.selectedItems.toTypedArray())
+                        type = TYPE_MULTI
+                        putExtra(EXTRA_MESSAGES, selectionManager.selectedItems.toTypedArray())
                     }
                 }
                 mContext.startActivity(intent)

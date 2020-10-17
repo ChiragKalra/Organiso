@@ -1,8 +1,9 @@
 package com.bruhascended.organiso.ml
 
 import android.content.Context
+import com.bruhascended.organiso.R
 import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.data.SMSManager.Companion.MESSAGE_CHECK_COUNT
+import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.EVENT_MESSAGE_ORGANISED
 import com.bruhascended.organiso.db.Message
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate
@@ -29,14 +30,22 @@ import java.nio.channels.FileChannel
    limitations under the License.
  */
 
+
 class OrganizerModel (context: Context) {
+
+    companion object {
+        const val HP_NUM_THREADS = 6
+        const val HP_MESSAGE_CHECK_COUNT = 6
+    }
+
+
     private val mContext = context
     private val fe = FeatureExtractor(mContext)
     private val tfliteModel = loadModelFile(mContext)
     private val delegate = GpuDelegate()
     private val options = Interpreter.Options()
         .setUseNNAPI(true)
-        .setNumThreads(6)
+        .setNumThreads(HP_NUM_THREADS)
         .addDelegate(delegate)
     private val tflite =  try {
         Interpreter(tfliteModel, options)
@@ -58,9 +67,9 @@ class OrganizerModel (context: Context) {
     fun getPrediction(message: Message) = getPredictions(arrayListOf(message))
 
     fun getPredictions(messages: ArrayList<Message>) : FloatArray {
-        val probs = FloatArray(5){0f}
+        val probs = FloatArray(5) { 0f }
 
-        for (i in 0 until min(messages.size, MESSAGE_CHECK_COUNT)) {
+        for (i in 0 until min(messages.size, HP_MESSAGE_CHECK_COUNT)) {
             val feature = fe.getFeatureVector(messages[i])
 
             val inputData = ByteBuffer.allocateDirect(n * 4)
@@ -68,12 +77,12 @@ class OrganizerModel (context: Context) {
             for (it in feature) {
                 inputData.putFloat(it)
             }
-            val out = Array(1){FloatArray(5)}
+            val out = Array(1) { FloatArray(5) }
             tflite.run(inputData, out)
 
             for (j in 0..4) probs[j] += out[0][j]
 
-            AnalyticsLogger(mContext).log("message_organised")
+            AnalyticsLogger(mContext).log(EVENT_MESSAGE_ORGANISED)
         }
         return probs
     }

@@ -1,3 +1,17 @@
+package com.bruhascended.organiso.analytics
+
+import android.content.Context
+import android.net.Uri
+import android.os.Bundle
+import androidx.preference.PreferenceManager
+import com.bruhascended.organiso.BuildConfig
+import com.bruhascended.organiso.db.Conversation
+import com.bruhascended.organiso.db.MessageDbFactory
+import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_SEND_SPAM
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,33 +28,38 @@
    limitations under the License.
  */
 
-package com.bruhascended.organiso.analytics
-
-import android.content.Context
-import android.net.Uri
-import android.os.Bundle
-import androidx.preference.PreferenceManager
-import com.bruhascended.organiso.BuildConfig
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.MessageDbProvider
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
-
 class AnalyticsLogger(
     private val context: Context
 ) {
+
+    companion object {
+        const val PATH_SPAM_REPORTS = "spam_reports"
+        const val PATH_BUG_REPORTS = "bug_reports"
+        const val PATH_TITLE = "title"
+        const val PATH_DETAIL = "detail"
+
+        const val EVENT_BUG_REPORTED = "bug_reported"
+        const val EVENT_CONVERSATION_ORGANISED = "conversation_organised"
+        const val EVENT_MESSAGE_ORGANISED = "message_organised"
+
+
+        const val PARAM_DEFAULT = "default"
+        const val PARAM_BACKGROUND = "background"
+        const val PARAM_INIT = "init"
+
+    }
+
     private val mPref = PreferenceManager.getDefaultSharedPreferences(context)
     private val firebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
 
     fun reportSpam (conversation: Conversation) {
-        if (!mPref.getBoolean("report_spam", false)) return
+        if (!mPref.getBoolean(PREF_SEND_SPAM, false)) return
 
         val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("spam_report/${conversation.sender}")
+        val myRef = database.getReference("${PATH_SPAM_REPORTS}/${conversation.sender}")
         Thread {
-            MessageDbProvider(context).of(conversation.sender).apply {
+            MessageDbFactory(context).of(conversation.sender).apply {
                 myRef.setValue(manager().loadAllSync())
                 close()
             }
@@ -49,21 +68,21 @@ class AnalyticsLogger(
 
     fun reportBug (title: String, content: String, fileUri: Uri? = null) {
         val rn = System.currentTimeMillis().toString()
-        log("bug_reported")
+        log(EVENT_BUG_REPORTED)
 
         val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("bug_report/${rn}")
-        myRef.child("title").setValue(title)
-        myRef.child("detail").setValue(content)
+        val myRef = database.getReference("${PATH_BUG_REPORTS}/${rn}")
+        myRef.child(PATH_TITLE).setValue(title)
+        myRef.child(PATH_DETAIL).setValue(content)
 
         if (fileUri != null) {
             val storageRef = FirebaseStorage.getInstance().reference
-            val riversRef = storageRef.child("bug_report/${rn}")
+            val riversRef = storageRef.child("${PATH_BUG_REPORTS}/${rn}")
             riversRef.putFile(fileUri)
         }
     }
 
-    fun log (event: String, param: String = "default") {
+    fun log (event: String, param: String = PARAM_DEFAULT) {
         if (BuildConfig.DEBUG) return
         val bundle = Bundle().apply {
             putString(FirebaseAnalytics.Param.METHOD, param)

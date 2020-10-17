@@ -14,19 +14,17 @@ import android.view.MenuItem
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
-import androidx.room.Room
 import androidx.viewpager.widget.ViewPager
-import com.bruhascended.organiso.data.ContactsManager
-import com.bruhascended.organiso.data.SMSManager.Companion.labelText
-import com.bruhascended.organiso.db.ConversationDatabase
-import com.bruhascended.organiso.services.SMSReceiver
-import com.bruhascended.organiso.ui.main.MainViewModel
+import com.bruhascended.organiso.db.ContactsProvider
+import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.ui.main.SectionsPagerAdapter
+import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
@@ -48,30 +46,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 */
 
-const val ARG_SP_DEF = "DEFAULT"
-
-lateinit var mainViewModel: MainViewModel
-fun isMainViewModelNull() = !(::mainViewModel.isInitialized)
-
-fun requireMainViewModel(mContext: Context) {
-    if (isMainViewModelNull()) {
-        mainViewModel = MainViewModel()
-        mainViewModel.daos = Array(6){
-            Room.databaseBuilder(
-                mContext, ConversationDatabase::class.java,
-                mContext.resources.getString(labelText[it])
-            ).allowMainThreadQueries().build().manager()
-        }
-    }
-}
-
-
 class MainActivity : AppCompatActivity() {
-    private val argSearchResult = 1
+
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
     private lateinit var hiddenCategories: Array<Int>
-    private lateinit var cm: ContactsManager
+    private lateinit var mContactsProvider: ContactsProvider
     private var actionMode: ActionMode? = null
     private var contactThread: Thread? = null
 
@@ -86,20 +66,11 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.READ_CONTACTS
     )
 
-    private fun updateContacts(loadDp: Boolean) {
-        val contacts = cm.getContactsList(loadDp)
-        mainViewModel.contacts.postValue(contacts)
-        contacts.forEach {
-            for (i in 0..4) {
-                val q = mainViewModel.daos[i].findBySender(it.number)
-                if (q.isEmpty()) continue
-                val res = q.first()
-                if (res.name != it.name) {
-                    res.name = it.name
-                    mainViewModel.daos[i].update(res)
-                }
-                break
-            }
+    private val onSearchCanceled = registerForActivityResult(StartActivityForResult()) {
+        if (it.resultCode == RESULT_CANCELED) {
+            appBarLayout?.postDelayed({
+                appBarLayout.setExpanded(true, true)
+            }, 300)
         }
     }
 
@@ -120,19 +91,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        startService(Intent(this, SMSReceiver::class.java))
-
-        mContext = this
-        cm = ContactsManager(this)
-        requireMainViewModel(this)
-        contactThread = Thread { updateContacts(true) }
-        contactThread?.start()
-
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
+        if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
         else setTheme(R.style.LightTheme)
 
         setContentView(R.layout.activity_main)
+
+        mContext = this
+        mContactsProvider = ContactsProvider(this)
 
         if (PackageManager.PERMISSION_DENIED in
             Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
@@ -190,7 +156,7 @@ class MainActivity : AppCompatActivity() {
             val customTitle = prefs.getString("custom_label_$label", "")!!
             menu.add(
                 0, label, 400 + i,
-                if (customTitle == "") getString(labelText[label]) else customTitle
+                if (customTitle == "") getString(ARR_LABEL_STR[label]) else customTitle
             )
         }
         return super.onPrepareOptionsMenu(menu)
@@ -217,10 +183,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         start()
                     }
-                    startActivityForResult(
-                        Intent(mContext, SearchActivity::class.java),
-                        argSearchResult
-                    )
+                    onSearchCanceled.launch(Intent(mContext, SearchActivity::class.java))
                     overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
                 }
             }
@@ -237,20 +200,8 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == argSearchResult && resultCode == RESULT_CANCELED) {
-            appBarLayout?.postDelayed({
-                appBarLayout.setExpanded(true, true)
-            }, 300)
-        }
-        super.onActivityResult(requestCode, resultCode, data)
-    }
-
     override fun onResume() {
-        if (contactThread?.isAlive != true) {
-            contactThread = Thread { updateContacts(false) }
-            contactThread?.start()
-        }
+        mContactsProvider.updateAsync()
         if (prefs.getBoolean("stateChanged", false)) {
             prefs.edit().putBoolean("stateChanged", false).apply()
             finish()
@@ -258,5 +209,10 @@ class MainActivity : AppCompatActivity() {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
         super.onResume()
+    }
+
+    override fun onDestroy() {
+        mContactsProvider.close()
+        super.onDestroy()
     }
 }

@@ -14,11 +14,11 @@ import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.data.SMSManager.Companion.labelText
+import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.moveTo
-import com.bruhascended.organiso.mainViewModel
 import com.bruhascended.organiso.ui.common.ListSelectionManager
+import com.bruhascended.organiso.db.MainDaoProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -127,7 +127,7 @@ class ConversationSelectionListener(
                 alertDialog.setTitle(mContext.getString(R.string.block_conversations_query))
                     .setPositiveButton(mContext.getString(R.string.block)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            selectedItem.moveTo(5)
+                            selectedItem.moveTo(5, mContext)
                             analyticsLogger.log("${selectedItem.label}_to_5")
                             notificationManager.cancel(selectedItem.id!!.toInt())
                         }
@@ -140,7 +140,7 @@ class ConversationSelectionListener(
                 alertDialog.setTitle(mContext.getString(R.string.report_conversations_query))
                     .setPositiveButton(mContext.getString(R.string.report)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            selectedItem.moveTo(4)
+                            selectedItem.moveTo(4, mContext)
                             analyticsLogger.reportSpam(selectedItem)
                             analyticsLogger.log("${selectedItem.label}_to_4")
                             notificationManager.cancel(selectedItem.id!!.toInt())
@@ -153,7 +153,7 @@ class ConversationSelectionListener(
             R.id.action_move -> {
                 val choices = ArrayList<String>().apply {
                     for (i in 0..3) {
-                        if (i!=label) add(mContext.resources.getString(labelText[i]))
+                        if (i!=label) add(mContext.resources.getString(ARR_LABEL_STR[i]))
                     }
                 }.toTypedArray()
                 var selection = 0
@@ -162,7 +162,7 @@ class ConversationSelectionListener(
                         selection = select + if (select>=label) 1 else 0
                     }.setPositiveButton(mContext.getString(R.string.move)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            selectedItem.moveTo(selection)
+                            selectedItem.moveTo(selection, mContext)
                             analyticsLogger.log("${selectedItem.label}_to_$selection")
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.conversations_moved), Toast.LENGTH_LONG).show()
@@ -175,7 +175,7 @@ class ConversationSelectionListener(
                     it.apply {
                         isMuted = !isMuted
                         if (isMuted) notificationManager.cancel(id!!.toInt())
-                        mainViewModel.daos[label].update(this)
+                        MainDaoProvider(mContext).getMainDaos()[label].update(this)
                     }
                 }
                 selectionManager.close()

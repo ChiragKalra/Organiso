@@ -11,12 +11,13 @@ import android.telephony.SmsManager
 import android.widget.Toast
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.mainViewModel
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
+import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.activeConversationSender
-import com.bruhascended.organiso.data.SMSManager
-import com.bruhascended.organiso.db.MessageDbProvider
+import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.organiso.db.MessageDbFactory
+import com.bruhascended.organiso.db.MainDaoProvider
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import com.klinker.android.send_message.Message as SMS
@@ -33,16 +34,6 @@ import com.klinker.android.send_message.Message as SMS
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-
-/*
-const val MESSAGE_TYPE_ALL = 0
-const val MESSAGE_TYPE_INBOX = 1
-const val MESSAGE_TYPE_SENT = 2
-const val MESSAGE_TYPE_DRAFT = 3
-const val MESSAGE_TYPE_OUTBOX = 4
-const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
-const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
-*/
 
 class SMSSender(
     private val mContext: Context,
@@ -64,31 +55,31 @@ class SMSSender(
         val message = Message (
             smsText, type, date, id = retryIndex, delivered = delivered
         )
-         if (activeConversationSender != conversation.sender) {
-             MessageDbProvider(mContext).of(conversation.sender).apply {
-                 val conversationDao = manager()
-                 val qs = conversationDao.search(date)
-                 for (m in qs) {
-                     message.id = m.id
-                     conversationDao.delete(m)
-                 }
-                 if (retryIndex != null) conversationDao.delete(message)
-                 conversationDao.insert(message)
-                 close()
-             }
-         } else {
-             mContext.sendBroadcast (
-                 Intent(SMSManager.ACTION_OVERWRITE_MESSAGE).apply {
-                     putExtra(SMSManager.EXTRA_MESSAGE, message)
-                     setPackage(mContext.applicationInfo.packageName)
-                 }
-             )
-         }
+        if (activeConversationSender != conversation.sender) {
+            MessageDbFactory(mContext).of(conversation.sender).apply {
+                val conversationDao = manager()
+                val qs = conversationDao.search(date)
+                for (m in qs) {
+                    message.id = m.id
+                    conversationDao.delete(m)
+                }
+                if (retryIndex != null) conversationDao.delete(message)
+                conversationDao.insert(message)
+                close()
+            }
+        } else {
+            mContext.sendBroadcast (
+                Intent(ACTION_OVERWRITE_MESSAGE).apply {
+                    putExtra(EXTRA_MESSAGE, message)
+                    setPackage(mContext.applicationInfo.packageName)
+                }
+            )
+        }
 
         var newCon = conversation
         if (conversation.id == null) {
             for (i in 0..4) {
-                val res = mainViewModel.daos[i].findBySender(conversation.sender)
+                val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(conversation.sender)
                 if (res.isNotEmpty()) {
                     conversations[
                         conversations.indexOf(conversations.first {
@@ -106,8 +97,8 @@ class SMSSender(
             lastSMS = smsText
             read = true
             lastMMS = false
-            if (newCon.id != null) mainViewModel.daos[label].update(this)
-            else mainViewModel.daos[label].insert(this)
+            if (newCon.id != null) MainDaoProvider(mContext).getMainDaos()[label].update(this)
+            else MainDaoProvider(mContext).getMainDaos()[label].insert(this)
         }
     }
 

@@ -13,7 +13,7 @@ import com.bruhascended.organiso.db.MessageComparator
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
 import com.bruhascended.organiso.ui.common.MediaPreviewActivity.Companion.getMimeType
 import java.io.File
 
@@ -33,12 +33,11 @@ import java.io.File
    limitations under the License.
  */
 
-
-class MessageRecyclerAdaptor(
+class MessageRecyclerAdaptor (
     private val mContext: Context,
     private val smsSender: SMSSender? = null,
     private val mmsSender: MMSSender? = null
-): SelectionRecyclerAdaptor<Message, MessageViewHolder>(MessageComparator){
+): SelectionRecyclerAdaptor<Message, MessageViewHolder>(MessageComparator) {
 
     lateinit var selectionManager: ListSelectionManager<Message>
     val isSelectionManagerNull get() = !::selectionManager.isInitialized

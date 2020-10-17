@@ -4,7 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.data.SMSManager
+import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
 
 class ChannelManager(
     private val mContext: Context
@@ -32,7 +32,7 @@ class ChannelManager(
 
         if (notificationManager.notificationChannels.isEmpty()) {
             for (i in 0..4) {
-                val name = mContext.getString(SMSManager.labelText[i])
+                val name = mContext.getString(ARR_LABEL_STR[i])
                 val channel = NotificationChannel(i.toString(), name, importance[i]).apply {
                     description = mContext.getString(descriptionText[i])
                 }

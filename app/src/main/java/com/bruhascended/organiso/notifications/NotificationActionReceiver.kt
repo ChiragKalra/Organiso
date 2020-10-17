@@ -9,7 +9,14 @@ import androidx.core.app.RemoteInput
 import androidx.room.Room
 import com.bruhascended.organiso.*
 import com.bruhascended.organiso.db.*
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_CANCEL
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_COPY
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_REPLY
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.KEY_TEXT_REPLY
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.NAME_TABLE
 import com.bruhascended.organiso.services.SMSSender
+import com.bruhascended.organiso.db.MainDaoProvider
 
 class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(mContext: Context, intent: Intent) {
@@ -40,11 +47,10 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 val toast = intent.getBooleanExtra("show_toast", true)
                 val message = intent.getSerializableExtra("message") as Message
                 val conversation = intent.getSerializableExtra("conversation") as Conversation
-                MessageDbProvider(mContext).of(conversation.sender).apply {
+                MessageDbFactory(mContext).of(conversation.sender).apply {
                     manager().delete(message)
                     if (manager().loadLastSync() == null) {
-                        requireMainViewModel(mContext)
-                        mainViewModel.daos[conversation.label].delete(conversation)
+                        MainDaoProvider(mContext).getMainDaos()[conversation.label].delete(conversation)
                     }
                     close()
                 }

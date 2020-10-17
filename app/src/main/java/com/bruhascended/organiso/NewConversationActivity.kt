@@ -10,23 +10,30 @@ import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.data.ContactsManager
-import com.bruhascended.organiso.data.ContactsManager.Contact
+import com.bruhascended.organiso.db.ContactsProvider
+import com.bruhascended.organiso.db.Contact
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.ui.common.MediaPreviewActivity
-import com.bruhascended.organiso.ui.newConversation.AddressRecyclerAdaptor
+import com.bruhascended.organiso.ui.newConversation.RecipientRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor
+import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -46,11 +53,18 @@ import kotlin.collections.ArrayList
 
 class NewConversationActivity : MediaPreviewActivity() {
 
+    companion object {
+        const val TYPE_MULTI = "multipart/*"
+        const val EXTRA_MESSAGES = "MESSAGES"
+    }
+
     private lateinit var mContext: Context
-    private lateinit var contacts: Array<Contact>
-    private val adds = arrayListOf<Contact>()
     private lateinit var cm: ContactsManager
-    private lateinit var addressRecyclerAdaptor: AddressRecyclerAdaptor
+    private lateinit var addressRecyclerAdaptor: RecipientRecyclerAdaptor
+    private lateinit var mAdaptor: ContactRecyclerAdaptor
+    private lateinit var mContactsProvider: ContactsProvider
+
+    private val recipients = arrayListOf<Contact>()
 
     override lateinit var mVideoView: VideoView
     override lateinit var mImagePreview: ImageView
@@ -61,15 +75,13 @@ class NewConversationActivity : MediaPreviewActivity() {
 
     private val clickAction = { contact: Contact ->
         to.text = null
-        if (adds.firstOrNull{ it.number == contact.number } == null) {
-            adds.add(contact)
-            addressRecyclerAdaptor.notifyItemInserted(adds.lastIndex)
-        }
+        addRecipient(contact)
     }
 
     private val addressClickAction = { contact: Contact ->
         to.setText(contact.number)
         to.setSelection(contact.number.length)
+        removeRecipient(contact)
     }
 
     private fun getRecipients(uri: Uri): String {
@@ -78,57 +90,53 @@ class NewConversationActivity : MediaPreviewActivity() {
         return if (pos == -1) base else base.substring(0, pos)
     }
 
-    private fun processIntentData(intent: Intent) {
-        if (Intent.ACTION_SENDTO == intent.action) {
-            val destinations = TextUtils.split(getRecipients(intent.data!!), ";")
-            destinations.forEach { address ->
-                val clean = cm.getRaw(address)
-                if (adds.firstOrNull{ it.number == clean } == null) {
-                    adds.add(Contact("", clean))
+    private fun addRecipientAsync (number: String) {
+        Thread {
+            val clean = cm.getRaw (
+                number.trim().toLowerCase(Locale.ROOT).filter { it.isDigit() }
+            )
+            if (clean.isBlank()) return@Thread
+            val name = mContactsProvider.getNameOrNull(clean) ?: ""
+            if (recipients.firstOrNull { it.number == clean } == null) {
+                addsRecycler.post {
+                    recipients.add(Contact(name, clean))
+                    addressRecyclerAdaptor.notifyItemInserted(recipients.lastIndex)
                 }
             }
-        } else if (Intent.ACTION_SEND == intent.action && intent.type != null) {
-            when {
-                intent.type!!.startsWith("text") -> {
-                    val str = intent.getStringExtra(Intent.EXTRA_TEXT)
-                    messageEditText.setText(str)
-                }
-                intent.type != "multi" -> {
-                    showMediaPreview(intent)
-                }
-            }
+        }.start()
+    }
+
+    private fun addRecipientSync (number: String) {
+        val clean = cm.getRaw (
+            number.trim().toLowerCase(Locale.ROOT).filter { it.isDigit() }
+        )
+        if (clean.isBlank()) return
+        val name = mContactsProvider.getNameOrNull(clean) ?: ""
+        if (recipients.firstOrNull { it.number == clean } == null) {
+            recipients.add(Contact(name, clean))
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun processMultiData(intent: Intent) {
-        if (Intent.ACTION_SEND != intent.action || intent.type != "multi") return
-
-        supportActionBar!!.title = "New Conversation"
-        addMedia.isVisible = false
-
-        val msgs = intent.getSerializableExtra("data") as Array<Message>
-        messageEditText.apply {
-            setText(getString(R.string.messages, msgs.size))
-            setBackgroundColor(Color.TRANSPARENT)
-            isFocusable = false
-            isCursorVisible = false
-            keyListener = null
+    private fun addRecipient (contact: Contact) {
+        if (recipients.firstOrNull { it.number == contact.number } == null) {
+            recipients.add(contact)
+            addressRecyclerAdaptor.notifyItemInserted(recipients.lastIndex)
         }
-        sendButton.setOnClickListener {
-            val conversations = Array(adds.size) {
-                Conversation(adds[it].number)
-            }
-            val smsSender = SMSSender(mContext, conversations)
-            val mmsSender = MMSSender(mContext, conversations)
+    }
 
-            msgs.forEach {
-                if (it.path == null) smsSender.sendSMS(it.text)
-                else {
-                    val uri =  Uri.fromFile(File(it.path!!))
-                    mmsSender.sendMMS(it.text, uri, getMimeType(it.path!!))
-                }
-            }
+    private fun removeRecipient (contact: Contact) {
+        val ind = recipients.indexOf(contact)
+        recipients.removeAt(ind)
+        addressRecyclerAdaptor.notifyItemRemoved(ind)
+    }
+
+    private fun startNextActivity () {
+        if (recipients.size == 1) {
+            startActivity(
+                Intent(this, ConversationActivity::class.java)
+                    .putExtra(EXTRA_SENDER, recipients.first().number)
+            )
+        } else if (recipients.isNotEmpty()) {
             startActivityIfNeeded(
                 Intent(mContext, MainActivity::class.java)
                     .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0
@@ -136,34 +144,112 @@ class NewConversationActivity : MediaPreviewActivity() {
         }
     }
 
-    private fun displaySearch(contacts: Array<Contact>) {
-        val filtered = ArrayList<Contact>()
-        val key = to.text.toString().trim().toLowerCase(Locale.ROOT)
-
-        val adaptor = if (key.isNotEmpty()) {
-            for (contact in contacts) {
-                if ((Regex("\\b${key}").matches(contact.number) && key.first()
-                        .isLetter()) or
-                    (Regex("\\b${key}").matches(contact.name) && key.first()
-                        .isDigit())
-                ) {
-                    filtered.add(contact)
+    @Suppress("UNCHECKED_CAST")
+    private fun processIntentData(intent: Intent) {
+        if (Intent.ACTION_SENDTO == intent.action) {
+            val destinations = TextUtils.split(getRecipients(intent.data!!), ";")
+            destinations.forEach { addRecipientAsync(it) }
+        } else if (Intent.ACTION_SEND == intent.action && intent.type != null) {
+            when {
+                intent.type!!.startsWith("text") -> {
+                    val str = intent.getStringExtra(Intent.EXTRA_TEXT)
+                    messageEditText.setText(str)
                 }
-            }
-            ContactRecyclerAdaptor(this, filtered.toTypedArray())
-        } else ContactRecyclerAdaptor(this, contacts)
+                intent.type == TYPE_MULTI -> {
+                    addMedia.isVisible = false
 
-        adaptor.onItemClick = clickAction
-        contactListView.adapter = adaptor
+                    val msgs = intent.getSerializableExtra(EXTRA_MESSAGES) as Array<Message>
+                    messageEditText.apply {
+                        setText(getString(R.string.messages, msgs.size))
+                        setBackgroundColor(Color.TRANSPARENT)
+                        isFocusable = false
+                        isCursorVisible = false
+                        keyListener = null
+                    }
+                    sendButton.setOnClickListener {
+                        val conversations = Array(recipients.size) {
+                            Conversation(recipients[it].number)
+                        }
+                        val smsSender = SMSSender(mContext, conversations)
+                        val mmsSender = MMSSender(mContext, conversations)
+
+                        msgs.forEach {
+                            if (it.path == null) smsSender.sendSMS(it.text)
+                            else {
+                                val uri =  Uri.fromFile(File(it.path!!))
+                                mmsSender.sendMMS(it.text, uri, getMimeType(it.path!!))
+                            }
+                        }
+                        startNextActivity()
+                    }
+                }
+                else -> showMediaPreview(intent)
+            }
+        }
+    }
+
+    private fun search(key: String) {
+        val flow = Pager(
+            PagingConfig(
+                pageSize = 3,
+                initialLoadSize = 3,
+                prefetchDistance = 12,
+                maxSize = 120,
+            )
+        ) {
+            mContactsProvider.getPaged(key)
+        }.flow.cachedIn(lifecycleScope)
+        lifecycleScope.launch {
+            flow.collectLatest {
+                mAdaptor.submitData(it)
+            }
+        }
+        mAdaptor.notifyDataSetChanged()
+    }
+
+    private fun setupContactRecycler() {
+        mAdaptor = ContactRecyclerAdaptor(this)
+        mAdaptor.onItemClick = clickAction
+        contactListView.layoutManager = LinearLayoutManager(this).apply {
+            orientation = LinearLayoutManager.HORIZONTAL
+        }
+        contactListView.adapter = mAdaptor
+        search("")
+        to.doOnTextChanged { text, _, _, _ ->
+            search(text.toString().trim())
+        }
+    }
+
+    private fun setupAddressRecycler() {
+        addsRecycler.layoutManager = LinearLayoutManager(this).apply {
+            orientation = LinearLayoutManager.HORIZONTAL
+        }
+        addressRecyclerAdaptor = RecipientRecyclerAdaptor(this, recipients).apply {
+            onItemClick = addressClickAction
+        }
+        addsRecycler.adapter = addressRecyclerAdaptor
+
+        to.requestFocus()
+        to.setOnEditorActionListener { _, i, _ ->
+            if (i != EditorInfo.IME_ACTION_DONE) return@setOnEditorActionListener true
+            val number = to.text.toString()
+            if (number.isNotBlank()) addRecipientAsync(number)
+            to.text = null
+            true
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val dark = PreferenceManager.getDefaultSharedPreferences(this)
-            .getBoolean("dark_theme", false)
+            .getBoolean(PREF_DARK_THEME, false)
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
         setContentView(R.layout.activity_new_conversation)
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        supportActionBar!!.title = getString(R.string.new_conversation)
 
         mContext = this
         mVideoView = videoView
@@ -172,110 +258,42 @@ class NewConversationActivity : MediaPreviewActivity() {
         mPlayPauseButton = playPauseButton
         mVideoPlayPauseButton = videoPlayPauseButton
         mAddMedia = addMedia
-
         cm = ContactsManager(this)
+        mContactsProvider = ContactsProvider(this)
 
         processIntentData(intent)
-        to.requestFocus()
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.title = "New Conversation"
+        setupAddressRecycler()
+        setupContactRecycler()
 
-
-        val observer = Observer<Array<Contact>?> { contacts ->
-            if (contacts == null) return@Observer
-
-            val adaptor = ContactRecyclerAdaptor(this, contacts)
-            adaptor.onItemClick = clickAction
-
-            contactListView.layoutManager = LinearLayoutManager(this).apply {
-                orientation = LinearLayoutManager.HORIZONTAL
-            }
-            contactListView.adapter = adaptor
-            progressBar.visibility = ProgressBar.INVISIBLE
-
-            addsRecycler.layoutManager = LinearLayoutManager(this).apply {
-                orientation = LinearLayoutManager.HORIZONTAL
-            }
-            addressRecyclerAdaptor = AddressRecyclerAdaptor(this, adds.apply {
-                forEachIndexed { index, contact ->
-                    val found = contacts.firstOrNull {it.number == contact.number}
-                    if (found != null) adds[index].name = found.name
-                }
-            }).apply {
-                onItemClick = addressClickAction
-            }
-            addsRecycler.adapter = addressRecyclerAdaptor
-
-            to.doOnTextChanged { _, _, _, _ -> displaySearch(contacts) }
-            if (to.text.isNotBlank()) displaySearch(contacts)
-
+        if (!sendButton.hasOnClickListeners()) {
             sendButton.setOnClickListener {
                 if (messageEditText.text.toString().trim() == "" && mmsType == 0)
                     return@setOnClickListener
 
-                val sender: String = to.text.toString().trim()
-                if (adds.isNotEmpty()) {
-                    to.onEditorAction(EditorInfo.IME_ACTION_DONE)
-                    val conversations = Array(adds.size) {
-                        Conversation(adds[it].number)
-                    }
+                addRecipientSync(to.text.toString())
+                to.text = null
 
+                if (recipients.isNotEmpty()) {
+                    val conversations = Array(recipients.size) {
+                        Conversation(recipients[it].number)
+                    }
                     val msg = messageEditText.text.toString().trim()
-                    if (mmsType == 0) SMSSender(mContext, conversations).sendSMS(msg)
-                    else {
+                    if (mmsType == 0) {
+                        SMSSender(mContext, conversations).sendSMS(msg)
+                        hideMediaPreview()
+                    } else {
                         MMSSender(mContext, conversations)
                             .sendMMS(msg, mmsURI, mmsTypeString)
                     }
-
-                    startActivityIfNeeded(
-                        Intent(mContext, MainActivity::class.java)
-                            .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0
-                    )
-
                     messageEditText.text = null
-                } else if (sender.isNotBlank()) {
-                    var name: String? = null
-
-                    for (contact in contacts) {
-                        if (contact.number == sender) {
-                            name = contact.name
-                            break
-                        }
-                    }
-                    val intent = Intent(this, ConversationActivity::class.java)
-                    intent.putExtra("ye",
-                        Conversation(
-                            sender, name,
-                            lastSMS = messageEditText.text.toString().trim()
-                        )
-                    )
-                    if (mmsType > 0) intent.data = mmsURI
-                    startActivity(intent)
-                    this.finish()
                 }
-            }
-            processMultiData(intent)
-            to.setOnEditorActionListener { _, i, _ ->
-                if (i != EditorInfo.IME_ACTION_DONE) return@setOnEditorActionListener true
-                val key = to.text.toString().trim().toLowerCase(Locale.ROOT)
-                    .filter { it.isDigit() }
-                if (key.isBlank()) return@setOnEditorActionListener true
-                val found = contacts.firstOrNull {it.number == key}
-                clickAction(Contact(found?.name ?: "", key))
-                true
+                startNextActivity()
             }
         }
-        Thread {
-            if (isMainViewModelNull()) {
-                requireMainViewModel(this)
-                mainViewModel.contacts.postValue(ContactsManager(this).getContactsList())
-            }
-            runOnUiThread{
-                mainViewModel.contacts.observe(this, observer)
-            }
-        }.start()
     }
 
+    override fun onDestroy() {
+        mContactsProvider.close()
+        super.onDestroy()
+    }
 }

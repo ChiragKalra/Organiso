@@ -1,6 +1,5 @@
 package com.bruhascended.organiso.ui.search
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.TypedValue
 import android.view.View
@@ -10,8 +9,15 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
-import com.bruhascended.organiso.R
-import com.bruhascended.organiso.data.SMSManager.Companion.labelText
+import com.bruhascended.organiso.*
+import com.bruhascended.organiso.SearchActivity.Companion.HEADER_CONTACTS
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_CONTACT
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_CONVERSATION
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_FOOTER
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_HEADER
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_RECEIVED
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_SENT
+import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
@@ -19,6 +25,22 @@ import com.bruhascended.organiso.ui.conversation.MessageViewHolder
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import com.bruhascended.organiso.ui.main.ConversationViewHolder
 
+/*
+                    Copyright 2020 Chirag Kalra
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
 
 class SearchResultViewHolder(
     val mContext: Context,
@@ -35,8 +57,10 @@ class SearchResultViewHolder(
     )
 
     object ResultItemComparator : DiffUtil.ItemCallback<ResultItem>() {
-        override fun areItemsTheSame(oldItem: ResultItem, newItem: ResultItem) = oldItem == newItem
-        override fun areContentsTheSame(oldItem: ResultItem, newItem: ResultItem) = oldItem == newItem
+        override fun areItemsTheSame(oldItem: ResultItem, newItem: ResultItem) =
+            oldItem == newItem
+        override fun areContentsTheSame(oldItem: ResultItem, newItem: ResultItem) =
+            oldItem == newItem
     }
 
     lateinit var item: ResultItem
@@ -48,18 +72,19 @@ class SearchResultViewHolder(
     }
 
     init {
-        when(type) {
-            0,1 -> conversationViewHolder = ConversationViewHolder(root, mContext)
-            2,3 -> messageViewHolder = MessageViewHolder(mContext, root)
+        when (type) {
+            TYPE_CONVERSATION, TYPE_CONTACT ->
+                conversationViewHolder = ConversationViewHolder(root, mContext)
+            TYPE_MESSAGE_SENT, TYPE_MESSAGE_RECEIVED ->
+                messageViewHolder = MessageViewHolder(mContext, root)
         }
     }
 
-    @SuppressLint("SetTextI18n")
     fun onBind(resultItem: ResultItem) {
         item = resultItem
         val pos = absoluteAdapterPosition
         when(type) {
-            0,1 -> {
+            TYPE_CONVERSATION, TYPE_CONTACT -> {
                 conversationViewHolder.apply {
                     conversation = item.conversation!!
                     onBind()
@@ -72,7 +97,7 @@ class SearchResultViewHolder(
                         setOnLongClickListener { false }
                     }
 
-                    if (type == 1) {
+                    if (type == TYPE_CONTACT) {
                         senderTextView.apply {
                             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
                             val lp = layoutParams as ConstraintLayout.LayoutParams
@@ -85,7 +110,7 @@ class SearchResultViewHolder(
                     }
                 }
             }
-            2,3 -> {
+            TYPE_MESSAGE_SENT, TYPE_MESSAGE_RECEIVED -> {
                 messageViewHolder.apply {
                     searchKey = mAdaptor.searchKey
                     message = item.message!!
@@ -97,13 +122,13 @@ class SearchResultViewHolder(
                     }
                 }
             }
-            4 -> {
+            TYPE_HEADER -> {
                 val labelTextView: TextView = root.findViewById(R.id.label)
-                if (item.categoryHeader == 42)
+                if (item.categoryHeader == HEADER_CONTACTS)
                     labelTextView.text = mContext.getString(R.string.from_contacts)
                 else {
                     val label = item.categoryHeader - (if (item.categoryHeader > 9) 10 else 0)
-                    val labelText = mContext.getString(labelText[label])
+                    val labelText = mContext.getString(ARR_LABEL_STR[label])
                     labelTextView.text = when {
                         item.categoryHeader > 9 ->
                             mContext.getString(R.string.messages_in_label, labelText)
@@ -111,7 +136,7 @@ class SearchResultViewHolder(
                     }
                 }
             }
-            5 -> {
+            TYPE_FOOTER -> {
                 val loading = root.findViewById<ProgressBar>(R.id.loading)
                 val empty = root.findViewById<TextView>(R.id.noResults)
                 val end = root.findViewById<TextView>(R.id.endOfResults)

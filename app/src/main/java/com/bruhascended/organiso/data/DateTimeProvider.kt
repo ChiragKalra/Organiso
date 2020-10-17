@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.ui.common
+package com.bruhascended.organiso.data
 
 import android.content.Context
 import android.text.format.DateFormat

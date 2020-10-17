@@ -21,13 +21,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.bruhascended.organiso.data.SMSManager.Companion.labelText
+import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
 
 class SectionsPagerAdapter(
         private val context: Context,
         private val visibleCategories: Array<Int>,
         private val prefs: SharedPreferences,
         fm: FragmentManager
+        // TODO
     ): FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     override fun getItem(position: Int)
@@ -36,7 +37,7 @@ class SectionsPagerAdapter(
     override fun getPageTitle(position: Int): String {
         val label = visibleCategories[position]
         val title = prefs.getString("custom_label_$label", "")
-        return if (title.isNullOrEmpty()) context.getString(labelText[label]) else title
+        return if (title.isNullOrEmpty()) context.getString(ARR_LABEL_STR[label]) else title
     }
 
     override fun getCount() = visibleCategories.size

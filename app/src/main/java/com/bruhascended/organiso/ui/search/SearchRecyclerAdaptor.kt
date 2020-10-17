@@ -4,7 +4,11 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.organiso.R
+import com.bruhascended.organiso.*
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_FOOTER
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_HEADER
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_RECEIVED
+import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_SENT
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
 
@@ -37,21 +41,17 @@ class SearchRecyclerAdaptor(
 
     override fun getItemCount() = items.size
 
-    override fun getItemViewType(position: Int): Int {
-        return if (items[position].type == 2) {
-            if (items[position].message?.type == 1) 3 else 2
-        } else items[position].type
-    }
+    override fun getItemViewType(position: Int) = items[position].type
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchResultViewHolder {
         return SearchResultViewHolder(
             mContext, viewType, this,
             LayoutInflater.from(parent.context).inflate(
                 when (viewType) {
-                    2 -> R.layout.item_message_out
-                    3 -> R.layout.item_message
-                    4 -> R.layout.item_search_category
-                    5 -> R.layout.item_search_footer
+                    TYPE_MESSAGE_SENT -> R.layout.item_message_out
+                    TYPE_MESSAGE_RECEIVED -> R.layout.item_message
+                    TYPE_HEADER -> R.layout.item_search_category
+                    TYPE_FOOTER -> R.layout.item_search_footer
                     else -> R.layout.item_conversation
                 }, parent, false
             )

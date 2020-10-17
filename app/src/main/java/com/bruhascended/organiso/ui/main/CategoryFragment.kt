@@ -19,10 +19,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.mainViewModel
 import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.db.MainDaoProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
+import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -67,6 +68,8 @@ class CategoryFragment: Fragment() {
     private lateinit var mListener: ConversationSelectionListener
     private lateinit var recyclerView: RecyclerView
 
+    private lateinit var mMainDaoProvider: MainDaoProvider
+
     private val dataObserver = object: RecyclerView.AdapterDataObserver() {
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
             super.onItemRangeInserted(positionStart, itemCount)
@@ -110,7 +113,7 @@ class CategoryFragment: Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val mContext = requireActivity()
-        val dark = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("dark_theme", false)
+        val dark = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(PREF_DARK_THEME, false)
         inflater.cloneInContext(ContextThemeWrapper(mContext, if (dark) R.style.DarkTheme else R.style.LightTheme))
         val root = inflater.inflate(R.layout.fragment_main, container, false)
         recyclerView = root.findViewById(R.id.listView)
@@ -119,6 +122,7 @@ class CategoryFragment: Fragment() {
         textView.visibility = TextView.INVISIBLE
 
         if (::selectionManager.isInitialized) selectionManager.close()
+        mMainDaoProvider = MainDaoProvider(mContext)
 
         val flow = Pager(PagingConfig(
             pageSize = 10,
@@ -126,15 +130,15 @@ class CategoryFragment: Fragment() {
             prefetchDistance = 80,
             maxSize = 180,
         )) {
-            mainViewModel.daos[label].loadAllPaged()
+            mMainDaoProvider.getMainDaos()[label].loadAllPaged()
         }.flow.cachedIn(mContext.lifecycleScope)
 
-        if (mainViewModel.daos[label].loadSingle()==null) textView.visibility = TextView.VISIBLE
+        if (mMainDaoProvider.getMainDaos()[label].loadSingle()==null) textView.visibility = TextView.VISIBLE
         else textView.visibility = TextView.INVISIBLE
 
         mAdaptor = ConversationRecyclerAdaptor(mContext)
         mListener =  ConversationSelectionListener(mContext, label)
-        selectionManager = ListSelectionManager(
+        selectionManager = ListSelectionManager (
             mContext as AppCompatActivity,
             mAdaptor as SelectionRecyclerAdaptor<Conversation, RecyclerView.ViewHolder>,
             mListener
@@ -159,7 +163,7 @@ class CategoryFragment: Fragment() {
         mContext.lifecycleScope.launch {
             delay(if (position == 0) 0 else 300)
             flow.collectLatest {
-                textView.isVisible = mainViewModel.daos[label].loadSingle()==null
+                textView.isVisible = mMainDaoProvider.getMainDaos()[label].loadSingle()==null
                 mAdaptor.submitData(it)
             }
         }

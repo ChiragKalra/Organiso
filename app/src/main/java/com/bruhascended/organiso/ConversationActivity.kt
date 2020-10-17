@@ -22,24 +22,27 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.analytics.AnalyticsLogger
+import com.bruhascended.organiso.db.ContactsProvider
 import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_NEW_MESSAGE
 import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
 import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_UPDATE_STATUS_MESSAGE
-import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
 import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
 import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.ListSelectionManager.Companion.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.db.MainDaoProvider
 import com.bruhascended.organiso.ui.common.MediaPreviewActivity
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
 import com.bruhascended.organiso.ui.conversation.ConversationViewModel
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
 import com.bruhascended.organiso.ui.conversation.MessageSelectionListener
+import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
@@ -62,12 +65,16 @@ import kotlinx.coroutines.launch
 
 */
 
-const val EXTRA_SENDER = "SENDER"
-
-var activeConversationSender: String? = null
-
 @Suppress("UNCHECKED_CAST")
 class ConversationActivity : MediaPreviewActivity() {
+
+    companion object {
+        const val EXTRA_SENDER = "SENDER"
+        const val EXTRA_CONVERSATION = "CONVERSATION"
+        const val EXTRA_MESSAGE_ID = "MESSAGE_ID"
+
+        var activeConversationSender: String? = null
+    }
 
     private lateinit var mContext: Context
     private lateinit var mViewModel: ConversationViewModel
@@ -142,10 +149,10 @@ class ConversationActivity : MediaPreviewActivity() {
                         conversation.lastSMS = it.text
                         conversation.time = it.time
                         conversation.lastMMS = it.path != null
-                        mainViewModel.daos[conversation.label].update(conversation)
+                        MainDaoProvider(mContext).getMainDaos()[conversation.label].update(conversation)
                     }
                 } else {
-                    mainViewModel.daos[conversation.label].delete(conversation)
+                    MainDaoProvider(mContext).getMainDaos()[conversation.label].delete(conversation)
                 }
             }
         })
@@ -183,7 +190,7 @@ class ConversationActivity : MediaPreviewActivity() {
             mViewModel.messages = it
             if (scroll) {
                 scroll = false
-                val id = intent?.getLongExtra("ID", -1L) ?: -1L
+                val id = intent?.getLongExtra(EXTRA_MESSAGE_ID, -1L) ?: -1L
                 if (id != -1L) {
                     recyclerView.postDelayed({
                         scrollToItem(id)
@@ -250,7 +257,7 @@ class ConversationActivity : MediaPreviewActivity() {
         super.onCreate(savedInstanceState)
 
         val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-            "dark_theme",
+            PREF_DARK_THEME,
             false
         )
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
@@ -259,24 +266,43 @@ class ConversationActivity : MediaPreviewActivity() {
 
         val temp by viewModels<ConversationViewModel>()
         mViewModel = temp
-        mViewModel.init (
-            intent.getSerializableExtra("ye") as Conversation?
-                ?: Conversation(intent.getStringExtra("sender")!!, intent.getStringExtra("name"))
+        mViewModel.init(
+            intent.getSerializableExtra(EXTRA_CONVERSATION) as Conversation?
+                ?: Conversation(intent.getStringExtra(EXTRA_SENDER)!!)
         )
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
 
-        requireMainViewModel(this)
-        if (mViewModel.conversation.lastSMS.isBlank()) {
-            for (i in 0..4) {
-                val res = mainViewModel.daos[i].findBySender(mViewModel.conversation.sender)
-                if (res.isNotEmpty()) {
-                    mViewModel.conversation = res.first()
-                    break
+        if (mViewModel.conversation.id == null) {
+            Thread {
+                var found = false
+                for (i in 0..4) {
+                    val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(mViewModel.conversation.sender)
+                    if (res.isNotEmpty()) {
+                        mViewModel.conversation = res.first()
+                        found = true
+                        break
+                    }
                 }
-            }
+                if (!found) {
+                    mViewModel.name = ContactsProvider(this).getNameOrNull(mViewModel.sender)
+                }
+                toolbar.post {
+                    supportActionBar!!.title = mViewModel.name ?: mViewModel.sender
+                }
+                if (mViewModel.conversation.id != null) {
+                    if (!mViewModel.conversation.read) {
+                        mViewModel.conversation.read = true
+                        MainDaoProvider(mContext).getMainDaos()[mViewModel.conversation.label].update(mViewModel.conversation)
+                    }
+                }
+            }.start()
+        } else if (!mViewModel.conversation.read) {
+            mViewModel.conversation.read = true
+            MainDaoProvider(mContext).getMainDaos()[mViewModel.conversation.label].update(mViewModel.conversation)
         }
+
 
         smsSender = SMSSender(this, arrayOf(mViewModel.conversation))
         mmsSender = MMSSender(this, arrayOf(mViewModel.conversation))
@@ -316,20 +342,6 @@ class ConversationActivity : MediaPreviewActivity() {
                 sendButton.isEnabled = true
                 messageEditText.setText("")
             }
-        }
-
-        if (mViewModel.conversation.id != null) {
-            if (!mViewModel.conversation.read) {
-                mViewModel.conversation.read = true
-                mainViewModel.daos[mViewModel.conversation.label].update(mViewModel.conversation)
-            }
-        } else if (!mViewModel.conversation.lastSMS.isBlank()) {
-            messageEditText.setText(mViewModel.conversation.lastSMS)
-            if (intent.data != null) showMediaPreview(intent)
-            sendButton.callOnClick()
-        } else if (intent.data != null) {
-            showMediaPreview(intent)
-            sendButton.callOnClick()
         }
 
         setupRecycler()

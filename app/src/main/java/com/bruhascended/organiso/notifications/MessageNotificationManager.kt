@@ -22,8 +22,9 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.room.Room
 import com.bruhascended.organiso.ConversationActivity
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
+import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.activeConversationSender
 import com.bruhascended.organiso.data.ContactsManager
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
@@ -50,20 +51,22 @@ import java.io.File
 
 */
 
-const val NAME_TABLE = "active_notifications"
-const val ACTION_CANCEL = "NOTIFICATION_CANCELED"
-const val ACTION_REPLY = "NOTIFICATION_REPLIED"
-const val ACTION_COPY = "OTP_COPIED"
-const val ACTION_DELETE = "MESSAGE_DELETED"
-const val GROUP_DEFAULT = "MESSAGE_GROUP"
-const val ID_SUMMARY = -1221
-const val KEY_TEXT_REPLY = "key_text_reply"
-const val DELAY_OTP_DELETE = 15L // in minutes
-
-
 class MessageNotificationManager(
     private val mContext: Context
 ) {
+
+    companion object {
+        const val NAME_TABLE = "active_notifications"
+        const val ACTION_CANCEL = "NOTIFICATION_CANCELED"
+        const val ACTION_REPLY = "NOTIFICATION_REPLIED"
+        const val ACTION_COPY = "OTP_COPIED"
+        const val ACTION_DELETE = "MESSAGE_DELETED"
+        const val GROUP_DEFAULT = "MESSAGE_GROUP"
+        const val ID_SUMMARY = -1221
+        const val KEY_TEXT_REPLY = "key_text_reply"
+        const val DELAY_OTP_DELETE = 15L // in minutes
+    }
+
     private val cm = ContactsManager(mContext)
     private val onm = OtpNotificationManager(mContext)
     private val notificationManager = NotificationManagerCompat.from(mContext)
@@ -165,9 +168,7 @@ class MessageNotificationManager(
         val contentPI = PendingIntent.getActivity(
             mContext, conversation.id!!.toInt(),
             Intent(mContext, ConversationActivity::class.java)
-                .putExtra("ye", conversation)
-                .putExtra("sender", conversation.sender)
-                .putExtra("name", conversation.name)
+                .putExtra(EXTRA_SENDER, conversation.sender)
                 .setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME),
             PendingIntent.FLAG_ONE_SHOT
         )

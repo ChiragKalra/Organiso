@@ -14,6 +14,7 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.preference.PreferenceManager
 import com.bruhascended.organiso.data.SMSManager
 import com.bruhascended.organiso.notifications.ChannelManager
 import kotlinx.android.synthetic.main.activity_start.*
@@ -35,11 +36,16 @@ import kotlin.math.roundToInt
    limitations under the License.
  */
 
+
 class StartActivity : AppCompatActivity() {
+
+    companion object {
+        const val TAG_WAKE_LOCK = "Organiso::Wakelock"
+        const val ARG_INIT = "InitDataOrganized"
+    }
+
     private lateinit var mContext: Context
     private lateinit var sharedPref: SharedPreferences
-
-    private val arg = "InitDataOrganized"
 
     private val perms = arrayOf(
         Manifest.permission.READ_SMS,
@@ -58,10 +64,10 @@ class StartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         mContext = this
-        sharedPref = getSharedPreferences("local", Context.MODE_PRIVATE)
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
 
-        if (sharedPref.getBoolean(arg, false)) {
+        if (sharedPref.getBoolean(ARG_INIT, false)) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
@@ -69,9 +75,8 @@ class StartActivity : AppCompatActivity() {
 
         if (PackageManager.PERMISSION_DENIED in
             Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
-            ActivityCompat.requestPermissions(this, perms, 1)
+            ActivityCompat.requestPermissions(this, perms, 0)
         else messages()
-
     }
 
     override fun onRequestPermissionsResult (
@@ -161,7 +166,7 @@ class StartActivity : AppCompatActivity() {
 
         val wakeLock: PowerManager.WakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Organiso::MyWakelock").apply {
+                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG_WAKE_LOCK).apply {
                     acquire(10*60*1000L)
                 }
             }
@@ -173,7 +178,7 @@ class StartActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
             wakeLock.release()
 
-            sharedPref.edit().putBoolean(arg, true).apply()
+            sharedPref.edit().putBoolean(ARG_INIT, true).apply()
             finish()
         }.start()
     }

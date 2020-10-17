@@ -1,5 +1,24 @@
 package com.bruhascended.organiso.ui.newConversation
 
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
+import com.bruhascended.organiso.R
+import com.bruhascended.organiso.data.ContactsManager
+import com.bruhascended.organiso.db.Contact
+import com.bruhascended.organiso.db.ContactComparator
+import com.bruhascended.organiso.ui.common.ListSelectionManager
+import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
+import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor.ContactViewHolder
+import com.squareup.picasso.Picasso
+import java.io.File
+import kotlin.math.abs
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -16,25 +35,11 @@ package com.bruhascended.organiso.ui.newConversation
    limitations under the License.
  */
 
-import android.content.Context
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.organiso.R
-import com.bruhascended.organiso.data.ContactsManager
-import com.bruhascended.organiso.data.ContactsManager.Contact
-import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
-import com.squareup.picasso.Picasso
-import java.io.File
-
 class ContactRecyclerAdaptor (
-    private val mContext: Context,
-    private val contacts: Array<Contact>
-): RecyclerView.Adapter<ContactRecyclerAdaptor.ContactViewHolder>() {
+    private val mContext: Context
+): ListSelectionManager.SelectionRecyclerAdaptor<Contact, ContactViewHolder>(
+    ContactComparator
+){
 
     private var colors: Array<Int> = Array(ConversationRecyclerAdaptor.colorRes.size) {
         ContextCompat.getColor(mContext, ConversationRecyclerAdaptor.colorRes[it])
@@ -53,12 +58,10 @@ class ContactRecyclerAdaptor (
 
         init {
             view.setOnClickListener {
-                onItemClick?.invoke(contacts[layoutPosition])
+                onItemClick?.invoke(getItem(layoutPosition)!!)
             }
         }
     }
-
-    override fun getItemCount(): Int = contacts.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContactViewHolder {
         val itemView: View = LayoutInflater.from(parent.context)
@@ -67,12 +70,12 @@ class ContactRecyclerAdaptor (
     }
 
     override fun onBindViewHolder(holder: ContactViewHolder, position: Int) {
-        val contact: Contact = contacts[position]
+        val contact: Contact = getItem(position) ?: return
         holder.name.text = contact.name
         holder.number.text = contact.number
         val dp = File(mContext.filesDir, contact.number)
         holder.dp.apply {
-            setBackgroundColor(colors[position % colors.size])
+            setBackgroundColor(colors[abs(contact.hashCode()) % colors.size])
             if (dp.exists()) picasso.load(dp).into(this)
             else setImageResource(R.drawable.ic_person)
         }

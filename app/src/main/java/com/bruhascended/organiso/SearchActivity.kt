@@ -11,9 +11,13 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_MESSAGE_ID
+import com.bruhascended.organiso.db.ContactsProvider
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbProvider
+import com.bruhascended.organiso.db.MessageDbFactory
+import com.bruhascended.organiso.db.MainDaoProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
@@ -38,11 +42,24 @@ import java.util.*
 
 */
 
+
 class SearchActivity : AppCompatActivity() {
+
+    companion object {
+        const val TYPE_HEADER = 4
+        const val TYPE_CONVERSATION = 0
+        const val TYPE_CONTACT = 1
+        const val TYPE_MESSAGE_SENT = 2
+        const val TYPE_MESSAGE_RECEIVED = 3
+        const val TYPE_FOOTER = 5
+
+        const val HEADER_CONTACTS = 42
+    }
 
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
     private lateinit var categories: Array<Int>
+    private lateinit var mContactsProvider: ContactsProvider
     private lateinit var mAdaptor: SearchRecyclerAdaptor
     private lateinit var result: ArrayList<ResultItem>
 
@@ -58,14 +75,14 @@ class SearchActivity : AppCompatActivity() {
             val displayedSenders = arrayListOf<String>()
             for (category in categories) {
                 if (searchThread.isInterrupted) return@Thread
-                val cons = mainViewModel.daos[category].search("$key%", "% $key%")
-                if (cons.isNotEmpty()) {ResultItem(4, categoryHeader = category)
+                val cons = MainDaoProvider(mContext).getMainDaos()[category].search("$key%", "% $key%")
+                if (cons.isNotEmpty()) {ResultItem(TYPE_HEADER, categoryHeader = category)
                     cons.forEach { displayedSenders.add(it.sender) }
                     searchRecycler.post {
-                        mAdaptor.addItems(listOf(ResultItem(4, categoryHeader = category)))
+                        mAdaptor.addItems(listOf(ResultItem(TYPE_HEADER, categoryHeader = category)))
                         mAdaptor.addItems(
                             List(cons.size) {
-                                ResultItem(0, conversation = cons[it])
+                                ResultItem(TYPE_CONVERSATION, conversation = cons[it])
                             }
                         )
                     }
@@ -73,7 +90,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             var otherDisplayed = false
-            mainViewModel.contacts.value?.forEach {  contact ->
+            mContactsProvider.getSync().forEach {  contact ->
                 val name = contact.name.toLowerCase(Locale.ROOT)
                 if (!Regex("\\b${key}").matches(name))
                     return@forEach
@@ -87,11 +104,12 @@ class SearchActivity : AppCompatActivity() {
                 if (!otherDisplayed) {
                     otherDisplayed = true
                     searchRecycler.post {
-                        mAdaptor.addItems(listOf(ResultItem(4, categoryHeader = 42)))
+                        mAdaptor.addItems(listOf(ResultItem(TYPE_HEADER, categoryHeader = HEADER_CONTACTS)))
                     }
                 }
                 searchRecycler.post {
-                    mAdaptor.addItems(listOf(ResultItem(1,
+                    mAdaptor.addItems(listOf(ResultItem(
+                        TYPE_CONTACT,
                         conversation = Conversation(contact.number, contact.name)
                     )))
                 }
@@ -100,10 +118,10 @@ class SearchActivity : AppCompatActivity() {
             for (category in categories) {
                 var isEmpty = true
                 if (searchThread.isInterrupted) return@Thread
-                for (con in mainViewModel.daos[category].loadAllSync()) {
+                for (con in MainDaoProvider(mContext).getMainDaos()[category].loadAllSync()) {
                     var msgs: List<Message>
                     if (searchThread.isInterrupted) return@Thread
-                    MessageDbProvider(mContext).of(con.sender).apply {
+                    MessageDbFactory(mContext).of(con.sender).apply {
                         msgs = manager().search("$key%", "% $key%")
                         close()
                     }
@@ -111,14 +129,21 @@ class SearchActivity : AppCompatActivity() {
                         if (isEmpty) {
                             isEmpty = false
                             searchRecycler.post {
-                                mAdaptor.addItems(listOf(ResultItem(4, categoryHeader = 10+category)))
+                                mAdaptor.addItems(
+                                    listOf(ResultItem(TYPE_HEADER, categoryHeader = 10+category))
+                                )
                             }
                         }
                         searchRecycler.post {
-                            mAdaptor.addItems(listOf(ResultItem(1, conversation = con)))
+                            mAdaptor.addItems(listOf(ResultItem(TYPE_CONTACT, conversation = con)))
                             mAdaptor.addItems(
                                 List(msgs.size) {
-                                    ResultItem(2, conversation = con, message = msgs[it])
+                                    ResultItem (
+                                        if (msgs[it].type == 1) TYPE_MESSAGE_RECEIVED
+                                        else TYPE_MESSAGE_SENT,
+                                        conversation = con,
+                                        message = msgs[it]
+                                    )
                                 }
                             )
                         }
@@ -137,8 +162,6 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        requireMainViewModel(this)
-
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
@@ -147,13 +170,13 @@ class SearchActivity : AppCompatActivity() {
         searchEditText.requestFocus()
 
         mContext = this
-
-        result = arrayListOf(ResultItem(5))
+        mContactsProvider = ContactsProvider(this)
+        result = arrayListOf(ResultItem(TYPE_FOOTER))
         mAdaptor = SearchRecyclerAdaptor(mContext, result)
         mAdaptor.doOnConversationClick = {
             startActivity(
                 Intent(mContext, ConversationActivity::class.java)
-                    .putExtra("ye", it)
+                    .putExtra(EXTRA_CONVERSATION, it)
             )
             finish()
         }
@@ -161,8 +184,8 @@ class SearchActivity : AppCompatActivity() {
         mAdaptor.doOnMessageClick = {
             startActivity(
                 Intent(mContext, ConversationActivity::class.java)
-                    .putExtra("ye", it.second)
-                    .putExtra("ID", it.first)
+                    .putExtra(EXTRA_CONVERSATION, it.second)
+                    .putExtra(EXTRA_MESSAGE_ID, it.first)
             )
             finish()
         }

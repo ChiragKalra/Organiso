@@ -17,13 +17,11 @@ class ListSelectionManager<T: Any> (
     private val listener: SelectionCallBack<T>,
 ){
 
-    companion object {
-        abstract class SelectionRecyclerAdaptor<T : Any, V : RecyclerView.ViewHolder>(
-            c: DiffUtil.ItemCallback<T>
-        ): PagingDataAdapter<T, V>(c) {
-            fun getItemObject(pos: Int): T? {
-                return super.getItem(pos)
-            }
+    abstract class SelectionRecyclerAdaptor<T : Any, V : RecyclerView.ViewHolder>(
+        c: DiffUtil.ItemCallback<T>
+    ): PagingDataAdapter<T, V>(c) {
+        fun getItemObject(pos: Int): T? {
+            return super.getItem(pos)
         }
     }
 

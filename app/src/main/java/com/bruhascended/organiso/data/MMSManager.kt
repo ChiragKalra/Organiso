@@ -7,10 +7,14 @@ import android.net.Uri
 import android.provider.Telephony
 import android.telephony.TelephonyManager
 import android.webkit.MimeTypeMap
-import com.bruhascended.organiso.*
+import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_NEW_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.organiso.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
+import com.bruhascended.organiso.data.SMSManager.Companion.MESSAGE_TYPE_SENT
 import com.bruhascended.organiso.db.Conversation
 import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbProvider
+import com.bruhascended.organiso.db.MessageDbFactory
+import com.bruhascended.organiso.db.MainDaoProvider
 import java.io.*
 import java.lang.Exception
 
@@ -34,6 +38,7 @@ import java.lang.Exception
 class MMSManager(private val mContext: Context) {
     private val cm = ContactsManager(mContext)
     private val senderNameMap = cm.getContactsHashMap()
+    private val mMainDaoProvider = MainDaoProvider(mContext)
 
     private val tMgr = mContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
     private var mPhoneNumber = cm.getRaw(tMgr.line1Number)
@@ -163,25 +168,26 @@ class MMSManager(private val mContext: Context) {
         val sentByUser = sender.first
         val rawNumber = cm.getRaw(sender.second)
 
-        val message = Message(body, if (sentByUser) 2 else 1, date, path = file)
-
-        requireMainViewModel(mContext)
+        val message = Message(
+            body, if (sentByUser) MESSAGE_TYPE_SENT else MESSAGE_TYPE_INBOX,
+            date, path = file
+        )
 
         var conversation: Conversation? = null
         for (i in 0..4) {
-            val got = mainViewModel.daos[i].findBySender(rawNumber)
+            val got = mMainDaoProvider.getMainDaos()[i].findBySender(rawNumber)
             if (got.isNotEmpty()) {
                 conversation = got.first()
                 for (item in got.slice(1 until got.size))
-                    mainViewModel.daos[i].delete(item)
+                    mMainDaoProvider.getMainDaos()[i].delete(item)
                 break
             }
         }
 
         conversation = if (conversation != null) {
             conversation.apply {
-                read = init
                 if (time < message.time) {
+                    read = init
                     time = message.time
                     lastSMS = message.text
                     lastMMS = true
@@ -189,7 +195,7 @@ class MMSManager(private val mContext: Context) {
                 label = 0
                 forceLabel = 0
                 name = senderNameMap[rawNumber]
-                mainViewModel.daos[0].update(this)
+                mMainDaoProvider.getMainDaos()[0].update(this)
             }
             conversation
         } else {
@@ -202,21 +208,21 @@ class MMSManager(private val mContext: Context) {
                 forceLabel = 0,
                 lastMMS = true
             )
-            mainViewModel.daos[0].insert(con)
-            con.id = mainViewModel.daos[0].findBySender(rawNumber).first().id
+            mMainDaoProvider.getMainDaos()[0].insert(con)
+            con.id = mMainDaoProvider.getMainDaos()[0].findBySender(rawNumber).first().id
             con
         }
 
         return if (activeSender == rawNumber) {
             mContext.sendBroadcast (
-                Intent(SMSManager.ACTION_NEW_MESSAGE).apply {
+                Intent(ACTION_NEW_MESSAGE).apply {
                     setPackage(mContext.applicationInfo.packageName)
-                    putExtra(SMSManager.EXTRA_MESSAGE, message)
+                    putExtra(EXTRA_MESSAGE, message)
                 }
             )
             null
         } else {
-            val mdb = MessageDbProvider(mContext).of(rawNumber)
+            val mdb = MessageDbFactory(mContext).of(rawNumber)
             mdb.manager().insert(message)
             val a = mdb.manager().search(message.time).first() to conversation
             mdb.close()

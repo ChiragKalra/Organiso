@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Bundle
 import android.os.Handler
 import android.os.Parcelable
 import android.view.View
@@ -13,6 +12,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.VideoView
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.organiso.R
 import kotlinx.coroutines.GlobalScope
@@ -80,14 +80,11 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "audio/*", "video/*"))
-        startActivityForResult(intent, ARG_MEDIA)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == ARG_MEDIA && data != null && data.data != null) {
-            showMediaPreview(data)
-        }
+        registerForActivityResult(StartActivityForResult()) {
+            if (it.data != null && it.data!!.data != null) {
+                showMediaPreview(it.data!!)
+            }
+        }.launch(intent)
     }
 
     override fun onStart() {
