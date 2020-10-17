@@ -9,9 +9,9 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.data.ContactsManager
-import com.bruhascended.organiso.db.Contact
-import com.bruhascended.organiso.db.ContactComparator
+import com.bruhascended.core.data.ContactsManager
+import com.bruhascended.core.db.Contact
+import com.bruhascended.core.db.ContactComparator
 import com.bruhascended.organiso.ui.common.ListSelectionManager
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor.ContactViewHolder

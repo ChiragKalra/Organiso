@@ -1,6 +1,5 @@
 package com.bruhascended.organiso.ui.conversation
 
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -11,7 +10,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -20,8 +18,8 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.MessageDao
-import com.bruhascended.organiso.db.MessageDbFactory
+import com.bruhascended.core.db.MessageDao
+import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_search.*

@@ -11,13 +11,13 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.work.*
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbFactory
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_COPY
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.DELAY_OTP_DELETE
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.db.MainDaoProvider
 import java.util.concurrent.TimeUnit
 
 class OtpNotificationManager (

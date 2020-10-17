@@ -21,8 +21,8 @@ import com.bruhascended.organiso.NewConversationActivity
 import com.bruhascended.organiso.NewConversationActivity.Companion.EXTRA_MESSAGES
 import com.bruhascended.organiso.NewConversationActivity.Companion.TYPE_MULTI
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDao
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDao
 import com.bruhascended.organiso.ui.common.ListSelectionManager
 import com.bruhascended.organiso.ui.common.MediaPreviewActivity.Companion.getMimeType
 import kotlinx.coroutines.GlobalScope

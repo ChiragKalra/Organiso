@@ -1,13 +1,12 @@
-package com.bruhascended.organiso.analytics
+package com.bruhascended.core.analytics
 
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import androidx.preference.PreferenceManager
-import com.bruhascended.organiso.BuildConfig
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.MessageDbFactory
-import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_SEND_SPAM
+import com.bruhascended.core.BuildConfig
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.MessageDbFactory
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -33,6 +32,8 @@ class AnalyticsLogger(
 ) {
 
     companion object {
+        const val PREF_SEND_SPAM = "report_spam"
+
         const val PATH_SPAM_REPORTS = "spam_reports"
         const val PATH_BUG_REPORTS = "bug_reports"
         const val PATH_TITLE = "title"

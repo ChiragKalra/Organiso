@@ -1,20 +1,20 @@
-package com.bruhascended.organiso.data
+package com.bruhascended.core.data
 
 import android.content.Context
 import android.content.Intent
-import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.EVENT_CONVERSATION_ORGANISED
-import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.PARAM_BACKGROUND
-import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_NEW_MESSAGE
-import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.organiso.data.SMSManager.Companion.LABEL_PERSONAL
-import com.bruhascended.organiso.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbFactory
-import com.bruhascended.organiso.ml.OrganizerModel
-import com.bruhascended.organiso.ml.getOtp
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.analytics.AnalyticsLogger.Companion.EVENT_CONVERSATION_ORGANISED
+import com.bruhascended.core.analytics.AnalyticsLogger.Companion.PARAM_BACKGROUND
+import com.bruhascended.core.data.SMSManager.Companion.ACTION_NEW_MESSAGE
+import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_PERSONAL
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.core.ml.OrganizerModel
+import com.bruhascended.core.ml.getOtp
+import com.bruhascended.core.db.MainDaoProvider
 
 /*
                     Copyright 2020 Chirag Kalra

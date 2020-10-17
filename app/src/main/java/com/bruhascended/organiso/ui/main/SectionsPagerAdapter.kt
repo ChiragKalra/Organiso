@@ -21,7 +21,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
+import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
 
 class SectionsPagerAdapter(
         private val context: Context,

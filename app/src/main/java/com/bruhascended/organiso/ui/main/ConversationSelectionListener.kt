@@ -13,12 +13,12 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.moveTo
+import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.moveTo
 import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

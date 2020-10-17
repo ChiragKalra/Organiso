@@ -1,17 +1,16 @@
-package com.bruhascended.organiso.data
+package com.bruhascended.core.data
 
 import android.content.Context
 import android.net.Uri
-import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
-import com.bruhascended.organiso.R
-import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.EVENT_CONVERSATION_ORGANISED
-import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.PARAM_INIT
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbFactory
-import com.bruhascended.organiso.ml.OrganizerModel
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.BuildConfig.LIBRARY_PACKAGE_NAME
+import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.analytics.AnalyticsLogger.Companion.EVENT_CONVERSATION_ORGANISED
+import com.bruhascended.core.analytics.AnalyticsLogger.Companion.PARAM_INIT
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.core.ml.OrganizerModel
+import com.bruhascended.core.db.MainDaoProvider
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -36,9 +35,9 @@ class SMSManager(private val mContext: Context) {
         const val EXTRA_MESSAGE = "MESSAGE"
         const val EXTRA_MESSAGE_DATE = "MESSAGE_DATE"
         const val EXTRA_MESSAGE_TYPE = "MESSAGE_TYPE"
-        const val ACTION_NEW_MESSAGE = "$APPLICATION_ID.NEW_MESSAGE"
-        const val ACTION_OVERWRITE_MESSAGE = "$APPLICATION_ID.OVERWRITE_MESSAGE"
-        const val ACTION_UPDATE_STATUS_MESSAGE = "$APPLICATION_ID.UPDATE_MESSAGE"
+        const val ACTION_NEW_MESSAGE = "$LIBRARY_PACKAGE_NAME.NEW_MESSAGE"
+        const val ACTION_OVERWRITE_MESSAGE = "$LIBRARY_PACKAGE_NAME.OVERWRITE_MESSAGE"
+        const val ACTION_UPDATE_STATUS_MESSAGE = "$LIBRARY_PACKAGE_NAME.UPDATE_MESSAGE"
 
         const val MESSAGE_TYPE_ALL = 0
         const val MESSAGE_TYPE_INBOX = 1
@@ -48,13 +47,13 @@ class SMSManager(private val mContext: Context) {
         const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
         const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
 
-        val ARR_LABEL_STR = arrayOf (
-            R.string.tab_text_1,
-            R.string.tab_text_2,
-            R.string.tab_text_3,
-            R.string.tab_text_4,
-            R.string.tab_text_5,
-            R.string.tab_text_6
+        internal val ARR_LABEL_STR = arrayOf (
+            "Personal",
+            "Important",
+            "Transactions",
+            "Promotions",
+            "Spam",
+            "Blocked"
         )
 
         const val LABEL_PERSONAL = 0

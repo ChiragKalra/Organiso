@@ -17,11 +17,11 @@ import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
-import com.bruhascended.organiso.data.ContactsManager
-import com.bruhascended.organiso.db.ContactsProvider
-import com.bruhascended.organiso.db.Contact
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
+import com.bruhascended.core.data.ContactsManager
+import com.bruhascended.core.db.ContactsProvider
+import com.bruhascended.core.db.Contact
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.ui.common.MediaPreviewActivity
@@ -145,7 +145,7 @@ class NewConversationActivity : MediaPreviewActivity() {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun processIntentData(intent: Intent) {
+    private fun processIntentData() {
         if (Intent.ACTION_SENDTO == intent.action) {
             val destinations = TextUtils.split(getRecipients(intent.data!!), ";")
             destinations.forEach { addRecipientAsync(it) }
@@ -215,7 +215,11 @@ class NewConversationActivity : MediaPreviewActivity() {
         }
         contactListView.adapter = mAdaptor
         search("")
+        clear_text.setOnClickListener {
+            to.text = null
+        }
         to.doOnTextChanged { text, _, _, _ ->
+            clear_text.isVisible = text.toString().isNotBlank()
             search(text.toString().trim())
         }
     }
@@ -261,7 +265,7 @@ class NewConversationActivity : MediaPreviewActivity() {
         cm = ContactsManager(this)
         mContactsProvider = ContactsProvider(this)
 
-        processIntentData(intent)
+        processIntentData()
         setupAddressRecycler()
         setupContactRecycler()
 

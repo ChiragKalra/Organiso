@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.db
+package com.bruhascended.core.db
 
 import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil

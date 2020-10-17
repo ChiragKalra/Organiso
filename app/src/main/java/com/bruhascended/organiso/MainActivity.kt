@@ -21,8 +21,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
-import com.bruhascended.organiso.db.ContactsProvider
-import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
+import com.bruhascended.core.db.ContactsProvider
 import com.bruhascended.organiso.ui.main.SectionsPagerAdapter
 import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import com.google.android.material.appbar.AppBarLayout
@@ -47,6 +46,17 @@ import kotlinx.android.synthetic.main.activity_main.*
 */
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        val ARR_LABEL_STR = arrayOf(
+            R.string.tab_text_1,
+            R.string.tab_text_2,
+            R.string.tab_text_3,
+            R.string.tab_text_4,
+            R.string.tab_text_5,
+            R.string.tab_text_6,
+        )
+    }
 
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences

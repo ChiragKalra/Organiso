@@ -3,7 +3,7 @@ package com.bruhascended.organiso
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
+import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.ui.main.CategoryFragment
 import kotlinx.android.synthetic.main.activity_conversation.toolbar
 

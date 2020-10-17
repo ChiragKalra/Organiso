@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.IBinder
 import android.telephony.TelephonyManager
 import android.text.TextUtils
-import com.bruhascended.organiso.db.Conversation
+import com.bruhascended.core.db.Conversation
 
 /*
                     Copyright 2020 Chirag Kalra

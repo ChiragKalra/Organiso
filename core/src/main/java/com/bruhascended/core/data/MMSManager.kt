@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.data
+package com.bruhascended.core.data
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,14 +7,14 @@ import android.net.Uri
 import android.provider.Telephony
 import android.telephony.TelephonyManager
 import android.webkit.MimeTypeMap
-import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_NEW_MESSAGE
-import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.organiso.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
-import com.bruhascended.organiso.data.SMSManager.Companion.MESSAGE_TYPE_SENT
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbFactory
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.data.SMSManager.Companion.ACTION_NEW_MESSAGE
+import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.core.db.MainDaoProvider
 import java.io.*
 import java.lang.Exception
 

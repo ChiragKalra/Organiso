@@ -1,7 +1,7 @@
-package com.bruhascended.organiso.ml
+package com.bruhascended.core.ml
 
 import android.content.Context
-import com.bruhascended.organiso.db.Message
+import com.bruhascended.core.db.Message
 
 /*
                     Copyright 2020 Chirag Kalra

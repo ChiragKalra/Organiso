@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.db
+package com.bruhascended.core.db
 
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery

@@ -19,11 +19,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bruhascended.organiso.*
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
-import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.moveTo
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.moveTo
+import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay

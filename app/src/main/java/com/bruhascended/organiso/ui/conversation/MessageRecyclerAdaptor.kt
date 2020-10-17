@@ -8,8 +8,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageComparator
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageComparator
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.ui.common.ListSelectionManager

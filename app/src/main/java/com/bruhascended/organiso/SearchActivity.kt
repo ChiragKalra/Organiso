@@ -13,11 +13,11 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_MESSAGE_ID
-import com.bruhascended.organiso.db.ContactsProvider
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.MessageDbFactory
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.db.ContactsProvider
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.core.db.MainDaoProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem

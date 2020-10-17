@@ -17,9 +17,9 @@ import com.bruhascended.organiso.SearchActivity.Companion.TYPE_FOOTER
 import com.bruhascended.organiso.SearchActivity.Companion.TYPE_HEADER
 import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_RECEIVED
 import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_SENT
-import com.bruhascended.organiso.data.SMSManager.Companion.ARR_LABEL_STR
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
+import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.conversation.MessageViewHolder
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor

@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.Contact
+import com.bruhascended.core.db.Contact
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import kotlin.math.abs
 

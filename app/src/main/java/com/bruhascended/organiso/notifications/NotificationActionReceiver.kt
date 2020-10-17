@@ -8,7 +8,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
 import androidx.room.Room
 import com.bruhascended.organiso.*
-import com.bruhascended.organiso.db.*
+import com.bruhascended.core.db.*
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_CANCEL
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_COPY
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE
@@ -16,7 +16,7 @@ import com.bruhascended.organiso.notifications.MessageNotificationManager.Compan
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.KEY_TEXT_REPLY
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.NAME_TABLE
 import com.bruhascended.organiso.services.SMSSender
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.db.MainDaoProvider
 
 class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(mContext: Context, intent: Intent) {

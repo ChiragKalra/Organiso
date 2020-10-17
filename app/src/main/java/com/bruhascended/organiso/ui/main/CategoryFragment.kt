@@ -18,10 +18,10 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.Conversation
+import com.bruhascended.core.db.Conversation
 import com.bruhascended.organiso.ui.common.ListSelectionManager
 import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.db.MainDaoProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.coroutines.delay

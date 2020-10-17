@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.bruhascended.organiso.db.*
+import com.bruhascended.core.db.*
 import kotlinx.coroutines.flow.Flow
 
 class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {

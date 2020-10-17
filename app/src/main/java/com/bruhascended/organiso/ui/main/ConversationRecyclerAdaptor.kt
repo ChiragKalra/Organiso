@@ -11,8 +11,8 @@ import androidx.core.content.ContextCompat
 import com.bruhascended.organiso.ConversationActivity
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.ConversationComparator
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.ConversationComparator
 import com.bruhascended.organiso.ui.common.ListSelectionManager
 import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
 

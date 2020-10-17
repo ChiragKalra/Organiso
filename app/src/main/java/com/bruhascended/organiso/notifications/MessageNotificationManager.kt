@@ -25,12 +25,12 @@ import com.bruhascended.organiso.ConversationActivity
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.data.ContactsManager
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
-import com.bruhascended.organiso.db.Notification
-import com.bruhascended.organiso.db.NotificationDatabase
-import com.bruhascended.organiso.ml.getOtp
+import com.bruhascended.core.data.ContactsManager
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.Notification
+import com.bruhascended.core.db.NotificationDatabase
+import com.bruhascended.core.ml.getOtp
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 import java.io.File
 

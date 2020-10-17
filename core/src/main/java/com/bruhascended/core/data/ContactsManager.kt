@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.data
+package com.bruhascended.core.data
 
 import android.content.ContentResolver
 import android.content.ContentUris
@@ -8,7 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
-import com.bruhascended.organiso.db.Contact
+import com.bruhascended.core.db.Contact
 import io.michaelrocks.libphonenumber.android.NumberParseException
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import io.michaelrocks.libphonenumber.android.Phonenumber

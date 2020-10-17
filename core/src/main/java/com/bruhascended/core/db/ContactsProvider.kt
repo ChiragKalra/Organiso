@@ -1,9 +1,9 @@
-package com.bruhascended.organiso.db
+package com.bruhascended.core.db
 
 import android.content.Context
 import androidx.preference.PreferenceManager
 import androidx.room.Room
-import com.bruhascended.organiso.data.ContactsManager
+import com.bruhascended.core.data.ContactsManager
 
 class ContactsProvider (mContext: Context) {
 

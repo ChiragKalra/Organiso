@@ -9,15 +9,15 @@ import android.os.Handler
 import android.os.Looper
 import android.telephony.SmsManager
 import android.widget.Toast
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.db.Message
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
-import com.bruhascended.organiso.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.organiso.db.MessageDbFactory
-import com.bruhascended.organiso.db.MainDaoProvider
+import com.bruhascended.core.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
+import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.core.db.MainDaoProvider
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import com.klinker.android.send_message.Message as SMS

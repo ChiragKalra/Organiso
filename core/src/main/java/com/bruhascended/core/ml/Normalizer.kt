@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.ml
+package com.bruhascended.core.ml
 
 import java.util.*
 import kotlin.math.abs

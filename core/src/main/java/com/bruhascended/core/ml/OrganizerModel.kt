@@ -1,10 +1,9 @@
-package com.bruhascended.organiso.ml
+package com.bruhascended.core.ml
 
 import android.content.Context
-import com.bruhascended.organiso.R
-import com.bruhascended.organiso.analytics.AnalyticsLogger
-import com.bruhascended.organiso.analytics.AnalyticsLogger.Companion.EVENT_MESSAGE_ORGANISED
-import com.bruhascended.organiso.db.Message
+import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.analytics.AnalyticsLogger.Companion.EVENT_MESSAGE_ORGANISED
+import com.bruhascended.core.db.Message
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate
 import java.io.FileInputStream

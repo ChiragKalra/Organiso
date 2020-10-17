@@ -16,8 +16,8 @@ import android.widget.ImageView
 import android.widget.QuickContactBadge
 import android.widget.TextView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.db.Conversation
-import com.bruhascended.organiso.data.DateTimeProvider
+import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.data.DateTimeProvider
 import com.bruhascended.organiso.ui.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
 import java.io.File

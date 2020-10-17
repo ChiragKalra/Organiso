@@ -15,7 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
-import com.bruhascended.organiso.data.SMSManager
+import com.bruhascended.core.data.SMSManager
 import com.bruhascended.organiso.notifications.ChannelManager
 import kotlinx.android.synthetic.main.activity_start.*
 import kotlin.math.roundToInt
