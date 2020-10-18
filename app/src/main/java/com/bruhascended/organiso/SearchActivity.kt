@@ -18,7 +18,7 @@ import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.organiso.ui.common.ScrollEffectFactory
+import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
 import com.google.gson.Gson
@@ -77,7 +77,7 @@ class SearchActivity : AppCompatActivity() {
                 if (searchThread.isInterrupted) return@Thread
                 val cons = MainDaoProvider(mContext).getMainDaos()[category].search("$key%", "% $key%")
                 if (cons.isNotEmpty()) {ResultItem(TYPE_HEADER, categoryHeader = category)
-                    cons.forEach { displayedSenders.add(it.sender) }
+                    cons.forEach { displayedSenders.add(it.clean) }
                     searchRecycler.post {
                         mAdaptor.addItems(listOf(ResultItem(TYPE_HEADER, categoryHeader = category)))
                         mAdaptor.addItems(
@@ -96,7 +96,7 @@ class SearchActivity : AppCompatActivity() {
                     return@forEach
 
                 for (sender in displayedSenders) {
-                    if (sender == contact.number) {
+                    if (sender == contact.clean) {
                         return@forEach
                     }
                 }
@@ -110,7 +110,7 @@ class SearchActivity : AppCompatActivity() {
                 searchRecycler.post {
                     mAdaptor.addItems(listOf(ResultItem(
                         TYPE_CONTACT,
-                        conversation = Conversation(contact.number, contact.name)
+                        conversation = Conversation(contact.address, contact.clean, contact.name)
                     )))
                 }
             }
@@ -121,7 +121,7 @@ class SearchActivity : AppCompatActivity() {
                 for (con in MainDaoProvider(mContext).getMainDaos()[category].loadAllSync()) {
                     var msgs: List<Message>
                     if (searchThread.isInterrupted) return@Thread
-                    MessageDbFactory(mContext).of(con.sender).apply {
+                    MessageDbFactory(mContext).of(con.clean).apply {
                         msgs = manager().search("$key%", "% $key%")
                         close()
                     }

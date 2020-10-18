@@ -21,9 +21,15 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
+import com.bruhascended.core.data.SMSManager
 import com.bruhascended.core.db.ContactsProvider
+import com.bruhascended.organiso.ExtraCategoryActivity.Companion.EXTRA_LABEL
+import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.ARR_PREF_CUSTOM_LABELS
 import com.bruhascended.organiso.ui.main.SectionsPagerAdapter
-import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.PREF_HIDDEN_CATEGORIES
+import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.PREF_VISIBLE_CATEGORIES
+import com.bruhascended.organiso.settings.GeneralFragment.Companion.KEY_STATE_CHANGED
+import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import com.google.android.material.appbar.AppBarLayout
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
@@ -62,6 +68,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prefs: SharedPreferences
     private lateinit var hiddenCategories: Array<Int>
     private lateinit var mContactsProvider: ContactsProvider
+    private lateinit var mSmsManager: SMSManager
     private var actionMode: ActionMode? = null
     private var contactThread: Thread? = null
 
@@ -109,6 +116,7 @@ class MainActivity : AppCompatActivity() {
 
         mContext = this
         mContactsProvider = ContactsProvider(this)
+        mSmsManager = SMSManager(mContext)
 
         if (PackageManager.PERMISSION_DENIED in
             Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
@@ -124,20 +132,20 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(mToolbar)
 
-        if (prefs.getString("visible_categories", "null") == "null") {
+        if (prefs.getString(PREF_VISIBLE_CATEGORIES, "null") == "null") {
             val vis = Array(4){it}
             val hid = Array(2){4+it}
             prefs.edit()
-                .putString("visible_categories", Gson().toJson(vis))
-                .putString("hidden_categories", Gson().toJson(hid))
+                .putString(PREF_VISIBLE_CATEGORIES, Gson().toJson(vis))
+                .putString(PREF_HIDDEN_CATEGORIES, Gson().toJson(hid))
                 .apply()
         }
 
         val visibleCategories = Gson().fromJson(
-            prefs.getString("visible_categories", ""), Array<Int>::class.java
+            prefs.getString(PREF_VISIBLE_CATEGORIES, ""), Array<Int>::class.java
         )
         hiddenCategories = Gson().fromJson(
-            prefs.getString("hidden_categories", ""), Array<Int>::class.java
+            prefs.getString(PREF_HIDDEN_CATEGORIES, ""), Array<Int>::class.java
         )
         viewPager.adapter = SectionsPagerAdapter(
             this, visibleCategories, prefs, supportFragmentManager
@@ -163,10 +171,10 @@ class MainActivity : AppCompatActivity() {
         addedCategoriesToMenu = true
         for (i in hiddenCategories.indices) {
             val label = hiddenCategories[i]
-            val customTitle = prefs.getString("custom_label_$label", "")!!
+            val customTitle = prefs.getString(ARR_PREF_CUSTOM_LABELS[i], "")!!
             menu.add(
                 0, label, 400 + i,
-                if (customTitle == "") getString(ARR_LABEL_STR[label]) else customTitle
+                if (customTitle.isBlank()) getString(ARR_LABEL_STR[label]) else customTitle
             )
         }
         return super.onPrepareOptionsMenu(menu)
@@ -203,22 +211,26 @@ class MainActivity : AppCompatActivity() {
             }
             else -> {
                 val intent = Intent(mContext, ExtraCategoryActivity::class.java)
-                intent.putExtra("Type", item.itemId)
+                intent.putExtra(EXTRA_LABEL, item.itemId)
                 startActivity(intent)
             }
         }
         return true
     }
 
-    override fun onResume() {
+    override fun onStart() {
         mContactsProvider.updateAsync()
-        if (prefs.getBoolean("stateChanged", false)) {
-            prefs.edit().putBoolean("stateChanged", false).apply()
+        if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
+            mSmsManager.updateAsync()
+        }
+
+        if (prefs.getBoolean(KEY_STATE_CHANGED, false)) {
+            prefs.edit().putBoolean(KEY_STATE_CHANGED, false).apply()
             finish()
             startActivity(intent)
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
-        super.onResume()
+        super.onStart()
     }
 
     override fun onDestroy() {

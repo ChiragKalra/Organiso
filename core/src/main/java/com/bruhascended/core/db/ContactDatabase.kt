@@ -25,9 +25,11 @@ import java.io.Serializable
 
 @Entity(tableName = "contacts")
 data class Contact (
-    @PrimaryKey(autoGenerate = false)
     var name: String,
-    val number: String
+    val clean: String,
+    val address: String,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int? = null
 ): Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -35,10 +37,10 @@ data class Contact (
 
         other as Contact
         if (name != other.name) return false
-        if (number != other.number) return false
+        if (address != other.address) return false
         return true
     }
-    override fun hashCode() = number.hashCode()
+    override fun hashCode() = clean.hashCode()
 }
 
 @Dao
@@ -59,7 +61,7 @@ interface ContactDao {
     @Query("DELETE FROM contacts")
     fun nukeTable()
 
-    @Query("SELECT * FROM contacts WHERE number LIKE :sender")
+    @Query("SELECT * FROM contacts WHERE clean LIKE :sender")
     fun findByNumber(sender: String): Contact?
 
     @Query("SELECT * FROM contacts")
@@ -68,7 +70,7 @@ interface ContactDao {
     @Query("SELECT * FROM contacts")
     fun loadAllPaged(): PagingSource<Int, Contact>
 
-    @Query("SELECT * FROM contacts WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR number LIKE :key")
+    @Query("SELECT * FROM contacts WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR clean LIKE :key")
     fun searchPaged(key: String, altKey: String=""): PagingSource<Int, Contact>
 
     @RawQuery
@@ -78,7 +80,7 @@ interface ContactDao {
 
 object ContactComparator : DiffUtil.ItemCallback<Contact>() {
     override fun areItemsTheSame(oldItem: Contact, newItem: Contact) =
-        oldItem.number == newItem.number
+        oldItem.clean == newItem.clean
 
     override fun areContentsTheSame(oldItem: Contact, newItem: Contact) =
         oldItem == newItem

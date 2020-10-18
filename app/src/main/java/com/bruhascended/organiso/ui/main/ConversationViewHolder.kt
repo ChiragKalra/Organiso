@@ -17,8 +17,8 @@ import android.widget.QuickContactBadge
 import android.widget.TextView
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Conversation
-import com.bruhascended.core.data.DateTimeProvider
-import com.bruhascended.organiso.ui.common.ScrollEffectFactory
+import com.bruhascended.organiso.common.DateTimeProvider
+import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
 import java.io.File
 
@@ -63,11 +63,11 @@ class ConversationViewHolder(
     private fun showDisplayPicture() {
         imageView.apply {
             isEnabled = true
-            assignContactFromPhone(conversation.sender, true)
+            assignContactFromPhone(conversation.clean, true)
             setMode(ContactsContract.QuickContact.MODE_LARGE)
-            val dp = File(mContext.filesDir, conversation.sender)
+            val dp = File(mContext.filesDir, conversation.clean)
             when {
-                conversation.sender.first().isLetter() -> {
+                conversation.clean.first().isLetter() -> {
                     setImageResource(R.drawable.ic_bot)
                     isEnabled = false
                 }
@@ -78,7 +78,7 @@ class ConversationViewHolder(
     }
 
     fun onBind() {
-        senderTextView.text = conversation.name ?: conversation.sender
+        senderTextView.text = conversation.name ?: conversation.address
         timeTextView.text = dtp.getCondensed(conversation.time)
 
         val str = if (conversation.lastMMS)

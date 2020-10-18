@@ -7,14 +7,15 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageComparator
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
-import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
-import com.bruhascended.organiso.ui.common.MediaPreviewActivity.Companion.getMimeType
+import com.bruhascended.organiso.common.ListSelectionManager
+import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.common.MediaPreviewActivity.Companion.getMimeType
 import java.io.File
 
 /*
@@ -43,7 +44,7 @@ class MessageRecyclerAdaptor (
     val isSelectionManagerNull get() = !::selectionManager.isInitialized
     var searchKey = ""
 
-    override fun getItemViewType(position: Int) = if (getItem(position)?.type == 1) 1 else 0
+    override fun getItemViewType(position: Int) = if (getItem(position)?.type == MESSAGE_TYPE_INBOX) 1 else 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
         return MessageViewHolder(

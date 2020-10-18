@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.ui.settings
+package com.bruhascended.organiso.settings.categories
 
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator

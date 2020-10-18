@@ -26,7 +26,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/action_copy"
-        android:icon="@drawable/ic_content_copy"
+        android:icon="@drawable/ic_copy_white"
         android:orderInCategory="300"
         android:title="@string/copy_to_clipboard"
         app:showAsAction="always"/>

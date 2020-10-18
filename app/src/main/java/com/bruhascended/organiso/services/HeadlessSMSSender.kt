@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.IBinder
 import android.telephony.TelephonyManager
 import android.text.TextUtils
+import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.db.Conversation
 
 /*
@@ -37,6 +38,8 @@ class HeadlessSMSSender : Service() {
                 TelephonyManager.ACTION_RESPOND_VIA_MESSAGE)) {
             return null
         }
+
+        val cm = ContactsManager(applicationContext)
         val extras = intent.extras ?: return null
         val message = extras.getString(Intent.EXTRA_TEXT) ?: extras.getString("sms_body")!!
         val intentUri: Uri = intent.data!!
@@ -46,7 +49,7 @@ class HeadlessSMSSender : Service() {
 
         val number = extras.get(Intent.EXTRA_PHONE_NUMBER) as String?
         val adds = if (number == null) TextUtils.split(recipients, ";") else arrayOf(number)
-        val conversations = Array(adds.size) { Conversation(adds[it]) }
+        val conversations = Array(adds.size) { Conversation(adds[it], cm.getClean(adds[it])) }
         SMSSender(this, conversations).sendSMS(message)
         return null
     }

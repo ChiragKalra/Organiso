@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package com.bruhascended.organiso.ui.common
+package com.bruhascended.organiso.common
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode

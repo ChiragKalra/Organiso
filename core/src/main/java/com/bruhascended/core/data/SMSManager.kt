@@ -1,7 +1,9 @@
 package com.bruhascended.core.data
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import androidx.preference.PreferenceManager
 import com.bruhascended.core.BuildConfig.LIBRARY_PACKAGE_NAME
 import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.analytics.AnalyticsLogger.Companion.EVENT_CONVERSATION_ORGANISED
@@ -11,6 +13,7 @@ import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.ml.OrganizerModel
 import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.ml.getOtp
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -29,7 +32,7 @@ import com.bruhascended.core.db.MainDaoProvider
 
 */
 
-class SMSManager(private val mContext: Context) {
+class SMSManager (private val mContext: Context) {
 
     companion object {
         const val EXTRA_MESSAGE = "MESSAGE"
@@ -56,22 +59,46 @@ class SMSManager(private val mContext: Context) {
             "Blocked"
         )
 
+        const val LABEL_NONE = -1
         const val LABEL_PERSONAL = 0
         const val LABEL_IMPORTANT = 1
         const val LABEL_TRANSACTIONS = 2
         const val LABEL_PROMOTIONS = 3
         const val LABEL_SPAM = 4
         const val LABEL_BLOCKED = 5
+
+
+        const val KEY_RESUME_INDEX = "last_index"
+        const val KEY_DONE_COUNT = "done_count"
+        const val KEY_TIME_TAKEN = "time_taken"
+        const val KEY_RESUME_DATE = "last_date"
+
+        class Number (
+            val address: String,
+            val clean: String
+        ) {
+            override fun equals(other: Any?) : Boolean {
+                if (other !is Number) return false
+                return clean == other.clean
+            }
+
+            override fun hashCode(): Int {
+                return clean.hashCode()
+            }
+        }
     }
 
     private val nn = OrganizerModel(mContext)
     private val cm = ContactsManager(mContext)
     private val mmsManager = MMSManager(mContext)
-    private val sp = mContext.getSharedPreferences("local", Context.MODE_PRIVATE)
+    private val analyticsLogger = AnalyticsLogger(mContext)
+    private val mMainDaoProvider = MainDaoProvider(mContext)
+    private val mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
 
-    private val messages = HashMap<String, ArrayList<Message>>()
+    private val messages = HashMap<Number, ArrayList<Message>>()
     private val senderToProbs = HashMap<String, FloatArray>()
 
+    private var isWorkingAfterInit = false
     private var done = 0
     private var index = 0
     private var total = 0
@@ -79,7 +106,7 @@ class SMSManager(private val mContext: Context) {
     private var timeTaken = 0L
     private var startTime = 0L
 
-    private lateinit var senderNameMap: HashMap<String, String>
+    private val senderNameMap = cm.getContactsHashMap()
 
     private lateinit var mmsThread: Thread
 
@@ -90,15 +117,17 @@ class SMSManager(private val mContext: Context) {
     private fun finish() {
         onStatusChangeListener(2)
 
-        nn.close()
+        if (!isWorkingAfterInit) nn.close()
         senderNameMap.clear()
         senderToProbs.clear()
 
-        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
-            .putLong("last", System.currentTimeMillis())
-            .putInt("index", 0)
-            .putInt("done", 0)
+        mPrefs.edit()
+            .remove(KEY_RESUME_INDEX)
+            .remove(KEY_DONE_COUNT)
+            .putLong(KEY_RESUME_DATE, System.currentTimeMillis())
             .apply()
+
+        isWorkingAfterInit = false
     }
 
     private fun updateProgress(size: Int) {
@@ -109,60 +138,68 @@ class SMSManager(private val mContext: Context) {
         onProgressListener(per)
         onEtaChangeListener(eta.toLong())
 
-        AnalyticsLogger(mContext).log(EVENT_CONVERSATION_ORGANISED, PARAM_INIT)
+        analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, PARAM_INIT)
     }
 
-    private fun saveMessage(ind: Int, sender: String, messages: ArrayList<Message>, label: Int) {
-        if (sender.isBlank()) return
-
+    private fun deletePrevious(rawNumber: String): Conversation? {
         var conversation: Conversation? = null
         for (i in 0..4) {
-            val got = MainDaoProvider(mContext).getMainDaos()[i].findBySender(sender)
+            val got = mMainDaoProvider.getMainDaos()[i].findBySender(rawNumber)
             if (got.isNotEmpty()) {
                 conversation = got.first()
-                for (item in got.slice(1 until got.size))
-                    MainDaoProvider(mContext).getMainDaos()[i].delete(item)
-                break
+                for (item in got)
+                    mMainDaoProvider.getMainDaos()[i].delete(item)
             }
         }
+        return conversation
+    }
+
+    private fun saveMessages(ind: Int, number: Number, messages: ArrayList<Message>, label: Int) {
+        if (number.clean.isBlank()) return
+
+        val conversation = deletePrevious(number.clean)
 
         if (conversation != null) {
             conversation.apply {
-                read = false
+                read = !isWorkingAfterInit
                 time = messages.last().time
                 lastSMS =  messages.last().text
                 lastMMS = false
-                name = senderNameMap[sender]
-                MainDaoProvider(mContext).getMainDaos()[LABEL_PERSONAL].update(this)
+                if (label == LABEL_PERSONAL) forceLabel = LABEL_PERSONAL
+                name = senderNameMap[number.clean]
+                mMainDaoProvider.getMainDaos()[label].insert(this)
             }
         } else {
             val con = Conversation(
-                sender,
-                senderNameMap[sender],
+                number.address,
+                number.clean,
+                senderNameMap[number.clean],
+                read = !isWorkingAfterInit,
                 time = messages.last().time,
                 lastSMS = messages.last().text,
                 label = label,
-                forceLabel = if (label == 0) 0 else -1,
-                probabilities = senderToProbs[sender] ?:
-                FloatArray(5) { if (it == 0) 1f else 0f }
+                forceLabel = if (label == LABEL_PERSONAL) LABEL_PERSONAL else LABEL_NONE,
+                probabilities = senderToProbs[number.clean] ?:
+                    FloatArray(5) { if (it == LABEL_PERSONAL) 1f else 0f }
             )
-            MainDaoProvider(mContext).getMainDaos()[label].insert(con)
+            mMainDaoProvider.getMainDaos()[label].insert(con)
         }
 
-        MessageDbFactory(mContext).of(sender).apply {
+        MessageDbFactory(mContext).of(number.clean).apply {
             manager().insertAll(messages.toList())
             close()
         }
 
-        mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
-            .putInt("index", ind + 1)
-            .putInt("done", done)
-            .putLong("timeTaken", timeTaken)
+        mPrefs.edit()
+            .putInt(KEY_RESUME_INDEX, ind + 1)
+            .putInt(KEY_DONE_COUNT, done)
+            .putLong(KEY_TIME_TAKEN, timeTaken)
             .apply()
     }
 
+
     fun getMessages() {
-        val lastDate = sp.getLong("last", 0).toString()
+        val lastDate = mPrefs.getLong(KEY_RESUME_DATE, 0).toString()
 
         mContext.contentResolver.query(
             Uri.parse("content://sms/"),
@@ -178,15 +215,16 @@ class SMSManager(private val mContext: Context) {
                 val typeID = getColumnIndex("type")
 
                 do {
-                    var name = getString(nameID)
+                    val name = getString(nameID)
                     val messageContent = getString(messageID)
                     if (name != null && !messageContent.isNullOrEmpty()) {
-                        name = cm.getRaw(name)
+
+                        val number = Number(name, cm.getClean(name))
                         val message = Message(
                             messageContent, getString(typeID).toInt(), getString(dateID).toLong()
                         )
-                        if (messages.containsKey(name)) messages[name]?.add(message)
-                        else messages[name] = arrayListOf(message)
+                        if (messages.containsKey(number)) messages[number]?.add(message)
+                        else messages[number] = arrayListOf(message)
                     }
                 } while (moveToNext())
             }
@@ -197,31 +235,30 @@ class SMSManager(private val mContext: Context) {
     }
 
     fun getLabels() {
-        done = sp.getInt("done", 0)
-        index = sp.getInt("index", 0)
-        senderNameMap = ContactsManager(mContext).getContactsHashMap()
+        done = mPrefs.getInt(KEY_DONE_COUNT, 0)
+        index = mPrefs.getInt(KEY_RESUME_INDEX, 0)
 
         for ((_, msgs) in messages) total += msgs.size
 
         val messagesArray = messages.entries.toTypedArray()
-        val number = messagesArray.size
+        val totalNumber = messagesArray.size
 
         var saveThread: Thread? = null
-        startTime = System.currentTimeMillis() - sp.getLong("timeTaken", 0)
+        startTime = System.currentTimeMillis() - mPrefs.getLong(KEY_TIME_TAKEN, 0)
 
-        for (ind in index until number) {
-            val sender = messagesArray[ind].component1()
+        for (ind in index until totalNumber) {
+            val number = messagesArray[ind].component1()
             val msgs = messagesArray[ind].component2()
             var label: Int
 
-            if (senderNameMap.containsKey(sender)) label = 0
+            if (senderNameMap.containsKey(number.clean)) label = 0
             else nn.getPredictions(msgs).apply {
-                senderToProbs[sender] = this
+                senderToProbs[number.clean] = this
                 label = toList().indexOf(maxOrNull())
             }
 
             saveThread?.join()
-            saveThread = Thread { saveMessage(ind, sender, messages[sender]!!, label) }
+            saveThread = Thread { saveMessages(ind, number, messages[number]!!, label) }
             saveThread.start()
             updateProgress(msgs.size)
         }
@@ -230,4 +267,83 @@ class SMSManager(private val mContext: Context) {
         mmsThread.join()
         finish()
     }
+
+    fun putMessage(number: String, body: String, active: Boolean): Pair<Message, Conversation>? {
+        val rawNumber = cm.getClean(number)
+        val message = Message(body, MESSAGE_TYPE_INBOX, System.currentTimeMillis())
+
+        var conversation = deletePrevious(rawNumber)
+
+        var mProbs: FloatArray? = null
+        val prediction = if (senderNameMap.containsKey(rawNumber)) LABEL_PERSONAL
+        else if (conversation != null && conversation.forceLabel != LABEL_NONE) conversation.forceLabel
+        else if (!getOtp(body).isNullOrEmpty()) LABEL_TRANSACTIONS
+        else {
+            mProbs = nn.getPrediction(message)
+            if (conversation != null)
+                for (j in 0..4) mProbs[j] += conversation.probabilities[j]
+            mProbs.toList().indexOf(mProbs.maxOrNull())
+        }
+
+        analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, AnalyticsLogger.PARAM_BACKGROUND)
+
+        conversation = conversation?.apply {
+            if (label != prediction) id = null
+            read = false
+            time = message.time
+            lastSMS = message.text
+            if (prediction == LABEL_PERSONAL) forceLabel = LABEL_PERSONAL
+            label = prediction
+            probabilities = mProbs ?: probabilities
+            name = senderNameMap[rawNumber]
+        } ?: Conversation(
+            number,
+            rawNumber,
+            senderNameMap[rawNumber],
+            read = false,
+            time = message.time,
+            lastSMS = message.text,
+            label = prediction,
+            forceLabel = if (prediction == LABEL_PERSONAL) LABEL_PERSONAL else LABEL_NONE
+        )
+
+        mMainDaoProvider.getMainDaos()[prediction].insert(conversation)
+        if (conversation.id == null)
+            conversation.id = mMainDaoProvider.getMainDaos()[prediction].findBySender(rawNumber).first().id
+
+        return if (active) {
+            mContext.sendBroadcast(Intent(ACTION_NEW_MESSAGE).apply{
+                putExtra(EXTRA_MESSAGE, message)
+                setPackage(mContext.applicationInfo.packageName)
+            })
+            null
+        } else {
+            val mdb = MessageDbFactory(mContext).of(rawNumber)
+            mdb.manager().insert(message)
+            val a = mdb.manager().search(message.time).first() to conversation
+            mdb.close()
+            a
+        }
+    }
+
+    fun updateAsync() {
+        if (isWorkingAfterInit) return
+        isWorkingAfterInit = true
+        Thread {
+            getMessages()
+            getLabels()
+        }.start()
+    }
+
+    fun updateSync() {
+        if (isWorkingAfterInit) return
+        isWorkingAfterInit = true
+        getMessages()
+        getLabels()
+    }
+
+    fun close() {
+        nn.close()
+    }
+
 }

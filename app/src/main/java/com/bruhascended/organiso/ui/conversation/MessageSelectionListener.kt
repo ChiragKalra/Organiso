@@ -21,10 +21,11 @@ import com.bruhascended.organiso.NewConversationActivity
 import com.bruhascended.organiso.NewConversationActivity.Companion.EXTRA_MESSAGES
 import com.bruhascended.organiso.NewConversationActivity.Companion.TYPE_MULTI
 import com.bruhascended.organiso.R
+import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDao
-import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.MediaPreviewActivity.Companion.getMimeType
+import com.bruhascended.organiso.common.ListSelectionManager
+import com.bruhascended.organiso.common.MediaPreviewActivity.Companion.getMimeType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -61,10 +62,10 @@ class MessageSelectionListener(
         val mmsTypeString = getMimeType(message.path!!)
         val contentUri = FileProvider.getUriForFile(
             mContext,
-            "com.bruhascended.sms.fileProvider", File(message.path!!)
+            "$APPLICATION_ID.fileProvider", File(message.path!!)
         )
         mContext.grantUriPermission(
-            "com.bruhascended.sms", contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+            APPLICATION_ID, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
         return Intent().apply {
             action = Intent.ACTION_SEND

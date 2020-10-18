@@ -14,7 +14,6 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
@@ -22,27 +21,26 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.analytics.AnalyticsLogger
-import com.bruhascended.core.db.ContactsProvider
+import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.data.SMSManager.Companion.ACTION_NEW_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.ACTION_UPDATE_STATUS_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
-import com.bruhascended.core.db.Conversation
-import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.*
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
-import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
-import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.organiso.ui.common.MediaPreviewActivity
-import com.bruhascended.organiso.ui.common.ScrollEffectFactory
+import com.bruhascended.organiso.common.ListSelectionManager
+import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.common.MediaPreviewActivity
+import com.bruhascended.organiso.common.ScrollEffectFactory
+import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
 import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
 import com.bruhascended.organiso.ui.conversation.ConversationViewModel
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
 import com.bruhascended.organiso.ui.conversation.MessageSelectionListener
-import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
@@ -69,8 +67,9 @@ import kotlinx.coroutines.launch
 class ConversationActivity : MediaPreviewActivity() {
 
     companion object {
-        const val EXTRA_SENDER = "SENDER"
+        const val EXTRA_ADDRESS = "ADDRESS"
         const val EXTRA_CONVERSATION = "CONVERSATION"
+        const val EXTRA_CONVERSATION_JSON = "CONVERSATION_JSON"
         const val EXTRA_MESSAGE_ID = "MESSAGE_ID"
 
         var activeConversationSender: String? = null
@@ -266,10 +265,17 @@ class ConversationActivity : MediaPreviewActivity() {
 
         val temp by viewModels<ConversationViewModel>()
         mViewModel = temp
-        mViewModel.init(
-            intent.getSerializableExtra(EXTRA_CONVERSATION) as Conversation?
-                ?: Conversation(intent.getStringExtra(EXTRA_SENDER)!!)
-        )
+        val receivedConversation = when {
+            intent.extras!!.containsKey(EXTRA_CONVERSATION) ->
+                intent.getSerializableExtra(EXTRA_CONVERSATION) as Conversation
+            intent.extras!!.containsKey(EXTRA_CONVERSATION_JSON) ->
+                intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
+            else -> {
+                val add = intent.getStringExtra(EXTRA_ADDRESS)!!
+                Conversation(add, ContactsManager(this).getClean(add))
+            }
+        }
+        mViewModel.init(receivedConversation)
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
@@ -278,7 +284,7 @@ class ConversationActivity : MediaPreviewActivity() {
             Thread {
                 var found = false
                 for (i in 0..4) {
-                    val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(mViewModel.conversation.sender)
+                    val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(mViewModel.conversation.clean)
                     if (res.isNotEmpty()) {
                         mViewModel.conversation = res.first()
                         found = true
@@ -289,7 +295,7 @@ class ConversationActivity : MediaPreviewActivity() {
                     mViewModel.name = ContactsProvider(this).getNameOrNull(mViewModel.sender)
                 }
                 toolbar.post {
-                    supportActionBar!!.title = mViewModel.name ?: mViewModel.sender
+                    supportActionBar!!.title = mViewModel.name ?: mViewModel.conversation.address
                 }
                 if (mViewModel.conversation.id != null) {
                     if (!mViewModel.conversation.read) {
@@ -307,13 +313,13 @@ class ConversationActivity : MediaPreviewActivity() {
         smsSender = SMSSender(this, arrayOf(mViewModel.conversation))
         mmsSender = MMSSender(this, arrayOf(mViewModel.conversation))
         analyticsLogger = AnalyticsLogger(this)
-        activeConversationSender = mViewModel.conversation.sender
+        activeConversationSender = mViewModel.conversation.clean
 
         conversationMenuOptions = ConversationMenuOptions(
             this, mViewModel.conversation, analyticsLogger, scrollToItemAfterSearch
         )
 
-        supportActionBar!!.title = mViewModel.conversation.name ?: mViewModel.conversation.sender
+        supportActionBar!!.title = mViewModel.conversation.name ?: mViewModel.conversation.address
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setDisplayShowHomeEnabled(true)
 
@@ -324,13 +330,13 @@ class ConversationActivity : MediaPreviewActivity() {
         mVideoPlayPauseButton = videoPlayPauseButton
         mAddMedia = addMedia
 
-        if (!mViewModel.conversation.sender.first().isDigit()) {
+        if (!mViewModel.conversation.clean.first().isDigit()) {
             sendLayout.visibility = LinearLayout.INVISIBLE
             notSupported.visibility = TextView.VISIBLE
         }
 
         sendButton.setOnClickListener {
-            if (mmsType > 0) {
+            if (isMms) {
                 sendButton.isEnabled = false
                 mmsSender.sendMMS(messageEditText.text.toString(), mmsURI, mmsTypeString)
                 sendButton.isEnabled = true
@@ -362,8 +368,8 @@ class ConversationActivity : MediaPreviewActivity() {
 
         mViewModel.conversation.apply {
             muteItem.title = if (isMuted) getString(R.string.unMute) else getString(R.string.mute)
-            callItem.isVisible = sender.first().isDigit()
-            contactItem.isVisible = sender.first().isDigit()
+            callItem.isVisible = clean.first().isDigit()
+            contactItem.isVisible = clean.first().isDigit()
             if (name != null) contactItem.title = getString(R.string.view_contact)
         }
         return super.onPrepareOptionsMenu(menu)
@@ -376,8 +382,8 @@ class ConversationActivity : MediaPreviewActivity() {
 
     override fun onStart() {
         if (mViewModel.conversation.id != null)
-            NotificationManagerCompat.from(this).cancel(mViewModel.conversation.id!!.toInt())
-        activeConversationSender = mViewModel.conversation.sender
+            cancelNotification(mViewModel.sender, mViewModel.conversation.id)
+        activeConversationSender = mViewModel.conversation.clean
         registerReceiver(messageUpdatedReceiver, IntentFilter().apply {
             addAction(ACTION_OVERWRITE_MESSAGE)
             addAction(ACTION_UPDATE_STATUS_MESSAGE)

@@ -17,6 +17,9 @@ import com.bruhascended.core.data.SMSManager.Companion.ACTION_UPDATE_STATUS_MESS
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_FAILED
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_QUEUED
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
@@ -51,7 +54,7 @@ class MMSSender(
     private lateinit var smsText: String
     private val settings = Settings().apply { useSystemSending = true}
 
-    private val sentAction = "${APPLICATION_ID}.MMS_SENT"
+    private val sentAction = "$APPLICATION_ID.MMS_SENT"
 
     private fun saveMedia(date: Long): String {
         val name = date.toString() + "." +
@@ -69,8 +72,8 @@ class MMSSender(
     }
 
     private fun updateDbMms(conversation: Conversation, date: Long, type: Int) {
-        if (activeConversationSender != conversation.sender) {
-            MessageDbFactory(mContext).of(conversation.sender).apply {
+        if (activeConversationSender != conversation.clean) {
+            MessageDbFactory(mContext).of(conversation.clean).apply {
                 val conversationDao = manager()
                 val qs = conversationDao.search(date).first()
                 qs.type = type
@@ -90,11 +93,11 @@ class MMSSender(
 
     private fun addMmsToDb(conversation: Conversation, date: Long, retryIndex: Long?) {
         val message = Message (
-            smsText, 6, date, id = retryIndex, path = saveMedia(date)
+            smsText, MESSAGE_TYPE_QUEUED, date, id = retryIndex, path = saveMedia(date)
         )
 
-        if (activeConversationSender != conversation.sender) {
-            MessageDbFactory(mContext).of(conversation.sender).apply {
+        if (activeConversationSender != conversation.clean) {
+            MessageDbFactory(mContext).of(conversation.clean).apply {
                 val conversationDao = manager()
                 val qs = conversationDao.search(date)
                 for (m in qs) {
@@ -117,11 +120,11 @@ class MMSSender(
         var newCon = conversation
         if (conversation.id == null) {
             for (i in 0..4) {
-                val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(conversation.sender)
+                val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(conversation.clean)
                 if (res.isNotEmpty()) {
                     conversations[
                             conversations.indexOf(conversations.first {
-                                it.sender == conversation.sender
+                                it.clean == conversation.clean
                             })
                     ] = res[0]
                     newCon = res[0]
@@ -159,8 +162,6 @@ class MMSSender(
 
         conversations.forEach {
             addMmsToDb(it, date, retryIndex)
-            mContext.getSharedPreferences("local", Context.MODE_PRIVATE).edit()
-                .putLong("last", System.currentTimeMillis()).apply()
 
             val transaction = Transaction(mContext, settings).apply {
                 setExplicitBroadcastForSentMms(Intent(sentAction))
@@ -169,14 +170,14 @@ class MMSSender(
             mContext.registerReceiver(object : BroadcastReceiver() {
                 override fun onReceive(arg0: Context?, arg1: Intent?) {
                     when (resultCode) {
-                        Activity.RESULT_OK -> updateDbMms(it, date, 2)
+                        Activity.RESULT_OK -> updateDbMms(it, date, MESSAGE_TYPE_SENT)
                         SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
                             Toast.makeText(
                                 mContext,
                                 mContext.getString(R.string.service_provider_error),
                                 Toast.LENGTH_SHORT
                             ).show()
-                            updateDbMms(it, date, 5)
+                            updateDbMms(it, date, MESSAGE_TYPE_FAILED)
                         }
                         SmsManager.RESULT_ERROR_NO_SERVICE -> {
                             Toast.makeText(
@@ -184,7 +185,7 @@ class MMSSender(
                                 mContext.getString(R.string.no_service),
                                 Toast.LENGTH_SHORT
                             ).show()
-                            updateDbMms(it, date, 5)
+                            updateDbMms(it, date, MESSAGE_TYPE_FAILED)
                         }
                         else -> {
                             Toast.makeText(
@@ -192,14 +193,14 @@ class MMSSender(
                                 mContext.getString(R.string.error),
                                 Toast.LENGTH_SHORT
                             ).show()
-                            updateDbMms(it, date, 5)
+                            updateDbMms(it, date, MESSAGE_TYPE_FAILED)
                         }
                     }
                     mContext.unregisterReceiver(this)
                 }
             }, IntentFilter(sentAction))
 
-            val message = MMS(smsText, it.sender)
+            val message = MMS(smsText, it.address)
             val iStream: InputStream = mContext.contentResolver.openInputStream(uri)!!
             message.addMedia(getBytes(iStream), type)
 

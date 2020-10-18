@@ -15,7 +15,7 @@
 
 */
 
-package com.bruhascended.organiso.ui.settings
+package com.bruhascended.organiso.settings
 
 import android.os.Bundle
 import androidx.preference.Preference

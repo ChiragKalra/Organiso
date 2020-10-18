@@ -1,8 +1,8 @@
-package com.bruhascended.organiso.ui.settings
+package com.bruhascended.organiso.settings.categories
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.organiso.ui.settings.RecyclerViewAdapter.MyViewHolder
+import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter.MyViewHolder
 
 class ItemMoveCallback(private val mAdapter: ItemTouchHelperContract) :
     ItemTouchHelper.Callback() {

@@ -58,9 +58,9 @@ class AnalyticsLogger(
         if (!mPref.getBoolean(PREF_SEND_SPAM, false)) return
 
         val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("${PATH_SPAM_REPORTS}/${conversation.sender}")
+        val myRef = database.getReference("${PATH_SPAM_REPORTS}/${conversation.clean}")
         Thread {
-            MessageDbFactory(context).of(conversation.sender).apply {
+            MessageDbFactory(context).of(conversation.clean).apply {
                 myRef.setValue(manager().loadAllSync())
                 close()
             }

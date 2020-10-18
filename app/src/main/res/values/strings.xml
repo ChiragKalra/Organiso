@@ -1,4 +1,5 @@
 <resources>
+
     <!-- Titles -->
     <string name="app_name">Organiso</string>
     <string name="tab_text_1">Personal</string>
@@ -154,6 +155,8 @@
     <string name="visit_app_website">Visit app website</string>
     <string name="visit_github">Check out the source code</string>
     <string name="license">License</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="mark_as_read">Mark As Read</string>
 
 
 </resources>

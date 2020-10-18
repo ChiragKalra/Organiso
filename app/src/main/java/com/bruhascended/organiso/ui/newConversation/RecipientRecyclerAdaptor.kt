@@ -40,6 +40,7 @@ class RecipientRecyclerAdaptor (
     }
 
     var onItemClick: ((Contact) -> Unit)? = null
+    var onRemoveClick: ((Contact) -> Unit)? = null
 
     inner class RecipientViewHolder(val root: View) :
         RecyclerView.ViewHolder(root) {
@@ -58,16 +59,13 @@ class RecipientRecyclerAdaptor (
     override fun onBindViewHolder(holder: RecipientViewHolder, position: Int) {
         val contact: Contact = contacts[position]
         holder.apply {
-            name.text = if (contact.name.isBlank()) contact.number else contact.name
+            name.text = if (contact.name.isBlank()) contact.address else contact.name
             root.backgroundTintList = ColorStateList.valueOf(colors[abs(contact.hashCode()) % colors.size])
             remove.setOnClickListener {
-                contacts.removeAt(absoluteAdapterPosition)
-                notifyDataSetChanged()
+                onRemoveClick?.invoke(contacts[absoluteAdapterPosition])
             }
             root.setOnClickListener {
-                onItemClick?.invoke(contacts[layoutPosition])
-                contacts.removeAt(absoluteAdapterPosition)
-                notifyDataSetChanged()
+                onItemClick?.invoke(contacts[absoluteAdapterPosition])
             }
         }
     }

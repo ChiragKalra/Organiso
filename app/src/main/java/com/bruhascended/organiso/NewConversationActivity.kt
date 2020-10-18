@@ -16,18 +16,18 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.db.ContactsProvider
 import com.bruhascended.core.db.Contact
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_ADDRESS
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
-import com.bruhascended.organiso.ui.common.MediaPreviewActivity
+import com.bruhascended.organiso.common.MediaPreviewActivity
 import com.bruhascended.organiso.ui.newConversation.RecipientRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor
-import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
@@ -74,14 +74,20 @@ class NewConversationActivity : MediaPreviewActivity() {
     override lateinit var mAddMedia: ImageButton
 
     private val clickAction = { contact: Contact ->
-        to.text = null
+        if (!to.text.isNullOrBlank()) to.text = null
         addRecipient(contact)
     }
 
     private val addressClickAction = { contact: Contact ->
-        to.setText(contact.number)
-        to.setSelection(contact.number.length)
-        removeRecipient(contact)
+        to.setText(contact.address)
+        to.setSelection(contact.address.length)
+        removeClickAction(contact)
+    }
+
+    private val removeClickAction = { contact: Contact ->
+        val ind = recipients.indexOf(contact)
+        recipients.removeAt(ind)
+        addressRecyclerAdaptor.notifyItemRemoved(ind)
     }
 
     private fun getRecipients(uri: Uri): String {
@@ -92,14 +98,14 @@ class NewConversationActivity : MediaPreviewActivity() {
 
     private fun addRecipientAsync (number: String) {
         Thread {
-            val clean = cm.getRaw (
+            val clean = cm.getClean (
                 number.trim().toLowerCase(Locale.ROOT).filter { it.isDigit() }
             )
             if (clean.isBlank()) return@Thread
             val name = mContactsProvider.getNameOrNull(clean) ?: ""
-            if (recipients.firstOrNull { it.number == clean } == null) {
+            if (recipients.firstOrNull { it.clean == clean } == null) {
                 addsRecycler.post {
-                    recipients.add(Contact(name, clean))
+                    recipients.add(Contact(name, clean, number))
                     addressRecyclerAdaptor.notifyItemInserted(recipients.lastIndex)
                 }
             }
@@ -107,34 +113,28 @@ class NewConversationActivity : MediaPreviewActivity() {
     }
 
     private fun addRecipientSync (number: String) {
-        val clean = cm.getRaw (
+        val clean = cm.getClean (
             number.trim().toLowerCase(Locale.ROOT).filter { it.isDigit() }
         )
         if (clean.isBlank()) return
         val name = mContactsProvider.getNameOrNull(clean) ?: ""
-        if (recipients.firstOrNull { it.number == clean } == null) {
-            recipients.add(Contact(name, clean))
+        if (recipients.firstOrNull { it.clean == clean } == null) {
+            recipients.add(Contact(name, clean, number))
         }
     }
 
     private fun addRecipient (contact: Contact) {
-        if (recipients.firstOrNull { it.number == contact.number } == null) {
+        if (recipients.firstOrNull { it.clean == contact.clean } == null) {
             recipients.add(contact)
             addressRecyclerAdaptor.notifyItemInserted(recipients.lastIndex)
         }
-    }
-
-    private fun removeRecipient (contact: Contact) {
-        val ind = recipients.indexOf(contact)
-        recipients.removeAt(ind)
-        addressRecyclerAdaptor.notifyItemRemoved(ind)
     }
 
     private fun startNextActivity () {
         if (recipients.size == 1) {
             startActivity(
                 Intent(this, ConversationActivity::class.java)
-                    .putExtra(EXTRA_SENDER, recipients.first().number)
+                    .putExtra(EXTRA_ADDRESS, recipients.first().address)
             )
         } else if (recipients.isNotEmpty()) {
             startActivityIfNeeded(
@@ -168,7 +168,7 @@ class NewConversationActivity : MediaPreviewActivity() {
                     }
                     sendButton.setOnClickListener {
                         val conversations = Array(recipients.size) {
-                            Conversation(recipients[it].number)
+                            Conversation(recipients[it].address, recipients[it].clean)
                         }
                         val smsSender = SMSSender(mContext, conversations)
                         val mmsSender = MMSSender(mContext, conversations)
@@ -191,9 +191,9 @@ class NewConversationActivity : MediaPreviewActivity() {
     private fun search(key: String) {
         val flow = Pager(
             PagingConfig(
-                pageSize = 3,
-                initialLoadSize = 3,
-                prefetchDistance = 12,
+                pageSize = 1,
+                initialLoadSize = 1,
+                prefetchDistance = 24,
                 maxSize = 120,
             )
         ) {
@@ -230,6 +230,7 @@ class NewConversationActivity : MediaPreviewActivity() {
         }
         addressRecyclerAdaptor = RecipientRecyclerAdaptor(this, recipients).apply {
             onItemClick = addressClickAction
+            onRemoveClick = removeClickAction
         }
         addsRecycler.adapter = addressRecyclerAdaptor
 
@@ -269,9 +270,11 @@ class NewConversationActivity : MediaPreviewActivity() {
         setupAddressRecycler()
         setupContactRecycler()
 
+        to.text = null
+
         if (!sendButton.hasOnClickListeners()) {
             sendButton.setOnClickListener {
-                if (messageEditText.text.toString().trim() == "" && mmsType == 0)
+                if (messageEditText.text.toString().trim() == "" && !isMms)
                     return@setOnClickListener
 
                 addRecipientSync(to.text.toString())
@@ -279,10 +282,10 @@ class NewConversationActivity : MediaPreviewActivity() {
 
                 if (recipients.isNotEmpty()) {
                     val conversations = Array(recipients.size) {
-                        Conversation(recipients[it].number)
+                        Conversation(recipients[it].address, recipients[it].clean)
                     }
                     val msg = messageEditText.text.toString().trim()
-                    if (mmsType == 0) {
+                    if (!isMms) {
                         SMSSender(mContext, conversations).sendSMS(msg)
                         hideMediaPreview()
                     } else {

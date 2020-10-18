@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.ui.common
+package com.bruhascended.organiso.common
 
 import android.view.View
 import android.widget.EdgeEffect

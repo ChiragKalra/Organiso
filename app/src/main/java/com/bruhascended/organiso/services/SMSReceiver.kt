@@ -8,7 +8,8 @@ import android.provider.Telephony
 import android.telephony.SmsMessage
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.core.data.ContactsManager
-import com.bruhascended.core.data.IncomingSMSManager
+import com.bruhascended.core.data.SMSManager
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
 import com.bruhascended.organiso.notifications.MessageNotificationManager
 
 /*
@@ -39,7 +40,7 @@ class SMSReceiver : BroadcastReceiver() {
             values.put("body", message)
             values.put("read", 0)
             values.put("date", System.currentTimeMillis())
-            values.put("type", 1)
+            values.put("type", MESSAGE_TYPE_INBOX)
             mContext.contentResolver.insert(Telephony.Sms.CONTENT_URI, values)
             ret = true
         } catch (ex: Exception) {
@@ -49,8 +50,14 @@ class SMSReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == "android.provider.Telephony.SMS_RECEIVED" &&
-            context.packageName == Telephony.Sms.getDefaultSmsPackage(context)) return
+        if (context.packageName != Telephony.Sms.getDefaultSmsPackage(context)) {
+            if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {
+                SMSManager(context).updateSync()
+            }
+            return
+        } else if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {
+            return
+        }
 
         val mnm = MessageNotificationManager(context)
         val cm = ContactsManager(context)
@@ -58,13 +65,13 @@ class SMSReceiver : BroadcastReceiver() {
         val bundle = intent.extras
         if (bundle != null) Thread {
             val pduObjects = bundle["pdus"] as Array<*>
-            val smm = IncomingSMSManager(context)
+            val smm = SMSManager(context)
             val senders = hashMapOf<String, String>()
 
             for (aObject in pduObjects) {
                 val currentSMS = SmsMessage.createFromPdu(aObject as ByteArray, bundle.getString("format"))
-                val sender = currentSMS.displayOriginatingAddress.toString()
-                val content = currentSMS.messageBody.toString()
+                val sender = currentSMS.displayOriginatingAddress
+                val content = currentSMS.messageBody
                 if (sender in senders) {
                     senders[sender] += content
                 } else {
@@ -74,10 +81,9 @@ class SMSReceiver : BroadcastReceiver() {
 
             senders.forEach {
                 it.apply {
-                    val sender = cm.getRaw(key)
-                    if (activeConversationSender == sender) smm.putMessage(sender, value, true)
-                    else mnm.sendSmsNotification(smm.putMessage(sender, value, false)!!)
-                    saveSms(sender, value)
+                    if (activeConversationSender == cm.getClean(key)) smm.putMessage(key, value, true)
+                    else mnm.sendSmsNotification(smm.putMessage(key, value, false)!!)
+                    saveSms(key, value)
                 }
             }
             smm.close()

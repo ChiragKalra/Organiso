@@ -16,6 +16,9 @@ import com.bruhascended.organiso.ConversationActivity.Companion.activeConversati
 import com.bruhascended.organiso.R
 import com.bruhascended.core.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_FAILED
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_QUEUED
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.db.MainDaoProvider
 import com.klinker.android.send_message.Settings
@@ -55,8 +58,8 @@ class SMSSender(
         val message = Message (
             smsText, type, date, id = retryIndex, delivered = delivered
         )
-        if (activeConversationSender != conversation.sender) {
-            MessageDbFactory(mContext).of(conversation.sender).apply {
+        if (activeConversationSender != conversation.clean) {
+            MessageDbFactory(mContext).of(conversation.clean).apply {
                 val conversationDao = manager()
                 val qs = conversationDao.search(date)
                 for (m in qs) {
@@ -79,14 +82,14 @@ class SMSSender(
         var newCon = conversation
         if (conversation.id == null) {
             for (i in 0..4) {
-                val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(conversation.sender)
+                val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(conversation.clean)
                 if (res.isNotEmpty()) {
                     conversations[
                         conversations.indexOf(conversations.first {
-                            it.sender == conversation.sender
+                            it.clean == conversation.clean
                         })
-                    ] = res[0]
-                    newCon = res[0]
+                    ] = res.first()
+                    newCon = res.first()
                     break
                 }
             }
@@ -107,12 +110,13 @@ class SMSSender(
         val transaction = Transaction(mContext, settings)
 
         conversations.forEach { conversation ->
-            addSmsToDb(conversation, smsText, date, 6, false, retryIndex)
+            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_QUEUED, false, retryIndex)
             mContext.registerReceiver(object : BroadcastReceiver() {
                 override fun onReceive(arg0: Context, arg1: Intent?) {
                     when (resultCode) {
                         Activity.RESULT_OK -> {
-                            addSmsToDb(conversation, smsText, date, 2, false, retryIndex)
+                            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_SENT,
+                                false, retryIndex)
                         }
                         SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
                             Handler(Looper.getMainLooper()).post {
@@ -122,7 +126,8 @@ class SMSSender(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                            addSmsToDb(conversation, smsText, date, 5, false, retryIndex)
+                            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_FAILED,
+                                false, retryIndex)
                         }
                         SmsManager.RESULT_ERROR_NO_SERVICE -> {
                             Handler(Looper.getMainLooper()).post {
@@ -132,7 +137,8 @@ class SMSSender(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                            addSmsToDb(conversation, smsText, date, 5, false, retryIndex)
+                            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_FAILED,
+                                false, retryIndex)
                         }
                         else -> {
                             Handler(Looper.getMainLooper()).post {
@@ -142,7 +148,8 @@ class SMSSender(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                            addSmsToDb(conversation, smsText, date, 5, false, retryIndex)
+                            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_FAILED,
+                                false, retryIndex)
                         }
                     }
                     mContext.unregisterReceiver(this)
@@ -152,15 +159,17 @@ class SMSSender(
                 override fun onReceive(arg0: Context?, arg1: Intent?) {
                     when (resultCode) {
                         Activity.RESULT_OK ->
-                            addSmsToDb(conversation, smsText, date, 2, true, retryIndex)
+                            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_SENT,
+                                true, retryIndex)
                         else ->
-                            addSmsToDb(conversation, smsText, date, 2, false, retryIndex)
+                            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_SENT,
+                                false, retryIndex)
                     }
                     mContext.unregisterReceiver(this)
                 }
             }, IntentFilter(deliveredAction))
 
-            val message = SMS(smsText, conversation.sender)
+            val message = SMS(smsText, conversation.address)
             transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
         }
     }

@@ -3,7 +3,9 @@ package com.bruhascended.organiso
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_SPAM
 import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
+import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import com.bruhascended.organiso.ui.main.CategoryFragment
 import kotlinx.android.synthetic.main.activity_conversation.toolbar
 
@@ -25,13 +27,19 @@ import kotlinx.android.synthetic.main.activity_conversation.toolbar
 */
 
 class ExtraCategoryActivity : AppCompatActivity() {
+
+    companion object {
+        const val EXTRA_LABEL = "LABEL"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("dark_theme", false)
+        val dark = PreferenceManager.getDefaultSharedPreferences(this)
+            .getBoolean(PREF_DARK_THEME, false)
         setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
         setContentView(R.layout.activity_extra_category)
 
-        val label = intent.getIntExtra("Type", 4)
+        val label = intent.getIntExtra(EXTRA_LABEL, LABEL_SPAM)
 
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)

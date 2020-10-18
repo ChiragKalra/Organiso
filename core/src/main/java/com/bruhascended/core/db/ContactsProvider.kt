@@ -23,11 +23,12 @@ class ContactsProvider (mContext: Context) {
         contacts.forEach {
             for (i in 0..4) {
                 val q =
-                    mMainDaoProvider.getMainDaos()[i].findBySender(it.number)
+                    mMainDaoProvider.getMainDaos()[i].findBySender(it.clean)
                 if (q.isEmpty()) continue
                 val res = q.first()
-                if (res.name != it.name) {
+                if (res.name != it.name || res.address != it.address) {
                     res.name = it.name
+                    res.address = it.address
                     mMainDaoProvider.getMainDaos()[i].update(res)
                 }
                 break

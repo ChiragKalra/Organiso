@@ -9,6 +9,7 @@ import android.telephony.TelephonyManager
 import android.webkit.MimeTypeMap
 import com.bruhascended.core.data.SMSManager.Companion.ACTION_NEW_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_PERSONAL
 import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
 import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
 import com.bruhascended.core.db.Conversation
@@ -41,7 +42,7 @@ class MMSManager(private val mContext: Context) {
     private val mMainDaoProvider = MainDaoProvider(mContext)
 
     private val tMgr = mContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    private var mPhoneNumber = cm.getRaw(tMgr.line1Number)
+    private var mPhoneNumber = cm.getClean(tMgr.line1Number)
 
     private fun getAddressNumber(id: String): Pair<Boolean, String> {
         var selection = "type=137 AND msg_id=$id"
@@ -166,7 +167,7 @@ class MMSManager(private val mContext: Context) {
 
         val sender = getAddressNumber(mmsId)
         val sentByUser = sender.first
-        val rawNumber = cm.getRaw(sender.second)
+        val rawNumber = cm.getClean(sender.second)
 
         val message = Message(
             body, if (sentByUser) MESSAGE_TYPE_SENT else MESSAGE_TYPE_INBOX,
@@ -178,9 +179,8 @@ class MMSManager(private val mContext: Context) {
             val got = mMainDaoProvider.getMainDaos()[i].findBySender(rawNumber)
             if (got.isNotEmpty()) {
                 conversation = got.first()
-                for (item in got.slice(1 until got.size))
+                for (item in got)
                     mMainDaoProvider.getMainDaos()[i].delete(item)
-                break
             }
         }
 
@@ -192,24 +192,26 @@ class MMSManager(private val mContext: Context) {
                     lastSMS = message.text
                     lastMMS = true
                 }
-                label = 0
-                forceLabel = 0
+                label = LABEL_PERSONAL
+                forceLabel = LABEL_PERSONAL
                 name = senderNameMap[rawNumber]
-                mMainDaoProvider.getMainDaos()[0].update(this)
+                mMainDaoProvider.getMainDaos()[LABEL_PERSONAL].insert(this)
             }
             conversation
         } else {
             val con = Conversation(
+                sender.second,
                 rawNumber,
                 senderNameMap[rawNumber],
                 read = init,
                 time = message.time,
                 lastSMS = message.text,
-                forceLabel = 0,
+                label = LABEL_PERSONAL,
+                forceLabel = LABEL_PERSONAL,
                 lastMMS = true
             )
-            mMainDaoProvider.getMainDaos()[0].insert(con)
-            con.id = mMainDaoProvider.getMainDaos()[0].findBySender(rawNumber).first().id
+            mMainDaoProvider.getMainDaos()[LABEL_PERSONAL].insert(con)
+            con.id = mMainDaoProvider.getMainDaos()[LABEL_PERSONAL].findBySender(rawNumber).first().id
             con
         }
 

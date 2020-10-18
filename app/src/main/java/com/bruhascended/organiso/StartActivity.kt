@@ -41,7 +41,7 @@ class StartActivity : AppCompatActivity() {
 
     companion object {
         const val TAG_WAKE_LOCK = "Organiso::Wakelock"
-        const val ARG_INIT = "InitDataOrganized"
+        const val KEY_INIT = "InitDataOrganized"
     }
 
     private lateinit var mContext: Context
@@ -67,7 +67,7 @@ class StartActivity : AppCompatActivity() {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
 
-        if (sharedPref.getBoolean(ARG_INIT, false)) {
+        if (sharedPref.getBoolean(KEY_INIT, false)) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
             return
@@ -178,7 +178,7 @@ class StartActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
             wakeLock.release()
 
-            sharedPref.edit().putBoolean(ARG_INIT, true).apply()
+            sharedPref.edit().putBoolean(KEY_INIT, true).apply()
             finish()
         }.start()
     }

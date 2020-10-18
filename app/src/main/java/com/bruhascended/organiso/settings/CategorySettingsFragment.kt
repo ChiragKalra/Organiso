@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.ui.settings
+package com.bruhascended.organiso.settings
 
 import android.app.AlertDialog
 import android.content.SharedPreferences
@@ -11,10 +11,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.ARG_STATE_CHANGED
-import com.bruhascended.organiso.ui.settings.GeneralFragment.Companion.PREF_DARK_THEME
-import com.bruhascended.organiso.ui.settings.RecyclerViewAdapter.Companion.CATEGORY_HIDDEN
-import com.bruhascended.organiso.ui.settings.RecyclerViewAdapter.Companion.CATEGORY_VISIBLE
+import com.bruhascended.organiso.settings.GeneralFragment.Companion.KEY_STATE_CHANGED
+import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.categories.ItemMoveCallback
+import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter
+import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter.Companion.CATEGORY_HIDDEN
+import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter.Companion.CATEGORY_VISIBLE
 import com.google.gson.Gson
 import kotlin.collections.ArrayList
 
@@ -39,10 +41,10 @@ import kotlin.collections.ArrayList
 class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListener {
 
     companion object {
-        const val ARG_VISIBLE_CATEGORIES = "visible_categories"
-        const val ARG_HIDDEN_CATEGORIES = "hidden_categories"
+        const val PREF_VISIBLE_CATEGORIES = "visible_categories"
+        const val PREF_HIDDEN_CATEGORIES = "hidden_categories"
 
-        val ARR_ARG_CUSTOM_LABELS = Array(6) {
+        val ARR_PREF_CUSTOM_LABELS = Array(6) {
             "custom_label_${it}"
         }
     }
@@ -79,7 +81,7 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
     }
 
     private fun getLabels() = Array(6) {
-        prefs.getString(ARR_ARG_CUSTOM_LABELS[it], "")!!
+        prefs.getString(ARR_PREF_CUSTOM_LABELS[it], "")!!
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,10 +105,10 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
         recycler = root.findViewById(R.id.recycler)
 
         val visibleCategories = gson.fromJson(
-            prefs.getString(ARG_VISIBLE_CATEGORIES, ""), Array<Int>::class.java
+            prefs.getString(PREF_VISIBLE_CATEGORIES, ""), Array<Int>::class.java
         )
         val hiddenCategories = gson.fromJson(
-            prefs.getString(ARG_HIDDEN_CATEGORIES, ""), Array<Int>::class.java
+            prefs.getString(PREF_HIDDEN_CATEGORIES, ""), Array<Int>::class.java
         )
 
         recycler.layoutManager = LinearLayoutManager(requireContext()).apply {
@@ -132,10 +134,10 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
                         val vis = Array(4){it}
                         val hid = Array(2){4+it}
                         prefs.edit()
-                            .putString(ARG_VISIBLE_CATEGORIES, gson.toJson(vis))
-                            .putString(ARG_HIDDEN_CATEGORIES, gson.toJson(hid))
+                            .putString(PREF_VISIBLE_CATEGORIES, gson.toJson(vis))
+                            .putString(PREF_HIDDEN_CATEGORIES, gson.toJson(hid))
                             .apply {
-                                for (i in 0..5) remove(ARR_ARG_CUSTOM_LABELS[i])
+                                for (i in 0..5) remove(ARR_PREF_CUSTOM_LABELS[i])
                             }.apply()
                         drawRecyclerView(vis, hid, Array(6){""})
                         dialog.dismiss()
@@ -163,9 +165,9 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
         val vis = Array(hidePos-1){arr[it+1]}
         val hid = Array(7-hidePos){arr[it+hidePos+1]}
         prefs.edit()
-            .putBoolean(ARG_STATE_CHANGED, true)
-            .putString(ARG_VISIBLE_CATEGORIES, gson.toJson(vis))
-            .putString(ARG_HIDDEN_CATEGORIES, gson.toJson(hid))
+            .putBoolean(KEY_STATE_CHANGED, true)
+            .putString(PREF_VISIBLE_CATEGORIES, gson.toJson(vis))
+            .putString(PREF_HIDDEN_CATEGORIES, gson.toJson(hid))
             .apply()
 
         super.onDestroy()

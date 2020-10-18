@@ -7,6 +7,10 @@
 /app/src/test/
 /app/google-services.json
 /app/proguard-rules.pro
+/core/build/
+/core/src/androidTest/
+/core/src/test/
+/core/proguard-rules.pro
 /build.gradle
 /gradle.properties
 /local.properties

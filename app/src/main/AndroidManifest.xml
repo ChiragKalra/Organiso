@@ -39,7 +39,7 @@
             android:name=".services.MMSReceiver"
             android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED" />
         <receiver
-            android:name=".services.SmsSentReceiverProxy"
+            android:name="com.bruhascended.core.SmsSentReceiverProxy"
             android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.SMS_SENT"/>

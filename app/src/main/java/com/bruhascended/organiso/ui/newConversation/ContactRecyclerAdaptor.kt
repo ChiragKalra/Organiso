@@ -12,7 +12,7 @@ import com.bruhascended.organiso.R
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.db.Contact
 import com.bruhascended.core.db.ContactComparator
-import com.bruhascended.organiso.ui.common.ListSelectionManager
+import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor.ContactViewHolder
 import com.squareup.picasso.Picasso
@@ -58,7 +58,7 @@ class ContactRecyclerAdaptor (
 
         init {
             view.setOnClickListener {
-                onItemClick?.invoke(getItem(layoutPosition)!!)
+                onItemClick?.invoke(getItem(layoutPosition) ?: return@setOnClickListener)
             }
         }
     }
@@ -72,8 +72,8 @@ class ContactRecyclerAdaptor (
     override fun onBindViewHolder(holder: ContactViewHolder, position: Int) {
         val contact: Contact = getItem(position) ?: return
         holder.name.text = contact.name
-        holder.number.text = contact.number
-        val dp = File(mContext.filesDir, contact.number)
+        holder.number.text = contact.address
+        val dp = File(mContext.filesDir, contact.clean)
         holder.dp.apply {
             setBackgroundColor(colors[abs(contact.hashCode()) % colors.size])
             if (dp.exists()) picasso.load(dp).into(this)

@@ -21,7 +21,14 @@ import com.bruhascended.core.db.Message
 
 class FeatureExtractor (context: Context) {
     private var mContext = context
-    private val nonWordFeatures = arrayOf("Time", "Digit", "Decimal", "URL", "Date", "NumberOfWords")
+    private val nonWordFeatures = arrayOf(
+        "Time",
+        "Digit",
+        "Decimal",
+        "URL",
+        "Date",
+        "NumberOfWords"
+    )
     private val wordFeatures = getWordFeatures()
 
     private fun getWordFeatures(): List<String> {

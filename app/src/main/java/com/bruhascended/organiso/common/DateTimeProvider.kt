@@ -1,13 +1,18 @@
-package com.bruhascended.core.data
+package com.bruhascended.organiso.common
 
 import android.content.Context
 import android.text.format.DateFormat
 import android.text.format.DateUtils
+import com.bruhascended.organiso.R
 import java.util.*
 
 class DateTimeProvider(
     private val mContext: Context
 ) {
+
+    // TODO locale language
+
+    private val yesterdayStr = mContext.getString(R.string.yesterday)
 
     fun getCondensed(time: Long): String {
         val smsTime = Calendar.getInstance().apply { timeInMillis = time }
@@ -19,7 +24,7 @@ class DateTimeProvider(
                 smsTime
             ).toString()
 
-            DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "Yesterday"
+            DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> yesterdayStr
 
             now[Calendar.WEEK_OF_YEAR] == smsTime[Calendar.WEEK_OF_YEAR] &&
                     now[Calendar.YEAR] == smsTime[Calendar.YEAR] -> DateFormat.format(
@@ -48,7 +53,7 @@ class DateTimeProvider(
         ).toString()
         return when {
             DateUtils.isToday(time) -> timeString
-            DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "$timeString,\nYesterday"
+            DateUtils.isToday(time + DateUtils.DAY_IN_MILLIS) -> "$timeString,\n$yesterdayStr"
             now[Calendar.YEAR] == smsTime[Calendar.YEAR] ->
                 timeString + ",\n" + DateFormat.format("d MMMM", smsTime).toString()
             else ->

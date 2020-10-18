@@ -78,7 +78,7 @@ class ContactsManager(context: Context) {
         return photo
     }
 
-    fun getRaw(number: String): String {
+    fun getClean(number: String): String {
         return if (number.startsWith("+")) {
             try {
                 val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.createInstance(mContext)
@@ -117,7 +117,7 @@ class ContactsManager(context: Context) {
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    map[getRaw(phoneNo)] = name
+                    map[getClean(phoneNo)] = name
                 }
                 pCur?.close()
             }
@@ -153,18 +153,18 @@ class ContactsManager(context: Context) {
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    list.add(Contact(name, getRaw(phoneNo)))
+                    list.add(Contact(name, getClean(phoneNo), phoneNo))
                 }
                 pCur?.close()
             }
         }
         cur?.close()
         val arr = list.toTypedArray()
-        arr.sortBy {it.name}
+        arr.sortBy {it.name.toLowerCase(Locale.ROOT) }
         if (loadDp) Thread {
             arr.forEach {
-                val bm = retrieveContactPhoto(it.number)
-                val des = File(mContext.filesDir, it.number)
+                val bm = retrieveContactPhoto(it.clean)
+                val des = File(mContext.filesDir, it.clean)
                 bm?.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(des))
             }
         }.start()

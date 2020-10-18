@@ -20,7 +20,7 @@ import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_SENT
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
-import com.bruhascended.organiso.ui.common.ScrollEffectFactory
+import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.conversation.MessageViewHolder
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import com.bruhascended.organiso.ui.main.ConversationViewHolder

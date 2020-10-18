@@ -4,6 +4,7 @@ import android.app.Notification.CATEGORY_MESSAGE
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_NONE
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
@@ -22,15 +23,21 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.room.Room
 import com.bruhascended.organiso.ConversationActivity
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
+import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.core.data.ContactsManager
+import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_BLOCKED
+import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.Notification
 import com.bruhascended.core.db.NotificationDatabase
 import com.bruhascended.core.ml.getOtp
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
+import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_SENDER
+import com.bruhascended.organiso.notifications.OtpNotificationManager.Companion.EXTRA_IS_OTP
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 import java.io.File
 
@@ -57,13 +64,20 @@ class MessageNotificationManager(
 
     companion object {
         const val NAME_TABLE = "active_notifications"
-        const val ACTION_CANCEL = "NOTIFICATION_CANCELED"
-        const val ACTION_REPLY = "NOTIFICATION_REPLIED"
-        const val ACTION_COPY = "OTP_COPIED"
-        const val ACTION_DELETE = "MESSAGE_DELETED"
+
+        const val ACTION_CANCEL = "${APPLICATION_ID}.CANCEL_NOTIFICATION"
+        const val ACTION_REPLY = "${APPLICATION_ID}.NOTIFICATION_REPLY"
+        const val ACTION_COPY = "${APPLICATION_ID}.OTP_COPY"
+        const val ACTION_DELETE_OTP = "${APPLICATION_ID}.OTP_DELETE"
+        const val ACTION_DELETE_MESSAGE = "${APPLICATION_ID}.MESSAGE_DELETE"
+        const val ACTION_MARK_READ = "${APPLICATION_ID}.MESSAGE_MARK_READ"
+
         const val GROUP_DEFAULT = "MESSAGE_GROUP"
+
         const val ID_SUMMARY = -1221
+
         const val KEY_TEXT_REPLY = "key_text_reply"
+
         const val DELAY_OTP_DELETE = 15L // in minutes
     }
 
@@ -101,13 +115,13 @@ class MessageNotificationManager(
     }
 
     private fun getSenderIcon(conversation: Conversation): IconCompat {
-        val dp = File(mContext.filesDir, conversation.sender)
+        val dp = File(mContext.filesDir, conversation.clean)
         val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
             setTint(mContext.getColor(colorRes[(conversation.id!! % colorRes.size).toInt()]))
         }
 
         return when {
-            conversation.sender.first().isLetter() -> {
+            conversation.clean.first().isLetter() -> {
                 val bot = ContextCompat.getDrawable(mContext, R.drawable.ic_bot)
                 val finalDrawable = LayerDrawable(arrayOf(bg, bot))
                 finalDrawable.setLayerGravity(1, Gravity.CENTER)
@@ -141,13 +155,12 @@ class MessageNotificationManager(
         val mNM = mContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         var active = 0
         mNM.activeNotifications.forEach {
-            if (!it.notification.extras.getBoolean("OTP", false)) active++
+            if (!it.notification.extras.getBoolean(EXTRA_IS_OTP, false)) active++
         }
         if (active < 3) return
         notificationManager.notify(
             0,
             Builder(mContext, "0")
-                .setContentTitle(mContext.getString(R.string.x_active_conversations, active))
                 .setSmallIcon(R.drawable.message)
                 .setAutoCancel(true)
                 .setGroup(GROUP_DEFAULT)
@@ -161,16 +174,16 @@ class MessageNotificationManager(
         val conversation: Conversation = pair.second
         val message: Message = pair.first
 
-        if (conversation.isMuted || conversation.sender == activeConversationSender ||
-            conversation.label == 5
+        if (conversation.isMuted || conversation.clean == activeConversationSender ||
+            conversation.label == LABEL_BLOCKED
         ) return
 
         val contentPI = PendingIntent.getActivity(
             mContext, conversation.id!!.toInt(),
             Intent(mContext, ConversationActivity::class.java)
-                .putExtra(EXTRA_SENDER, conversation.sender)
+                .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString())
                 .setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME),
-            PendingIntent.FLAG_ONE_SHOT
+            FLAG_UPDATE_CURRENT
         )
 
         val otp = getOtp(message.text)
@@ -180,7 +193,7 @@ class MessageNotificationManager(
         }
 
         val senderPerson = Person.Builder()
-            .setName(conversation.name ?: conversation.sender)
+            .setName(conversation.name ?: conversation.address)
             .setIcon(getSenderIcon(conversation))
             .build()
 
@@ -193,8 +206,8 @@ class MessageNotificationManager(
             mContext, conversation.id!!.toInt(),
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_CANCEL)
-                .putExtra("sender", conversation.sender),
-            PendingIntent.FLAG_ONE_SHOT
+                .putExtra(EXTRA_SENDER, conversation.clean),
+            FLAG_UPDATE_CURRENT
         )
 
         if (notificationManager.getNotificationChannel(conversation.label.toString())?.importance
@@ -202,18 +215,18 @@ class MessageNotificationManager(
         ) {
             ndb.insert(
                 Notification(
-                    conversation.sender,
+                    conversation.clean,
                     message.text,
                     System.currentTimeMillis(),
                     conversation.label,
                     message.path,
-                    message.type != 1
+                    message.type != MESSAGE_TYPE_INBOX
                 )
             )
         }
 
         val conversationStyle = NotificationCompat.MessagingStyle(senderPerson)
-        ndb.findBySender(conversation.sender).forEach {
+        ndb.findBySender(conversation.clean).forEach {
             var msgText = it.text
             if (it.path != null) {
                 val mType = getMimeType(it.path!!)
@@ -228,7 +241,7 @@ class MessageNotificationManager(
                 it.time,
                 if (it.fromUser) userPerson else senderPerson
             )
-            if (it.path != null && getMimeType(it.path!!).startsWith("photo")) {
+            if (it.path != null && getMimeType(it.path!!).startsWith("image")) {
                 msg.setData(getMimeType(it.path!!), Uri.fromFile(File(it.path!!)))
             }
             conversationStyle.addMessage(msg)
@@ -243,24 +256,45 @@ class MessageNotificationManager(
             conversation.id!!.toInt(),
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_REPLY)
-                .putExtra("conversation", conversation),
-            PendingIntent.FLAG_UPDATE_CURRENT
+                .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
+            FLAG_UPDATE_CURRENT
         )
-        val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
+        val replyAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
             R.drawable.ic_reply, mContext.getString(R.string.reply), replyPendingIntent
         ).addRemoteInput(remoteInput).build()
+
+        val readPI = PendingIntent.getBroadcast(mContext, conversation.id!!.toInt(),
+            Intent(mContext, NotificationActionReceiver::class.java)
+                .setAction(ACTION_MARK_READ)
+                .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
+            FLAG_UPDATE_CURRENT
+        )
+        val deletePI = PendingIntent.getBroadcast(mContext, conversation.id!!.toInt(),
+            Intent(mContext, NotificationActionReceiver::class.java)
+                .setAction(ACTION_DELETE_MESSAGE)
+                .putExtra(EXTRA_MESSAGE, message)
+                .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
+            FLAG_UPDATE_CURRENT
+        )
 
         val notification = Builder(mContext, conversation.label.toString())
             .setCategory(CATEGORY_MESSAGE)
             .setGroup(GROUP_DEFAULT)
             .setSmallIcon(R.drawable.message)
             .setContentIntent(contentPI)
-            .setDeleteIntent(cancelPI)
-            .setAutoCancel(true)
-            .setStyle(conversationStyle).apply {
-                if (message.type != 1) setNotificationSilent()
-                if (conversation.sender.first().isDigit()) addAction(action)
-        }
+            .setAutoCancel(false)
+            .addAction(
+                R.drawable.ic_mark_chat_read,
+                mContext.getString(R.string.mark_as_read),
+                readPI
+            ).setStyle(conversationStyle).apply {
+                if (message.type != MESSAGE_TYPE_INBOX) setNotificationSilent()
+                if (conversation.clean.first().isDigit()) addAction(replyAction)
+            }.addAction(
+                R.drawable.ic_delete_notif,
+                mContext.getString(R.string.delete),
+                deletePI
+            ).setDeleteIntent(cancelPI)
 
         notificationManager.notify(conversation.id!!.toInt(), notification.build())
         showSummaryNotification()

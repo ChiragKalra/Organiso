@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.room.*
 import com.bruhascended.core.data.SMSManager.Companion.ARR_LABEL_STR
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_NONE
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_PERSONAL
 import com.google.gson.Gson
 import java.io.Serializable
 
@@ -29,13 +31,14 @@ import java.io.Serializable
 
 @Entity(tableName = "conversations")
 data class Conversation (
-    val sender: String,
+    var address: String,
+    val clean: String,
     var name: String? = null,
     @PrimaryKey(autoGenerate = true)
     var id: Long? = null,
-    var label: Int = 0,
+    var label: Int = LABEL_PERSONAL,
     var forceLabel: Int = -1,
-    var probabilities: FloatArray = FloatArray(5) { if (it == 0) 1F else 0F },
+    var probabilities: FloatArray = FloatArray(5) { if (it == LABEL_PERSONAL) 1F else 0F },
     var read: Boolean = true,
     var time: Long = 0,
     var lastSMS: String = "",
@@ -47,7 +50,7 @@ data class Conversation (
         if (javaClass != other?.javaClass) return false
 
         other as Conversation
-        if (sender != other.sender) return false
+        if (clean != other.clean) return false
         if (name != other.name) return false
         if (read != other.read) return false
         if (time != other.time) return false
@@ -58,8 +61,15 @@ data class Conversation (
     }
 
     override fun hashCode(): Int {
-        return sender.hashCode()
+        return clean.hashCode()
     }
+
+    override fun toString(): String =
+        Gson().toJson(this)
+}
+
+fun String?.toConversation(): Conversation {
+    return Gson().fromJson(this, Conversation::class.java)
 }
 
 @Dao
@@ -73,10 +83,10 @@ interface ConversationDao {
     @Delete
     fun delete(conversation: Conversation)
 
-    @Query("SELECT * FROM conversations WHERE sender LIKE :sender ORDER BY time DESC")
+    @Query("SELECT * FROM conversations WHERE clean LIKE :sender ORDER BY time DESC")
     fun findBySender(sender: String): List<Conversation>
 
-    @Query("SELECT * FROM conversations WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR sender LIKE :key ORDER BY time DESC")
+    @Query("SELECT * FROM conversations WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR clean LIKE :key ORDER BY time DESC")
     fun search(key: String, altKey: String=""): List<Conversation>
 
     @Query("SELECT * FROM conversations LIMIT 1")
@@ -130,11 +140,11 @@ class ConversationDbFactory (private val mContext: Context) {
 fun Conversation.moveTo(to: Int, mContext: Context) {
     MainDaoProvider(mContext).getMainDaos()[label].delete(this)
     id = null
-    if (to >= 0) {
+    if (to != LABEL_NONE) {
         label = to
         forceLabel = to
         MainDaoProvider(mContext).getMainDaos()[to].insert(this)
-    } else MessageDbFactory(mContext).of(sender).apply {
+    } else MessageDbFactory(mContext).of(clean).apply {
         manager().nukeTable()
         close()
     }

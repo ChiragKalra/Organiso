@@ -23,7 +23,7 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
         }
 
     val sender: String
-        get() = mConversation.sender
+        get() = mConversation.clean
 
     var name: String?
         get() = mConversation.name
@@ -32,7 +32,7 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
         }
 
     val lastSms: String
-        get() = mConversation.sender
+        get() = mConversation.lastSMS
 
     var isMuted: Boolean
         get() = mConversation.isMuted

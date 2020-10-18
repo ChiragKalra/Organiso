@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.ui.common
+package com.bruhascended.organiso.common
 
 import android.content.Intent
 import android.graphics.drawable.AnimatedVectorDrawable
@@ -52,7 +52,7 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
     protected abstract var mVideoPlayPauseButton: ImageButton
     protected abstract var mAddMedia: ImageButton
 
-    protected var mmsType = 0
+    protected var isMms = false
     protected lateinit var mmsTypeString: String
     protected lateinit var mmsURI: Uri
 
@@ -99,7 +99,7 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
         mVideoView.stopPlayback()
         mp.reset()
         fadeAway(mVideoView, mImagePreview, mSeekBar, mPlayPauseButton, mVideoPlayPauseButton)
-        mmsType = 0
+        isMms = false
         mAddMedia.setImageResource(R.drawable.close_to_add)
         (mAddMedia.drawable as AnimatedVectorDrawable).start()
         mAddMedia.setOnClickListener {
@@ -117,11 +117,11 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
 
         mmsURI = data.data ?: data.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
         mmsTypeString = contentResolver.getType(mmsURI)!!
-        mmsType = when {
+        isMms = when {
             mmsTypeString.startsWith("image") -> {
                 mImagePreview.visibility = View.VISIBLE
                 mImagePreview.setImageURI(mmsURI)
-                1
+                true
             }
             mmsTypeString.startsWith("audio") -> {
                 mSeekBar.visibility = View.VISIBLE
@@ -165,7 +165,7 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
                         }
                     }
                 }
-                2
+                true
             }
             mmsTypeString.startsWith("video") -> {
                 mVideoView.apply {
@@ -183,11 +183,11 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
                         }
                     }
                 }
-                3
+                true
             }
-            else -> 0
+            else -> false
         }
-        if (mmsType == 0) hideMediaPreview()
+        if (!isMms) hideMediaPreview()
     }
 
 

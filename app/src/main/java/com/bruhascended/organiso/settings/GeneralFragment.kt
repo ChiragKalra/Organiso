@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.ui.settings
+package com.bruhascended.organiso.settings
 
 import android.os.Build
 import android.os.Bundle
@@ -35,8 +35,9 @@ class GeneralFragment : PreferenceFragmentCompat() {
     companion object {
         const val PREF_DARK_THEME = "dark_theme"
         const val PREF_DELETE_OTP = "delete_otp"
+        const val PREF_COPY_OTP = "copy_otp"
 
-        const val ARG_STATE_CHANGED = "stateChanged"
+        const val KEY_STATE_CHANGED = "stateChanged"
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -52,7 +53,7 @@ class GeneralFragment : PreferenceFragmentCompat() {
         } else {
             themePref.setOnPreferenceChangeListener { _, _ ->
                 val sp = PreferenceManager.getDefaultSharedPreferences(requireActivity())
-                sp.edit().putBoolean(ARG_STATE_CHANGED, true).apply()
+                sp.edit().putBoolean(KEY_STATE_CHANGED, true).apply()
                 requireActivity().recreate()
                 true
             }
@@ -64,7 +65,7 @@ class GeneralFragment : PreferenceFragmentCompat() {
                 deleteOtpPref.setOnPreferenceChangeListener { _, _ ->  true}
                 Thread {
                     for (con in MainDaoProvider(mContext).getMainDaos()[LABEL_TRANSACTIONS].loadAllSync()) {
-                        MessageDbFactory(mContext).of(con.sender).apply {
+                        MessageDbFactory(mContext).of(con.clean).apply {
                             manager().loadAllSync().forEach {
                                 if (getOtp(it.text) != null && it.type== MESSAGE_TYPE_INBOX &&
                                     System.currentTimeMillis()-it.time > 15*60*1000) {

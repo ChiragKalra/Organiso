@@ -13,8 +13,8 @@ import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATI
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.ConversationComparator
-import com.bruhascended.organiso.ui.common.ListSelectionManager
-import com.bruhascended.organiso.ui.common.ListSelectionManager.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.common.ListSelectionManager
+import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
 
 @SuppressLint("ResourceType")
 class ConversationRecyclerAdaptor(

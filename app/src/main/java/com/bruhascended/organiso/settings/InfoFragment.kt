@@ -15,7 +15,7 @@
 
 */
 
-package com.bruhascended.organiso.ui.settings
+package com.bruhascended.organiso.settings
 
 import android.content.Intent
 import android.net.Uri

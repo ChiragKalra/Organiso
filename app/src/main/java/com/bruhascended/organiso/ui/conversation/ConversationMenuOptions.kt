@@ -18,17 +18,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bruhascended.organiso.*
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_SENDER
 import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_BLOCKED
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_NONE
+import com.bruhascended.core.data.SMSManager.Companion.LABEL_SPAM
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.moveTo
 import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
 import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
-import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
+import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_SENDER
+import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.math.abs
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -75,12 +80,12 @@ class ConversationMenuOptions (
 
     private fun getSenderIcon(): Icon {
         val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
-            setTint(mContext.getColor(ConversationRecyclerAdaptor.colorRes[(conversation.id!! % ConversationRecyclerAdaptor.colorRes.size).toInt()]))
+            setTint(mContext.getColor(colorRes[(abs(conversation.hashCode()) % colorRes.size)]))
         }
 
-        val dp = File(mContext.filesDir, conversation.sender)
+        val dp = File(mContext.filesDir, conversation.clean)
         return when {
-            conversation.sender.first().isLetter() -> {
+            conversation.clean.first().isLetter() -> {
                 val bot = ContextCompat.getDrawable(mContext, R.drawable.ic_bot)
                 val finalDrawable = LayerDrawable(arrayOf(bg, bot))
                 finalDrawable.setLayerGravity(1, Gravity.CENTER)
@@ -101,7 +106,7 @@ class ConversationMenuOptions (
 
     fun onOptionsItemSelected(item: MenuItem): Boolean {
         (mContext as AppCompatActivity).apply {
-            val display = conversation.name ?: conversation.sender
+            val display = conversation.name ?: conversation.address
             if (item.itemId == android.R.id.home) onBackPressed()
             when (item.itemId) {
                 R.id.action_block -> {
@@ -109,7 +114,7 @@ class ConversationMenuOptions (
                         .setTitle(getString(R.string.block_sender_query, display))
                         .setPositiveButton(getString(R.string.block)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_5")
-                            conversation.moveTo(5, mContext)
+                            conversation.moveTo(LABEL_BLOCKED, mContext)
                             Toast.makeText(
                                 mContext,
                                 getString(R.string.sender_blocked),
@@ -126,7 +131,7 @@ class ConversationMenuOptions (
                         .setPositiveButton(getString(R.string.report)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_4")
                             analyticsLogger.reportSpam(conversation)
-                            conversation.moveTo(4, mContext)
+                            conversation.moveTo(LABEL_SPAM, mContext)
                             Toast.makeText(
                                 mContext,
                                 getString(R.string.reported_spam),
@@ -142,7 +147,7 @@ class ConversationMenuOptions (
                         .setTitle(getString(R.string.delete_conversation_query))
                         .setPositiveButton(getString(R.string.delete)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_-1")
-                            conversation.moveTo(-1, mContext)
+                            conversation.moveTo(LABEL_NONE, mContext)
                             Toast.makeText(
                                 mContext,
                                 getString(R.string.conversation_deleted),
@@ -183,7 +188,7 @@ class ConversationMenuOptions (
                 R.id.action_search -> {
                     searchResult.launch(
                         Intent(mContext, SearchActivity::class.java).apply {
-                            putExtra(EXTRA_SENDER, conversation.sender)
+                            putExtra(EXTRA_SENDER, conversation.clean)
                         }
                     )
                     overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
@@ -203,13 +208,13 @@ class ConversationMenuOptions (
                 }
                 R.id.action_call -> {
                     val intent = Intent(Intent.ACTION_DIAL)
-                    intent.data = Uri.parse("tel:${conversation.sender}")
+                    intent.data = Uri.parse("tel:${conversation.address}")
                     startActivity(intent)
                 }
                 R.id.action_contact -> {
                     val intent = Intent(
                         ContactsContract.Intents.SHOW_OR_CREATE_CONTACT,
-                        Uri.parse("tel:" + conversation.sender)
+                        Uri.parse("tel:" + conversation.address)
                     )
                     startActivity(intent)
                 }
@@ -218,13 +223,13 @@ class ConversationMenuOptions (
 
                     if (shortcutManager.isRequestPinShortcutSupported) {
                         val pinShortcutInfo =
-                            ShortcutInfo.Builder(mContext, conversation.sender)
+                            ShortcutInfo.Builder(mContext, conversation.clean)
                                 .setIcon(getSenderIcon())
-                                .setShortLabel(conversation.name ?: conversation.sender)
+                                .setShortLabel(conversation.name ?: conversation.address)
                                 .setIntent(
                                     Intent(mContext, ConversationActivity::class.java)
                                         .setAction("android.intent.action.VIEW")
-                                        .putExtra(EXTRA_SENDER, conversation.sender)
+                                        .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString())
                                 )
                                 .setCategories(setOf("android.shortcut.conversation"))
                                 .build()
