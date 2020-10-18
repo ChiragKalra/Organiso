@@ -200,7 +200,7 @@ class MMSSender(
                 }
             }, IntentFilter(sentAction))
 
-            val message = MMS(smsText, it.address)
+            val message = MMS(smsText, it.address.filter { char -> char.isDigit() })
             val iStream: InputStream = mContext.contentResolver.openInputStream(uri)!!
             message.addMedia(getBytes(iStream), type)
 

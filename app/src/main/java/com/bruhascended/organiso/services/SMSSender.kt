@@ -169,7 +169,7 @@ class SMSSender(
                 }
             }, IntentFilter(deliveredAction))
 
-            val message = SMS(smsText, conversation.address)
+            val message = SMS(smsText, conversation.address.filter { char -> char.isDigit() })
             transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
         }
     }
