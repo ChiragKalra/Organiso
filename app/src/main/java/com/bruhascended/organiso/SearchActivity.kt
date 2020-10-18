@@ -42,7 +42,6 @@ import java.util.*
 
 */
 
-
 class SearchActivity : AppCompatActivity() {
 
     companion object {
@@ -92,7 +91,7 @@ class SearchActivity : AppCompatActivity() {
             var otherDisplayed = false
             mContactsProvider.getSync().forEach {  contact ->
                 val name = contact.name.toLowerCase(Locale.ROOT)
-                if (!Regex("\\b${key}").matches(name))
+                if (!Regex("\\b${key}.*").matches(name))
                     return@forEach
 
                 for (sender in displayedSenders) {

@@ -21,7 +21,7 @@ import com.bruhascended.organiso.R
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.common.ScrollEffectFactory
-import com.google.gson.Gson
+import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -32,7 +32,6 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var inputManager: InputMethodManager
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
-    private lateinit var visibleCategories: Array<Int>
     private lateinit var activeConversationDao: MessageDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,15 +42,12 @@ class SearchActivity : AppCompatActivity() {
         val sender = intent.getStringExtra(EXTRA_SENDER)!!
         activeConversationDao = MessageDbFactory(this).of(sender).manager()
 
-        if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
+        if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
         else setTheme(R.style.LightTheme)
         setContentView(R.layout.activity_search)
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        visibleCategories = Gson().fromJson(
-            prefs.getString("visible_categories", ""), Array<Int>::class.java
-        )
 
         searchEditText.requestFocus()
         inputManager.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)
