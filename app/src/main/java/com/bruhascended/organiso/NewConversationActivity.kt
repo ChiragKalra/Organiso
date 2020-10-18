@@ -302,9 +302,4 @@ class NewConversationActivity : MediaPreviewActivity() {
             }
         }
     }
-
-    override fun onDestroy() {
-        mContactsProvider.close()
-        super.onDestroy()
-    }
 }

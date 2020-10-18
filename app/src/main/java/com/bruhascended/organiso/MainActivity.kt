@@ -233,9 +233,4 @@ class MainActivity : AppCompatActivity() {
         }
         super.onStart()
     }
-
-    override fun onDestroy() {
-        mContactsProvider.close()
-        super.onDestroy()
-    }
 }
