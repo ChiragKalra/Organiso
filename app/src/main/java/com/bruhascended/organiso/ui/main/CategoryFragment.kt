@@ -125,9 +125,9 @@ class CategoryFragment: Fragment() {
         mMainDaoProvider = MainDaoProvider(mContext)
 
         val flow = Pager(PagingConfig(
-            pageSize = 10,
-            initialLoadSize = 10,
-            prefetchDistance = 80,
+            pageSize = 12,
+            initialLoadSize = 12,
+            prefetchDistance = 12,
             maxSize = 180,
         )) {
             mMainDaoProvider.getMainDaos()[label].loadAllPaged()
@@ -161,7 +161,7 @@ class CategoryFragment: Fragment() {
 
 
         mContext.lifecycleScope.launch {
-            delay(if (position == 0) 0 else 300)
+            delay(if (position == 0) 0 else 500)
             flow.collectLatest {
                 textView.isVisible = mMainDaoProvider.getMainDaos()[label].loadSingle()==null
                 mAdaptor.submitData(it)

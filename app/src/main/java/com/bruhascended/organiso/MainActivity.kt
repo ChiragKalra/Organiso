@@ -105,33 +105,7 @@ class MainActivity : AppCompatActivity() {
         super.onSupportActionModeFinished(mode)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
-        else setTheme(R.style.LightTheme)
-
-        setContentView(R.layout.activity_main)
-
-        mContext = this
-        mContactsProvider = ContactsProvider(this)
-        mSmsManager = SMSManager(mContext)
-
-        if (PackageManager.PERMISSION_DENIED in
-            Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
-            ActivityCompat.requestPermissions(this, perms, 1)
-
-        if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
-            val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
-            startActivity(setSmsAppIntent)
-        }
-
-        inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-        setSupportActionBar(mToolbar)
-
+    private fun setupViewPager() {
         if (prefs.getString(PREF_VISIBLE_CATEGORIES, "null") == "null") {
             val vis = Array(4){it}
             val hid = Array(2){4+it}
@@ -159,7 +133,24 @@ class MainActivity : AppCompatActivity() {
 
         if (visibleCategories.size == 1) tabs.visibility = View.GONE
         else tabs.setupWithViewPager(viewPager)
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
+        else setTheme(R.style.LightTheme)
+
+        setContentView(R.layout.activity_main)
+        setSupportActionBar(mToolbar)
+
+        mContext = this
+        mContactsProvider = ContactsProvider(this)
+        mSmsManager = SMSManager(mContext)
+        inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        setupViewPager()
         fab.setOnClickListener {
             startActivity(Intent(mContext, NewConversationActivity::class.java))
         }
@@ -220,8 +211,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         mContactsProvider.updateAsync()
+        if (PackageManager.PERMISSION_DENIED in
+            Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])}
+        ) {
+            ActivityCompat.requestPermissions(this, perms, 1)
+        }
+
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
             mSmsManager.updateAsync()
+
+            val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
+            startActivity(setSmsAppIntent)
         }
 
         if (prefs.getBoolean(KEY_STATE_CHANGED, false)) {

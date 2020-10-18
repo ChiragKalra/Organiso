@@ -6,7 +6,9 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
-import androidx.room.Room
+import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
+import com.bruhascended.core.data.SMSManager
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
 import com.bruhascended.organiso.*
@@ -15,18 +17,17 @@ import com.bruhascended.organiso.notifications.MessageNotificationManager.Compan
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_COPY
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_REPLY
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.KEY_TEXT_REPLY
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.NAME_TABLE
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.core.db.MainDaoProvider
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE_MESSAGE
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE_OTP
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_MARK_READ
+import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_REPORT_SPAM
 
 class NotificationActionReceiver : BroadcastReceiver() {
 
     companion object {
-        const val EXTRA_SENDER = "CLEAN_SENDER"
         const val EXTRA_OTP = "otp"
         const val EXTRA_NOTIFICATION_ID = "notif_id"
 
@@ -48,13 +49,10 @@ class NotificationActionReceiver : BroadcastReceiver() {
         mContext = context.applicationContext
         mIntent = intent
 
-
         when (intent.action) {
             ACTION_CANCEL -> {
                 val sender = intent.getStringExtra(EXTRA_SENDER) ?: return
-                Room.databaseBuilder(
-                    mContext, NotificationDatabase::class.java, NAME_TABLE
-                ).allowMainThreadQueries().build().apply {
+                NotificationDbFactory(mContext).get().apply {
                     manager().findBySender(sender).forEach {
                         manager().delete(it)
                     }
@@ -92,7 +90,12 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     }
                     close()
                 }
-                mContext.cancelNotification(conversation.clean, conversation.id)
+                val id = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                if (id == -1) {
+                    mContext.cancelNotification(conversation.clean, conversation.id)
+                } else {
+                    NotificationManagerCompat.from(mContext).cancel(id)
+                }
             }
             ACTION_MARK_READ -> {
                 val conversation =
@@ -110,6 +113,16 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 MessageNotificationManager(mContext).sendSmsNotification(newMessage to conversation)
 
                 SMSSender(mContext.applicationContext, arrayOf(conversation)).sendSMS(replyText)
+            }
+            ACTION_REPORT_SPAM -> {
+                val conversation =
+                    intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
+                AnalyticsLogger(mContext).apply {
+                    log("${conversation.label}_to_4")
+                    reportSpam(conversation)
+                }
+                mContext.cancelNotification(conversation.clean, conversation.id)
+                conversation.moveTo(SMSManager.LABEL_SPAM, mContext)
             }
         }
     }

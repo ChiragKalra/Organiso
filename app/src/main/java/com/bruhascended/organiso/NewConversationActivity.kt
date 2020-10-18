@@ -99,7 +99,7 @@ class NewConversationActivity : MediaPreviewActivity() {
     private fun addRecipientAsync (number: String) {
         Thread {
             val clean = cm.getClean (
-                number.trim().toLowerCase(Locale.ROOT).filter { it.isDigit() }
+                number.trim().filter { it.isDigit() }
             )
             if (clean.isBlank()) return@Thread
             val name = mContactsProvider.getNameOrNull(clean) ?: ""
@@ -142,6 +142,10 @@ class NewConversationActivity : MediaPreviewActivity() {
                     .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0
             )
         }
+        to.text = null
+        messageEditText.text = null
+        recipients.clear()
+        addressRecyclerAdaptor.notifyDataSetChanged()
     }
 
     @Suppress("UNCHECKED_CAST")

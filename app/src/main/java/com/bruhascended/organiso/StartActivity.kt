@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
@@ -60,6 +59,9 @@ class StartActivity : AppCompatActivity() {
         R.string.done
     )
 
+    private val onPermissionsResult =
+        registerForActivityResult(StartActivityForResult()) { organise() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -76,7 +78,7 @@ class StartActivity : AppCompatActivity() {
         if (PackageManager.PERMISSION_DENIED in
             Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
             ActivityCompat.requestPermissions(this, perms, 0)
-        else messages()
+        else organise()
     }
 
     override fun onRequestPermissionsResult (
@@ -84,34 +86,17 @@ class StartActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        messages()
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-    private fun messages() {
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
             val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
             intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
-            registerForActivityResult(StartActivityForResult()) {
-                organise()
-            }.launch(setSmsAppIntent)
-        } else {
-            organise()
+            onPermissionsResult.launch(setSmsAppIntent)
         }
+        organise()
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private fun organise() {
-        if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
-                Configuration.UI_MODE_NIGHT_YES ) {
-            setTheme(R.style.DarkTheme)
-            window.statusBarColor = getColor(R.color.background_dark)
-        } else {
-            setTheme(R.style.LightTheme)
-            window.statusBarColor = getColor(R.color.background_light)
-            // TODO FIX
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        }
-
+        setTheme(R.style.LightTheme)
         setContentView(R.layout.activity_start)
 
         val smsManager = SMSManager(mContext)

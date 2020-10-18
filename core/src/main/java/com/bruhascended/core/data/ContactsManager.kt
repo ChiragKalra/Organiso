@@ -3,12 +3,14 @@ package com.bruhascended.core.data
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
 import com.bruhascended.core.db.Contact
+import com.bruhascended.core.BuildConfig.LIBRARY_PACKAGE_NAME
 import io.michaelrocks.libphonenumber.android.NumberParseException
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import io.michaelrocks.libphonenumber.android.Phonenumber
@@ -37,6 +39,11 @@ import kotlin.collections.toTypedArray
  */
 
 class ContactsManager(context: Context) {
+
+    companion object {
+        const val ACTION_UPDATE_DP = "${LIBRARY_PACKAGE_NAME}.UPDATE_DP"
+        const val EXTRA_SENDER = "SENDER"
+    }
 
     private val mContext = context
     private val map = HashMap<String, String>()
@@ -126,7 +133,7 @@ class ContactsManager(context: Context) {
         return map
     }
 
-    fun getContactsList(loadDp: Boolean = true): Array<Contact> {
+    fun getContactsList(): Array<Contact> {
         val list = HashSet<Contact>()
 
         val cr: ContentResolver = mContext.contentResolver
@@ -161,11 +168,14 @@ class ContactsManager(context: Context) {
         cur?.close()
         val arr = list.toTypedArray()
         arr.sortBy {it.name.toLowerCase(Locale.ROOT) }
-        if (loadDp) Thread {
+         Thread {
             arr.forEach {
                 val bm = retrieveContactPhoto(it.clean)
-                val des = File(mContext.filesDir, it.clean)
-                bm?.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(des))
+                if (bm != null) {
+                    val des = File(mContext.filesDir, it.clean)
+                    bm.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(des))
+                    mContext.sendBroadcast(Intent(ACTION_UPDATE_DP).putExtra(EXTRA_SENDER, it.clean))
+                }
             }
         }.start()
         return arr

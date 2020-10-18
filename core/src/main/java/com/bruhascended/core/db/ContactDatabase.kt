@@ -32,13 +32,10 @@ data class Contact (
     val id: Int? = null
 ): Serializable {
     override fun equals(other: Any?): Boolean {
-        if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as Contact
-        if (name != other.name) return false
-        if (address != other.address) return false
-        return true
+        return clean == other.clean
     }
     override fun hashCode() = clean.hashCode()
 }
@@ -70,7 +67,7 @@ interface ContactDao {
     @Query("SELECT * FROM contacts")
     fun loadAllPaged(): PagingSource<Int, Contact>
 
-    @Query("SELECT * FROM contacts WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR clean LIKE :key")
+    @Query("SELECT * FROM contacts WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR clean LIKE :key or address like :altKey")
     fun searchPaged(key: String, altKey: String=""): PagingSource<Int, Contact>
 
     @RawQuery
@@ -90,3 +87,4 @@ object ContactComparator : DiffUtil.ItemCallback<Contact>() {
 abstract class ContactDatabase: RoomDatabase() {
     abstract fun manager(): ContactDao
 }
+

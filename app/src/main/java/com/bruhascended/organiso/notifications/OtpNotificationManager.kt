@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.work.*
+import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.LABEL_TRANSACTIONS
 import com.bruhascended.organiso.R
@@ -23,7 +24,6 @@ import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATI
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE_OTP
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_NOTIFICATION_ID
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_OTP
-import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_COPY_OTP
 import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DELETE_OTP
 import java.util.concurrent.TimeUnit
@@ -131,7 +131,9 @@ class OtpNotificationManager (
                 .setCustomContentView(notificationLayoutMin)
                 .setCustomBigContentView(notificationLayout)
                 .setCategory(Notification.CATEGORY_MESSAGE)
-                .setAutoCancel(true)
+                .setAutoCancel(false)
+                .setColorized(true)
+                .setColor(mContext.getColor(R.color.colorAccent))
                 .setExtras(Bundle().apply {
                     putBoolean(EXTRA_IS_OTP, true)
                 })

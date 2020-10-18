@@ -21,7 +21,6 @@
         app:key="github"
         app:title="@string/visit_github" />
     <Preference
-        app:fragment="com.bruhascended.sms.ui.settings.LicenseFragment"
         app:icon="@drawable/ic_policy"
         app:key="license"
         app:title="@string/license" />

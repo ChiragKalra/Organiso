@@ -3,7 +3,10 @@ package com.bruhascended.organiso.ui.main
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.provider.ContactsContract
@@ -15,8 +18,10 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.QuickContactBadge
 import android.widget.TextView
-import com.bruhascended.organiso.R
+import com.bruhascended.core.data.ContactsManager.Companion.ACTION_UPDATE_DP
+import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
 import com.bruhascended.core.db.Conversation
+import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.DateTimeProvider
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
@@ -47,12 +52,14 @@ class ConversationViewHolder(
     var textColor = 0
 
     init {
-        val tp = mContext.obtainStyledAttributes(intArrayOf(
-            R.attr.multiChoiceSelectorColor,
-            android.R.attr.selectableItemBackground,
-            R.attr.unreadTextColor,
-            R.attr.backgroundColor
-        ))
+        val tp = mContext.obtainStyledAttributes(
+            intArrayOf(
+                R.attr.multiChoiceSelectorColor,
+                android.R.attr.selectableItemBackground,
+                R.attr.unreadTextColor,
+                R.attr.backgroundColor
+            )
+        )
         defaultBackground = tp.getDrawable(1)!!
         selectedColor = tp.getColor(0, 0)
         backgroundColor = tp.getColor(3, 0)
@@ -75,6 +82,14 @@ class ConversationViewHolder(
                 else -> setImageResource(R.drawable.ic_person)
             }
         }
+        mContext.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(p0: Context, intent: Intent) {
+                if (intent.getStringExtra(EXTRA_SENDER) == conversation.clean) {
+                    val dp = File(mContext.filesDir, conversation.clean)
+                    picasso.load(dp).into(imageView)
+                }
+            }
+        }, IntentFilter(ACTION_UPDATE_DP))
     }
 
     fun onBind() {

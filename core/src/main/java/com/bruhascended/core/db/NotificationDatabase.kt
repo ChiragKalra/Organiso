@@ -1,5 +1,6 @@
 package com.bruhascended.core.db
 
+import android.content.Context
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import java.io.Serializable
@@ -81,4 +82,15 @@ interface NotificationDao {
 @Database(entities = [Notification::class], version = 1, exportSchema = false)
 abstract class NotificationDatabase: RoomDatabase() {
     abstract fun manager(): NotificationDao
+}
+
+
+class NotificationDbFactory(
+    private val mContext: Context
+) {
+    fun get(mainThread: Boolean = true) = Room.databaseBuilder(
+        mContext, NotificationDatabase::class.java, "notifications"
+    ).apply {
+        if (mainThread) allowMainThreadQueries()
+    }.build()
 }

@@ -86,7 +86,7 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations WHERE clean LIKE :sender ORDER BY time DESC")
     fun findBySender(sender: String): List<Conversation>
 
-    @Query("SELECT * FROM conversations WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR clean LIKE :key ORDER BY time DESC")
+    @Query("SELECT * FROM conversations WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR address LIKE :key or address like :altKey ORDER BY time DESC")
     fun search(key: String, altKey: String=""): List<Conversation>
 
     @Query("SELECT * FROM conversations LIMIT 1")

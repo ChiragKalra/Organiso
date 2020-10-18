@@ -21,22 +21,18 @@ import androidx.core.app.RemoteInput
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.room.Room
 import com.bruhascended.organiso.ConversationActivity
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.core.data.ContactsManager
+import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.LABEL_BLOCKED
 import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
-import com.bruhascended.core.db.Conversation
-import com.bruhascended.core.db.Message
-import com.bruhascended.core.db.Notification
-import com.bruhascended.core.db.NotificationDatabase
+import com.bruhascended.core.db.*
 import com.bruhascended.core.ml.getOtp
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
-import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.notifications.OtpNotificationManager.Companion.EXTRA_IS_OTP
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 import java.io.File
@@ -63,12 +59,11 @@ class MessageNotificationManager(
 ) {
 
     companion object {
-        const val NAME_TABLE = "active_notifications"
-
         const val ACTION_CANCEL = "${APPLICATION_ID}.CANCEL_NOTIFICATION"
         const val ACTION_REPLY = "${APPLICATION_ID}.NOTIFICATION_REPLY"
         const val ACTION_COPY = "${APPLICATION_ID}.OTP_COPY"
         const val ACTION_DELETE_OTP = "${APPLICATION_ID}.OTP_DELETE"
+        const val ACTION_REPORT_SPAM = "${APPLICATION_ID}.REPORT_SPAM"
         const val ACTION_DELETE_MESSAGE = "${APPLICATION_ID}.MESSAGE_DELETE"
         const val ACTION_MARK_READ = "${APPLICATION_ID}.MESSAGE_MARK_READ"
 
@@ -85,9 +80,7 @@ class MessageNotificationManager(
     private val onm = OtpNotificationManager(mContext)
     private val notificationManager = NotificationManagerCompat.from(mContext)
 
-    private val ndb = Room.databaseBuilder(
-        mContext, NotificationDatabase::class.java, NAME_TABLE
-    ).allowMainThreadQueries().build().manager()
+    private val ndb = NotificationDbFactory(mContext).get().manager()
 
     private fun getMimeType(url: String): String {
         val extension = MimeTypeMap.getFileExtensionFromUrl(url)
@@ -276,21 +269,37 @@ class MessageNotificationManager(
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
             FLAG_UPDATE_CURRENT
         )
+        val reportSpamPI = PendingIntent.getBroadcast(mContext, conversation.id!!.toInt(),
+            Intent(mContext, NotificationActionReceiver::class.java)
+                .setAction(ACTION_REPORT_SPAM)
+                .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
+            FLAG_UPDATE_CURRENT
+        )
 
+        val context = mContext
         val notification = Builder(mContext, conversation.label.toString())
             .setCategory(CATEGORY_MESSAGE)
             .setGroup(GROUP_DEFAULT)
+            .setColorized(true)
+            .setColor(mContext.getColor(R.color.colorAccent))
             .setSmallIcon(R.drawable.message)
             .setContentIntent(contentPI)
             .setAutoCancel(false)
-            .addAction(
+            .setStyle(conversationStyle).apply {
+                if (message.type != MESSAGE_TYPE_INBOX) setNotificationSilent()
+                if (conversation.clean.first().isDigit()) addAction(replyAction)
+                else {
+                    addAction(
+                        R.drawable.ic_report_notif,
+                        context.getString(R.string.report_spam),
+                        reportSpamPI
+                    )
+                }
+            }.addAction(
                 R.drawable.ic_mark_chat_read,
                 mContext.getString(R.string.mark_as_read),
                 readPI
-            ).setStyle(conversationStyle).apply {
-                if (message.type != MESSAGE_TYPE_INBOX) setNotificationSilent()
-                if (conversation.clean.first().isDigit()) addAction(replyAction)
-            }.addAction(
+            ).addAction(
                 R.drawable.ic_delete_notif,
                 mContext.getString(R.string.delete),
                 deletePI

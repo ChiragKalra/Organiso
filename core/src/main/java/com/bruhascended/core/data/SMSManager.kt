@@ -106,7 +106,7 @@ class SMSManager (private val mContext: Context) {
     private var timeTaken = 0L
     private var startTime = 0L
 
-    private val senderNameMap = cm.getContactsHashMap()
+    private lateinit var senderNameMap: HashMap<String, String>
 
     private lateinit var mmsThread: Thread
 
@@ -199,6 +199,7 @@ class SMSManager (private val mContext: Context) {
 
 
     fun getMessages() {
+        senderNameMap = cm.getContactsHashMap()
         val lastDate = mPrefs.getLong(KEY_RESUME_DATE, 0).toString()
 
         mContext.contentResolver.query(
@@ -269,6 +270,7 @@ class SMSManager (private val mContext: Context) {
     }
 
     fun putMessage(number: String, body: String, active: Boolean): Pair<Message, Conversation>? {
+        senderNameMap = cm.getContactsHashMap()
         val rawNumber = cm.getClean(number)
         val message = Message(body, MESSAGE_TYPE_INBOX, System.currentTimeMillis())
 

@@ -16,11 +16,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.common.ScrollEffectFactory
-import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_SENDER
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.flow.collectLatest

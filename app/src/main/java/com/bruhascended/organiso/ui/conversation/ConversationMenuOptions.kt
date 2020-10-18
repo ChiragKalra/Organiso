@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bruhascended.organiso.*
 import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
 import com.bruhascended.core.data.SMSManager.Companion.LABEL_BLOCKED
 import com.bruhascended.core.data.SMSManager.Companion.LABEL_NONE
 import com.bruhascended.core.data.SMSManager.Companion.LABEL_SPAM
@@ -27,7 +28,6 @@ import com.bruhascended.core.db.moveTo
 import com.bruhascended.core.db.MainDaoProvider
 import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
 import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
-import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_SENDER
 import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay

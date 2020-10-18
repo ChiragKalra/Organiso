@@ -9,15 +9,19 @@ class ContactsProvider (mContext: Context) {
 
     companion object {
         const val KEY_LAST_REFRESH = "LAST_REFRESH"
-    }
 
-    private val mDb: ContactDatabase = Room.databaseBuilder(
-        mContext, ContactDatabase::class.java, "contacts"
-    ).allowMainThreadQueries().build()
+        private var mDb: ContactDatabase? = null
+    }
 
     private val mCm = ContactsManager(mContext)
     private val mMainDaoProvider = MainDaoProvider(mContext)
     private val mPref = PreferenceManager.getDefaultSharedPreferences(mContext)
+
+    init {
+        if (mDb == null) mDb = Room.databaseBuilder(
+            mContext, ContactDatabase::class.java, "contacts"
+        ).allowMainThreadQueries().build()
+    }
 
     private fun updateConversations (contacts: Array<Contact>) {
         contacts.forEach {
@@ -26,7 +30,7 @@ class ContactsProvider (mContext: Context) {
                     mMainDaoProvider.getMainDaos()[i].findBySender(it.clean)
                 if (q.isEmpty()) continue
                 val res = q.first()
-                if (res.name != it.name || res.address != it.address) {
+                if (res.name != it.name) {
                     res.name = it.name
                     res.address = it.address
                     mMainDaoProvider.getMainDaos()[i].update(res)
@@ -38,9 +42,9 @@ class ContactsProvider (mContext: Context) {
 
     fun updateAsync() {
         if (System.currentTimeMillis() - mPref.getLong(KEY_LAST_REFRESH, 0) < 120*1000) return
-        mPref.edit().putLong(KEY_LAST_REFRESH, System.currentTimeMillis()).apply()
         Thread {
-            mDb.manager().apply {
+            mPref.edit().putLong(KEY_LAST_REFRESH, System.currentTimeMillis()).apply()
+            mDb!!.manager().apply {
                 nukeTable()
                 val contacts = mCm.getContactsList()
                 insertAll(contacts)
@@ -49,15 +53,15 @@ class ContactsProvider (mContext: Context) {
         }.start()
     }
 
-    fun getSync(): Array<Contact> = mDb.manager().loadAllSync()
+    fun getSync(): Array<Contact> = mDb!!.manager().loadAllSync()
 
     fun getPaged(key: String) =
-        mDb.manager().searchPaged("$key%", "% $key%")
+        mDb!!.manager().searchPaged("$key%", "% $key%")
 
     fun getNameOrNull(number: String) =
-        mDb.manager().findByNumber(number)?.name
+        mDb!!.manager().findByNumber(number)?.name
 
     fun close() {
-        mDb.close()
+        mDb!!.close()
     }
 }
