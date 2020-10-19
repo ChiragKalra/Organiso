@@ -2,7 +2,6 @@ package com.bruhascended.organiso.ui.conversation
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -14,14 +13,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
-import com.bruhascended.organiso.R
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
+import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.ScrollEffectFactory
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -31,23 +29,17 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var inputManager: InputMethodManager
     private lateinit var mContext: Context
-    private lateinit var prefs: SharedPreferences
     private lateinit var activeConversationDao: MessageDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
-
-        val sender = intent.getStringExtra(EXTRA_SENDER)!!
-        activeConversationDao = MessageDbFactory(this).of(sender).manager()
-
-        if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
-        else setTheme(R.style.LightTheme)
+        setPrefTheme()
         setContentView(R.layout.activity_search)
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val sender = intent.getStringExtra(EXTRA_SENDER)!!
+        activeConversationDao = MessageDbFactory(this).of(sender).manager()
 
         searchEditText.requestFocus()
         inputManager.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT)

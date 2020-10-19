@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
 import kotlinx.android.synthetic.main.activity_bug_report.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -38,25 +39,27 @@ class BugReportActivity : AppCompatActivity() {
 
     private var fileUri: Uri? = null
 
+    private val loadMediaResult = registerForActivityResult(StartActivityForResult()) {
+        it.data.apply {
+            if (this != null && data != null) {
+                fileUri = data!!
+                fileName.text = getFileName(fileUri!!)
+                fileName.visibility = View.VISIBLE
+                addFile.apply {
+                    setImageResource(R.drawable.close)
+                    setOnClickListener {
+                        hideMediaPreview()
+                    }
+                }
+            }
+        }
+    }
+
     private fun loadMedia() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "image/*"
-        registerForActivityResult(StartActivityForResult()) {
-            it.data.apply {
-                if (this != null && data != null) {
-                    fileUri = data!!
-                    fileName.text = getFileName(fileUri!!)
-                    fileName.visibility = View.VISIBLE
-                    addFile.apply {
-                        setImageResource(R.drawable.close)
-                        setOnClickListener {
-                            hideMediaPreview()
-                        }
-                    }
-                }
-            }
-        }.launch(intent)
+        loadMediaResult.launch(intent)
     }
 
     private fun fadeAway(vararg views: View) {
@@ -106,11 +109,7 @@ class BugReportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-            "dark_theme",
-            false
-        )
-        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+        setPrefTheme()
         setContentView(R.layout.activity_bug_report)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)

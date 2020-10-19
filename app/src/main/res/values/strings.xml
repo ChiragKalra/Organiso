@@ -93,7 +93,7 @@
 
     <string name="x_active_conversations">%1$d active conversation(s)</string>
 
-    <string name="x_mins_remaining">%1$d minutes remaining</string>
+    <string name="x_mins_remaining">%1$d minute(s) remaining</string>
     <string name="x_percent">%1$d%%</string>
     <string name="less_than_min_remaining">Less than a minute remaining</string>
     <string name="just_few_secs">Just a few more seconds</string>

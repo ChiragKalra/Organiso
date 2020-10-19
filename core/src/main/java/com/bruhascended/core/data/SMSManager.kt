@@ -88,9 +88,7 @@ class SMSManager (private val mContext: Context) {
         }
     }
 
-    private val nn = OrganizerModel(mContext)
     private val cm = ContactsManager(mContext)
-    private val mmsManager = MMSManager(mContext)
     private val analyticsLogger = AnalyticsLogger(mContext)
     private val mMainDaoProvider = MainDaoProvider(mContext)
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
@@ -107,7 +105,8 @@ class SMSManager (private val mContext: Context) {
     private var startTime = 0L
 
     private lateinit var senderNameMap: HashMap<String, String>
-
+    private lateinit var mmsManager: MMSManager
+    private lateinit var nn: OrganizerModel
     private lateinit var mmsThread: Thread
 
     var onStatusChangeListener: (Int) -> Unit = {}
@@ -128,6 +127,15 @@ class SMSManager (private val mContext: Context) {
             .apply()
 
         isWorkingAfterInit = false
+    }
+
+    // Init heavy objects here
+    private fun initLate() {
+        if (!::senderNameMap.isInitialized || senderNameMap.isEmpty()) {
+            senderNameMap = cm.getContactsHashMap()
+            nn = OrganizerModel(mContext)
+            mmsManager = MMSManager(mContext, senderNameMap)
+        }
     }
 
     private fun updateProgress(size: Int) {
@@ -161,6 +169,7 @@ class SMSManager (private val mContext: Context) {
 
         if (conversation != null) {
             conversation.apply {
+                if (label != this.label) id = null
                 read = !isWorkingAfterInit
                 time = messages.last().time
                 lastSMS =  messages.last().text
@@ -182,6 +191,7 @@ class SMSManager (private val mContext: Context) {
                 probabilities = senderToProbs[number.clean] ?:
                     FloatArray(5) { if (it == LABEL_PERSONAL) 1f else 0f }
             )
+
             mMainDaoProvider.getMainDaos()[label].insert(con)
         }
 
@@ -199,7 +209,8 @@ class SMSManager (private val mContext: Context) {
 
 
     fun getMessages() {
-        senderNameMap = cm.getContactsHashMap()
+        initLate()
+
         val lastDate = mPrefs.getLong(KEY_RESUME_DATE, 0).toString()
 
         mContext.contentResolver.query(
@@ -270,7 +281,8 @@ class SMSManager (private val mContext: Context) {
     }
 
     fun putMessage(number: String, body: String, active: Boolean): Pair<Message, Conversation>? {
-        senderNameMap = cm.getContactsHashMap()
+        initLate()
+
         val rawNumber = cm.getClean(number)
         val message = Message(body, MESSAGE_TYPE_INBOX, System.currentTimeMillis())
 

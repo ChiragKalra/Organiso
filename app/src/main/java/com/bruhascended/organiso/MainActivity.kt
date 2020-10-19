@@ -1,6 +1,5 @@
 package com.bruhascended.organiso
 
-import android.Manifest
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
@@ -15,23 +14,27 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
-import androidx.viewpager.widget.ViewPager
-import com.bruhascended.core.data.SMSManager
-import com.bruhascended.core.db.ContactsProvider
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.bruhascended.organiso.ExtraCategoryActivity.Companion.EXTRA_LABEL
 import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.ARR_PREF_CUSTOM_LABELS
-import com.bruhascended.organiso.ui.main.SectionsPagerAdapter
 import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.PREF_HIDDEN_CATEGORIES
 import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.PREF_VISIBLE_CATEGORIES
+import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.toJson
+import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.toLabelArray
 import com.bruhascended.organiso.settings.GeneralFragment.Companion.KEY_STATE_CHANGED
 import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.ui.main.CategoryPagerAdapter
+import com.bruhascended.organiso.ui.main.MainViewModel
+import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
+import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_PERMS
 import com.google.android.material.appbar.AppBarLayout
-import com.google.gson.Gson
+import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 
 /*
@@ -54,34 +57,17 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        val ARR_LABEL_STR = arrayOf(
-            R.string.tab_text_1,
-            R.string.tab_text_2,
-            R.string.tab_text_3,
-            R.string.tab_text_4,
-            R.string.tab_text_5,
-            R.string.tab_text_6,
-        )
+        fun AppCompatActivity.setPrefTheme() {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+            if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
+            else setTheme(R.style.LightTheme)
+        }
     }
 
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
-    private lateinit var hiddenCategories: Array<Int>
-    private lateinit var mContactsProvider: ContactsProvider
-    private lateinit var mSmsManager: SMSManager
-    private var actionMode: ActionMode? = null
-    private var contactThread: Thread? = null
-
     private lateinit var inputManager: InputMethodManager
-    private var searchLayoutVisible = false
-    private var promotionsVisible: Boolean = true
-
-    private val perms = arrayOf(
-        Manifest.permission.READ_SMS,
-        Manifest.permission.SEND_SMS,
-        Manifest.permission.RECEIVE_SMS,
-        Manifest.permission.READ_CONTACTS
-    )
+    private lateinit var mViewModel: MainViewModel
 
     private val onSearchCanceled = registerForActivityResult(StartActivityForResult()) {
         if (it.resultCode == RESULT_CANCELED) {
@@ -91,77 +77,74 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSupportActionModeStarted(mode: ActionMode) {
-        actionMode = mode
-        val trans: TransitionDrawable = appBarLayout.background as TransitionDrawable
-        trans.startTransition(300)
-        super.onSupportActionModeStarted(mode)
-    }
-
-    override fun onSupportActionModeFinished(mode: ActionMode) {
-        actionMode = null
-        val trans: TransitionDrawable = appBarLayout.background as TransitionDrawable
-        trans.reverseTransition(150)
-        super.onSupportActionModeFinished(mode)
+    private fun setupTabs() {
+        if (mViewModel.visibleCategories.size == 1) {
+            tabs.visibility = View.GONE
+        } else {
+            TabLayoutMediator(tabs, viewPager) { tab, position ->
+                val label = mViewModel.visibleCategories[position]
+                val title = prefs.getString(ARR_PREF_CUSTOM_LABELS[label], "")
+                tab.text = if (title.isNullOrEmpty()) getString(ARR_LABEL_STR[label]) else title
+            }.attach()
+        }
     }
 
     private fun setupViewPager() {
-        if (prefs.getString(PREF_VISIBLE_CATEGORIES, "null") == "null") {
-            val vis = Array(4){it}
-            val hid = Array(2){4+it}
-            prefs.edit()
-                .putString(PREF_VISIBLE_CATEGORIES, Gson().toJson(vis))
-                .putString(PREF_HIDDEN_CATEGORIES, Gson().toJson(hid))
-                .apply()
-        }
-
-        val visibleCategories = Gson().fromJson(
-            prefs.getString(PREF_VISIBLE_CATEGORIES, ""), Array<Int>::class.java
-        )
-        hiddenCategories = Gson().fromJson(
-            prefs.getString(PREF_HIDDEN_CATEGORIES, ""), Array<Int>::class.java
-        )
-        viewPager.adapter = SectionsPagerAdapter(
-            this, visibleCategories, prefs, supportFragmentManager
-        )
-        viewPager.offscreenPageLimit = 5
-        viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
-            override fun onPageSelected(position: Int) {
-                actionMode?.finish()
+        mViewModel.apply {
+            if (prefs.getString(PREF_VISIBLE_CATEGORIES, "") == "") {
+                visibleCategories = Array(4) { it }
+                hiddenCategories = Array(2) { 4 + it }
+                prefs.edit()
+                    .putString(PREF_VISIBLE_CATEGORIES, visibleCategories.toJson())
+                    .putString(PREF_HIDDEN_CATEGORIES, hiddenCategories.toJson())
+                    .apply()
+            } else {
+                visibleCategories =
+                    prefs.getString(PREF_VISIBLE_CATEGORIES, "").toLabelArray()
+                hiddenCategories =
+                    prefs.getString(PREF_HIDDEN_CATEGORIES, "").toLabelArray()
             }
-        })
 
-        if (visibleCategories.size == 1) tabs.visibility = View.GONE
-        else tabs.setupWithViewPager(viewPager)
+            viewPager.adapter = CategoryPagerAdapter(
+                visibleCategories, supportFragmentManager, lifecycle
+            )
+            viewPager.offscreenPageLimit = 5
+            viewPager.registerOnPageChangeCallback(object: OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    actionMode?.finish()
+                    super.onPageSelected(position)
+                }
+            })
+        }
+        setupTabs()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
-        else setTheme(R.style.LightTheme)
-
+        setPrefTheme()
         setContentView(R.layout.activity_main)
         setSupportActionBar(mToolbar)
 
         mContext = this
-        mContactsProvider = ContactsProvider(this)
-        mSmsManager = SMSManager(mContext)
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
+
+        val temp by viewModels<MainViewModel>()
+        mViewModel = temp
 
         setupViewPager()
         fab.setOnClickListener {
-            startActivity(Intent(mContext, NewConversationActivity::class.java))
+            startActivity(Intent(this, NewConversationActivity::class.java))
         }
     }
 
     private var addedCategoriesToMenu: Boolean = false
+
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         if (addedCategoriesToMenu) return super.onPrepareOptionsMenu(menu)
         addedCategoriesToMenu = true
-        for (i in hiddenCategories.indices) {
-            val label = hiddenCategories[i]
+        for (i in mViewModel.hiddenCategories.indices) {
+            val label = mViewModel.hiddenCategories[i]
             val customTitle = prefs.getString(ARR_PREF_CUSTOM_LABELS[i], "")!!
             menu.add(
                 0, label, 400 + i,
@@ -209,19 +192,35 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    private var actionMode: ActionMode? = null
+
+    override fun onSupportActionModeStarted(mode: ActionMode) {
+        actionMode = mode
+        val trans: TransitionDrawable = appBarLayout.background as TransitionDrawable
+        trans.startTransition(300)
+        super.onSupportActionModeStarted(mode)
+    }
+
+    override fun onSupportActionModeFinished(mode: ActionMode) {
+        actionMode = null
+        val trans: TransitionDrawable = appBarLayout.background as TransitionDrawable
+        trans.reverseTransition(150)
+        super.onSupportActionModeFinished(mode)
+    }
+
     override fun onStart() {
-        mContactsProvider.updateAsync()
+        mViewModel.mContactsProvider.updateAsync()
         if (PackageManager.PERMISSION_DENIED in
-            Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])}
+            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it])}
         ) {
-            ActivityCompat.requestPermissions(this, perms, 1)
+            ActivityCompat.requestPermissions(this, ARR_PERMS, 1)
         }
 
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
-            mSmsManager.updateAsync()
+            mViewModel.mSmsManager.updateAsync()
 
             val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
+            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
             startActivity(setSmsAppIntent)
         }
 

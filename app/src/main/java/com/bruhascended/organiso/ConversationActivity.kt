@@ -29,6 +29,7 @@ import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
 import com.bruhascended.core.db.*
+import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.common.ListSelectionManager
@@ -254,12 +255,7 @@ class ConversationActivity : MediaPreviewActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-            PREF_DARK_THEME,
-            false
-        )
-        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+        setPrefTheme()
         setContentView(R.layout.activity_conversation)
         setSupportActionBar(toolbar)
 

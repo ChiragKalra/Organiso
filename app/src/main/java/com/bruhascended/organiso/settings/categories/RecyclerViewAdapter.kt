@@ -15,8 +15,8 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.R
+import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 import java.util.*
 
 /*

@@ -47,6 +47,11 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
         val ARR_PREF_CUSTOM_LABELS = Array(6) {
             "custom_label_${it}"
         }
+
+        fun String?.toLabelArray(): Array<Int> = Gson().fromJson(this,  Array<Int>::class.java)
+
+        fun Array<Int>.toJson(): String = Gson().toJson(this)
+
     }
 
     private lateinit var touchHelper: ItemTouchHelper
@@ -55,7 +60,6 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
     private lateinit var recycler: RecyclerView
     private lateinit var previousOrder: Array<Int>
     private lateinit var previousLabels: Array<String>
-    private val gson = Gson()
 
     private fun drawRecyclerView(
         visibleCategories: Array<Int>,
@@ -104,12 +108,10 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
         val root = inflater.inflate(R.layout.fragment_settings_category, container, false)
         recycler = root.findViewById(R.id.recycler)
 
-        val visibleCategories = gson.fromJson(
-            prefs.getString(PREF_VISIBLE_CATEGORIES, ""), Array<Int>::class.java
-        )
-        val hiddenCategories = gson.fromJson(
-            prefs.getString(PREF_HIDDEN_CATEGORIES, ""), Array<Int>::class.java
-        )
+        val visibleCategories =
+            prefs.getString(PREF_VISIBLE_CATEGORIES, "").toLabelArray()
+        val hiddenCategories =
+            prefs.getString(PREF_HIDDEN_CATEGORIES, "").toLabelArray()
 
         recycler.layoutManager = LinearLayoutManager(requireContext()).apply {
             orientation = LinearLayoutManager.VERTICAL
@@ -134,8 +136,8 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
                         val vis = Array(4){it}
                         val hid = Array(2){4+it}
                         prefs.edit()
-                            .putString(PREF_VISIBLE_CATEGORIES, gson.toJson(vis))
-                            .putString(PREF_HIDDEN_CATEGORIES, gson.toJson(hid))
+                            .putString(PREF_VISIBLE_CATEGORIES, vis.toJson())
+                            .putString(PREF_HIDDEN_CATEGORIES, hid.toJson())
                             .apply {
                                 for (i in 0..5) remove(ARR_PREF_CUSTOM_LABELS[i])
                             }.apply()
@@ -166,8 +168,8 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
         val hid = Array(7-hidePos){arr[it+hidePos+1]}
         prefs.edit()
             .putBoolean(KEY_STATE_CHANGED, true)
-            .putString(PREF_VISIBLE_CATEGORIES, gson.toJson(vis))
-            .putString(PREF_HIDDEN_CATEGORIES, gson.toJson(hid))
+            .putString(PREF_VISIBLE_CATEGORIES, vis.toJson())
+            .putString(PREF_HIDDEN_CATEGORIES, hid.toJson())
             .apply()
 
         super.onDestroy()

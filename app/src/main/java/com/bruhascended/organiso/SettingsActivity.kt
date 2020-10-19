@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
 import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import com.bruhascended.organiso.settings.HeaderFragment
 import kotlinx.android.synthetic.main.activity_conversation.*
@@ -36,11 +37,7 @@ class SettingsActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dark = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
-            PREF_DARK_THEME,
-            false
-        )
-        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+        setPrefTheme()
         setContentView(R.layout.activity_settings)
         setSupportActionBar(toolbar)
 

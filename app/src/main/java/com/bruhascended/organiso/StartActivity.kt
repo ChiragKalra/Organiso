@@ -1,6 +1,5 @@
 package com.bruhascended.organiso
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -16,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.SMSManager
 import com.bruhascended.organiso.notifications.ChannelManager
+import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_PERMS
 import kotlinx.android.synthetic.main.activity_start.*
 import kotlin.math.roundToInt
 
@@ -43,17 +43,9 @@ class StartActivity : AppCompatActivity() {
         const val KEY_INIT = "InitDataOrganized"
     }
 
-    private lateinit var mContext: Context
     private lateinit var sharedPref: SharedPreferences
 
-    private val perms = arrayOf(
-        Manifest.permission.READ_SMS,
-        Manifest.permission.SEND_SMS,
-        Manifest.permission.RECEIVE_SMS,
-        Manifest.permission.READ_CONTACTS
-    )
-
-    private val discStrings = arrayOf(
+    private val discStrings = arrayOf (
         R.string.getting_your_msgs,
         R.string.organising_your_msgs,
         R.string.done
@@ -65,7 +57,6 @@ class StartActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mContext = this
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
 
@@ -76,8 +67,8 @@ class StartActivity : AppCompatActivity() {
         }
 
         if (PackageManager.PERMISSION_DENIED in
-            Array(perms.size){ ActivityCompat.checkSelfPermission(this, perms[it])})
-            ActivityCompat.requestPermissions(this, perms, 0)
+            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it])})
+            ActivityCompat.requestPermissions(this, ARR_PERMS, 0)
         else organise()
     }
 
@@ -86,20 +77,20 @@ class StartActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
             val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, mContext.packageName)
+            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
             onPermissionsResult.launch(setSmsAppIntent)
         }
         organise()
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private fun organise() {
         setTheme(R.style.LightTheme)
         setContentView(R.layout.activity_start)
 
-        val smsManager = SMSManager(mContext)
+        val smsManager = SMSManager(this)
 
         var progress = 0f
 

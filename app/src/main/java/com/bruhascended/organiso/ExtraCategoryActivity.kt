@@ -4,9 +4,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.SMSManager.Companion.LABEL_SPAM
-import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
+import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
 import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import com.bruhascended.organiso.ui.main.CategoryFragment
+import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 import kotlinx.android.synthetic.main.activity_conversation.toolbar
 
 /*
@@ -34,9 +35,7 @@ class ExtraCategoryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dark = PreferenceManager.getDefaultSharedPreferences(this)
-            .getBoolean(PREF_DARK_THEME, false)
-        setTheme(if (dark) R.style.DarkTheme else R.style.LightTheme)
+        setPrefTheme()
         setContentView(R.layout.activity_extra_category)
 
         val label = intent.getIntExtra(EXTRA_LABEL, LABEL_SPAM)

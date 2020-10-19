@@ -30,7 +30,7 @@ import java.nio.channels.FileChannel
  */
 
 
-class OrganizerModel (context: Context) {
+class OrganizerModel (private val context: Context) {
 
     companion object {
         const val HP_NUM_THREADS = 6
@@ -40,7 +40,7 @@ class OrganizerModel (context: Context) {
 
     private val mContext = context
     private val fe = FeatureExtractor(mContext)
-    private val tfliteModel = loadModelFile(mContext)
+    private var tfliteModel = loadModelFile()
     private val delegate = GpuDelegate()
     private val options = Interpreter.Options()
         .setUseNNAPI(true)
@@ -54,7 +54,7 @@ class OrganizerModel (context: Context) {
 
     private val n = fe.getFeaturesLength()
 
-    private fun loadModelFile(context: Context): MappedByteBuffer {
+    private fun loadModelFile(): MappedByteBuffer {
         val fileDescriptor = context.assets.openFd("model.tflite")
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel = inputStream.channel

@@ -38,14 +38,15 @@ import kotlin.collections.toTypedArray
    limitations under the License.
  */
 
-class ContactsManager(context: Context) {
+class ContactsManager (
+    private val mContext: Context
+) {
 
     companion object {
         const val ACTION_UPDATE_DP = "${LIBRARY_PACKAGE_NAME}.UPDATE_DP"
         const val EXTRA_SENDER = "SENDER"
     }
 
-    private val mContext = context
     private val map = HashMap<String, String>()
 
     private fun retrieveContactPhoto(number: String): Bitmap? {

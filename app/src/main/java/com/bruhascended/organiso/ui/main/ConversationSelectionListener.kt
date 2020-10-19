@@ -18,8 +18,8 @@ import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.moveTo
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
+import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

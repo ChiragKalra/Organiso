@@ -18,6 +18,7 @@ import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
@@ -160,15 +161,12 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
-
-        if (prefs.getBoolean("dark_theme", false)) setTheme(R.style.DarkTheme)
-        else setTheme(R.style.LightTheme)
+        setPrefTheme()
         setContentView(R.layout.activity_search)
         searchEditText.requestFocus()
 
         mContext = this
+        prefs = PreferenceManager.getDefaultSharedPreferences(this)
         mContactsProvider = ContactsProvider(this)
         result = arrayListOf(ResultItem(TYPE_FOOTER))
         mAdaptor = SearchRecyclerAdaptor(mContext, result)

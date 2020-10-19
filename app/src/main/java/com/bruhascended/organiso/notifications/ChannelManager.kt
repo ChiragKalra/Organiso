@@ -3,8 +3,8 @@ package com.bruhascended.organiso.notifications
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import com.bruhascended.organiso.MainActivity.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.R
+import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 
 class ChannelManager(
     private val mContext: Context

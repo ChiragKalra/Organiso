@@ -56,6 +56,12 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
     protected lateinit var mmsTypeString: String
     protected lateinit var mmsURI: Uri
 
+    private val loadMediaResult = registerForActivityResult(StartActivityForResult()) {
+        if (it.data != null && it.data!!.data != null) {
+            showMediaPreview(it.data!!)
+        }
+    }
+
     private fun fadeAway(vararg views: View) {
         for (view in views) view.apply {
             if (visibility == View.VISIBLE) {
@@ -80,11 +86,7 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "audio/*", "video/*"))
-        registerForActivityResult(StartActivityForResult()) {
-            if (it.data != null && it.data!!.data != null) {
-                showMediaPreview(it.data!!)
-            }
-        }.launch(intent)
+        loadMediaResult.launch(intent)
     }
 
     override fun onStart() {

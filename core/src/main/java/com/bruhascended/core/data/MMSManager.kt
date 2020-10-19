@@ -36,9 +36,11 @@ import java.lang.Exception
  */
 
 @SuppressLint("Recycle", "MissingPermission", "HardwareIds")
-class MMSManager(private val mContext: Context) {
+class MMSManager (
+    private val mContext: Context,
+    private var senderNameMap: HashMap<String, String>? = null
+) {
     private val cm = ContactsManager(mContext)
-    private val senderNameMap = cm.getContactsHashMap()
     private val mMainDaoProvider = MainDaoProvider(mContext)
 
     private val tMgr = mContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
@@ -137,6 +139,10 @@ class MMSManager(private val mContext: Context) {
         mmsId: String, date: Long = System.currentTimeMillis(),
         init: Boolean = true, activeSender: String? = null
     ): Pair<Message, Conversation>? {
+        if (senderNameMap == null) {
+            senderNameMap = cm.getContactsHashMap()
+        }
+
         val selectionPart = "mid=$mmsId"
         val partUri = Uri.parse("content://mms/part")
         val cursor = mContext.contentResolver.query(
@@ -194,7 +200,7 @@ class MMSManager(private val mContext: Context) {
                 }
                 label = LABEL_PERSONAL
                 forceLabel = LABEL_PERSONAL
-                name = senderNameMap[rawNumber]
+                name = senderNameMap!![rawNumber]
                 mMainDaoProvider.getMainDaos()[LABEL_PERSONAL].insert(this)
             }
             conversation
@@ -202,7 +208,7 @@ class MMSManager(private val mContext: Context) {
             val con = Conversation(
                 sender.second,
                 rawNumber,
-                senderNameMap[rawNumber],
+                senderNameMap!![rawNumber],
                 read = init,
                 time = message.time,
                 lastSMS = message.text,
