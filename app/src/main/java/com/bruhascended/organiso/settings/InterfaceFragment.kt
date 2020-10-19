@@ -3,11 +3,10 @@ package com.bruhascended.organiso.settings
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
-import androidx.preference.SwitchPreferenceCompat
+import androidx.preference.*
 import com.bruhascended.organiso.R
+import com.bruhascended.organiso.common.RadioButtonPreference
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -30,7 +29,19 @@ class InterfaceFragment : PreferenceFragmentCompat() {
 
     companion object {
         const val PREF_DARK_THEME = "dark_theme"
-        const val KEY_STATE_CHANGED = "stateChanged"
+
+        const val PREF_ACTION_NAVIGATE = "action_navigate"
+        const val PREF_ACTION_CUSTOM = "action_custom"
+        const val PREF_CUSTOM_LEFT = "action_left_swipe"
+        const val PREF_CUSTOM_RIGHT = "action_right_swipe"
+
+        const val ACTION_MUTE = "Mute"
+        const val ACTION_MOVE = "Move"
+        const val ACTION_REPORT = "Report Spam"
+        const val ACTION_BLOCK = "Block"
+        const val ACTION_DELETE = "Delete"
+
+        const val KEY_STATE_CHANGED = "state_changed"
 
         fun AppCompatActivity.setPrefTheme() {
             val prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -44,6 +55,34 @@ class InterfaceFragment : PreferenceFragmentCompat() {
 
         val themePref: SwitchPreferenceCompat = findPreference(PREF_DARK_THEME)!!
         val themeCategory: PreferenceCategory = findPreference("theme_category")!!
+
+        val nonePref: RadioButtonPreference = findPreference("action_null")!!
+        val navPref: RadioButtonPreference = findPreference(PREF_ACTION_NAVIGATE)!!
+        val customPref: RadioButtonPreference = findPreference(PREF_ACTION_CUSTOM)!!
+        val radioGroup = arrayOf(nonePref, navPref, customPref)
+
+        val customActionCategory: PreferenceCategory = findPreference("action_category")!!
+        //val leftPref: ListPreference = findPreference(PREF_CUSTOM_LEFT)!!
+        //val rightPref: ListPreference = findPreference(PREF_CUSTOM_RIGHT)!!
+
+
+        customActionCategory.isVisible = customPref.isChecked
+
+        val listener = { pref: Preference ->
+            radioGroup.forEach {
+                if (it !== pref) {
+                    it.isChecked = false
+                }
+            }
+            customActionCategory.isVisible = pref === customPref
+            true
+        }
+        radioGroup.forEach{
+            it.setOnPreferenceClickListener { pref ->
+                listener(pref)
+            }
+        }
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             themeCategory.isVisible = false

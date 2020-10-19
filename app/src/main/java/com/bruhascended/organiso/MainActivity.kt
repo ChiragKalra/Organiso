@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.bruhascended.organiso.ExtraCategoryActivity.Companion.EXTRA_LABEL
 import com.bruhascended.organiso.settings.InterfaceFragment.Companion.KEY_STATE_CHANGED
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_ACTION_NAVIGATE
 import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryPagerAdapter
 import com.bruhascended.organiso.ui.main.MainViewModel
@@ -191,6 +192,8 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
             startActivity(setSmsAppIntent)
         }
+
+        viewPager.isUserInputEnabled = mViewModel.prefs.getBoolean(PREF_ACTION_NAVIGATE, true)
 
         if (mViewModel.prefs.getBoolean(KEY_STATE_CHANGED, false)) {
             mViewModel.prefs.edit().putBoolean(KEY_STATE_CHANGED, false).apply()

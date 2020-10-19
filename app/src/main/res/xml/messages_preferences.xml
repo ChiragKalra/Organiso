@@ -3,30 +3,32 @@
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="@string/otp" />
-    <SwitchPreferenceCompat
-        app:defaultValue="true"
-        app:icon="@drawable/ic_copy"
-        app:key="copy_otp"
-        app:allowDividerBelow="false"
-        app:title="@string/auto_copy_otp"/>
-    <SwitchPreferenceCompat
-        app:defaultValue="false"
-        app:icon="@drawable/ic_themed_delete"
-        app:key="delete_otp"
-        app:allowDividerBelow="false"
-        app:summaryOn="@string/otp_auto_delete_after"
-        app:title="@string/auto_delete_otp"/>
+        app:title="@string/otp" >
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:icon="@drawable/ic_copy"
+            app:key="copy_otp"
+            app:allowDividerBelow="false"
+            app:title="@string/auto_copy_otp"/>
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:icon="@drawable/ic_themed_delete"
+            app:key="delete_otp"
+            app:allowDividerBelow="false"
+            app:summaryOn="@string/otp_auto_delete_after"
+            app:title="@string/auto_delete_otp"/>
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="@string/privacy" />
-    <SwitchPreferenceCompat
-        app:defaultValue="true"
-        app:icon="@drawable/ic_report"
-        app:key="report_spam"
-        app:allowDividerBelow="false"
-        android:summary="@string/send_reports_summary"
-        app:title="@string/upload_spam_reports" />
+        app:title="@string/privacy" >
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:icon="@drawable/ic_report"
+            app:key="report_spam"
+            app:allowDividerBelow="false"
+            android:summary="@string/send_reports_summary"
+            app:title="@string/upload_spam_reports" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

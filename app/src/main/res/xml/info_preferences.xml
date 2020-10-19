@@ -3,26 +3,28 @@
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="@string/contact_us"/>
-    <Preference
-        app:icon="@drawable/ic_bug_report"
-        app:key="report_bug"
-        app:title="@string/report_bug" />
+        app:title="@string/contact_us">
+        <Preference
+            app:icon="@drawable/ic_bug_report"
+            app:key="report_bug"
+            app:title="@string/report_bug" />
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="@string/about_app" />
-    <Preference
-        app:icon="@drawable/ic_web"
-        app:key="website"
-        app:title="@string/visit_app_website" />
-    <Preference
-        app:icon="@drawable/github"
-        app:key="github"
-        app:title="@string/visit_github" />
-    <Preference
-        app:icon="@drawable/ic_policy"
-        app:key="license"
-        app:title="@string/license" />
+        app:title="@string/about_app" >
+        <Preference
+            app:icon="@drawable/ic_web"
+            app:key="website"
+            app:title="@string/visit_app_website" />
+        <Preference
+            app:icon="@drawable/github"
+            app:key="github"
+            app:title="@string/visit_github" />
+        <Preference
+            app:icon="@drawable/ic_policy"
+            app:key="license"
+            app:title="@string/license" />
+    </PreferenceCategory>
 
 </PreferenceScreen>
