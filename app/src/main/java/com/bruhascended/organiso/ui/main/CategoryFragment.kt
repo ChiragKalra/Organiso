@@ -10,9 +10,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,9 +20,8 @@ import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
-import com.bruhascended.core.db.MainDaoProvider
 import com.bruhascended.organiso.common.ScrollEffectFactory
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_DARK_THEME
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -49,18 +47,16 @@ import kotlinx.coroutines.launch
 class CategoryFragment: Fragment() {
 
     companion object {
-        fun newInstance(label: Int, pos: Int) : CategoryFragment {
+        fun newInstance(label: Int) : CategoryFragment {
             return CategoryFragment().apply {
                 arguments = Bundle().apply {
                     putInt(labelArg, label)
-                    putInt(posArg, pos)
                 }
             }
         }
     }
 
     private val labelArg = "LABEL"
-    private val posArg = "POSITION"
 
     private lateinit var selectionManager: ListSelectionManager<Conversation>
     private lateinit var mAdaptor: ConversationRecyclerAdaptor
@@ -68,7 +64,6 @@ class CategoryFragment: Fragment() {
     private lateinit var mListener: ConversationSelectionListener
     private lateinit var recyclerView: RecyclerView
 
-    private lateinit var mMainDaoProvider: MainDaoProvider
 
     private val dataObserver = object: RecyclerView.AdapterDataObserver() {
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
@@ -87,7 +82,7 @@ class CategoryFragment: Fragment() {
     }
 
     private var label: Int = 0
-    private var position: Int = 0
+    private val model: MainViewModel by activityViewModels()
 
     class FooterDecoration(private val footerHeight: Int) : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
@@ -105,7 +100,6 @@ class CategoryFragment: Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.apply {
             label = getInt(labelArg)
-            position = getInt(posArg)
         }
     }
 
@@ -122,19 +116,9 @@ class CategoryFragment: Fragment() {
         textView.visibility = TextView.INVISIBLE
 
         if (::selectionManager.isInitialized) selectionManager.close()
-        mMainDaoProvider = MainDaoProvider(mContext)
 
-        val flow = Pager(PagingConfig(
-            pageSize = 12,
-            initialLoadSize = 12,
-            prefetchDistance = 12,
-            maxSize = 180,
-        )) {
-            mMainDaoProvider.getMainDaos()[label].loadAllPaged()
-        }.flow.cachedIn(mContext.lifecycleScope)
-
-        if (mMainDaoProvider.getMainDaos()[label].loadSingle()==null) textView.visibility = TextView.VISIBLE
-        else textView.visibility = TextView.INVISIBLE
+        val flow =
+            model.categoryFlows[label].cachedIn(mContext.lifecycleScope)
 
         mAdaptor = ConversationRecyclerAdaptor(mContext)
         mListener =  ConversationSelectionListener(mContext, label)
@@ -161,9 +145,9 @@ class CategoryFragment: Fragment() {
 
 
         mContext.lifecycleScope.launch {
-            delay(if (position == 0) 0 else 500)
+            delay(if (model.isDelayed(label)) 500 else 0)
             flow.collectLatest {
-                textView.isVisible = mMainDaoProvider.getMainDaos()[label].loadSingle()==null
+                textView.isVisible = model.isEmpty(label)
                 mAdaptor.submitData(it)
             }
         }

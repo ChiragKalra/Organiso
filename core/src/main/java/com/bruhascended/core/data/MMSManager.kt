@@ -192,6 +192,7 @@ class MMSManager (
 
         conversation = if (conversation != null) {
             conversation.apply {
+                if (LABEL_PERSONAL != label) id = null
                 if (time < message.time) {
                     read = init
                     time = message.time

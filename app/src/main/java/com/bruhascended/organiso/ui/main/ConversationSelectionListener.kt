@@ -116,8 +116,8 @@ class ConversationSelectionListener(
                     .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         for (selectedItem in selected) {
                             mContext.cancelNotification(selectedItem.clean, selectedItem.id)
-                            selectedItem.moveTo(-1, mContext)
                             analyticsLogger.log("${selectedItem.label}_to_-1")
+                            selectedItem.moveTo(-1, mContext)
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.deleted), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -128,9 +128,9 @@ class ConversationSelectionListener(
                 alertDialog.setTitle(mContext.getString(R.string.block_conversations_query))
                     .setPositiveButton(mContext.getString(R.string.block)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            selectedItem.moveTo(5, mContext)
                             analyticsLogger.log("${selectedItem.label}_to_5")
                             mContext.cancelNotification(selectedItem.clean, selectedItem.id)
+                            selectedItem.moveTo(5, mContext)
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.senders_blocked), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -141,10 +141,10 @@ class ConversationSelectionListener(
                 alertDialog.setTitle(mContext.getString(R.string.report_conversations_query))
                     .setPositiveButton(mContext.getString(R.string.report)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            selectedItem.moveTo(4, mContext)
                             analyticsLogger.reportSpam(selectedItem)
                             analyticsLogger.log("${selectedItem.label}_to_4")
                             mContext.cancelNotification(selectedItem.clean, selectedItem.id)
+                            selectedItem.moveTo(4, mContext)
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.senders_reported_spam), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -163,8 +163,8 @@ class ConversationSelectionListener(
                         selection = select + if (select>=label) 1 else 0
                     }.setPositiveButton(mContext.getString(R.string.move)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            selectedItem.moveTo(selection, mContext)
                             analyticsLogger.log("${selectedItem.label}_to_$selection")
+                            selectedItem.moveTo(selection, mContext)
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.conversations_moved), Toast.LENGTH_LONG).show()
                         dialog.dismiss()

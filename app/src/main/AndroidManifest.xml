@@ -105,6 +105,7 @@
             android:windowSoftInputMode="stateVisible" />
         <activity
             android:name="com.bruhascended.organiso.ConversationActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="standard">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -120,8 +121,8 @@
         </activity>
         <activity
             android:name="com.bruhascended.organiso.StartActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
-            android:launchMode="singleTop"
+            android:configChanges="orientation"
+            android:launchMode="singleTask"
             android:theme="@style/Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -133,12 +134,11 @@
         </activity>
         <activity
             android:name="com.bruhascended.organiso.MainActivity"
-            android:clearTaskOnLaunch="false"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
-            android:finishOnTaskLaunch="false"
+            android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|screenSize"
+            android:alwaysRetainTaskState="true"
             android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:noHistory="false" />
+            android:launchMode="singleTask" />
         <activity
             android:name="com.bruhascended.organiso.SettingsActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"

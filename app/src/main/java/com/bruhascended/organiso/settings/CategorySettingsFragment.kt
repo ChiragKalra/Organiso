@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.KEY_STATE_CHANGED
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.KEY_STATE_CHANGED
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_DARK_THEME
 import com.bruhascended.organiso.settings.categories.ItemMoveCallback
 import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter
 import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter.Companion.CATEGORY_HIDDEN
@@ -75,7 +75,10 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
 
         previousOrder = currentOrder.toTypedArray()
 
-        mAdapter = RecyclerViewAdapter(requireContext(), currentOrder, this, labels)
+        mAdapter = RecyclerViewAdapter(
+            requireContext(), currentOrder,
+            this, labels.clone()
+        )
 
         val callback: ItemTouchHelper.Callback = ItemMoveCallback(mAdapter)
         touchHelper = ItemTouchHelper(callback)
@@ -154,12 +157,12 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         val arr = mAdapter.data
         if (
             arr.toTypedArray() contentDeepEquals previousOrder &&
             previousLabels contentDeepEquals mAdapter.customLabels
         ) {
-            super.onDestroy()
             return
         }
 
@@ -170,9 +173,16 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
             .putBoolean(KEY_STATE_CHANGED, true)
             .putString(PREF_VISIBLE_CATEGORIES, vis.toJson())
             .putString(PREF_HIDDEN_CATEGORIES, hid.toJson())
-            .apply()
-
-        super.onDestroy()
+            .apply {
+                mAdapter.customLabels.indices.forEach {
+                    putString(
+                        ARR_PREF_CUSTOM_LABELS[it],
+                        mAdapter.customLabels[it].filter { c ->
+                            c.isLetterOrDigit()
+                        }
+                    )
+                }
+            }.apply()
     }
 
     override fun requestDrag(viewHolder: ViewHolder) {

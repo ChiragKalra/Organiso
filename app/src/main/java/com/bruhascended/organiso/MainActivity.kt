@@ -3,7 +3,6 @@ package com.bruhascended.organiso
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.drawable.TransitionDrawable
 import android.os.Bundle
@@ -19,19 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
-import androidx.preference.PreferenceManager
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.bruhascended.organiso.ExtraCategoryActivity.Companion.EXTRA_LABEL
-import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.ARR_PREF_CUSTOM_LABELS
-import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.PREF_HIDDEN_CATEGORIES
-import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.PREF_VISIBLE_CATEGORIES
-import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.toJson
-import com.bruhascended.organiso.settings.CategorySettingsFragment.Companion.toLabelArray
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.KEY_STATE_CHANGED
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.KEY_STATE_CHANGED
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryPagerAdapter
 import com.bruhascended.organiso.ui.main.MainViewModel
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_PERMS
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -56,16 +48,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        fun AppCompatActivity.setPrefTheme() {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-            if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
-            else setTheme(R.style.LightTheme)
-        }
-    }
-
     private lateinit var mContext: Context
-    private lateinit var prefs: SharedPreferences
     private lateinit var inputManager: InputMethodManager
     private lateinit var mViewModel: MainViewModel
 
@@ -83,28 +66,13 @@ class MainActivity : AppCompatActivity() {
         } else {
             TabLayoutMediator(tabs, viewPager) { tab, position ->
                 val label = mViewModel.visibleCategories[position]
-                val title = prefs.getString(ARR_PREF_CUSTOM_LABELS[label], "")
-                tab.text = if (title.isNullOrEmpty()) getString(ARR_LABEL_STR[label]) else title
+                tab.text = mViewModel.customTabLabels[label]
             }.attach()
         }
     }
 
     private fun setupViewPager() {
         mViewModel.apply {
-            if (prefs.getString(PREF_VISIBLE_CATEGORIES, "") == "") {
-                visibleCategories = Array(4) { it }
-                hiddenCategories = Array(2) { 4 + it }
-                prefs.edit()
-                    .putString(PREF_VISIBLE_CATEGORIES, visibleCategories.toJson())
-                    .putString(PREF_HIDDEN_CATEGORIES, hiddenCategories.toJson())
-                    .apply()
-            } else {
-                visibleCategories =
-                    prefs.getString(PREF_VISIBLE_CATEGORIES, "").toLabelArray()
-                hiddenCategories =
-                    prefs.getString(PREF_HIDDEN_CATEGORIES, "").toLabelArray()
-            }
-
             viewPager.adapter = CategoryPagerAdapter(
                 visibleCategories, supportFragmentManager, lifecycle
             )
@@ -121,13 +89,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setPrefTheme()
         setContentView(R.layout.activity_main)
         setSupportActionBar(mToolbar)
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
         val temp by viewModels<MainViewModel>()
         mViewModel = temp
@@ -145,10 +113,9 @@ class MainActivity : AppCompatActivity() {
         addedCategoriesToMenu = true
         for (i in mViewModel.hiddenCategories.indices) {
             val label = mViewModel.hiddenCategories[i]
-            val customTitle = prefs.getString(ARR_PREF_CUSTOM_LABELS[i], "")!!
-            menu.add(
+            menu.add (
                 0, label, 400 + i,
-                if (customTitle.isBlank()) getString(ARR_LABEL_STR[label]) else customTitle
+                mViewModel.customTabLabels[label]
             )
         }
         return super.onPrepareOptionsMenu(menu)
@@ -209,6 +176,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
+        super.onStart()
         mViewModel.mContactsProvider.updateAsync()
         if (PackageManager.PERMISSION_DENIED in
             Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it])}
@@ -224,12 +192,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(setSmsAppIntent)
         }
 
-        if (prefs.getBoolean(KEY_STATE_CHANGED, false)) {
-            prefs.edit().putBoolean(KEY_STATE_CHANGED, false).apply()
+        if (mViewModel.prefs.getBoolean(KEY_STATE_CHANGED, false)) {
+            mViewModel.prefs.edit().putBoolean(KEY_STATE_CHANGED, false).apply()
             finish()
+            mViewModel.forceReload()
             startActivity(intent)
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
-        super.onStart()
     }
 }

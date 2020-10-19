@@ -97,21 +97,18 @@ class RecyclerViewAdapter(
                 labelEditText.text = string
                 editText.apply {
                     hint = string
-                    setOnFocusChangeListener { _, _ ->
-                        customLabels[labelInt] = text.toString()
-                    }
                     doOnTextChanged { text, _, _, _ ->
                         clearButton.isVisible = !text.isNullOrEmpty()
                         labelEditText.animate().alpha(
                             if (!text.isNullOrEmpty()) 1f else 0f
                         ).setDuration(300).start()
+                        customLabels[labelInt] = text.toString()
                     }
                     setText(customLabels[labelInt])
                     clearButton.setOnClickListener {
                         setText("")
                         labelEditText.animate().alpha(0f).setDuration(300).start()
                         clearButton.visibility = View.GONE
-                        customLabels[labelInt] = text.toString()
                     }
                 }
 

@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import kotlinx.android.synthetic.main.activity_search.*

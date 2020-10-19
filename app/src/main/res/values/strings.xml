@@ -12,7 +12,8 @@
     <string name="new_conversation">New Conversation</string>
     <string name="new_short">New</string>
     <string name="info">Info</string>
-    <string name="general">General</string>
+    <string name="interface_settings">Interface</string>
+    <string name="message_settings">Messages</string>
     <string name="notifications">Notifications</string>
     <string name="customise_categories">Customise Categories</string>
     <string name="privacy">Privacy</string>

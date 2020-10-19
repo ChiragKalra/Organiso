@@ -2,10 +2,8 @@ package com.bruhascended.organiso
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.SMSManager.Companion.LABEL_SPAM
-import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryFragment
 import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 import kotlinx.android.synthetic.main.activity_conversation.toolbar
@@ -46,7 +44,7 @@ class ExtraCategoryActivity : AppCompatActivity() {
         supportActionBar!!.setTitle(ARR_LABEL_STR[label])
 
         if (savedInstanceState == null) {
-            val newFragment = CategoryFragment.newInstance(label, 0)
+            val newFragment = CategoryFragment.newInstance(label)
             supportFragmentManager.beginTransaction().add(R.id.fragmentContainer, newFragment).commit()
         }
     }

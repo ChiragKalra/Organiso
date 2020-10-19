@@ -10,9 +10,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
 import com.bruhascended.core.analytics.AnalyticsLogger
-import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import kotlinx.android.synthetic.main.activity_bug_report.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay

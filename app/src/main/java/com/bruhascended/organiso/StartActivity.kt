@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
 import android.provider.Telephony
+import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
@@ -45,7 +46,7 @@ class StartActivity : AppCompatActivity() {
 
     private lateinit var sharedPref: SharedPreferences
 
-    private val discStrings = arrayOf (
+    private val discStrings = arrayOf(
         R.string.getting_your_msgs,
         R.string.organising_your_msgs,
         R.string.done
@@ -57,8 +58,12 @@ class StartActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
+        if (intent.action != Intent.ACTION_MAIN) {
+            finish()
+            return
+        }
 
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this)
 
         if (sharedPref.getBoolean(KEY_INIT, false)) {
             startActivity(Intent(this, MainActivity::class.java))
@@ -72,7 +77,7 @@ class StartActivity : AppCompatActivity() {
         else organise()
     }
 
-    override fun onRequestPermissionsResult (
+    override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
@@ -143,7 +148,7 @@ class StartActivity : AppCompatActivity() {
         val wakeLock: PowerManager.WakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG_WAKE_LOCK).apply {
-                    acquire(10*60*1000L)
+                    acquire(10 * 60 * 1000L)
                 }
             }
         Thread {

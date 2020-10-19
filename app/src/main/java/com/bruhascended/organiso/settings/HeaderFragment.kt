@@ -29,13 +29,15 @@ class HeaderFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.header_preferences, rootKey)
         val notifyPref: Preference = findPreference("notifications")!!
         val appBadgePref: Preference = findPreference("app_badge")!!
-        val generalPref: Preference = findPreference("general")!!
+        val interfacePref: Preference = findPreference("interface")!!
+        val messagesPref: Preference = findPreference("messages")!!
         val categoryPref: Preference = findPreference("category")!!
         val infoPref: Preference = findPreference("info")!!
 
         appBadgePref.summary = BuildConfig.VERSION_NAME
 
-        generalPref.fragment = GeneralFragment::class.qualifiedName
+        interfacePref.fragment = InterfaceFragment::class.qualifiedName
+        messagesPref.fragment = MessagesFragment::class.qualifiedName
         categoryPref.fragment = CategorySettingsFragment::class.qualifiedName
         infoPref.fragment = InfoFragment::class.qualifiedName
 

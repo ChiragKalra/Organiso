@@ -14,21 +14,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.db.ContactsProvider
 import com.bruhascended.core.db.Contact
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_ADDRESS
-import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
+import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.common.MediaPreviewActivity
 import com.bruhascended.organiso.ui.newConversation.RecipientRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
@@ -135,7 +133,11 @@ class NewConversationActivity : MediaPreviewActivity() {
         if (recipients.size == 1) {
             startActivity(
                 Intent(this, ConversationActivity::class.java)
-                    .putExtra(EXTRA_ADDRESS, recipients.first().address)
+                    .putExtra(EXTRA_CONVERSATION, Conversation(
+                        recipients.first().address,
+                        recipients.first().clean,
+                        name = recipients.first().name
+                    ))
             )
         } else if (recipients.isNotEmpty()) {
             startActivityIfNeeded(

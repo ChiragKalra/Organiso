@@ -24,8 +24,8 @@ import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATI
 import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE_OTP
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_NOTIFICATION_ID
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_OTP
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_COPY_OTP
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DELETE_OTP
+import com.bruhascended.organiso.settings.MessagesFragment.Companion.PREF_COPY_OTP
+import com.bruhascended.organiso.settings.MessagesFragment.Companion.PREF_DELETE_OTP
 import java.util.concurrent.TimeUnit
 
 class OtpNotificationManager (

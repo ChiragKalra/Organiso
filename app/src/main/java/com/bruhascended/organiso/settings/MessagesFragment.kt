@@ -2,6 +2,7 @@ package com.bruhascended.organiso.settings
 
 import android.os.Build
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
@@ -30,34 +31,17 @@ import com.bruhascended.core.db.MainDaoProvider
 
 */
 
-class GeneralFragment : PreferenceFragmentCompat() {
+class MessagesFragment : PreferenceFragmentCompat() {
 
     companion object {
-        const val PREF_DARK_THEME = "dark_theme"
         const val PREF_DELETE_OTP = "delete_otp"
         const val PREF_COPY_OTP = "copy_otp"
-
-        const val KEY_STATE_CHANGED = "stateChanged"
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.general_preferences, rootKey)
+        setPreferencesFromResource(R.xml.messages_preferences, rootKey)
 
-        val themePref: SwitchPreferenceCompat = findPreference(PREF_DARK_THEME)!!
         val deleteOtpPref: SwitchPreferenceCompat = findPreference(PREF_DELETE_OTP)!!
-        val themeCategory: PreferenceCategory = findPreference("theme_category")!!
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            themeCategory.isVisible = false
-            themePref.isVisible = false
-        } else {
-            themePref.setOnPreferenceChangeListener { _, _ ->
-                val sp = PreferenceManager.getDefaultSharedPreferences(requireActivity())
-                sp.edit().putBoolean(KEY_STATE_CHANGED, true).apply()
-                requireActivity().recreate()
-                true
-            }
-        }
 
         val mContext = requireContext().applicationContext
         deleteOtpPref.setOnPreferenceChangeListener { _, state ->

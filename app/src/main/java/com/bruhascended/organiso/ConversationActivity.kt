@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.doOnLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.analytics.AnalyticsLogger
@@ -29,7 +28,7 @@ import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
 import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
 import com.bruhascended.core.db.*
-import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.common.ListSelectionManager
@@ -41,7 +40,6 @@ import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
 import com.bruhascended.organiso.ui.conversation.ConversationViewModel
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
 import com.bruhascended.organiso.ui.conversation.MessageSelectionListener
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
 import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
@@ -85,6 +83,7 @@ class ConversationActivity : MediaPreviewActivity() {
     private lateinit var conversationMenuOptions: ConversationMenuOptions
     private lateinit var smsSender: SMSSender
     private lateinit var mmsSender: MMSSender
+    private lateinit var mainDaoProvider: MainDaoProvider
     private var inputManager: InputMethodManager? = null
 
     private var scroll = true
@@ -127,7 +126,7 @@ class ConversationActivity : MediaPreviewActivity() {
 
     private fun toggleGoToBottomButtonVisibility(){
         val dp = resources.displayMetrics.density
-        if (mLayoutManager.findFirstVisibleItemPosition() > 5 && !mViewModel.goToBottomVisible) {
+        if (mLayoutManager.findFirstVisibleItemPosition() > 1 && !mViewModel.goToBottomVisible) {
             mViewModel.goToBottomVisible = true
             goToBottom.animate().alpha(1f).translationY(0f)
                 .setInterpolator(AccelerateDecelerateInterpolator()).start()
@@ -149,10 +148,10 @@ class ConversationActivity : MediaPreviewActivity() {
                         conversation.lastSMS = it.text
                         conversation.time = it.time
                         conversation.lastMMS = it.path != null
-                        MainDaoProvider(mContext).getMainDaos()[conversation.label].update(conversation)
+                        mainDaoProvider.getMainDaos()[conversation.label].update(conversation)
                     }
                 } else {
-                    MainDaoProvider(mContext).getMainDaos()[conversation.label].delete(conversation)
+                    mainDaoProvider.getMainDaos()[conversation.label].delete(conversation)
                 }
             }
         })
@@ -275,12 +274,13 @@ class ConversationActivity : MediaPreviewActivity() {
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        mainDaoProvider = MainDaoProvider(mContext)
 
         if (mViewModel.conversation.id == null) {
             Thread {
                 var found = false
                 for (i in 0..4) {
-                    val res = MainDaoProvider(mContext).getMainDaos()[i].findBySender(mViewModel.conversation.clean)
+                    val res = mainDaoProvider.getMainDaos()[i].findBySender(mViewModel.conversation.clean)
                     if (res.isNotEmpty()) {
                         mViewModel.conversation = res.first()
                         found = true
@@ -296,15 +296,14 @@ class ConversationActivity : MediaPreviewActivity() {
                 if (mViewModel.conversation.id != null) {
                     if (!mViewModel.conversation.read) {
                         mViewModel.conversation.read = true
-                        MainDaoProvider(mContext).getMainDaos()[mViewModel.conversation.label].update(mViewModel.conversation)
+                        mainDaoProvider.getMainDaos()[mViewModel.conversation.label].update(mViewModel.conversation)
                     }
                 }
             }.start()
         } else if (!mViewModel.conversation.read) {
             mViewModel.conversation.read = true
-            MainDaoProvider(mContext).getMainDaos()[mViewModel.conversation.label].update(mViewModel.conversation)
+            mainDaoProvider.getMainDaos()[mViewModel.conversation.label].update(mViewModel.conversation)
         }
-
 
         smsSender = SMSSender(this, arrayOf(mViewModel.conversation))
         mmsSender = MMSSender(this, arrayOf(mViewModel.conversation))

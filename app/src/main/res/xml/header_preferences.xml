@@ -9,9 +9,15 @@
 
     <Preference
         app:allowDividerBelow="false"
-        app:key="general"
+        app:key="interface"
         app:icon="@drawable/ic_account"
-        app:title="@string/general" />
+        app:title="@string/interface_settings" />
+
+    <Preference
+        app:allowDividerBelow="false"
+        app:key="messages"
+        app:icon="@drawable/ic_message"
+        app:title="@string/message_settings" />
 
     <Preference
         app:allowDividerBelow="false"

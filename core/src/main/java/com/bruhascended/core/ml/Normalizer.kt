@@ -97,7 +97,7 @@ fun getOtp(message: String): String? {
     val otp = otps.first().groups.first()!!.value
     content.apply {
         if (contains("otp") || contains("code") || contains("key") ||
-            contains("pin") || contains("one time password") ||
+            contains("pin") || contains("one time password") || contains("verify") ||
             (contains("number") && (contains("registration") || contains("verification")))
         )
             return otp

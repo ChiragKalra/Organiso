@@ -3,27 +3,6 @@
 
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
-        app:title="@string/theme"
-        app:key="theme_category"/>
-    <SwitchPreferenceCompat
-        app:defaultValue="false"
-        app:icon="@drawable/ic_theme"
-        app:key="dark_theme"
-        app:allowDividerBelow="false"
-        app:title="@string/dark_theme" />
-
-    <PreferenceCategory
-        android:layout="@layout/view_category_pref"
-        app:title="@string/search"/>
-    <SwitchPreferenceCompat
-        app:defaultValue="false"
-        app:icon="@drawable/ic_search_themed"
-        app:key="show_hidden_results"
-        app:allowDividerBelow="false"
-        app:title="@string/search_hidden_categories" />
-
-    <PreferenceCategory
-        android:layout="@layout/view_category_pref"
         app:title="@string/otp" />
     <SwitchPreferenceCompat
         app:defaultValue="true"

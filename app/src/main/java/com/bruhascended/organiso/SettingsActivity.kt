@@ -4,9 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
-import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
-import com.bruhascended.organiso.settings.GeneralFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.settings.HeaderFragment
 import kotlinx.android.synthetic.main.activity_conversation.*
 

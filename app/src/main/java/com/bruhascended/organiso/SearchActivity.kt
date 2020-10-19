@@ -18,7 +18,7 @@ import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.organiso.MainActivity.Companion.setPrefTheme
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
