@@ -4,19 +4,29 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
+
+/*
+                    Copyright 2020 Chirag Kalra
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
 
 class ChannelManager(
     private val mContext: Context
 ) {
 
-    private val descriptionText = arrayOf(
-        R.string.text_1,
-        R.string.text_2,
-        R.string.text_3,
-        R.string.text_4,
-        R.string.text_5
-    )
+    private val descriptionText = mContext.resources.getStringArray(R.array.label_descriptions)
 
     private val importance = arrayOf(
         NotificationManager.IMPORTANCE_MAX,
@@ -31,10 +41,12 @@ class ChannelManager(
             mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (notificationManager.notificationChannels.isEmpty()) {
+            val labelArr = mContext.resources.getStringArray(R.array.labels)
             for (i in 0..4) {
-                val name = mContext.getString(ARR_LABEL_STR[i])
-                val channel = NotificationChannel(i.toString(), name, importance[i]).apply {
-                    description = mContext.getString(descriptionText[i])
+                val channel = NotificationChannel(
+                    i.toString(), labelArr[i], importance[i]
+                ).apply {
+                    description = descriptionText[i]
                 }
                 notificationManager.createNotificationChannel(channel)
             }

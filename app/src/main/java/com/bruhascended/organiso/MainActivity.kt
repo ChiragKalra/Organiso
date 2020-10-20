@@ -19,13 +19,10 @@ import androidx.appcompat.view.ActionMode
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
-import com.bruhascended.organiso.ExtraCategoryActivity.Companion.EXTRA_LABEL
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.KEY_STATE_CHANGED
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_ACTION_NAVIGATE
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryPagerAdapter
 import com.bruhascended.organiso.ui.main.MainViewModel
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_PERMS
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*

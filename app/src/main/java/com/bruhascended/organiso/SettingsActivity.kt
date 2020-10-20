@@ -28,10 +28,7 @@ import kotlinx.android.synthetic.main.activity_conversation.*
 class SettingsActivity : AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
-    companion object {
-        const val ARG_TITLE = "title"
-        const val KEY_FRAGMENT_REQUEST = "key"
-    }
+    private val argTitle = "title"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +45,7 @@ class SettingsActivity : AppCompatActivity(),
                 .replace(R.id.settings, HeaderFragment())
                 .commit()
         } else {
-            title = savedInstanceState.getCharSequence(ARG_TITLE)
+            title = savedInstanceState.getCharSequence(argTitle)
         }
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0)
@@ -58,7 +55,7 @@ class SettingsActivity : AppCompatActivity(),
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putCharSequence(ARG_TITLE, title)
+        outState.putCharSequence(argTitle, title)
     }
 
     override fun onSupportNavigateUp(): Boolean {

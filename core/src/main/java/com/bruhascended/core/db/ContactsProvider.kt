@@ -3,13 +3,12 @@ package com.bruhascended.core.db
 import android.content.Context
 import androidx.preference.PreferenceManager
 import androidx.room.Room
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.ContactsManager
 
 class ContactsProvider (mContext: Context) {
 
     companion object {
-        const val KEY_LAST_REFRESH = "LAST_REFRESH"
-
         private var mDb: ContactDatabase? = null
     }
 

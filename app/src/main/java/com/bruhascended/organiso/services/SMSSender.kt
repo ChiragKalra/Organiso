@@ -14,11 +14,7 @@ import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
-import com.bruhascended.core.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_FAILED
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_QUEUED
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.db.MainDaoProvider
 import com.klinker.android.send_message.Settings

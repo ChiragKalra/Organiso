@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import androidx.preference.PreferenceManager
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.BuildConfig
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.MessageDbFactory
@@ -30,26 +31,6 @@ import com.google.firebase.storage.FirebaseStorage
 class AnalyticsLogger(
     private val context: Context
 ) {
-
-    companion object {
-        const val PREF_SEND_SPAM = "report_spam"
-
-        const val PATH_SPAM_REPORTS = "spam_reports"
-        const val PATH_BUG_REPORTS = "bug_reports"
-        const val PATH_TITLE = "title"
-        const val PATH_DETAIL = "detail"
-
-        const val EVENT_BUG_REPORTED = "bug_reported"
-        const val EVENT_CONVERSATION_ORGANISED = "conversation_organised"
-        const val EVENT_MESSAGE_ORGANISED = "message_organised"
-
-
-        const val PARAM_DEFAULT = "default"
-        const val PARAM_BACKGROUND = "background"
-        const val PARAM_INIT = "init"
-
-    }
-
     private val mPref = PreferenceManager.getDefaultSharedPreferences(context)
     private val firebaseAnalytics = FirebaseAnalytics.getInstance(context)
 

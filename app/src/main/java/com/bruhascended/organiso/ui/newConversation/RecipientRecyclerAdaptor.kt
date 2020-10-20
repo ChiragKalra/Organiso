@@ -7,11 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Contact
-import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import kotlin.math.abs
 
 /*
@@ -31,13 +29,11 @@ import kotlin.math.abs
  */
 
 class RecipientRecyclerAdaptor (
-    private val mContext: Context,
+    mContext: Context,
     private val contacts: ArrayList<Contact>
 ): RecyclerView.Adapter<RecipientRecyclerAdaptor.RecipientViewHolder>() {
 
-    private var colors: Array<Int> = Array(ConversationRecyclerAdaptor.colorRes.size) {
-        ContextCompat.getColor(mContext, ConversationRecyclerAdaptor.colorRes[it])
-    }
+    private val colors = mContext.resources.getIntArray(R.array.colors)
 
     var onItemClick: ((Contact) -> Unit)? = null
     var onRemoveClick: ((Contact) -> Unit)? = null

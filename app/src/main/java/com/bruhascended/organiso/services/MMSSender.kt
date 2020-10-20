@@ -12,14 +12,7 @@ import android.widget.Toast
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
-import com.bruhascended.core.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.ACTION_UPDATE_STATUS_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_FAILED
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_QUEUED
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory

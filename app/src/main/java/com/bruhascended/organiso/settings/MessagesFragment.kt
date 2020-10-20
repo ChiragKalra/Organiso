@@ -1,18 +1,15 @@
 package com.bruhascended.organiso.settings
 
-import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
-import com.bruhascended.organiso.R
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_TRANSACTIONS
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
+import com.bruhascended.core.constants.LABEL_TRANSACTIONS
+import com.bruhascended.core.constants.MESSAGE_TYPE_INBOX
+import com.bruhascended.core.constants.PREF_DELETE_OTP
+import com.bruhascended.core.db.MainDaoProvider
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.ml.getOtp
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.organiso.R
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -32,11 +29,6 @@ import com.bruhascended.core.db.MainDaoProvider
 */
 
 class MessagesFragment : PreferenceFragmentCompat() {
-
-    companion object {
-        const val PREF_DELETE_OTP = "delete_otp"
-        const val PREF_COPY_OTP = "copy_otp"
-    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.messages_preferences, rootKey)

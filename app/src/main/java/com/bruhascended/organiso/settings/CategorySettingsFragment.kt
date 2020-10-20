@@ -11,13 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.KEY_STATE_CHANGED
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.settings.categories.ItemMoveCallback
 import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter
-import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter.Companion.CATEGORY_HIDDEN
-import com.bruhascended.organiso.settings.categories.RecyclerViewAdapter.Companion.CATEGORY_VISIBLE
-import com.google.gson.Gson
 import kotlin.collections.ArrayList
 
 /*
@@ -40,19 +36,6 @@ import kotlin.collections.ArrayList
 @Suppress("UNCHECKED_CAST")
 class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListener {
 
-    companion object {
-        const val PREF_VISIBLE_CATEGORIES = "visible_categories"
-        const val PREF_HIDDEN_CATEGORIES = "hidden_categories"
-
-        val ARR_PREF_CUSTOM_LABELS = Array(6) {
-            "custom_label_${it}"
-        }
-
-        fun String?.toLabelArray(): Array<Int> = Gson().fromJson(this,  Array<Int>::class.java)
-
-        fun Array<Int>.toJson(): String = Gson().toJson(this)
-
-    }
 
     private lateinit var touchHelper: ItemTouchHelper
     private lateinit var prefs: SharedPreferences

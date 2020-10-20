@@ -2,7 +2,7 @@ package com.bruhascended.core.ml
 
 import android.content.Context
 import com.bruhascended.core.analytics.AnalyticsLogger
-import com.bruhascended.core.analytics.AnalyticsLogger.Companion.EVENT_MESSAGE_ORGANISED
+import com.bruhascended.core.constants.EVENT_MESSAGE_ORGANISED
 import com.bruhascended.core.db.Message
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate

@@ -6,24 +6,15 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import com.bruhascended.organiso.*
-import com.bruhascended.organiso.SearchActivity.Companion.HEADER_CONTACTS
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_CONTACT
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_CONVERSATION
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_FOOTER
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_HEADER
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_RECEIVED
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_SENT
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.organiso.ui.conversation.MessageViewHolder
-import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import com.bruhascended.organiso.ui.main.ConversationViewHolder
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -67,10 +58,7 @@ class SearchResultViewHolder(
     private lateinit var conversationViewHolder: ConversationViewHolder
     private lateinit var messageViewHolder: MessageViewHolder
 
-    private val colors: Array<Int> = Array(ConversationRecyclerAdaptor.colorRes.size) {
-        ContextCompat.getColor(mContext, ConversationRecyclerAdaptor.colorRes[it])
-    }
-
+    private val colors = mContext.resources.getIntArray(R.array.colors)
     init {
         when (type) {
             TYPE_CONVERSATION, TYPE_CONTACT ->
@@ -128,7 +116,7 @@ class SearchResultViewHolder(
                     labelTextView.text = mContext.getString(R.string.from_contacts)
                 else {
                     val label = item.categoryHeader - (if (item.categoryHeader > 9) 10 else 0)
-                    val labelText = mContext.getString(ARR_LABEL_STR[label])
+                    val labelText = mContext.resources.getStringArray(R.array.labels)[label]
                     labelTextView.text = when {
                         item.categoryHeader > 9 ->
                             mContext.getString(R.string.messages_in_label, labelText)

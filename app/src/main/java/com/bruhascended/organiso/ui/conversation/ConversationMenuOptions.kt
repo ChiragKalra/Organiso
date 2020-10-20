@@ -20,16 +20,10 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.*
 import com.bruhascended.core.analytics.AnalyticsLogger
-import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_BLOCKED
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_NONE
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_SPAM
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.moveTo
 import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
-import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -56,11 +50,14 @@ import kotlin.math.abs
 class ConversationMenuOptions (
     private val mContext: Context,
     private val conversation: Conversation,
-    private val analyticsLogger: AnalyticsLogger = AnalyticsLogger(mContext),
     private val searchResult: ActivityResultLauncher<Intent>? = null,
     private val cancelCallBack: ((RecyclerView.ViewHolder?) -> Unit)? = null,
     private val itemViewHolder: RecyclerView.ViewHolder? = null,
 ) {
+
+    private val analyticsLogger: AnalyticsLogger = AnalyticsLogger(mContext)
+
+    private val colorRes = mContext.resources.getIntArray(R.array.colors)
 
     private fun getRoundedCornerBitmap(bitmap: Bitmap): Bitmap {
         val output = Bitmap.createBitmap(
@@ -83,7 +80,7 @@ class ConversationMenuOptions (
 
     private fun getSenderIcon(): Icon {
         val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
-            setTint(mContext.getColor(colorRes[(abs(conversation.hashCode()) % colorRes.size)]))
+            setTint(colorRes[(abs(conversation.hashCode()) % colorRes.size)])
         }
 
         val dp = File(mContext.filesDir, conversation.clean)
@@ -124,8 +121,9 @@ class ConversationMenuOptions (
                             ).show()
                             dialog.dismiss()
                         }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-                            cancelCallBack?.invoke(itemViewHolder)
                             dialog.dismiss()
+                        }.setOnDismissListener {
+                            cancelCallBack?.invoke(itemViewHolder)
                         }.create().show()
                 }
                 R.id.action_report_spam -> {
@@ -142,8 +140,9 @@ class ConversationMenuOptions (
                             ).show()
                             dialog.dismiss()
                         }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-                            cancelCallBack?.invoke(itemViewHolder)
                             dialog.dismiss()
+                        }.setOnDismissListener {
+                            cancelCallBack?.invoke(itemViewHolder)
                         }.create().show()
                 }
                 R.id.action_delete -> {
@@ -162,21 +161,25 @@ class ConversationMenuOptions (
                                 (mContext as AppCompatActivity).finish()
                             }
                         }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-                            cancelCallBack?.invoke(itemViewHolder)
                             dialog.dismiss()
+                        }.setOnDismissListener {
+                            cancelCallBack?.invoke(itemViewHolder)
                         }.create().show()
                 }
                 R.id.action_move -> {
                     val choices = ArrayList<String>().apply {
+                        val labelArr = mContext.resources.getStringArray(R.array.labels)
                         for (i in 0..3) {
-                            if (i != conversation.label)
-                                add(mContext.resources.getString(ARR_LABEL_STR[i]))
+                            if (i != conversation.label) {
+                                add(labelArr[i])
+                            }
                         }
                     }.toTypedArray()
-                    var selection = 0
+                    var selection = if (LABEL_PERSONAL == conversation.label)
+                        LABEL_IMPORTANT else LABEL_PERSONAL
                     AlertDialog.Builder(mContext)
                         .setTitle(getString(R.string.move_conversation_to))
-                        .setSingleChoiceItems(choices, selection) { _, select ->
+                        .setSingleChoiceItems(choices, 0) { _, select ->
                             selection = select + if (select >= conversation.label) 1 else 0
                         }.setPositiveButton(getText(R.string.move)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_$selection")
@@ -188,8 +191,9 @@ class ConversationMenuOptions (
                             ).show()
                             dialog.dismiss()
                         }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-                            cancelCallBack?.invoke(itemViewHolder)
                             dialog.dismiss()
+                        }.setOnDismissListener {
+                            cancelCallBack?.invoke(itemViewHolder)
                         }.create().show()
                 }
                 R.id.action_search -> {

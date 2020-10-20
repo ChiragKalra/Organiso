@@ -10,7 +10,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
 import com.bruhascended.core.db.Contact
-import com.bruhascended.core.BuildConfig.LIBRARY_PACKAGE_NAME
+import com.bruhascended.core.constants.*
 import io.michaelrocks.libphonenumber.android.NumberParseException
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import io.michaelrocks.libphonenumber.android.Phonenumber
@@ -41,12 +41,6 @@ import kotlin.collections.toTypedArray
 class ContactsManager (
     private val mContext: Context
 ) {
-
-    companion object {
-        const val ACTION_UPDATE_DP = "${LIBRARY_PACKAGE_NAME}.UPDATE_DP"
-        const val EXTRA_SENDER = "SENDER"
-    }
-
     private val map = HashMap<String, String>()
 
     private fun retrieveContactPhoto(number: String): Bitmap? {

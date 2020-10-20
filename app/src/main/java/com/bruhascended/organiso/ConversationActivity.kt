@@ -19,14 +19,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.ContactsManager
-import com.bruhascended.core.data.SMSManager.Companion.ACTION_NEW_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.ACTION_OVERWRITE_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.ACTION_UPDATE_STATUS_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_DATE
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE_TYPE
 import com.bruhascended.core.db.*
 import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.services.MMSSender
@@ -66,11 +60,6 @@ import kotlinx.coroutines.launch
 class ConversationActivity : MediaPreviewActivity() {
 
     companion object {
-        const val EXTRA_ADDRESS = "ADDRESS"
-        const val EXTRA_CONVERSATION = "CONVERSATION"
-        const val EXTRA_CONVERSATION_JSON = "CONVERSATION_JSON"
-        const val EXTRA_MESSAGE_ID = "MESSAGE_ID"
-
         var activeConversationSender: String? = null
     }
 
@@ -78,7 +67,6 @@ class ConversationActivity : MediaPreviewActivity() {
     private lateinit var mViewModel: ConversationViewModel
     private lateinit var mAdaptor: MessageRecyclerAdaptor
     private lateinit var mLayoutManager: LinearLayoutManager
-    private lateinit var analyticsLogger: AnalyticsLogger
     private lateinit var selectionManager: ListSelectionManager<Message>
     private lateinit var conversationMenuOptions: ConversationMenuOptions
     private lateinit var smsSender: SMSSender
@@ -307,11 +295,10 @@ class ConversationActivity : MediaPreviewActivity() {
 
         smsSender = SMSSender(this, arrayOf(mViewModel.conversation))
         mmsSender = MMSSender(this, arrayOf(mViewModel.conversation))
-        analyticsLogger = AnalyticsLogger(this)
         activeConversationSender = mViewModel.conversation.clean
 
         conversationMenuOptions = ConversationMenuOptions(
-            this, mViewModel.conversation, analyticsLogger, scrollToItemAfterSearch
+            this, mViewModel.conversation, scrollToItemAfterSearch
         )
 
         supportActionBar!!.title = mViewModel.conversation.name ?: mViewModel.conversation.address

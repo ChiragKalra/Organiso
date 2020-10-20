@@ -6,14 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.db.Contact
 import com.bruhascended.core.db.ContactComparator
 import com.bruhascended.organiso.common.ListSelectionManager
-import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor.ContactViewHolder
 import com.squareup.picasso.Picasso
 import java.io.File
@@ -41,9 +39,7 @@ class ContactRecyclerAdaptor (
     ContactComparator
 ){
 
-    private var colors: Array<Int> = Array(ConversationRecyclerAdaptor.colorRes.size) {
-        ContextCompat.getColor(mContext, ConversationRecyclerAdaptor.colorRes[it])
-    }
+    private val colors = mContext.resources.getIntArray(R.array.colors)
 
     private val cm = ContactsManager(mContext)
     private val picasso = Picasso.get()

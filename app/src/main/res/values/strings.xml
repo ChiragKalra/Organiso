@@ -2,12 +2,6 @@
 
     <!-- Titles -->
     <string name="app_name">Organiso</string>
-    <string name="tab_text_1">Personal</string>
-    <string name="tab_text_2">Important</string>
-    <string name="tab_text_3">Transactions</string>
-    <string name="tab_text_4">Promotions</string>
-    <string name="tab_text_5">Spam</string>
-    <string name="tab_text_6">Blocked</string>
     <string name="settings">Settings</string>
     <string name="new_conversation">New Conversation</string>
     <string name="new_short">New</string>
@@ -100,12 +94,6 @@
     <string name="just_few_secs">Just a few more seconds</string>
     <string name="finishing_up">Finishing Up</string>
 
-    <string name="text_1">Personal messages sent by contacts</string>
-    <string name="text_2">Important messages</string>
-    <string name="text_3">Transactional messages like financial statements, orders</string>
-    <string name="text_4">Advertisements</string>
-    <string name="text_5">Probably fraud</string>
-
     <string name="this_category_has_no_messages_yet">This category has no messages yet.</string>
     <string name="sending_messages_not_supported">Sender Doesn\'t Support Replies</string>
     <string name="type_your_message_here">Type your message here</string>
@@ -165,4 +153,6 @@
     <string name="custom_actions">Custom Actions</string>
     <string name="choose_left_swipe">Choose Left Swipe Action</string>
     <string name="choose_right_swipe">Choose Right Swipe Action</string>
+    <string name="custom_swipe_action">Swipe Action Settings</string>
+    <string name="swipe_strength">Swipe Strength</string>
 </resources>

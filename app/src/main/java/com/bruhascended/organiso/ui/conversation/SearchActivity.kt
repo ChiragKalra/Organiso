@@ -14,7 +14,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
+import com.bruhascended.core.constants.EXTRA_SENDER
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme

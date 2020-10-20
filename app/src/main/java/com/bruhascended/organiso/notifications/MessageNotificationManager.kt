@@ -24,17 +24,11 @@ import androidx.core.graphics.drawable.toBitmap
 import com.bruhascended.organiso.ConversationActivity
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.core.data.ContactsManager
-import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_BLOCKED
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.*
 import com.bruhascended.core.ml.getOtp
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
 import com.bruhascended.organiso.notifications.OtpNotificationManager.Companion.EXTRA_IS_OTP
-import com.bruhascended.organiso.ui.main.ConversationRecyclerAdaptor.Companion.colorRes
 import java.io.File
 
 /*
@@ -58,26 +52,11 @@ class MessageNotificationManager(
     private val mContext: Context
 ) {
 
-    companion object {
-        const val ACTION_CANCEL = "${APPLICATION_ID}.CANCEL_NOTIFICATION"
-        const val ACTION_REPLY = "${APPLICATION_ID}.NOTIFICATION_REPLY"
-        const val ACTION_COPY = "${APPLICATION_ID}.OTP_COPY"
-        const val ACTION_DELETE_OTP = "${APPLICATION_ID}.OTP_DELETE"
-        const val ACTION_REPORT_SPAM = "${APPLICATION_ID}.REPORT_SPAM"
-        const val ACTION_DELETE_MESSAGE = "${APPLICATION_ID}.MESSAGE_DELETE"
-        const val ACTION_MARK_READ = "${APPLICATION_ID}.MESSAGE_MARK_READ"
-
-        const val GROUP_DEFAULT = "MESSAGE_GROUP"
-
-        const val ID_SUMMARY = -1221
-
-        const val KEY_TEXT_REPLY = "key_text_reply"
-
-        const val DELAY_OTP_DELETE = 15L // in minutes
-    }
+    private val defaultGroup = "MESSAGE_GROUP"
 
     private val cm = ContactsManager(mContext)
     private val onm = OtpNotificationManager(mContext)
+    private val colorRes = mContext.resources.getIntArray(R.array.colors)
     private val notificationManager = NotificationManagerCompat.from(mContext)
 
     private val ndb = NotificationDbFactory(mContext).get().manager()
@@ -110,7 +89,7 @@ class MessageNotificationManager(
     private fun getSenderIcon(conversation: Conversation): IconCompat {
         val dp = File(mContext.filesDir, conversation.clean)
         val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
-            setTint(mContext.getColor(colorRes[(conversation.id!! % colorRes.size).toInt()]))
+            setTint(colorRes[(conversation.id!! % colorRes.size).toInt()])
         }
 
         return when {
@@ -156,7 +135,7 @@ class MessageNotificationManager(
             Builder(mContext, "0")
                 .setSmallIcon(R.drawable.message)
                 .setAutoCancel(true)
-                .setGroup(GROUP_DEFAULT)
+                .setGroup(defaultGroup)
                 .setGroupSummary(true)
                 .setNotificationSilent()
                 .build()
@@ -240,7 +219,7 @@ class MessageNotificationManager(
             conversationStyle.addMessage(msg)
         }
 
-        val remoteInput: RemoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).run {
+        val remoteInput: RemoteInput = RemoteInput.Builder(EXTRA_TEXT_REPLY).run {
             setLabel(mContext.getString(R.string.reply))
             build()
         }
@@ -279,7 +258,7 @@ class MessageNotificationManager(
         val context = mContext
         val notification = Builder(mContext, conversation.label.toString())
             .setCategory(CATEGORY_MESSAGE)
-            .setGroup(GROUP_DEFAULT)
+            .setGroup(defaultGroup)
             .setColorized(true)
             .setColor(mContext.getColor(R.color.colorAccent))
             .setSmallIcon(R.drawable.message)

@@ -7,30 +7,32 @@ import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
 import com.bruhascended.core.analytics.AnalyticsLogger
-import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
-import com.bruhascended.core.data.SMSManager
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
 import com.bruhascended.organiso.*
 import com.bruhascended.core.db.*
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_CANCEL
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_COPY
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_REPLY
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.KEY_TEXT_REPLY
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE_MESSAGE
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE_OTP
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_MARK_READ
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_REPORT_SPAM
+
+/*
+                    Copyright 2020 Chirag Kalra
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
 
 class NotificationActionReceiver : BroadcastReceiver() {
 
     companion object {
-        const val EXTRA_OTP = "otp"
-        const val EXTRA_NOTIFICATION_ID = "notif_id"
-
         fun Context.cancelNotification(sender: String, id: Long?) {
             NotificationManagerCompat.from(this).cancel(id!!.toInt())
             sendBroadcast(
@@ -39,7 +41,6 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 .putExtra(EXTRA_SENDER, sender)
             )
         }
-
     }
 
     private lateinit var mContext: Context
@@ -107,7 +108,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
             ACTION_REPLY -> {
                 val conversation =
                     intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
-                val replyText = RemoteInput.getResultsFromIntent(intent).getCharSequence(KEY_TEXT_REPLY).toString()
+                val replyText = RemoteInput.getResultsFromIntent(intent).getCharSequence(EXTRA_TEXT_REPLY).toString()
 
                 val newMessage = Message(replyText, MESSAGE_TYPE_SENT, System.currentTimeMillis())
                 MessageNotificationManager(mContext).sendSmsNotification(newMessage to conversation)
@@ -122,7 +123,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     reportSpam(conversation)
                 }
                 mContext.cancelNotification(conversation.clean, conversation.id)
-                conversation.moveTo(SMSManager.LABEL_SPAM, mContext)
+                conversation.moveTo(LABEL_SPAM, mContext)
             }
         }
     }

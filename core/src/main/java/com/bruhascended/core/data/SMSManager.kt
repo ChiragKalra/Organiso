@@ -4,10 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.preference.PreferenceManager
-import com.bruhascended.core.BuildConfig.LIBRARY_PACKAGE_NAME
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.analytics.AnalyticsLogger
-import com.bruhascended.core.analytics.AnalyticsLogger.Companion.EVENT_CONVERSATION_ORGANISED
-import com.bruhascended.core.analytics.AnalyticsLogger.Companion.PARAM_INIT
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
@@ -34,57 +32,17 @@ import com.bruhascended.core.ml.getOtp
 
 class SMSManager (private val mContext: Context) {
 
-    companion object {
-        const val EXTRA_MESSAGE = "MESSAGE"
-        const val EXTRA_MESSAGE_DATE = "MESSAGE_DATE"
-        const val EXTRA_MESSAGE_TYPE = "MESSAGE_TYPE"
-        const val ACTION_NEW_MESSAGE = "$LIBRARY_PACKAGE_NAME.NEW_MESSAGE"
-        const val ACTION_OVERWRITE_MESSAGE = "$LIBRARY_PACKAGE_NAME.OVERWRITE_MESSAGE"
-        const val ACTION_UPDATE_STATUS_MESSAGE = "$LIBRARY_PACKAGE_NAME.UPDATE_MESSAGE"
+    class Number (
+        val address: String,
+        val clean: String
+    ) {
+        override fun equals(other: Any?) : Boolean {
+            if (other !is Number) return false
+            return clean == other.clean
+        }
 
-        const val MESSAGE_TYPE_ALL = 0
-        const val MESSAGE_TYPE_INBOX = 1
-        const val MESSAGE_TYPE_SENT = 2
-        const val MESSAGE_TYPE_DRAFT = 3
-        const val MESSAGE_TYPE_OUTBOX = 4
-        const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
-        const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
-
-        internal val ARR_LABEL_STR = arrayOf (
-            "Personal",
-            "Important",
-            "Transactions",
-            "Promotions",
-            "Spam",
-            "Blocked"
-        )
-
-        const val LABEL_NONE = -1
-        const val LABEL_PERSONAL = 0
-        const val LABEL_IMPORTANT = 1
-        const val LABEL_TRANSACTIONS = 2
-        const val LABEL_PROMOTIONS = 3
-        const val LABEL_SPAM = 4
-        const val LABEL_BLOCKED = 5
-
-
-        const val KEY_RESUME_INDEX = "last_index"
-        const val KEY_DONE_COUNT = "done_count"
-        const val KEY_TIME_TAKEN = "time_taken"
-        const val KEY_RESUME_DATE = "last_date"
-
-        class Number (
-            val address: String,
-            val clean: String
-        ) {
-            override fun equals(other: Any?) : Boolean {
-                if (other !is Number) return false
-                return clean == other.clean
-            }
-
-            override fun hashCode(): Int {
-                return clean.hashCode()
-            }
+        override fun hashCode(): Int {
+            return clean.hashCode()
         }
     }
 
@@ -299,7 +257,7 @@ class SMSManager (private val mContext: Context) {
             mProbs.toList().indexOf(mProbs.maxOrNull())
         }
 
-        analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, AnalyticsLogger.PARAM_BACKGROUND)
+        analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, PARAM_BACKGROUND)
 
         conversation = conversation?.apply {
             if (label != prediction) id = null

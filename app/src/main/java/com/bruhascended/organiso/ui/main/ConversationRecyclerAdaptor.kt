@@ -7,31 +7,21 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.bruhascended.organiso.ConversationActivity
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.ConversationComparator
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
+import kotlin.math.abs
 
 @SuppressLint("ResourceType")
 class ConversationRecyclerAdaptor(
     private val mContext: Context
 ): SelectionRecyclerAdaptor<Conversation, ConversationViewHolder>(ConversationComparator) {
 
-    companion object{
-        val colorRes: Array<Int> = arrayOf(
-            R.color.red, R.color.purple, R.color.blue, R.color.teal,
-            R.color.green, R.color.yellow, R.color.orange
-        )
-    }
-
-    private val colors: Array<Int> = Array(colorRes.size) {
-        ContextCompat.getColor(mContext, colorRes[it])
-    }
-
+    private val colors = mContext.resources.getIntArray(R.array.colors)
     lateinit var selectionManager: ListSelectionManager<Conversation>
 
     private fun onItemClickListener(it: ConversationViewHolder) {
@@ -90,6 +80,7 @@ class ConversationRecyclerAdaptor(
         holder.apply {
             imageView.setBackgroundColor(colors[absoluteAdapterPosition % colors.size])
             conversation = getItem(position) ?: return
+            imageView.setBackgroundColor(colors[abs(conversation.hashCode()) % colors.size])
             onBind()
             root.apply {
                 stopBgAnim()

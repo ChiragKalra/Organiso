@@ -6,4 +6,34 @@
         <item>Block</item>
         <item>Delete</item>
     </string-array>
+
+    <string-array name="labels">
+        <item>Personal</item>
+        <item>Important</item>
+        <item>Transactions</item>
+        <item>Promotions</item>
+        <item>Spam</item>
+        <item>Blocked</item>
+    </string-array>
+
+    <string-array name="label_descriptions">
+        <item>Personal messages sent by contacts</item>
+        <item>Important messages</item>
+        <item>Transactional messages like financial statements, orders</item>
+        <item>Advertisements</item>
+        <item>Probably fraud</item>
+        <item>Blocked</item>
+    </string-array>
+
+    <array name="colors">
+        <item>@color/red</item>
+        <item>@color/purple</item>
+        <item>@color/blue</item>
+        <item>@color/teal</item>
+        <item>@color/green</item>
+        <item>@color/yellow</item>
+        <item>@color/orange</item>
+    </array>
+
+
 </resources>

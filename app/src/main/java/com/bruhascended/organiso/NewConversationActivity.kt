@@ -20,7 +20,7 @@ import com.bruhascended.core.db.ContactsProvider
 import com.bruhascended.core.db.Contact
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
@@ -51,11 +51,6 @@ import java.util.*
  */
 
 class NewConversationActivity : MediaPreviewActivity() {
-
-    companion object {
-        const val TYPE_MULTI = "multipart/*"
-        const val EXTRA_MESSAGES = "MESSAGES"
-    }
 
     private lateinit var mContext: Context
     private lateinit var cm: ContactsManager

@@ -2,10 +2,9 @@ package com.bruhascended.organiso
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_SPAM
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryFragment
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 import kotlinx.android.synthetic.main.activity_conversation.toolbar
 
 /*
@@ -27,10 +26,6 @@ import kotlinx.android.synthetic.main.activity_conversation.toolbar
 
 class ExtraCategoryActivity : AppCompatActivity() {
 
-    companion object {
-        const val EXTRA_LABEL = "LABEL"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setPrefTheme()
@@ -39,9 +34,9 @@ class ExtraCategoryActivity : AppCompatActivity() {
         val label = intent.getIntExtra(EXTRA_LABEL, LABEL_SPAM)
 
         setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.setTitle(ARR_LABEL_STR[label])
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.title = resources.getStringArray(R.array.labels)[label]
 
         if (savedInstanceState == null) {
             val newFragment = CategoryFragment.newInstance(label)

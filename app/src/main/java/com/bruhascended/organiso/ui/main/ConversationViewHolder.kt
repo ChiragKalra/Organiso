@@ -18,8 +18,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.QuickContactBadge
 import android.widget.TextView
-import com.bruhascended.core.data.ContactsManager.Companion.ACTION_UPDATE_DP
-import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.DateTimeProvider

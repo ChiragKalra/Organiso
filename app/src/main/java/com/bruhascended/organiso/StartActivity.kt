@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
 import android.provider.Telephony
-import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.SMSManager
 import com.bruhascended.organiso.notifications.ChannelManager
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_PERMS
+import com.bruhascended.core.constants.*
 import kotlinx.android.synthetic.main.activity_start.*
 import kotlin.math.roundToInt
 
@@ -41,7 +40,6 @@ class StartActivity : AppCompatActivity() {
 
     companion object {
         const val TAG_WAKE_LOCK = "Organiso::Wakelock"
-        const val KEY_INIT = "InitDataOrganized"
     }
 
     private lateinit var sharedPref: SharedPreferences

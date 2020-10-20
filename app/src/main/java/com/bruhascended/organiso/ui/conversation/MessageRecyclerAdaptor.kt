@@ -7,7 +7,7 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageComparator
@@ -15,7 +15,6 @@ import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
-import com.bruhascended.organiso.common.MediaPreviewActivity.Companion.getMimeType
 import java.io.File
 
 /*

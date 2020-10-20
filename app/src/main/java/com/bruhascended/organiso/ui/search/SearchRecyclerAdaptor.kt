@@ -5,10 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.*
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_FOOTER
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_HEADER
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_RECEIVED
-import com.bruhascended.organiso.SearchActivity.Companion.TYPE_MESSAGE_SENT
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
 

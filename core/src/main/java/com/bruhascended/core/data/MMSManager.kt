@@ -7,11 +7,7 @@ import android.net.Uri
 import android.provider.Telephony
 import android.telephony.TelephonyManager
 import android.webkit.MimeTypeMap
-import com.bruhascended.core.data.SMSManager.Companion.ACTION_NEW_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_PERSONAL
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_INBOX
-import com.bruhascended.core.data.SMSManager.Companion.MESSAGE_TYPE_SENT
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory

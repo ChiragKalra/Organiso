@@ -10,22 +10,12 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.work.*
-import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
-import com.bruhascended.core.data.SMSManager.Companion.EXTRA_MESSAGE
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_TRANSACTIONS
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_COPY
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.DELAY_OTP_DELETE
 import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION_JSON
-import com.bruhascended.organiso.notifications.MessageNotificationManager.Companion.ACTION_DELETE_OTP
-import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_NOTIFICATION_ID
-import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.EXTRA_OTP
-import com.bruhascended.organiso.settings.MessagesFragment.Companion.PREF_COPY_OTP
-import com.bruhascended.organiso.settings.MessagesFragment.Companion.PREF_DELETE_OTP
 import java.util.concurrent.TimeUnit
 
 class OtpNotificationManager (
@@ -93,7 +83,7 @@ class OtpNotificationManager (
 
         if (prefs.getBoolean(PREF_DELETE_OTP, false)) {
             val request = OneTimeWorkRequest.Builder(OtpDeleteWork::class.java)
-                .setInitialDelay(DELAY_OTP_DELETE, TimeUnit.MINUTES)
+                .setInitialDelay(15, TimeUnit.MINUTES)
                 .setInputData(Data.Builder()
                     .putLong(EXTRA_TIME, message.time)
                     .putString(EXTRA_SENDER, conversation.clean)

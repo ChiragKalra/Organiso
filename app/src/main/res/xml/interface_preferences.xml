@@ -9,7 +9,7 @@
             app:defaultValue="false"
             app:icon="@drawable/ic_theme"
             app:key="dark_theme"
-            app:allowDividerBelow="false"
+            app:allowDividerBelow="true"
             app:title="@string/dark_theme" />
     </PreferenceCategory>
 
@@ -27,47 +27,12 @@
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
         app:title="@string/swipe_action">
-        <com.bruhascended.organiso.common.RadioButtonPreference
-            android:title="@string/no_action"
-            android:key="action_null"
-            app:allowDividerBelow="false"
-            android:icon="@drawable/ic_swipe_off"
-            android:defaultValue="false"/>
-        <com.bruhascended.organiso.common.RadioButtonPreference
-            android:title="@string/navigate_between_categories"
-            android:icon="@drawable/ic_swipe_tabs"
-            app:allowDividerBelow="false"
-            android:key="action_navigate"
-            android:defaultValue="true"/>
-        <com.bruhascended.organiso.common.RadioButtonPreference
-            android:title="@string/custom__conversation_actions"
-            android:key="action_custom"
-            android:icon="@drawable/ic_swipe_custom"
-            app:allowDividerBelow="false"
-            android:defaultValue="false"/>
+        <Preference
+            app:icon="@drawable/ic_swipe_custom"
+            app:key="swipe_header"
+            app:title="@string/custom_swipe_action" />
     </PreferenceCategory>
-    <PreferenceCategory
-        android:dependency="action_custom"
-        android:key="action_category"
-        app:allowDividerBelow="false"
-        android:layout="@layout/view_category_pref"
-        app:title="@string/custom_actions">
-        <ListPreference
-            app:allowDividerBelow="false"
-            android:dependency="action_custom"
-            android:icon="@drawable/ic_swipe_left"
-            android:title="@string/choose_left_swipe"
-            android:key="action_left_swipe"
-            android:entries="@array/actions"
-            android:entryValues="@array/actions" />
-        <ListPreference
-            app:allowDividerBelow="false"
-            android:dependency="action_custom"
-            android:icon="@drawable/ic_swipe_right"
-            android:title="@string/choose_right_swipe"
-            android:key="action_right_swipe"
-            android:entries="@array/actions"
-            android:entryValues="@array/actions" />
-    </PreferenceCategory>
+
+
 
 </PreferenceScreen>

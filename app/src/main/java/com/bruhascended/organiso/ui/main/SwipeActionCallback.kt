@@ -1,4 +1,4 @@
-package com.bruhascended.organiso.ui.conversation
+package com.bruhascended.organiso.ui.main
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -6,34 +6,49 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.ACTION_BLOCK
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.ACTION_DELETE
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.ACTION_REPORT
-import com.bruhascended.organiso.ui.main.ConversationViewHolder
-import kotlin.math.abs
+import com.bruhascended.core.constants.*
+import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
+import java.lang.Integer.min
 import kotlin.math.roundToInt
 
+/*
+                    Copyright 2020 Chirag Kalra
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
 
 class SwipeActionCallback(
     private val mContext: Context,
     private val cancelCallBack: (RecyclerView.ViewHolder?) -> Unit,
     private val leftAction: String,
     private val rightAction: String,
+    private val swipeStrength: Int,
 ): ItemTouchHelper.SimpleCallback(
     0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
 ) {
+    private val margin = 16.toPx()
 
-    private val leftIcon =
+    private val rightIcon =
         ResourcesCompat.getDrawable(
             mContext.resources, getDrawableId(leftAction), mContext.theme
         )!!.toBitmap()
 
-    private val rightIcon =
+    private val leftIcon =
         ResourcesCompat.getDrawable(
             mContext.resources, getDrawableId(rightAction), mContext.theme
         )!!.toBitmap()
@@ -71,8 +86,7 @@ class SwipeActionCallback(
         return bitmap
     }
 
-    private fun Int.toPx() =
-        (this * mContext.resources.displayMetrics.density).roundToInt()
+    private fun Int.toPx() = this * mContext.resources.displayMetrics.density
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -104,6 +118,10 @@ class SwipeActionCallback(
         )
     }
 
+    override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
+        return defaultValue * swipeStrength / 2f
+    }
+
     override fun onChildDraw(
         c: Canvas,
         recyclerView: RecyclerView,
@@ -115,48 +133,67 @@ class SwipeActionCallback(
     ) {
         viewHolder as ConversationViewHolder
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-            val itemView: View = viewHolder.itemView
             val p = Paint()
-            if (dX > 0) {
-                p.color = mContext.getColor(getColorId(rightAction))
+            viewHolder.itemView.apply {
+                if (dX > 0) {
+                    p.color = mContext.getColor(getColorId(rightAction))
+                    c.drawRect(
+                        left.toFloat(),
+                        top.toFloat(),
+                        dX,
+                        bottom.toFloat(),
+                        p
+                    )
 
-                c.drawRect(
-                    itemView.left.toFloat(),
-                    itemView.top.toFloat(),
-                    dX,
-                    itemView.bottom.toFloat(),
-                    p
-                )
-                c.drawBitmap(
-                    rightIcon,
-                    itemView.left.toFloat() + 16.toPx(),
-                    itemView.top.toFloat() + (itemView.bottom.toFloat() -
-                            itemView.top.toFloat() - rightIcon.height) / 2,
-                    p
-                )
-            } else if (dX < 0) {
-                p.color = mContext.getColor(getColorId(leftAction))
+                    val width = min(leftIcon.width, (dX - margin).roundToInt())
+                    if (width > 0) {
+                        val cropped = Bitmap.createBitmap(
+                            leftIcon,
+                            0,
+                            0,
+                            width,
+                            leftIcon.height
+                        )
 
-                c.drawRect(
-                    itemView.right.toFloat() + dX,
-                    itemView.top.toFloat(),
-                    itemView.right.toFloat(),
-                    itemView.bottom.toFloat(),
-                    p
-                )
+                        c.drawBitmap(
+                            cropped,
+                            left + margin,
+                            top + (bottom - top - cropped.height) / 2f,
+                            p
+                        )
+                    }
+                } else if (dX < 0) {
+                    p.color = mContext.getColor(getColorId(leftAction))
 
-                c.drawBitmap(
-                    leftIcon,
-                    itemView.right.toFloat() - 16.toPx() - leftIcon.width,
-                    itemView.top.toFloat() + (itemView.bottom.toFloat() -
-                            itemView.top.toFloat() - leftIcon.height) / 2,
-                    p
-                )
+                    c.drawRect(
+                        right + dX,
+                        top.toFloat(),
+                        right.toFloat(),
+                        bottom.toFloat(),
+                        p
+                    )
+                    val width = min(rightIcon.width, (-margin - dX).roundToInt())
+                    if (width > 0) {
+                        val cropped = Bitmap.createBitmap(
+                            rightIcon,
+                            rightIcon.width - width,
+                            0,
+                            width,
+                            rightIcon.height
+                        )
+
+                        c.drawBitmap(
+                            cropped,
+                            right - margin - cropped.width,
+                            top + (bottom - top - cropped.height) / 2f,
+                            p
+                        )
+                    }
+                }
+
+                alpha = 1 - dX/ width
+                translationX = dX
             }
-
-            val alpha = 1 - abs(dX) / viewHolder.itemView.width.toFloat()
-            viewHolder.itemView.alpha = alpha
-            viewHolder.itemView.translationX = dX
         } else {
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
         }

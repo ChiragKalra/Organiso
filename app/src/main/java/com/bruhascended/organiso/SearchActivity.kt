@@ -11,8 +11,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_CONVERSATION
-import com.bruhascended.organiso.ConversationActivity.Companion.EXTRA_MESSAGE_ID
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.ContactsProvider
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
@@ -44,17 +43,6 @@ import java.util.*
 */
 
 class SearchActivity : AppCompatActivity() {
-
-    companion object {
-        const val TYPE_HEADER = 4
-        const val TYPE_CONVERSATION = 0
-        const val TYPE_CONTACT = 1
-        const val TYPE_MESSAGE_SENT = 2
-        const val TYPE_MESSAGE_RECEIVED = 3
-        const val TYPE_FOOTER = 5
-
-        const val HEADER_CONTACTS = 42
-    }
 
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences

@@ -16,7 +16,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
+import com.bruhascended.core.constants.*
 import java.util.*
 
 /*
@@ -44,10 +44,6 @@ class RecyclerViewAdapter(
 ): RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder>(),
     ItemMoveCallback.ItemTouchHelperContract
 {
-    companion object {
-        const val CATEGORY_VISIBLE = 100
-        const val CATEGORY_HIDDEN = 101
-    }
 
     interface StartDragListener {
         fun requestDrag(viewHolder: RecyclerView.ViewHolder)
@@ -72,11 +68,12 @@ class RecyclerViewAdapter(
     @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val category = data[position] == CATEGORY_HIDDEN || data[position] == CATEGORY_VISIBLE
-        val string = mContext.getString( when {
-            data[position] == CATEGORY_HIDDEN -> R.string.hidden_category
-            data[position] == CATEGORY_VISIBLE -> R.string.visible_category
-            else -> ARR_LABEL_STR[data[position]]
-        })
+        val labelArr = mContext.resources.getStringArray(R.array.labels)
+        val string = when {
+            data[position] == CATEGORY_HIDDEN -> mContext.getString(R.string.hidden_category)
+            data[position] == CATEGORY_VISIBLE -> mContext.getString(R.string.visible_category)
+            else -> labelArr[data[position]]
+        }
 
         holder.apply {
             labelInt = data[position]

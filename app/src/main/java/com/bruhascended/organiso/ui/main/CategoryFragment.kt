@@ -22,12 +22,7 @@ import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
 import com.bruhascended.organiso.common.ScrollEffectFactory
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.ACTION_MOVE
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_ACTION_CUSTOM
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_CUSTOM_LEFT
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_CUSTOM_RIGHT
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_DARK_THEME
-import com.bruhascended.organiso.ui.conversation.SwipeActionCallback
+import com.bruhascended.core.constants.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -189,10 +184,13 @@ class CategoryFragment: Fragment(), ConversationSelectionListener.SimpleActionMo
                 cancelCallBack,
                 model.prefs.getString(PREF_CUSTOM_LEFT, ACTION_MOVE)!!,
                 model.prefs.getString(PREF_CUSTOM_RIGHT, ACTION_MOVE)!!,
+                model.prefs.getInt(PREF_CUSTOM_STRENGTH, 3),
             )
             swipeHelper?.attachToRecyclerView(null)
             swipeHelper = ItemTouchHelper(callback)
             swipeHelper?.attachToRecyclerView(recyclerView)
+        } else {
+            swipeHelper?.attachToRecyclerView(null)
         }
     }
 

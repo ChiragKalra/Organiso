@@ -19,7 +19,6 @@ import com.bruhascended.core.db.moveTo
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.core.db.MainDaoProvider
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
-import com.bruhascended.organiso.ui.main.MainViewModel.Companion.ARR_LABEL_STR
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -160,8 +159,11 @@ class ConversationSelectionListener(
             }
             R.id.action_move -> {
                 val choices = ArrayList<String>().apply {
+                    val labelArr = mContext.resources.getStringArray(R.array.labels)
                     for (i in 0..3) {
-                        if (i!=label) add(mContext.resources.getString(ARR_LABEL_STR[i]))
+                        if (i!=label) {
+                            add(labelArr[i])
+                        }
                     }
                 }.toTypedArray()
                 var selection = 0

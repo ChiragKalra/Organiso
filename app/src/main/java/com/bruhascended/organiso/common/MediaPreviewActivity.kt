@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Parcelable
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -37,12 +36,6 @@ import kotlinx.coroutines.launch
 */
 
 abstract class MediaPreviewActivity : AppCompatActivity() {
-    companion object {
-        fun getMimeType(url: String): String {
-            val extension = MimeTypeMap.getFileExtensionFromUrl(url)
-            return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: ""
-        }
-    }
 
     private val mp = MediaPlayer()
     protected abstract var mVideoView: VideoView

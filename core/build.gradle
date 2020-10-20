@@ -57,6 +57,7 @@ dependencies {
 
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
+
     implementation 'io.michaelrocks:libphonenumber-android:8.12.6'
 
     implementation 'com.google.firebase:firebase-analytics:17.6.0'

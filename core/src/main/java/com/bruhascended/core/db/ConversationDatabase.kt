@@ -6,9 +6,7 @@ import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil
 import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.room.*
-import com.bruhascended.core.data.SMSManager.Companion.ARR_LABEL_STR
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_NONE
-import com.bruhascended.core.data.SMSManager.Companion.LABEL_PERSONAL
+import com.bruhascended.core.constants.*
 import com.google.gson.Gson
 import java.io.Serializable
 
@@ -129,8 +127,18 @@ abstract class ConversationDatabase : RoomDatabase() {
 }
 
 class ConversationDbFactory (private val mContext: Context) {
+
+    private val arrLabel = arrayOf (
+        "Personal",
+        "Important",
+        "Transactions",
+        "Promotions",
+        "Spam",
+        "Blocked"
+    )
+
     fun of (label: Int, mainThread: Boolean = true) = Room.databaseBuilder(
-        mContext, ConversationDatabase::class.java, ARR_LABEL_STR[label]
+        mContext, ConversationDatabase::class.java, arrLabel[label]
     ).apply {
         if (mainThread) allowMainThreadQueries()
     }.build()

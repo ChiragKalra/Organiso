@@ -18,14 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.FileProvider
 import com.bruhascended.organiso.NewConversationActivity
-import com.bruhascended.organiso.NewConversationActivity.Companion.EXTRA_MESSAGES
-import com.bruhascended.organiso.NewConversationActivity.Companion.TYPE_MULTI
+import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.organiso.common.ListSelectionManager
-import com.bruhascended.organiso.common.MediaPreviewActivity.Companion.getMimeType
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
