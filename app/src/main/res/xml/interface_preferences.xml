@@ -30,11 +30,13 @@
         <com.bruhascended.organiso.common.RadioButtonPreference
             android:title="@string/no_action"
             android:key="action_null"
+            app:allowDividerBelow="false"
             android:icon="@drawable/ic_swipe_off"
             android:defaultValue="false"/>
         <com.bruhascended.organiso.common.RadioButtonPreference
             android:title="@string/navigate_between_categories"
             android:icon="@drawable/ic_swipe_tabs"
+            app:allowDividerBelow="false"
             android:key="action_navigate"
             android:defaultValue="true"/>
         <com.bruhascended.organiso.common.RadioButtonPreference
@@ -45,16 +47,22 @@
             android:defaultValue="false"/>
     </PreferenceCategory>
     <PreferenceCategory
+        android:dependency="action_custom"
         android:key="action_category"
+        app:allowDividerBelow="false"
         android:layout="@layout/view_category_pref"
         app:title="@string/custom_actions">
         <ListPreference
+            app:allowDividerBelow="false"
+            android:dependency="action_custom"
             android:icon="@drawable/ic_swipe_left"
             android:title="@string/choose_left_swipe"
             android:key="action_left_swipe"
             android:entries="@array/actions"
             android:entryValues="@array/actions" />
         <ListPreference
+            app:allowDividerBelow="false"
+            android:dependency="action_custom"
             android:icon="@drawable/ic_swipe_right"
             android:title="@string/choose_right_swipe"
             android:key="action_right_swipe"

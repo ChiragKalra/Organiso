@@ -7,7 +7,6 @@ import androidx.preference.*
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.RadioButtonPreference
 
-
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -35,7 +34,6 @@ class InterfaceFragment : PreferenceFragmentCompat() {
         const val PREF_CUSTOM_LEFT = "action_left_swipe"
         const val PREF_CUSTOM_RIGHT = "action_right_swipe"
 
-        const val ACTION_MUTE = "Mute"
         const val ACTION_MOVE = "Move"
         const val ACTION_REPORT = "Report Spam"
         const val ACTION_BLOCK = "Block"

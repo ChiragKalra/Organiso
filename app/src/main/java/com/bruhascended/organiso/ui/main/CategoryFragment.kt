@@ -14,17 +14,24 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Conversation
+import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
 import com.bruhascended.organiso.common.ScrollEffectFactory
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.ACTION_MOVE
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_ACTION_CUSTOM
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_CUSTOM_LEFT
+import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_CUSTOM_RIGHT
 import com.bruhascended.organiso.settings.InterfaceFragment.Companion.PREF_DARK_THEME
+import com.bruhascended.organiso.ui.conversation.SwipeActionCallback
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -44,7 +51,7 @@ import kotlinx.coroutines.launch
 */
 
 @Suppress("UNCHECKED_CAST")
-class CategoryFragment: Fragment() {
+class CategoryFragment: Fragment(), ConversationSelectionListener.SimpleActionModeCallBack {
 
     companion object {
         fun newInstance(label: Int) : CategoryFragment {
@@ -63,7 +70,10 @@ class CategoryFragment: Fragment() {
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var mListener: ConversationSelectionListener
     private lateinit var recyclerView: RecyclerView
+    private var swipeHelper: ItemTouchHelper? = null
 
+    private var label: Int = 0
+    private val model: MainViewModel by activityViewModels()
 
     private val dataObserver = object: RecyclerView.AdapterDataObserver() {
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
@@ -81,11 +91,13 @@ class CategoryFragment: Fragment() {
         }
     }
 
-    private var label: Int = 0
-    private val model: MainViewModel by activityViewModels()
-
     class FooterDecoration(private val footerHeight: Int) : RecyclerView.ItemDecoration() {
-        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
             val adapter = parent.adapter ?: return
             when (parent.getChildAdapterPosition(view)) {
                 adapter.itemCount - 1 ->
@@ -107,8 +119,16 @@ class CategoryFragment: Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val mContext = requireActivity()
-        val dark = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(PREF_DARK_THEME, false)
-        inflater.cloneInContext(ContextThemeWrapper(mContext, if (dark) R.style.DarkTheme else R.style.LightTheme))
+        val dark = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(
+            PREF_DARK_THEME,
+            false
+        )
+        inflater.cloneInContext(
+            ContextThemeWrapper(
+                mContext,
+                if (dark) R.style.DarkTheme else R.style.LightTheme
+            )
+        )
         val root = inflater.inflate(R.layout.fragment_main, container, false)
         recyclerView = root.findViewById(R.id.listView)
         val textView: TextView = root.findViewById(R.id.emptyList)
@@ -121,8 +141,8 @@ class CategoryFragment: Fragment() {
             model.categoryFlows[label].cachedIn(mContext.lifecycleScope)
 
         mAdaptor = ConversationRecyclerAdaptor(mContext)
-        mListener =  ConversationSelectionListener(mContext, label)
-        selectionManager = ListSelectionManager (
+        mListener =  ConversationSelectionListener(mContext, label, this)
+        selectionManager = ListSelectionManager(
             mContext as AppCompatActivity,
             mAdaptor as SelectionRecyclerAdaptor<Conversation, RecyclerView.ViewHolder>,
             mListener
@@ -151,7 +171,36 @@ class CategoryFragment: Fragment() {
                 mAdaptor.submitData(it)
             }
         }
+
         return root
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (model.prefs.getBoolean(PREF_ACTION_CUSTOM, false)) {
+            val cancelCallBack: (RecyclerView.ViewHolder?) -> Unit = {
+                if (it != null) {
+                    mAdaptor.notifyItemChanged(it.absoluteAdapterPosition)
+                }
+            }
+
+            val callback = SwipeActionCallback(
+                requireContext(),
+                cancelCallBack,
+                model.prefs.getString(PREF_CUSTOM_LEFT, ACTION_MOVE)!!,
+                model.prefs.getString(PREF_CUSTOM_RIGHT, ACTION_MOVE)!!,
+            )
+            swipeHelper?.attachToRecyclerView(null)
+            swipeHelper = ItemTouchHelper(callback)
+            swipeHelper?.attachToRecyclerView(recyclerView)
+        }
+    }
+
+    override fun onCreateActionMode() {
+        swipeHelper?.attachToRecyclerView(null)
+    }
+
+    override fun onDestroyActionMode() {
+        swipeHelper?.attachToRecyclerView(recyclerView)
+    }
 }

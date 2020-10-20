@@ -17,6 +17,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.*
 import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.data.ContactsManager.Companion.EXTRA_SENDER
@@ -55,8 +56,10 @@ import kotlin.math.abs
 class ConversationMenuOptions (
     private val mContext: Context,
     private val conversation: Conversation,
-    private val analyticsLogger: AnalyticsLogger,
-    private val searchResult: ActivityResultLauncher<Intent>
+    private val analyticsLogger: AnalyticsLogger = AnalyticsLogger(mContext),
+    private val searchResult: ActivityResultLauncher<Intent>? = null,
+    private val cancelCallBack: ((RecyclerView.ViewHolder?) -> Unit)? = null,
+    private val itemViewHolder: RecyclerView.ViewHolder? = null,
 ) {
 
     private fun getRoundedCornerBitmap(bitmap: Bitmap): Bitmap {
@@ -104,11 +107,10 @@ class ConversationMenuOptions (
         }
     }
 
-    fun onOptionsItemSelected(item: MenuItem): Boolean {
-        (mContext as AppCompatActivity).apply {
+    fun onOptionsItemSelected(item: MenuItem? = null, itemId: Int = 0): Boolean {
+        mContext.apply {
             val display = conversation.name ?: conversation.address
-            if (item.itemId == android.R.id.home) onBackPressed()
-            when (item.itemId) {
+            when (item?.itemId ?: itemId) {
                 R.id.action_block -> {
                     AlertDialog.Builder(mContext)
                         .setTitle(getString(R.string.block_sender_query, display))
@@ -121,9 +123,10 @@ class ConversationMenuOptions (
                                 Toast.LENGTH_LONG
                             ).show()
                             dialog.dismiss()
-                        }
-                        .setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }
-                        .create().show()
+                        }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                            cancelCallBack?.invoke(itemViewHolder)
+                            dialog.dismiss()
+                        }.create().show()
                 }
                 R.id.action_report_spam -> {
                     AlertDialog.Builder(mContext)
@@ -138,9 +141,10 @@ class ConversationMenuOptions (
                                 Toast.LENGTH_LONG
                             ).show()
                             dialog.dismiss()
-                        }
-                        .setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }
-                        .create().show()
+                        }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                            cancelCallBack?.invoke(itemViewHolder)
+                            dialog.dismiss()
+                        }.create().show()
                 }
                 R.id.action_delete -> {
                     AlertDialog.Builder(mContext)
@@ -154,10 +158,13 @@ class ConversationMenuOptions (
                                 Toast.LENGTH_LONG
                             ).show()
                             dialog.dismiss()
-                            finish()
-                        }
-                        .setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }
-                        .create().show()
+                            if (itemViewHolder == null) {
+                                (mContext as AppCompatActivity).finish()
+                            }
+                        }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                            cancelCallBack?.invoke(itemViewHolder)
+                            dialog.dismiss()
+                        }.create().show()
                 }
                 R.id.action_move -> {
                     val choices = ArrayList<String>().apply {
@@ -171,8 +178,7 @@ class ConversationMenuOptions (
                         .setTitle(getString(R.string.move_conversation_to))
                         .setSingleChoiceItems(choices, selection) { _, select ->
                             selection = select + if (select >= conversation.label) 1 else 0
-                        }
-                        .setPositiveButton(getText(R.string.move)) { dialog, _ ->
+                        }.setPositiveButton(getText(R.string.move)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_$selection")
                             conversation.moveTo(selection, mContext)
                             Toast.makeText(
@@ -181,16 +187,18 @@ class ConversationMenuOptions (
                                 Toast.LENGTH_LONG
                             ).show()
                             dialog.dismiss()
-                        }
-                        .setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }
-                        .create().show()
+                        }.setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                            cancelCallBack?.invoke(itemViewHolder)
+                            dialog.dismiss()
+                        }.create().show()
                 }
                 R.id.action_search -> {
-                    searchResult.launch(
+                    searchResult?.launch(
                         Intent(mContext, SearchActivity::class.java).apply {
                             putExtra(EXTRA_SENDER, conversation.clean)
                         }
                     )
+                    this as AppCompatActivity
                     overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
                 }
                 R.id.action_mute -> {
@@ -199,8 +207,9 @@ class ConversationMenuOptions (
                         MainDaoProvider(mContext).getMainDaos()[label].update(this)
                         GlobalScope.launch {
                             delay(300)
+                            this as AppCompatActivity
                             runOnUiThread {
-                                item.title = if (isMuted)
+                                item?.title = if (isMuted)
                                     getString(R.string.unMute) else getString(R.string.mute)
                             }
                         }
@@ -238,6 +247,7 @@ class ConversationMenuOptions (
                     }
                 }
                 android.R.id.home -> {
+                    this as AppCompatActivity
                     startActivityIfNeeded(
                         Intent(mContext, MainActivity::class.java)
                             .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0

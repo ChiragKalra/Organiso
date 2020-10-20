@@ -40,8 +40,14 @@ import kotlinx.coroutines.launch
 
 class ConversationSelectionListener(
     private val mContext: Context,
-    private val label: Int
+    private val label: Int,
+    private val actionModeCallBack: SimpleActionModeCallBack,
 ): ListSelectionManager.SelectionCallBack<Conversation> {
+
+    interface SimpleActionModeCallBack {
+        fun onCreateActionMode()
+        fun onDestroyActionMode()
+    }
 
     private var actionMenu: Menu? = null
     private lateinit var muteItem: MenuItem
@@ -86,6 +92,7 @@ class ConversationSelectionListener(
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+        actionModeCallBack.onCreateActionMode()
         mode.menuInflater.inflate(R.menu.conversation_selection, menu)
         return true
     }
@@ -186,5 +193,8 @@ class ConversationSelectionListener(
         return true
     }
 
-    override fun onDestroyActionMode(mode: ActionMode) = selectionManager.close()
+    override fun onDestroyActionMode(mode: ActionMode) {
+        actionModeCallBack.onDestroyActionMode()
+        selectionManager.close()
+    }
 }

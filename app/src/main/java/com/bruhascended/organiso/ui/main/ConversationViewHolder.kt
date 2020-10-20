@@ -44,6 +44,9 @@ class ConversationViewHolder(
     val messageTextView: TextView = root.findViewById(R.id.lastMessage)
     val timeTextView: TextView = root.findViewById(R.id.time)
 
+    val isInitialised
+        get() = ::conversation.isInitialized
+
     lateinit var conversation: Conversation
 
     var defaultBackground: Drawable

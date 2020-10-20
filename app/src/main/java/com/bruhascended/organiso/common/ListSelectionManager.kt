@@ -1,5 +1,3 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package com.bruhascended.organiso.common
 
 import androidx.appcompat.app.AppCompatActivity
@@ -10,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.max
 import kotlin.math.min
 
-
+@Suppress("UNCHECKED_CAST")
 class ListSelectionManager<T: Any> (
     private val activity: AppCompatActivity,
     private val adaptor: SelectionRecyclerAdaptor<T, RecyclerView.ViewHolder>,

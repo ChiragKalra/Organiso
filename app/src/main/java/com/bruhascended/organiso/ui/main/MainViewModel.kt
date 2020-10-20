@@ -49,6 +49,7 @@ class MainViewModel(
     var mContactsProvider: ContactsProvider = ContactsProvider(mApp)
     var mSmsManager: SMSManager = SMSManager(mApp)
 
+
     lateinit var visibleCategories: Array<Int>
     lateinit var hiddenCategories: Array<Int>
     lateinit var customTabLabels: Array<String>

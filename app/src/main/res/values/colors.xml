@@ -29,6 +29,12 @@
     <color name="text_hint_light">#393939</color>
     <color name="headerTextColorLight">#24674C</color>
 
+    <!-- Swipe Action Colors -->
+    <color name="move">#2E7D32</color>
+    <color name="report">#D84315</color>
+    <color name="block">#C62828</color>
+    <color name="delete">#C62828</color>
+
     <!-- neutral colors -->
     <color name="red">#C62828</color>
     <color name="yellow">#FF8F00</color>

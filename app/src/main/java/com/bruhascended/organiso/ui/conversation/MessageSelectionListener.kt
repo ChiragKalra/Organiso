@@ -51,7 +51,7 @@ import java.io.File
 @SuppressLint("InflateParams")
 class MessageSelectionListener(
     private val mContext: Context,
-    private val messageDao: MessageDao,
+    private val messageDao: MessageDao
 ): ListSelectionManager.SelectionCallBack<Message> {
 
     private lateinit var shareMenuItem: MenuItem
@@ -183,5 +183,7 @@ class MessageSelectionListener(
         return true
     }
 
-    override fun onDestroyActionMode(mode: ActionMode) = selectionManager.close()
+    override fun onDestroyActionMode(mode: ActionMode) {
+        selectionManager.close()
+    }
 }
