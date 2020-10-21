@@ -20,7 +20,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
+import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryPagerAdapter
 import com.bruhascended.organiso.ui.main.MainViewModel
 import com.google.android.material.appbar.AppBarLayout
@@ -45,10 +45,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 */
 
 class MainActivity : AppCompatActivity() {
+    private val mViewModel: MainViewModel by viewModels()
 
     private lateinit var mContext: Context
     private lateinit var inputManager: InputMethodManager
-    private lateinit var mViewModel: MainViewModel
 
     private val onSearchCanceled = registerForActivityResult(StartActivityForResult()) {
         if (it.resultCode == RESULT_CANCELED) {
@@ -94,9 +94,6 @@ class MainActivity : AppCompatActivity() {
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-        val temp by viewModels<MainViewModel>()
-        mViewModel = temp
 
         setupViewPager()
         fab.setOnClickListener {
@@ -145,8 +142,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             R.id.action_settings -> {
-                val intent = Intent(mContext, SettingsActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(mContext, SettingsActivity::class.java))
+            }
+            R.id.action_saved -> {
+                startActivity(Intent(mContext, SavedActivity::class.java))
             }
             else -> {
                 val intent = Intent(mContext, ExtraCategoryActivity::class.java)

@@ -9,22 +9,22 @@
 
     <!-- dark mode -->
     <color name="message_bg_accent_dark">#384C4E</color>
-    <color name="background_dark">#000000</color>
+    <color name="background_dark">#0C0C0C</color>
     <color name="list_item_background_dark">#202020</color>
     <color name="selection_background_dark">#2E2E2E</color>
 
-    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_primary_dark">#EEEEEE</color>
     <color name="text_secondary_dark">#91C8B7</color>
     <color name="text_hint_dark">#9F9F9F</color>
     <color name="headerTextColorDark">#30FFAC</color>
 
     <!-- light mode -->
     <color name="message_bg_accent_light">#9ECFC9</color>
-    <color name="background_light">#FFFFFF</color>
-    <color name="list_item_background_light">#DADADA</color>
+    <color name="background_light">#F3F3F3</color>
+    <color name="list_item_background_light">#DBDBDB</color>
     <color name="selection_background_light">#EAFFE4</color>
 
-    <color name="text_primary_light">#000000</color>
+    <color name="text_primary_light">#101010</color>
     <color name="text_secondary_light">#1D302E</color>
     <color name="text_hint_light">#393939</color>
     <color name="headerTextColorLight">#24674C</color>

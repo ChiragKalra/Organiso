@@ -6,10 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.telephony.SmsMessage
-import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.data.SMSManager
 import com.bruhascended.core.constants.*
+import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.notifications.MessageNotificationManager
 
 /*

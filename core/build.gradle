@@ -52,7 +52,6 @@ dependencies {
     api "androidx.room:room-ktx:2.3.0-alpha02"
     kapt "androidx.room:room-compiler:2.3.0-alpha02"
 
-    api 'com.google.code.gson:gson:2.8.6'
     api 'com.klinkerapps:android-smsmms:5.2.5'
 
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
@@ -60,6 +59,7 @@ dependencies {
 
     implementation 'io.michaelrocks:libphonenumber-android:8.12.6'
 
+    implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.google.firebase:firebase-analytics:17.6.0'
     implementation 'com.google.firebase:firebase-database:19.5.0'
     implementation 'com.google.firebase:firebase-storage:19.2.0'

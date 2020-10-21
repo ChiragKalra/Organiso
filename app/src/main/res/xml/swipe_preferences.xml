@@ -39,16 +39,16 @@
             android:icon="@drawable/ic_swipe_left"
             android:title="@string/choose_left_swipe"
             android:key="action_left_swipe"
-            android:entries="@array/actions"
-            android:entryValues="@array/actions" />
+            android:entries="@array/swipe_actions"
+            android:entryValues="@array/swipe_actions" />
         <ListPreference
             app:allowDividerBelow="false"
             android:dependency="action_custom"
             android:icon="@drawable/ic_swipe_right"
             android:title="@string/choose_right_swipe"
             android:key="action_right_swipe"
-            android:entries="@array/actions"
-            android:entryValues="@array/actions" />
+            android:entries="@array/swipe_actions"
+            android:entryValues="@array/swipe_actions" />
     </PreferenceCategory>
 
 

@@ -2,7 +2,6 @@ package com.bruhascended.organiso.settings
 
 import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import com.bruhascended.organiso.R
 import com.bruhascended.core.constants.*
@@ -25,14 +24,6 @@ import com.bruhascended.core.constants.*
 */
 
 class InterfaceFragment : PreferenceFragmentCompat() {
-
-    companion object {
-        fun AppCompatActivity.setPrefTheme() {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-            if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
-            else setTheme(R.style.LightTheme)
-        }
-    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.interface_preferences, rootKey)

@@ -1,39 +1,50 @@
-package com.bruhascended.organiso.ui.conversation
+package com.bruhascended.organiso.ui.saved
 
-import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
 import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.BackgroundColorSpan
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View.*
 import android.webkit.MimeTypeMap
 import android.widget.*
+import android.widget.TextView.TEXT_ALIGNMENT_VIEW_START
 import androidx.core.content.FileProvider
 import androidx.core.view.doOnDetach
+import com.bruhascended.core.constants.SAVED_TYPE_RECEIVED
 import com.bruhascended.organiso.R
-import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
+import com.bruhascended.core.db.Saved
 import com.bruhascended.organiso.common.DateTimeProvider
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
 
-@SuppressLint("ResourceType")
-class MessageViewHolder(
+/*
+                    Copyright 2020 Chirag Kalra
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
+
+class SavedViewHolder(
     private val mContext: Context,
     val root: View,
 ) : ScrollEffectFactory.ScrollEffectViewHolder(root) {
@@ -50,40 +61,11 @@ class MessageViewHolder(
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
     private val highlightColor = mContext.getColor(R.color.textHighLight)
 
-    lateinit var message: Message
-
-    var searchKey = ""
+    lateinit var message: Saved
 
     private val messageTextView: TextView = root.findViewById(R.id.message)
-    private val timeTextView: TextView = root.findViewById(R.id.time)
     val slider: SeekBar = root.findViewById(R.id.slider)
     val content: LinearLayout = root.findViewById(R.id.content)
-    private val statusTextView: TextView? = try {
-        root.findViewById(R.id.status)
-    } catch (e: Exception) {
-        null
-    }
-
-    var defaultBackground: Drawable
-    var selectedColor = 0
-    var backgroundColor = 0
-    var textColor = 0
-    var failed = false
-
-    init {
-        val tp = mContext.obtainStyledAttributes(intArrayOf(
-            R.attr.multiChoiceSelectorColor,
-            android.R.attr.selectableItemBackground,
-            R.attr.unreadTextColor,
-            R.attr.backgroundColor
-        ))
-        defaultBackground = tp.getDrawable(1)!!
-        selectedColor = tp.getColor(0, 0)
-        backgroundColor = tp.getColor(3, 0)
-        textColor = tp.getColor(2, 0)
-        tp.recycle()
-    }
-
 
     private fun getMimeType(url: String): String {
         val extension = MimeTypeMap.getFileExtensionFromUrl(url)
@@ -214,35 +196,17 @@ class MessageViewHolder(
         }
     }
 
-    fun onBind(retryEnabled: Boolean = false) {
+    fun onBind() {
         hideMedia()
 
-        messageTextView.text = if (!searchKey.isBlank()) SpannableString(message.text).apply {
-            val regex = Regex("\\b${searchKey}")
-            val matches = regex.findAll(message.text.toLowerCase(Locale.ROOT))
-            for (match in matches) {
-                val index = match.range
-                setSpan(BackgroundColorSpan(highlightColor), index.first, index.last+1, flag)
-            }
-        } else message.text
-        timeTextView.text = dtp.getFull(message.time)
-        timeTextView.alpha = 0f
+        content.setBackgroundResource(
+            if (message.type == SAVED_TYPE_RECEIVED)
+                R.drawable.bg_message else R.drawable.bg_message_out
+        )
 
-        if (message.type != 1) {
-            statusTextView!!.visibility = VISIBLE
-            statusTextView.setTextColor(textColor)
-            statusTextView.text =  when {
-                message.delivered -> mContext.getString(R.string.delivered)
-                message.type == 2 -> mContext.getString(R.string.sent)
-                message.type == 6 -> mContext.getString(R.string.queued)
-                else -> {
-                    failed = true
-                    statusTextView.setTextColor(mContext.getColor(R.color.red))
-                    if (retryEnabled) mContext.getString(R.string.failed_retry)
-                    else mContext.getString(R.string.failed)
-                }
-            }
-        }
+        messageTextView.text = message.text
+        messageTextView.textAlignment = if (message.type == SAVED_TYPE_RECEIVED)
+            TEXT_ALIGNMENT_VIEW_START else TEXT_ALIGNMENT_VIEW_END
 
         if (message.path != null) {
             showMedia()
@@ -250,37 +214,4 @@ class MessageViewHolder(
         }
 
     }
-
-    fun rangeSelectionAnim() {
-        backgroundAnimator = ValueAnimator.ofObject(
-            ArgbEvaluator(),
-            selectedColor,
-            backgroundColor
-        ).apply {
-            duration = 700
-            repeatMode = ValueAnimator.REVERSE
-            repeatCount = ValueAnimator.INFINITE
-            addUpdateListener { animator ->
-                root.setBackgroundColor(animator.animatedValue as Int)
-            }
-            start()
-        }
-    }
-
-    fun stopBgAnim() {
-        backgroundAnimator?.cancel()
-    }
-
-    fun showTime() {
-        timeTextView.apply {
-            if (alpha != 0f) return
-            postOnAnimation {
-                animate().alpha(1f).setDuration(700).start()
-                postDelayed( {
-                    animate().alpha(0f).setDuration(700).start()
-                }, 3700)
-            }
-        }
-    }
-
 }

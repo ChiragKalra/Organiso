@@ -2,8 +2,8 @@ package com.bruhascended.organiso.services
 
 import android.content.Context
 import android.net.Uri
-import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.core.data.MMSManager
+import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.notifications.MessageNotificationManager
 import com.klinker.android.send_message.MmsReceivedReceiver
 

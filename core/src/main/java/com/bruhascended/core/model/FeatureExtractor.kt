@@ -1,4 +1,4 @@
-package com.bruhascended.core.ml
+package com.bruhascended.core.model
 
 import android.content.Context
 import com.bruhascended.core.db.Message

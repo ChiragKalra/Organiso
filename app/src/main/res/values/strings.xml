@@ -4,6 +4,7 @@
     <string name="app_name">Organiso</string>
     <string name="settings">Settings</string>
     <string name="new_conversation">New Conversation</string>
+    <string name="saved_messages">Saved Messages</string>
     <string name="new_short">New</string>
     <string name="info">Info</string>
     <string name="interface_settings">Interface</string>
@@ -69,6 +70,8 @@
     <string name="play_button">Play/Pause Button</string>
 
     <!-- Descriptions -->
+    <string name="saved_wishes">Wishes</string>
+    <string name="saved_not_tagged">Not Tagged</string>
     <string name="you">You</string>
     <string name="title">Title</string>
     <string name="report_a_bug">Report A Bug</string>
@@ -77,7 +80,7 @@
     <string name="video_col">Video: </string>
     <string name="otp_col">OTP: </string>
     <string name="media_message">Media %1$s</string>
-    <string name="copied">(Copied)</string>
+    <string name="copied_in_brackets">(Copied)</string>
     <string name="from_sender">From %1$s</string>
 
     <string name="delivered">delivered</string>
@@ -121,6 +124,7 @@
     <string name="conversation_deleted">Conversation Deleted</string>
     <string name="reported_spam">Sender Reported Spam</string>
     <string name="otp_copied">OTP Copied To Clipboard</string>
+    <string name="copied">Copied</string>
     <string name="deleted">Deleted</string>
     <string name="service_provider_error">Service provider error</string>
     <string name="no_service">No service</string>
@@ -129,6 +133,7 @@
     <string name="senders_reported_spam">Sender(s) Reported Spam</string>
     <string name="conversations_moved">Conversation(s) Moved</string>
     <string name="cant_hide_last_category">Can\'t hide last category</string>
+    <string name="message_was_deleted">Message was deleted</string>
 
     <!-- Settings -->
     <string name="dark_theme">Dark Theme</string>

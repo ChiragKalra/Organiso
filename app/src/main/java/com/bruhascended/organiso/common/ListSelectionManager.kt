@@ -2,8 +2,6 @@ package com.bruhascended.organiso.common
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.paging.PagingDataAdapter
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.max
 import kotlin.math.min
@@ -11,17 +9,9 @@ import kotlin.math.min
 @Suppress("UNCHECKED_CAST")
 class ListSelectionManager<T: Any> (
     private val activity: AppCompatActivity,
-    private val adaptor: SelectionRecyclerAdaptor<T, RecyclerView.ViewHolder>,
+    private val adaptor: MyPagingDataAdapter<T, RecyclerView.ViewHolder>,
     private val listener: SelectionCallBack<T>,
 ){
-
-    abstract class SelectionRecyclerAdaptor<T : Any, V : RecyclerView.ViewHolder>(
-        c: DiffUtil.ItemCallback<T>
-    ): PagingDataAdapter<T, V>(c) {
-        fun getItemObject(pos: Int): T? {
-            return super.getItem(pos)
-        }
-    }
 
     interface SelectionCallBack<T>: ActionMode.Callback {
         fun onSingleItemSelected(item: T)

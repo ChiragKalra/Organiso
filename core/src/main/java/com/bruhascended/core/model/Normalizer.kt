@@ -1,4 +1,4 @@
-package com.bruhascended.core.ml
+package com.bruhascended.core.model
 
 import java.util.*
 import kotlin.math.abs
@@ -88,6 +88,7 @@ fun time (date: Long): Float {
 
 // returns null if message has no otp otherwise returns the 4-6 digit OTP
 fun getOtp(message: String): String? {
+    val maxSepAllowed = 30
     val sepRegex = Regex("(?<=\\d)[\\s\\-](?=\\d)")
     val content = message.toLowerCase(Locale.ROOT).replace(sepRegex, "")
     val otpRegex = Regex("\\b\\d{4,6}\\b")
@@ -95,12 +96,36 @@ fun getOtp(message: String): String? {
 
     if (otps.isEmpty()) return null
     val otp = otps.first().groups.first()!!.value
+    val otpIndex = content.indexOf(otp)
+
+    val keys = arrayOf(
+        "otp", "code", "key", "pin", "one time password", "verify"
+    )
+
+    val numberPairs = arrayOf(
+        "verify", "verification", "registration"
+    )
+
     content.apply {
-        if (contains("otp") || contains("code") || contains("key") ||
-            contains("pin") || contains("one time password") || contains("verify") ||
-            (contains("number") && (contains("registration") || contains("verification")))
-        )
-            return otp
+        keys.forEach {
+            val ind = indexOf(it)
+            if (ind != -1 && abs(otpIndex-ind) < maxSepAllowed) {
+                return otp
+            }
+        }
+        val numberIndex = indexOf("number")
+        if (numberIndex != -1) {
+            numberPairs.forEach {
+                val ind = indexOf(it)
+                if (ind != 1 && (
+                        abs(otpIndex-ind) < maxSepAllowed ||
+                        abs(otpIndex-numberIndex) < maxSepAllowed
+                    )
+                ) {
+                    return otp
+                }
+            }
+        }
     }
     return null
 }

@@ -11,7 +11,7 @@ import com.bruhascended.organiso.R
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.db.Contact
 import com.bruhascended.core.db.ContactComparator
-import com.bruhascended.organiso.common.ListSelectionManager
+import com.bruhascended.organiso.common.MyPagingDataAdapter
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor.ContactViewHolder
 import com.squareup.picasso.Picasso
 import java.io.File
@@ -35,7 +35,7 @@ import kotlin.math.abs
 
 class ContactRecyclerAdaptor (
     private val mContext: Context
-): ListSelectionManager.SelectionRecyclerAdaptor<Contact, ContactViewHolder>(
+): MyPagingDataAdapter<Contact, ContactViewHolder>(
     ContactComparator
 ){
 

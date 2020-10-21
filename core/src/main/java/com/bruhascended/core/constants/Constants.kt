@@ -12,6 +12,11 @@ const val MESSAGE_TYPE_OUTBOX = 4
 const val MESSAGE_TYPE_FAILED = 5 // for failed outgoing messages
 const val MESSAGE_TYPE_QUEUED = 6 // for messages to send later
 
+// saved message types
+const val SAVED_TYPE_DRAFT = 0
+const val SAVED_TYPE_SENT = 1
+const val SAVED_TYPE_RECEIVED = 2
+
 // labels
 const val LABEL_NONE = -1
 const val LABEL_PERSONAL = 0
@@ -36,6 +41,7 @@ const val ACTION_MARK_READ = "$LIBRARY_PACKAGE_NAME.MESSAGE_MARK_READ"
 
 
 // intent extras
+const val EXTRA_TAG = "TAG"
 const val EXTRA_ADDRESS = "ADDRESS"
 const val EXTRA_CONVERSATION = "CONVERSATION"
 const val EXTRA_CONVERSATION_JSON = "CONVERSATION_JSON"
@@ -65,6 +71,7 @@ const val KEY_LAST_REFRESH = "LAST_REFRESH"
 // prefs
 const val PREF_VISIBLE_CATEGORIES = "visible_categories"
 const val PREF_HIDDEN_CATEGORIES = "hidden_categories"
+const val PREF_SEARCH_HIDDEN = "show_hidden_results"
 const val PREF_ACTION_NAVIGATE = "action_navigate"
 const val PREF_ACTION_CUSTOM = "action_custom"
 const val PREF_CUSTOM_LEFT = "action_left_swipe"

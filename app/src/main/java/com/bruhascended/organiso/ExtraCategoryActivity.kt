@@ -3,7 +3,8 @@ package com.bruhascended.organiso
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
+import com.bruhascended.organiso.common.setPrefTheme
+import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.ui.main.CategoryFragment
 import kotlinx.android.synthetic.main.activity_conversation.toolbar
 
@@ -33,10 +34,7 @@ class ExtraCategoryActivity : AppCompatActivity() {
 
         val label = intent.getIntExtra(EXTRA_LABEL, LABEL_SPAM)
 
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-        supportActionBar?.title = resources.getStringArray(R.array.labels)[label]
+        setupToolbar(toolbar, resources.getStringArray(R.array.labels)[label])
 
         if (savedInstanceState == null) {
             val newFragment = CategoryFragment.newInstance(label)

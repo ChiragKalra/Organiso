@@ -8,7 +8,7 @@ import com.bruhascended.core.constants.MESSAGE_TYPE_INBOX
 import com.bruhascended.core.constants.PREF_DELETE_OTP
 import com.bruhascended.core.db.MainDaoProvider
 import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.core.ml.getOtp
+import com.bruhascended.core.model.getOtp
 import com.bruhascended.organiso.R
 
 /*

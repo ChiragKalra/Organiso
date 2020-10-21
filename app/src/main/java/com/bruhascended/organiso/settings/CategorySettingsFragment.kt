@@ -36,7 +36,6 @@ import kotlin.collections.ArrayList
 @Suppress("UNCHECKED_CAST")
 class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListener {
 
-
     private lateinit var touchHelper: ItemTouchHelper
     private lateinit var prefs: SharedPreferences
     private lateinit var mAdapter: RecyclerViewAdapter

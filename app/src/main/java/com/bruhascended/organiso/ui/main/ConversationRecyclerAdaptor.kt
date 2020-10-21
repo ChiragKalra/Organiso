@@ -13,13 +13,13 @@ import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.ConversationComparator
 import com.bruhascended.organiso.common.ListSelectionManager
-import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.common.MyPagingDataAdapter
 import kotlin.math.abs
 
 @SuppressLint("ResourceType")
 class ConversationRecyclerAdaptor(
     private val mContext: Context
-): SelectionRecyclerAdaptor<Conversation, ConversationViewHolder>(ConversationComparator) {
+): MyPagingDataAdapter<Conversation, ConversationViewHolder>(ConversationComparator) {
 
     private val colors = mContext.resources.getIntArray(R.array.colors)
     lateinit var selectionManager: ListSelectionManager<Conversation>

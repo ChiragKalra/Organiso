@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.ListSelectionManager
-import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
+import com.bruhascended.organiso.common.MyPagingDataAdapter
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.core.constants.*
 import kotlinx.coroutines.delay
@@ -136,10 +136,10 @@ class CategoryFragment: Fragment(), ConversationSelectionListener.SimpleActionMo
             model.categoryFlows[label].cachedIn(mContext.lifecycleScope)
 
         mAdaptor = ConversationRecyclerAdaptor(mContext)
-        mListener =  ConversationSelectionListener(mContext, label, this)
+        mListener = ConversationSelectionListener(mContext, label, this)
         selectionManager = ListSelectionManager(
             mContext as AppCompatActivity,
-            mAdaptor as SelectionRecyclerAdaptor<Conversation, RecyclerView.ViewHolder>,
+            mAdaptor as MyPagingDataAdapter<Conversation, RecyclerView.ViewHolder>,
             mListener
         )
         mAdaptor.selectionManager = selectionManager

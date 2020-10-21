@@ -38,9 +38,8 @@ import kotlin.math.roundToInt
 
 class StartActivity : AppCompatActivity() {
 
-    companion object {
-        const val TAG_WAKE_LOCK = "Organiso::Wakelock"
-    }
+    private val wakeLockTag = "Organiso::Wakelock"
+    private val timeout = 10 * 60 * 1000L // stay awake for
 
     private lateinit var sharedPref: SharedPreferences
 
@@ -145,8 +144,8 @@ class StartActivity : AppCompatActivity() {
 
         val wakeLock: PowerManager.WakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG_WAKE_LOCK).apply {
-                    acquire(10 * 60 * 1000L)
+                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockTag).apply {
+                    acquire(timeout)
                 }
             }
         Thread {

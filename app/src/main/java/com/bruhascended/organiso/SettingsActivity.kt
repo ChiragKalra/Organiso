@@ -4,7 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
+import com.bruhascended.organiso.common.setPrefTheme
+import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.settings.HeaderFragment
 import kotlinx.android.synthetic.main.activity_conversation.*
 
@@ -34,10 +35,7 @@ class SettingsActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setPrefTheme()
         setContentView(R.layout.activity_settings)
-        setSupportActionBar(toolbar)
-
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
+        setupToolbar(toolbar)
 
         if (savedInstanceState == null) {
             supportFragmentManager

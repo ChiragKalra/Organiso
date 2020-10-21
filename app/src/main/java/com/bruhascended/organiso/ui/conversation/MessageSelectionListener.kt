@@ -24,6 +24,7 @@ import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.organiso.common.ListSelectionManager
+import com.bruhascended.organiso.common.getSharable
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,23 +56,6 @@ class MessageSelectionListener(
     private lateinit var shareMenuItem: MenuItem
 
     lateinit var selectionManager: ListSelectionManager<Message>
-
-    private fun getSharable(message: Message) : Intent {
-        val mmsTypeString = getMimeType(message.path!!)
-        val contentUri = FileProvider.getUriForFile(
-            mContext,
-            "$APPLICATION_ID.fileProvider", File(message.path!!)
-        )
-        mContext.grantUriPermission(
-            APPLICATION_ID, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
-        )
-        return Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_STREAM, contentUri)
-            type = mmsTypeString
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-        }
-    }
 
     private fun toggleRange(item: MenuItem): Boolean {
         val inf = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -124,8 +108,9 @@ class MessageSelectionListener(
                     .setTitle(mContext.getString(R.string.delete_msgs_query))
                     .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         Thread {
-                            for (selectedItem in selected)
+                            for (selectedItem in selected) {
                                 messageDao.delete(selectedItem)
+                            }
                         }.start()
                         Toast.makeText(mContext, mContext.getString(R.string.deleted), Toast.LENGTH_LONG).show()
                         dialog.dismiss()
@@ -149,7 +134,7 @@ class MessageSelectionListener(
             R.id.action_share -> {
                 mContext.startActivity(
                     Intent.createChooser(
-                        getSharable(selected.first()),
+                        File(selected.first().path!!).getSharable(mContext),
                         mContext.getString(R.string.share)
                     )
                 )

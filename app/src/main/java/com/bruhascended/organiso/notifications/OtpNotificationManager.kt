@@ -77,7 +77,7 @@ class OtpNotificationManager (
 
         var text = mContext.getString(R.string.from_sender, conversation.address)
         if (prefs.getBoolean(PREF_COPY_OTP, true)) {
-            text += mContext.getString(R.string.copied)
+            text += mContext.getString(R.string.copied_in_brackets)
             mContext.sendBroadcast(copyIntent)
         }
 

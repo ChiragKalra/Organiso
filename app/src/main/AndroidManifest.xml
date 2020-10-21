@@ -42,20 +42,19 @@
             android:name="com.bruhascended.core.SmsSentReceiverProxy"
             android:exported="false">
             <intent-filter>
-                <action android:name="${applicationId}.SMS_SENT"/>
+                <action android:name="${applicationId}.SMS_SENT" />
             </intent-filter>
         </receiver>
         <receiver
             android:name="com.klinker.android.send_message.MmsSentReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="${applicationId}.MMS_SENT"/>
+                <action android:name="${applicationId}.MMS_SENT" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".notifications.NotificationActionReceiver" />
         <receiver
-            android:name="com.bruhascended.organiso.notifications.NotificationActionReceiver"/>
-        <receiver
-            android:name="com.bruhascended.organiso.services.SMSReceiver"
+            android:name=".services.SMSReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
@@ -76,7 +75,7 @@
 
         <service android:name="com.android.mms.transaction.TransactionService" />
         <service
-            android:name="com.bruhascended.organiso.services.HeadlessSMSSender"
+            android:name=".services.HeadlessSMSSender"
             android:exported="true"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
             <intent-filter>
@@ -89,22 +88,21 @@
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
             </intent-filter>
         </service>
 
         <activity
-            android:name="com.bruhascended.organiso.ui.conversation.SearchActivity"
+            android:name=".ui.conversation.MessageSearchActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateVisible" />
         <activity
-            android:name="com.bruhascended.organiso.SearchActivity"
+            android:name=".SearchActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateVisible" />
         <activity
-            android:name="com.bruhascended.organiso.ConversationActivity"
+            android:name=".ConversationActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="standard">
             <meta-data
@@ -112,7 +110,7 @@
                 android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
         <activity
-            android:name="com.bruhascended.organiso.ExtraCategoryActivity"
+            android:name=".ExtraCategoryActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:launchMode="singleTop">
             <meta-data
@@ -120,27 +118,29 @@
                 android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
         <activity
-            android:name="com.bruhascended.organiso.StartActivity"
+            android:name=".StartActivity"
             android:configChanges="orientation"
             android:launchMode="singleTask"
             android:theme="@style/Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <meta-data android:name="android.app.shortcuts"
+            <meta-data
+                android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
-            android:name="com.bruhascended.organiso.MainActivity"
+            android:name=".MainActivity"
+            android:alwaysRetainTaskState="true"
             android:clearTaskOnLaunch="true"
             android:configChanges="orientation|screenSize"
-            android:alwaysRetainTaskState="true"
             android:label="@string/app_name"
             android:launchMode="singleTask" />
         <activity
-            android:name="com.bruhascended.organiso.SettingsActivity"
+            android:name=".SettingsActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:label="@string/settings"
             android:launchMode="singleTop">
@@ -149,7 +149,7 @@
                 android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
         <activity
-            android:name="com.bruhascended.organiso.BugReportActivity"
+            android:name=".BugReportActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:label="@string/report_a_bug"
             android:launchMode="singleTop">
@@ -158,7 +158,26 @@
                 android:value="com.bruhascended.organiso.SettingsActivity" />
         </activity>
         <activity
-            android:name="com.bruhascended.organiso.NewConversationActivity"
+            android:name=".SavedActivity"
+            android:configChanges="orientation"
+            android:label="@string/saved_messages"
+            android:launchMode="singleTask" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bruhascended.organiso.MainActivity" />
+        </activity>
+
+
+        <activity
+            android:name=".ui.saved.TagActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTask">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bruhascended.organiso.SavedActivity" />
+        </activity>
+        <activity
+            android:name=".NewConversationActivity"
             android:enabled="true"
             android:exported="true"
             android:launchMode="singleTop">

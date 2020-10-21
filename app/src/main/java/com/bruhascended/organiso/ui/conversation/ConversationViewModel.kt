@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.Flow
 class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
     private lateinit var mConversation: Conversation
     private lateinit var mPagingFlow: Flow<PagingData<Message>>
-    private lateinit var mdb: MessageDao
+    private lateinit var mdb: MessageDatabase
     lateinit var messages: List<Message>
+
 
     var goToBottomVisible = false
 
@@ -40,21 +41,21 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
             mConversation.isMuted = b
         }
 
-    val dao: MessageDao
-        get() = mdb
+    val dao
+        get() = mdb.manager()
 
     val pagingFlow
         get() = mPagingFlow
 
-    fun loadLast() = mdb.loadLast()
-    fun loadAll() = mdb.loadAll()
+    fun loadLast() = mdb.manager().loadLast()
+    fun loadAll() = mdb.manager().loadAll()
 
     fun init (conversation: Conversation) {
         if (::mConversation.isInitialized) return
 
         mConversation = conversation
 
-        mdb = MessageDbFactory(getApplication()).of(sender).manager()
+        mdb = MessageDbFactory(getApplication()).of(sender)
 
         mPagingFlow = Pager(
             PagingConfig(
@@ -64,7 +65,7 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
                 maxSize = 180,
             )
         ) {
-            mdb.loadAllPaged()
+            mdb.manager().loadAllPaged()
         }.flow
     }
 }

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -14,7 +15,6 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.doOnLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,14 +22,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.db.*
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
+import com.bruhascended.organiso.common.*
+import com.bruhascended.organiso.common.MyPagingDataAdapter
+import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
-import com.bruhascended.organiso.common.ListSelectionManager
-import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
-import com.bruhascended.organiso.common.MediaPreviewActivity
-import com.bruhascended.organiso.common.ScrollEffectFactory
-import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
 import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
 import com.bruhascended.organiso.ui.conversation.ConversationViewModel
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
@@ -38,6 +35,7 @@ import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.File
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -63,8 +61,9 @@ class ConversationActivity : MediaPreviewActivity() {
         var activeConversationSender: String? = null
     }
 
+    private val mViewModel: ConversationViewModel by viewModels()
+
     private lateinit var mContext: Context
-    private lateinit var mViewModel: ConversationViewModel
     private lateinit var mAdaptor: MessageRecyclerAdaptor
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var selectionManager: ListSelectionManager<Message>
@@ -82,7 +81,6 @@ class ConversationActivity : MediaPreviewActivity() {
     override lateinit var mPlayPauseButton: ImageButton
     override lateinit var mVideoPlayPauseButton: ImageButton
     override lateinit var mAddMedia: ImageButton
-
 
     private val messageUpdatedReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context, intent: Intent) {
@@ -126,6 +124,9 @@ class ConversationActivity : MediaPreviewActivity() {
     }
 
     private fun trackLastMessage() {
+        if (mViewModel.loadAll().hasActiveObservers()) {
+            return
+        }
         mViewModel.loadLast().observe(this, {
             mViewModel.apply {
                 if (it != null) {
@@ -186,19 +187,26 @@ class ConversationActivity : MediaPreviewActivity() {
             }
         })
 
-        mAdaptor = MessageRecyclerAdaptor(mContext, smsSender, mmsSender)
+        mAdaptor = MessageRecyclerAdaptor(mContext)
         val mListener =  MessageSelectionListener(mContext, mViewModel.dao)
         selectionManager = ListSelectionManager(
             mContext as AppCompatActivity,
-            mAdaptor as SelectionRecyclerAdaptor<Message, RecyclerView.ViewHolder>,
+            mAdaptor as MyPagingDataAdapter<Message, RecyclerView.ViewHolder>,
             mListener
         )
+        mAdaptor.setOnRetry {
+            if (it.path == null) smsSender.sendSMS(it.text, it.id)
+            else {
+                val uri =  Uri.fromFile(File(it.path!!))
+                mmsSender.sendMMS(it.text, uri, getMimeType(it.path!!), it.id)
+            }
+        }
         mAdaptor.selectionManager = selectionManager
         mListener.selectionManager = selectionManager
         recyclerView.apply {
-            conversationLayout.doOnLayout {
+            /*conversationLayout.doOnLayout {
                 layoutParams.height = sendLayout.top - appBarLayout.bottom
-            }
+            }*/
             mLayoutManager = LinearLayoutManager(mContext).apply {
                 orientation = LinearLayoutManager.VERTICAL
                 reverseLayout = true
@@ -244,10 +252,7 @@ class ConversationActivity : MediaPreviewActivity() {
         super.onCreate(savedInstanceState)
         setPrefTheme()
         setContentView(R.layout.activity_conversation)
-        setSupportActionBar(toolbar)
 
-        val temp by viewModels<ConversationViewModel>()
-        mViewModel = temp
         val receivedConversation = when {
             intent.extras!!.containsKey(EXTRA_CONVERSATION) ->
                 intent.getSerializableExtra(EXTRA_CONVERSATION) as Conversation
@@ -301,9 +306,7 @@ class ConversationActivity : MediaPreviewActivity() {
             this, mViewModel.conversation, scrollToItemAfterSearch
         )
 
-        supportActionBar!!.title = mViewModel.conversation.name ?: mViewModel.conversation.address
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
+        setupToolbar(toolbar, mViewModel.name ?: mViewModel.conversation.address)
 
         mVideoView = videoView
         mImagePreview = imagePreview

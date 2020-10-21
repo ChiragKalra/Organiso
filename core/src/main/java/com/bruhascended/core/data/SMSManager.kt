@@ -9,9 +9,9 @@ import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.core.ml.OrganizerModel
+import com.bruhascended.core.model.OrganizerModel
 import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.core.ml.getOtp
+import com.bruhascended.core.model.getOtp
 
 /*
                     Copyright 2020 Chirag Kalra

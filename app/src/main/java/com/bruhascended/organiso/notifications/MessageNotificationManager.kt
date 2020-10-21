@@ -22,12 +22,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bruhascended.organiso.ConversationActivity
-import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.*
-import com.bruhascended.core.ml.getOtp
+import com.bruhascended.core.model.getOtp
 import com.bruhascended.organiso.notifications.OtpNotificationManager.Companion.EXTRA_IS_OTP
 import java.io.File
 
@@ -114,7 +113,7 @@ class MessageNotificationManager(
 
     private fun getUserIcon(): IconCompat {
         val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
-            setTint(mContext.getColor(colorRes.first()))
+            setTint(colorRes.first())
         }
 
         val person = ContextCompat.getDrawable(mContext, R.drawable.ic_person)
@@ -146,9 +145,9 @@ class MessageNotificationManager(
         val conversation: Conversation = pair.second
         val message: Message = pair.first
 
-        if (conversation.isMuted || conversation.clean == activeConversationSender ||
-            conversation.label == LABEL_BLOCKED
-        ) return
+        if (conversation.isMuted || conversation.label == LABEL_BLOCKED) {
+            return
+        }
 
         val contentPI = PendingIntent.getActivity(
             mContext, conversation.id!!.toInt(),
@@ -266,8 +265,9 @@ class MessageNotificationManager(
             .setAutoCancel(false)
             .setStyle(conversationStyle).apply {
                 if (message.type != MESSAGE_TYPE_INBOX) setNotificationSilent()
-                if (conversation.clean.first().isDigit()) addAction(replyAction)
-                else {
+                if (conversation.clean.first().isDigit() && conversation.label == LABEL_PERSONAL) {
+                    addAction(replyAction)
+                } else {
                     addAction(
                         R.drawable.ic_report_notif,
                         context.getString(R.string.report_spam),

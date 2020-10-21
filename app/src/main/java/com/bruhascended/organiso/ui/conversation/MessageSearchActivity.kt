@@ -17,15 +17,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.core.constants.EXTRA_SENDER
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.ScrollEffectFactory
+import com.bruhascended.organiso.common.setPrefTheme
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
-class SearchActivity : AppCompatActivity() {
+class MessageSearchActivity : AppCompatActivity() {
 
     private lateinit var inputManager: InputMethodManager
     private lateinit var mContext: Context

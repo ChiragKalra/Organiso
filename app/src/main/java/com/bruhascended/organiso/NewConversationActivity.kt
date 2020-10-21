@@ -21,10 +21,11 @@ import com.bruhascended.core.db.Contact
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.common.MediaPreviewActivity
+import com.bruhascended.organiso.common.setPrefTheme
+import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.ui.newConversation.RecipientRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor
 import kotlinx.android.synthetic.main.activity_new_conversation.*
@@ -251,10 +252,7 @@ class NewConversationActivity : MediaPreviewActivity() {
 
         setPrefTheme()
         setContentView(R.layout.activity_new_conversation)
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
-        supportActionBar!!.title = getString(R.string.new_conversation)
+        setupToolbar(toolbar, getString(R.string.new_conversation))
 
         mContext = this
         mVideoView = videoView

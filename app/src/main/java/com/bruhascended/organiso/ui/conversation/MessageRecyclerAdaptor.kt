@@ -2,20 +2,16 @@ package com.bruhascended.organiso.ui.conversation
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.net.Uri
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.R
+import com.bruhascended.core.constants.MESSAGE_TYPE_INBOX
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageComparator
-import com.bruhascended.organiso.services.MMSSender
-import com.bruhascended.organiso.services.SMSSender
+import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.ListSelectionManager
-import com.bruhascended.organiso.common.ListSelectionManager.SelectionRecyclerAdaptor
-import java.io.File
+import com.bruhascended.organiso.common.MyPagingDataAdapter
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -34,14 +30,18 @@ import java.io.File
  */
 
 class MessageRecyclerAdaptor (
-    private val mContext: Context,
-    private val smsSender: SMSSender? = null,
-    private val mmsSender: MMSSender? = null
-): SelectionRecyclerAdaptor<Message, MessageViewHolder>(MessageComparator) {
+    private val mContext: Context
+): MyPagingDataAdapter<Message, MessageViewHolder>(MessageComparator) {
+
+    private var retryCallBack: ((Message) -> Unit)? = null
 
     lateinit var selectionManager: ListSelectionManager<Message>
     val isSelectionManagerNull get() = !::selectionManager.isInitialized
     var searchKey = ""
+
+    fun setOnRetry(callback: (Message) -> Unit) {
+        retryCallBack = callback
+    }
 
     override fun getItemViewType(position: Int) = if (getItem(position)?.type == MESSAGE_TYPE_INBOX) 1 else 0
 
@@ -60,7 +60,7 @@ class MessageRecyclerAdaptor (
         holder.searchKey = searchKey
         holder.apply {
             message = getItem(position) ?: return
-            onBind(smsSender != null)
+            onBind(retryCallBack != null)
             root.apply {
                 stopBgAnim()
                 if (::selectionManager.isInitialized &&
@@ -99,11 +99,7 @@ class MessageRecyclerAdaptor (
                 }
             }
             it.failed -> {
-                if (it.message.path == null) smsSender?.sendSMS(it.message.text, it.message.id)
-                else {
-                    val uri =  Uri.fromFile(File(it.message.path!!))
-                    mmsSender?.sendMMS(it.message.text, uri, getMimeType(it.message.path!!), it.message.id)
-                }
+                retryCallBack?.invoke(it.message)
             }
             else -> {
                 it.showTime()

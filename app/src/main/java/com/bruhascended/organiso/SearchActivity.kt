@@ -17,11 +17,10 @@ import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.db.MainDaoProvider
-import com.bruhascended.organiso.settings.InterfaceFragment.Companion.setPrefTheme
 import com.bruhascended.organiso.common.ScrollEffectFactory
+import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_search.*
 import java.util.*
 
@@ -177,13 +176,10 @@ class SearchActivity : AppCompatActivity() {
 
         searchRecycler.adapter = mAdaptor
 
-        val visible = Gson().fromJson(
-            prefs.getString("visible_categories", ""), Array<Int>::class.java
-        )
-        val hidden = Gson().fromJson(
-            prefs.getString("hidden_categories", ""), Array<Int>::class.java
-        )
-        categories = if (prefs.getBoolean("show_hidden_results", false))
+        val visible = prefs.getString(PREF_VISIBLE_CATEGORIES, "").toLabelArray()
+        val hidden = prefs.getString(PREF_HIDDEN_CATEGORIES, "").toLabelArray()
+
+        categories = if (prefs.getBoolean(PREF_SEARCH_HIDDEN, false))
             visible + hidden else visible
 
         clear_text.setOnClickListener{

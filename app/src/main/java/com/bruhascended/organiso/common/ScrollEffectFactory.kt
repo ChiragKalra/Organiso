@@ -21,7 +21,7 @@ class ScrollEffectFactory:  RecyclerView.EdgeEffectFactory() {
         /** The magnitude of translation distance when the list reaches the edge on fling. */
         private const val FLING_TRANSLATION_MAGNITUDE = 0.25f
 
-        fun RecyclerView.forEachVisibleHolder(
+        private fun RecyclerView.forEachVisibleHolder(
             action: (ScrollEffectViewHolder) -> Unit
         ) {
             for (i in 0 until childCount) {

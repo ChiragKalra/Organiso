@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="actions">
+    <string-array name="swipe_actions">
         <item>Move</item>
         <item>Report Spam</item>
         <item>Block</item>
@@ -25,6 +25,11 @@
         <item>Blocked</item>
     </string-array>
 
+    <string-array name="sample_saved">
+        <item>Happy Birthday!</item>
+        <item>Happy New Year!</item>
+    </string-array>
+
     <array name="colors">
         <item>@color/red</item>
         <item>@color/purple</item>
@@ -35,5 +40,12 @@
         <item>@color/orange</item>
     </array>
 
+    <string-array name="saved_actions">
+        <item>Send</item>
+        <item>Copy</item>
+        <item>Share</item>
+        <item>Go to message</item>
+        <item>Delete</item>
+    </string-array>
 
 </resources>

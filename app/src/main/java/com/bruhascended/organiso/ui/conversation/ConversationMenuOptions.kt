@@ -198,7 +198,7 @@ class ConversationMenuOptions (
                 }
                 R.id.action_search -> {
                     searchResult?.launch(
-                        Intent(mContext, SearchActivity::class.java).apply {
+                        Intent(mContext, MessageSearchActivity::class.java).apply {
                             putExtra(EXTRA_SENDER, conversation.clean)
                         }
                     )
