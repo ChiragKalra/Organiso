@@ -54,7 +54,7 @@ class MessageViewHolder(
 
     var searchKey = ""
 
-    private val messageTextView: TextView = root.findViewById(R.id.message)
+    val messageTextView: TextView = root.findViewById(R.id.message)
     private val timeTextView: TextView = root.findViewById(R.id.time)
     val slider: SeekBar = root.findViewById(R.id.slider)
     val content: LinearLayout = root.findViewById(R.id.content)
@@ -193,8 +193,6 @@ class MessageViewHolder(
 
     private fun showMedia() {
         mediaLayout.visibility = VISIBLE
-        if (message.type == 1) content.setBackgroundResource(R.drawable.bg_mms)
-        else content.setBackgroundResource(R.drawable.bg_mms_out)
         val mmsTypeString = getMimeType(message.path!!)
         val contentUri = FileProvider.getUriForFile(
             mContext,

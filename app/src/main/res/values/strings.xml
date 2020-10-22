@@ -4,7 +4,7 @@
     <string name="app_name">Organiso</string>
     <string name="settings">Settings</string>
     <string name="new_conversation">New Conversation</string>
-    <string name="saved_messages">Saved Messages</string>
+    <string name="saved_messages">Favorite Messages</string>
     <string name="new_short">New</string>
     <string name="info">Info</string>
     <string name="interface_settings">Interface</string>
@@ -16,6 +16,7 @@
     <string name="otp">OTP</string>
 
     <!-- Actions -->
+    <string name="add">Add</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="search">Search</string>
@@ -54,6 +55,7 @@
 
     <!-- Image(Button) Descriptions-->
     <string name="app_icon">App Icon</string>
+    <string name="more_options">More Options</string>
     <string name="mms">MMS Image</string>
     <string name="display_picture">Display picture</string>
 
@@ -68,8 +70,13 @@
     <string name="custom_category_label">custom category label</string>
     <string name="toggle_visibility">Toggle Visibility</string>
     <string name="play_button">Play/Pause Button</string>
+    <string name="create_new_tag">create new tag</string>
+    <string name="send_scheduled_message">Send scheduled message</string>
+    <string name="draft_message">Draft message</string>
+    <string name="add_to_favorite_messages">Add to favorite messages</string>
 
     <!-- Descriptions -->
+    <string name="new_tag">New Tag</string>
     <string name="saved_wishes">Wishes</string>
     <string name="saved_not_tagged">Not Tagged</string>
     <string name="you">You</string>
@@ -134,6 +141,7 @@
     <string name="conversations_moved">Conversation(s) Moved</string>
     <string name="cant_hide_last_category">Can\'t hide last category</string>
     <string name="message_was_deleted">Message was deleted</string>
+    <string name="added_to_favorites">Added to favorites</string>
 
     <!-- Settings -->
     <string name="dark_theme">Dark Theme</string>

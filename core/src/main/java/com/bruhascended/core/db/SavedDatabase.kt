@@ -34,7 +34,7 @@ data class Saved (
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null,
     val sender: String? = null,
-    var messageId: Int? = null,
+    var messageId: Long? = null,
     var path: String? = null,
 ): Serializable {
     override fun equals(other: Any?): Boolean {

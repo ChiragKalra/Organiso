@@ -46,8 +46,8 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
     protected abstract var mAddMedia: ImageButton
 
     protected var isMms = false
-    protected lateinit var mmsTypeString: String
-    protected lateinit var mmsURI: Uri
+    private lateinit var mmsTypeString: String
+    protected var mmsURI: Uri? = null
 
     private val loadMediaResult = registerForActivityResult(StartActivityForResult()) {
         if (it.data != null && it.data!!.data != null) {
@@ -84,9 +84,12 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-
-        mAddMedia.setOnClickListener{
-            loadMedia()
+        mAddMedia.setOnClickListener {
+            if (isMms) {
+                hideMediaPreview()
+            } else {
+                loadMedia()
+            }
         }
     }
 
@@ -97,21 +100,12 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
         isMms = false
         mAddMedia.setImageResource(R.drawable.close_to_add)
         (mAddMedia.drawable as AnimatedVectorDrawable).start()
-        mAddMedia.setOnClickListener {
-            loadMedia()
-        }
     }
 
     fun showMediaPreview(data: Intent) {
-        mAddMedia.apply {
-            setImageResource(R.drawable.close)
-            setOnClickListener {
-                hideMediaPreview()
-            }
-        }
-
+        mAddMedia.setImageResource(R.drawable.close)
         mmsURI = data.data ?: data.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
-        mmsTypeString = contentResolver.getType(mmsURI)!!
+        mmsTypeString = contentResolver.getType(mmsURI!!)!!
         isMms = when {
             mmsTypeString.startsWith("image") -> {
                 mImagePreview.visibility = View.VISIBLE
@@ -123,7 +117,7 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
                 mPlayPauseButton.visibility = View.VISIBLE
                 val mContext = this
                 mp.apply {
-                    setDataSource(mContext, mmsURI)
+                    setDataSource(mContext, mmsURI!!)
                     prepareAsync()
                     setOnPreparedListener {
                         mSeekBar.max = mp.duration / 500

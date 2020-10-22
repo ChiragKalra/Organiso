@@ -18,6 +18,12 @@
         android:title="@string/select_range"
         app:showAsAction="always" />
     <item
+        android:id="@+id/action_save"
+        android:icon="@drawable/ic_favorite"
+        android:orderInCategory="300"
+        android:title="@string/forward"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/action_forward"
         android:icon="@drawable/ic_forward"
         android:orderInCategory="300"

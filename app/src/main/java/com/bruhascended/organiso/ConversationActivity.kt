@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.db.*
+import com.bruhascended.core.model.toFloat
 import com.bruhascended.organiso.common.*
 import com.bruhascended.organiso.common.MyPagingDataAdapter
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
@@ -82,6 +84,8 @@ class ConversationActivity : MediaPreviewActivity() {
     override lateinit var mVideoPlayPauseButton: ImageButton
     override lateinit var mAddMedia: ImageButton
 
+    private fun Int.toPx() = this * resources.displayMetrics.density
+
     private val messageUpdatedReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context, intent: Intent) {
             when (intent.action) {
@@ -110,17 +114,38 @@ class ConversationActivity : MediaPreviewActivity() {
         }
     }
 
-    private fun toggleGoToBottomButtonVisibility(){
-        val dp = resources.displayMetrics.density
+    private fun toggleGoToBottomButtonVisibility() {
         if (mLayoutManager.findFirstVisibleItemPosition() > 1 && !mViewModel.goToBottomVisible) {
             mViewModel.goToBottomVisible = true
             goToBottom.animate().alpha(1f).translationY(0f)
                 .setInterpolator(AccelerateDecelerateInterpolator()).start()
         } else if (mLayoutManager.findFirstVisibleItemPosition() <= 5 && mViewModel.goToBottomVisible) {
             mViewModel.goToBottomVisible = false
-            goToBottom.animate().alpha(0f).translationY(48*dp)
+            goToBottom.animate().alpha(0f).translationY(48.toPx())
                 .setInterpolator(AccelerateDecelerateInterpolator()).start()
         }
+    }
+
+    private fun syncExtraVisibility() {
+        val extras = arrayOf(
+            favoriteButton,
+            draftButton,
+            timedButton
+        )
+        val vis = mViewModel.extraIsVisible
+        extras.forEachIndexed { i, b ->
+            b.animate()
+                .alpha(vis.toFloat())
+                .translationY(if (vis) 0f else 64.toPx() * (i + 1))
+                .setDuration(300)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .start()
+        }
+        extraButton.animate()
+            .rotation(if (vis) 45f else 0f)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .setDuration(300)
+            .start()
     }
 
     private fun trackLastMessage() {
@@ -188,7 +213,7 @@ class ConversationActivity : MediaPreviewActivity() {
         })
 
         mAdaptor = MessageRecyclerAdaptor(mContext)
-        val mListener =  MessageSelectionListener(mContext, mViewModel.dao)
+        val mListener =  MessageSelectionListener(mContext, mViewModel.dao, mViewModel.sender)
         selectionManager = ListSelectionManager(
             mContext as AppCompatActivity,
             mAdaptor as MyPagingDataAdapter<Message, RecyclerView.ViewHolder>,
@@ -198,15 +223,12 @@ class ConversationActivity : MediaPreviewActivity() {
             if (it.path == null) smsSender.sendSMS(it.text, it.id)
             else {
                 val uri =  Uri.fromFile(File(it.path!!))
-                mmsSender.sendMMS(it.text, uri, getMimeType(it.path!!), it.id)
+                mmsSender.sendMMS(it.text, uri, it.id)
             }
         }
         mAdaptor.selectionManager = selectionManager
         mListener.selectionManager = selectionManager
         recyclerView.apply {
-            /*conversationLayout.doOnLayout {
-                layoutParams.height = sendLayout.top - appBarLayout.bottom
-            }*/
             mLayoutManager = LinearLayoutManager(mContext).apply {
                 orientation = LinearLayoutManager.VERTICAL
                 reverseLayout = true
@@ -307,6 +329,21 @@ class ConversationActivity : MediaPreviewActivity() {
         )
 
         setupToolbar(toolbar, mViewModel.name ?: mViewModel.conversation.address)
+        setupRecycler()
+        goToBottom.setOnClickListener {
+            recyclerView.smoothScrollToPosition(0)
+        }
+        toggleGoToBottomButtonVisibility()
+        trackLastMessage()
+
+        if (!mViewModel.conversation.clean.first().isDigit()) {
+            sendLayout.visibility = View.INVISIBLE
+            favoriteButton.visibility = View.GONE
+            timedButton.visibility = View.GONE
+            draftButton.visibility = View.GONE
+            notSupported.visibility = View.VISIBLE
+            return
+        }
 
         mVideoView = videoView
         mImagePreview = imagePreview
@@ -315,15 +352,10 @@ class ConversationActivity : MediaPreviewActivity() {
         mVideoPlayPauseButton = videoPlayPauseButton
         mAddMedia = addMedia
 
-        if (!mViewModel.conversation.clean.first().isDigit()) {
-            sendLayout.visibility = LinearLayout.INVISIBLE
-            notSupported.visibility = TextView.VISIBLE
-        }
-
         sendButton.setOnClickListener {
             if (isMms) {
                 sendButton.isEnabled = false
-                mmsSender.sendMMS(messageEditText.text.toString(), mmsURI, mmsTypeString)
+                mmsSender.sendMMS(messageEditText.text.toString(), mmsURI!!)
                 sendButton.isEnabled = true
                 messageEditText.setText("")
                 hideMediaPreview()
@@ -334,13 +366,25 @@ class ConversationActivity : MediaPreviewActivity() {
                 messageEditText.setText("")
             }
         }
-
-        setupRecycler()
-        goToBottom.setOnClickListener {
-            recyclerView.smoothScrollToPosition(0)
+        syncExtraVisibility()
+        extraButton.setOnClickListener {
+            mViewModel.extraIsVisible = !mViewModel.extraIsVisible
+            syncExtraVisibility()
         }
-        toggleGoToBottomButtonVisibility()
-        trackLastMessage()
+        favoriteButton.setOnClickListener {
+            val msg = messageEditText.text.toString().trim()
+            if (msg.isEmpty() && !isMms)
+                return@setOnClickListener
+            mContext.startActivity(
+                Intent(mContext, SavedActivity::class.java).apply {
+                    action = Intent.ACTION_PICK
+                    data = mmsURI
+                    putExtra(EXTRA_MESSAGE_TEXT, msg)
+                }
+            )
+            mViewModel.extraIsVisible = false
+            syncExtraVisibility()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem)

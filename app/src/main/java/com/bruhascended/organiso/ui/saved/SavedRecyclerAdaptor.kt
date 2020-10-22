@@ -52,6 +52,15 @@ class SavedRecyclerAdaptor (
             root.setOnClickListener{
                 onItemClickListener?.invoke(holder)
             }
+            messageTextView.apply {
+                setOnClickListener {
+                    if (selectionStart == -1 && selectionEnd == -1) {
+                        //This condition will satisfy only when it is not an autolinked text
+                        //Fired only when you touch the part of the text that is not hyperlinked
+                        onItemClickListener?.invoke(holder)
+                    }
+                }
+            }
         }
     }
 }

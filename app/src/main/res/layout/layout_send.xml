@@ -63,27 +63,39 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal">
+
+        <ImageButton
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="2dp"
+            android:id="@+id/extraButton"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="#0000"
+            android:contentDescription="@string/more_options"
+            android:src="@drawable/ic_shortcut_add"
+            android:tint="?headerTextColor" />
         <EditText
+            android:maxLines="4"
+            android:background="#0000"
             android:theme="?editTextStyle"
             android:focusableInTouchMode="true"
             android:id="@+id/messageEditText"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="@string/type_your_message_here"
             android:importantForAutofill="no"
-            android:inputType="textShortMessage"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:inputType="textMultiLine"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:textColorHint="?android:textColorHint" />
-
 
         <ImageButton
             android:id="@+id/addMedia"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="#0000"
             android:contentDescription="@string/attach_file"
             android:src="@drawable/add_file"
@@ -91,9 +103,8 @@
 
         <ImageButton
             android:id="@+id/sendButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="4dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="#0000"
             android:contentDescription="@string/send"
             android:src="@drawable/ic_send"

@@ -160,6 +160,7 @@ class NewConversationActivity : MediaPreviewActivity() {
                 }
                 intent.type == TYPE_MULTI -> {
                     addMedia.isVisible = false
+                    extraButton.isVisible = false
 
                     val msgs = intent.getSerializableExtra(EXTRA_MESSAGES) as Array<Message>
                     messageEditText.apply {
@@ -180,7 +181,7 @@ class NewConversationActivity : MediaPreviewActivity() {
                             if (it.path == null) smsSender.sendSMS(it.text)
                             else {
                                 val uri =  Uri.fromFile(File(it.path!!))
-                                mmsSender.sendMMS(it.text, uri, getMimeType(it.path!!))
+                                mmsSender.sendMMS(it.text, uri)
                             }
                         }
                         startNextActivity()
@@ -271,6 +272,20 @@ class NewConversationActivity : MediaPreviewActivity() {
         to.text = null
 
         if (!sendButton.hasOnClickListeners()) {
+            extraButton.setImageResource(R.drawable.ic_favorite)
+            extraButton.setOnClickListener {
+                val msg = messageEditText.text.toString().trim()
+                if (msg.isEmpty() && !isMms)
+                    return@setOnClickListener
+                mContext.startActivity(
+                    Intent(mContext, SavedActivity::class.java).apply {
+                        action = Intent.ACTION_PICK
+                        data = mmsURI
+                        putExtra(EXTRA_MESSAGE_TEXT, msg)
+                    }
+                )
+                finish()
+            }
             sendButton.setOnClickListener {
                 if (messageEditText.text.toString().trim() == "" && !isMms)
                     return@setOnClickListener
@@ -288,7 +303,7 @@ class NewConversationActivity : MediaPreviewActivity() {
                         hideMediaPreview()
                     } else {
                         MMSSender(mContext, conversations)
-                            .sendMMS(msg, mmsURI, mmsTypeString)
+                            .sendMMS(msg, mmsURI!!)
                     }
                     messageEditText.text = null
                 }

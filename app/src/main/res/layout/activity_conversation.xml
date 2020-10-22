@@ -69,6 +69,48 @@
         app:layout_constraintBottom_toBottomOf="@id/recyclerView"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:contentDescription="@string/add_to_favorite_messages"
+        android:id="@+id/favoriteButton"
+        android:layout_width="wrap_content"
+        android:alpha="0"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_favorite"
+        android:tint="#000"
+        android:translationY="64dp"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerView"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:contentDescription="@string/draft_message"
+        android:translationY="128dp"
+        android:id="@+id/draftButton"
+        android:alpha="0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_draft"
+        android:tint="#000"
+        app:layout_constraintBottom_toTopOf="@id/favoriteButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/timedButton"
+        android:translationY="192dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:alpha="0"
+        android:layout_margin="8dp"
+        android:contentDescription="@string/send_scheduled_message"
+        android:src="@drawable/ic_calendar"
+        android:tint="#000"
+        app:layout_constraintBottom_toTopOf="@+id/draftButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <include layout="@layout/layout_send"/>
 
     <ImageButton

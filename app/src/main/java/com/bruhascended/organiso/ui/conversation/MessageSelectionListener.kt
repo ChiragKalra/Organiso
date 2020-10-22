@@ -16,13 +16,12 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.core.content.FileProvider
-import com.bruhascended.organiso.NewConversationActivity
 import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.R
-import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDao
+import com.bruhascended.organiso.NewConversationActivity
+import com.bruhascended.organiso.R
+import com.bruhascended.organiso.SavedActivity
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.common.getSharable
 import kotlinx.coroutines.GlobalScope
@@ -50,7 +49,8 @@ import java.io.File
 @SuppressLint("InflateParams")
 class MessageSelectionListener(
     private val mContext: Context,
-    private val messageDao: MessageDao
+    private val messageDao: MessageDao,
+    private val sender: String
 ): ListSelectionManager.SelectionCallBack<Message> {
 
     private lateinit var shareMenuItem: MenuItem
@@ -103,12 +103,24 @@ class MessageSelectionListener(
         val selected = selectionManager.selectedItems
 
         when (item.itemId) {
+            R.id.action_save -> {
+                mContext.startActivity(
+                    Intent(mContext, SavedActivity::class.java).apply {
+                        action = Intent.ACTION_PICK
+                        type = TYPE_MULTI
+                        putExtra(EXTRA_SENDER, sender)
+                        putExtra(EXTRA_MESSAGES, selectionManager.selectedItems.toTypedArray())
+                    }
+                )
+                selectionManager.close()
+            }
             R.id.action_delete -> {
                 AlertDialog.Builder(mContext)
                     .setTitle(mContext.getString(R.string.delete_msgs_query))
                     .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         Thread {
                             for (selectedItem in selected) {
+                                // TODO delete from saved
                                 messageDao.delete(selectedItem)
                             }
                         }.start()

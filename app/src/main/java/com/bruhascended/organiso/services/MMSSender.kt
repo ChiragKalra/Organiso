@@ -7,11 +7,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.telephony.SmsManager
-import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
+import com.bruhascended.organiso.common.saveFile
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
@@ -49,21 +49,6 @@ class MMSSender(
 
     private val sentAction = "$APPLICATION_ID.MMS_SENT"
 
-    private fun saveMedia(date: Long): String {
-        val name = date.toString() + "." +
-                MimeTypeMap.getSingleton().getExtensionFromMimeType(typeString)
-        val destination = File(mContext.filesDir, name)
-        val output: OutputStream = FileOutputStream(destination)
-        val input = mContext.contentResolver.openInputStream(uri)!!
-        val buffer = ByteArray(4 * 1024)
-        var read: Int
-        while (input.read(buffer).also { read = it } != -1) {
-            output.write(buffer, 0, read)
-        }
-        output.flush()
-        return destination.absolutePath
-    }
-
     private fun updateDbMms(conversation: Conversation, date: Long, type: Int) {
         if (activeConversationSender != conversation.clean) {
             MessageDbFactory(mContext).of(conversation.clean).apply {
@@ -86,7 +71,11 @@ class MMSSender(
 
     private fun addMmsToDb(conversation: Conversation, date: Long, retryIndex: Long?) {
         val message = Message (
-            smsText, MESSAGE_TYPE_QUEUED, date, id = retryIndex, path = saveMedia(date)
+            smsText,
+            MESSAGE_TYPE_QUEUED,
+            date,
+            id = retryIndex,
+            path = uri.saveFile(mContext, date.toString())
         )
 
         if (activeConversationSender != conversation.clean) {
@@ -147,11 +136,10 @@ class MMSSender(
         return byteBuffer.toByteArray()
     }
 
-    fun sendMMS(smsText: String, data: Uri, type: String, retryIndex: Long? = null) {
+    fun sendMMS(smsText: String, data: Uri, retryIndex: Long? = null) {
         val date = System.currentTimeMillis()
         this.smsText = smsText
         uri = data
-        typeString = type
 
         conversations.forEach {
             addMmsToDb(it, date, retryIndex)
@@ -195,6 +183,7 @@ class MMSSender(
 
             val message = MMS(smsText, it.address.filter { char -> char.isDigit() })
             val iStream: InputStream = mContext.contentResolver.openInputStream(uri)!!
+            val type = mContext.contentResolver.getType(uri) ?: getMimeType(uri.path!!)
             message.addMedia(getBytes(iStream), type)
 
             transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)

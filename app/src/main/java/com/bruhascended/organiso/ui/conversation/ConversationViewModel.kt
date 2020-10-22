@@ -16,6 +16,7 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
 
 
     var goToBottomVisible = false
+    var extraIsVisible = false
 
     var conversation: Conversation
         get() = mConversation

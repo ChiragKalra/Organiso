@@ -18,6 +18,7 @@ import android.widget.TextView.TEXT_ALIGNMENT_VIEW_START
 import androidx.core.content.FileProvider
 import androidx.core.view.doOnDetach
 import com.bruhascended.core.constants.SAVED_TYPE_RECEIVED
+import com.bruhascended.core.constants.getMimeType
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.core.db.Saved
@@ -63,14 +64,9 @@ class SavedViewHolder(
 
     lateinit var message: Saved
 
-    private val messageTextView: TextView = root.findViewById(R.id.message)
+    val messageTextView: TextView = root.findViewById(R.id.message)
     val slider: SeekBar = root.findViewById(R.id.slider)
     val content: LinearLayout = root.findViewById(R.id.content)
-
-    private fun getMimeType(url: String): String {
-        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: ""
-    }
 
     private fun saveCache(bitmap: Bitmap, date: Long): File {
         val destination = File(mContext.cacheDir, date.toString())
@@ -205,9 +201,6 @@ class SavedViewHolder(
         )
 
         messageTextView.text = message.text
-        messageTextView.textAlignment = if (message.type == SAVED_TYPE_RECEIVED)
-            TEXT_ALIGNMENT_VIEW_START else TEXT_ALIGNMENT_VIEW_END
-
         if (message.path != null) {
             showMedia()
             if (message.text.isBlank()) messageTextView.visibility = GONE
