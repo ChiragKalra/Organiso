@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.Flow
 class SavedViewModel(mApp: Application) : AndroidViewModel(mApp) {
     private val mDao: SavedDao = SavedDbFactory(mApp).get().manager()
 
-    val tagsFlow: Flow<PagingData<String>> = Pager(
+    val flow: Flow<PagingData<Saved>> = Pager(
         PagingConfig(
             pageSize = 15,
             initialLoadSize = 15,
@@ -36,22 +36,10 @@ class SavedViewModel(mApp: Application) : AndroidViewModel(mApp) {
             maxSize = 180,
         )
     ) {
-        mDao.loadPagedTags()
-    }.flow
-
-    fun getFlowOf(tag: String) = Pager(
-        PagingConfig(
-            pageSize = 15,
-            initialLoadSize = 15,
-            prefetchDistance = 60,
-            maxSize = 180,
-        )
-    ) {
-        mDao.loadPagedFrom(tag)
+        mDao.loadPaged()
     }.flow
 
     fun dbIsEmpty() = mDao.loadSingleSync() == null
 
-    fun insert(saved: Saved) = mDao.insert(saved)
     fun delete(saved: Saved) = mDao.delete(saved)
 }

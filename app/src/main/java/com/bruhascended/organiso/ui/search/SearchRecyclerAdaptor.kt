@@ -29,7 +29,7 @@ class SearchRecyclerAdaptor(
 ) : RecyclerView.Adapter<SearchResultViewHolder>() {
 
     var doOnConversationClick: (Conversation) -> Unit = {}
-    var doOnMessageClick: (Pair<Long, Conversation>) -> Unit = {}
+    var doOnMessageClick: (Pair<Int, Conversation>) -> Unit = {}
     lateinit var doOnLoaded: () -> Unit
 
     var isLoaded = false

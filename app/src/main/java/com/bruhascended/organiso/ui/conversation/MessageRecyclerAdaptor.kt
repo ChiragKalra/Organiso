@@ -6,6 +6,8 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import com.bruhascended.core.constants.MESSAGE_TYPE_DRAFT
+import com.bruhascended.core.constants.MESSAGE_TYPE_FAILED
 import com.bruhascended.core.constants.MESSAGE_TYPE_INBOX
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageComparator
@@ -34,6 +36,7 @@ class MessageRecyclerAdaptor (
 ): MyPagingDataAdapter<Message, MessageViewHolder>(MessageComparator) {
 
     private var retryCallBack: ((Message) -> Unit)? = null
+    private var draftCallBack: ((Message) -> Unit)? = null
 
     lateinit var selectionManager: ListSelectionManager<Message>
     val isSelectionManagerNull get() = !::selectionManager.isInitialized
@@ -41,6 +44,10 @@ class MessageRecyclerAdaptor (
 
     fun setOnRetry(callback: (Message) -> Unit) {
         retryCallBack = callback
+    }
+
+    fun setOnDraftClick(callback: (Message) -> Unit) {
+        draftCallBack = callback
     }
 
     override fun getItemViewType(position: Int) = if (getItem(position)?.type == MESSAGE_TYPE_INBOX) 1 else 0
@@ -114,8 +121,11 @@ class MessageRecyclerAdaptor (
                         it.root.background = it.defaultBackground
                 }
             }
-            it.failed -> {
+            it.message.type == MESSAGE_TYPE_FAILED -> {
                 retryCallBack?.invoke(it.message)
+            }
+            it.message.type == MESSAGE_TYPE_DRAFT -> {
+                draftCallBack?.invoke(it.message)
             }
             else -> {
                 it.showTime()

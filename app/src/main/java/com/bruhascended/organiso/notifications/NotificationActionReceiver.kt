@@ -33,8 +33,8 @@ import com.bruhascended.core.db.MainDaoProvider
 class NotificationActionReceiver : BroadcastReceiver() {
 
     companion object {
-        fun Context.cancelNotification(sender: String, id: Long?) {
-            NotificationManagerCompat.from(this).cancel(id!!.toInt())
+        fun Context.cancelNotification(sender: String, id: Int?) {
+            NotificationManagerCompat.from(this).cancel(id!!)
             sendBroadcast(
                 Intent(this, NotificationActionReceiver::class.java)
                 .setAction(ACTION_CANCEL)
@@ -75,7 +75,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
                 val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
                 MessageDbFactory(mContext).of(conversation.clean).apply {
-                    manager().delete(message)
+                    manager().delete(mContext, message, conversation.clean)
                     val last = manager().loadLastSync()
                     if (last == null) {
                         MainDaoProvider(mContext).getMainDaos()[conversation.label]

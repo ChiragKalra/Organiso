@@ -50,7 +50,7 @@ class StartActivity : AppCompatActivity() {
     )
 
     private val onPermissionsResult =
-        registerForActivityResult(StartActivityForResult()) { organise() }
+        registerForActivityResult(StartActivityForResult()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

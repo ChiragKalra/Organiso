@@ -11,7 +11,7 @@ import android.widget.Toast
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.common.saveFile
+import com.bruhascended.core.constants.saveFile
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
@@ -69,7 +69,7 @@ class MMSSender(
         }
     }
 
-    private fun addMmsToDb(conversation: Conversation, date: Long, retryIndex: Long?) {
+    private fun addMmsToDb(conversation: Conversation, date: Long, retryIndex: Int?) {
         val message = Message (
             smsText,
             MESSAGE_TYPE_QUEUED,
@@ -84,9 +84,9 @@ class MMSSender(
                 val qs = conversationDao.search(date)
                 for (m in qs) {
                     message.id = m.id
-                    conversationDao.delete(m)
+                    conversationDao.deleteFromInternal(m)
                 }
-                if (retryIndex != null) conversationDao.delete(message)
+                if (retryIndex != null) conversationDao.deleteFromInternal(message)
                 conversationDao.insert(message)
                 close()
             }
@@ -136,7 +136,7 @@ class MMSSender(
         return byteBuffer.toByteArray()
     }
 
-    fun sendMMS(smsText: String, data: Uri, retryIndex: Long? = null) {
+    fun sendMMS(smsText: String, data: Uri, retryIndex: Int? = null) {
         val date = System.currentTimeMillis()
         this.smsText = smsText
         uri = data

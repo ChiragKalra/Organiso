@@ -6,6 +6,7 @@ import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.bruhascended.core.constants.deleteSMS
 import java.io.Serializable
 
 /*
@@ -31,7 +32,7 @@ data class Message (
     var type: Int,
     val time: Long,
     @PrimaryKey(autoGenerate = true)
-    var id: Long? = null,
+    var id: Int? = null,
     var delivered: Boolean = false,
     var path: String? = null
 ): Serializable {
@@ -66,10 +67,24 @@ interface MessageDao {
     fun update(message: Message)
 
     @Delete
-    fun delete(message: Message)
+    fun deleteFromInternal(message: Message)
+
+    fun delete(mContext: Context, message: Message, sender: String) {
+        Thread {
+            deleteFromInternal(message)
+            deleteSMS(mContext, message.text, sender)
+        }.start()
+    }
 
     @Query("DELETE FROM messages")
-    fun nukeTable()
+    fun nukeInternalTable()
+
+    fun nukeTable(mContext: Context, sender: String) {
+        Thread {
+            nukeInternalTable()
+            deleteSMS(mContext, null, sender)
+        }.start()
+    }
 
     @Query("SELECT * FROM messages WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
     fun search(key: String, altKey: String=""): List<Message>

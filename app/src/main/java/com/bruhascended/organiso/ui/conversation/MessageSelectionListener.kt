@@ -19,9 +19,10 @@ import androidx.appcompat.view.ActionMode
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDao
+import com.bruhascended.core.db.Saved
+import com.bruhascended.core.db.SavedDbFactory
 import com.bruhascended.organiso.NewConversationActivity
 import com.bruhascended.organiso.R
-import com.bruhascended.organiso.SavedActivity
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.common.getSharable
 import kotlinx.coroutines.GlobalScope
@@ -56,6 +57,7 @@ class MessageSelectionListener(
     private lateinit var shareMenuItem: MenuItem
 
     lateinit var selectionManager: ListSelectionManager<Message>
+    private val savedDao = SavedDbFactory(mContext).get().manager()
 
     private fun toggleRange(item: MenuItem): Boolean {
         val inf = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -104,14 +106,29 @@ class MessageSelectionListener(
 
         when (item.itemId) {
             R.id.action_save -> {
-                mContext.startActivity(
-                    Intent(mContext, SavedActivity::class.java).apply {
-                        action = Intent.ACTION_PICK
-                        type = TYPE_MULTI
-                        putExtra(EXTRA_SENDER, sender)
-                        putExtra(EXTRA_MESSAGES, selectionManager.selectedItems.toTypedArray())
+                Thread {
+                    for (message in selected) {
+                        val pre = savedDao.loadMessageFromSender(sender, message.id!!)
+                        if (pre == null) {
+                            savedDao.insert(
+                                Saved(
+                                    message.text,
+                                    System.currentTimeMillis(),
+                                    if (message.type == MESSAGE_TYPE_INBOX)
+                                        SAVED_TYPE_RECEIVED else SAVED_TYPE_SENT,
+                                    path = message.path,
+                                    sender = sender,
+                                    messageId = message.id!!,
+                                )
+                            )
+                        }
                     }
-                )
+                }.start()
+                Toast.makeText(
+                    mContext,
+                    mContext.getString(R.string.added_to_favorites),
+                    Toast.LENGTH_LONG
+                ).show()
                 selectionManager.close()
             }
             R.id.action_delete -> {
@@ -120,8 +137,12 @@ class MessageSelectionListener(
                     .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         Thread {
                             for (selectedItem in selected) {
-                                // TODO delete from saved
-                                messageDao.delete(selectedItem)
+                                val pre = savedDao.loadMessageFromSender(sender, selectedItem.id!!)
+                                if (pre != null) {
+                                    pre.messageId = null
+                                    savedDao.update(pre)
+                                }
+                                messageDao.delete(mContext, selectedItem, sender)
                             }
                         }.start()
                         Toast.makeText(mContext, mContext.getString(R.string.deleted), Toast.LENGTH_LONG).show()

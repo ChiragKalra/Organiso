@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.ContactsManager
+import com.bruhascended.core.data.DraftsManager
 import com.bruhascended.core.db.*
 import com.bruhascended.core.model.toFloat
 import com.bruhascended.organiso.common.*
@@ -70,9 +71,11 @@ class ConversationActivity : MediaPreviewActivity() {
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var selectionManager: ListSelectionManager<Message>
     private lateinit var conversationMenuOptions: ConversationMenuOptions
+    private lateinit var mDraftsManager: DraftsManager
     private lateinit var smsSender: SMSSender
     private lateinit var mmsSender: MMSSender
     private lateinit var mainDaoProvider: MainDaoProvider
+    private lateinit var mSavedDao: SavedDao
     private var inputManager: InputMethodManager? = null
 
     private var scroll = true
@@ -98,9 +101,9 @@ class ConversationActivity : MediaPreviewActivity() {
                     val qs = mViewModel.dao.search(message.time)
                     for (m in qs) {
                         message.id = m.id
-                        mViewModel.dao.delete(m)
+                        mViewModel.dao.deleteFromInternal(m)
                     }
-                    if (message.id != null) mViewModel.dao.delete(message)
+                    if (message.id != null) mViewModel.dao.deleteFromInternal(message)
                     mViewModel.dao.insert(message)
                 }
                 ACTION_UPDATE_STATUS_MESSAGE -> {
@@ -174,13 +177,13 @@ class ConversationActivity : MediaPreviewActivity() {
     private val scrollToItemAfterSearch = registerForActivityResult(StartActivityForResult()) {
         it.apply {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                val id = data!!.getLongExtra("ID", -1L)
-                if (id != -1L) scrollToItem(id)
+                val id = data!!.getIntExtra("ID", -1)
+                if (id != -1) scrollToItem(id)
             }
         }
     }
 
-    private fun scrollToItem(id: Long) {
+    private fun scrollToItem(id: Int) {
         val index = mViewModel.messages.indexOfFirst { m -> m.id==id }
         recyclerView.apply {
             scrollToPosition(index)
@@ -203,8 +206,8 @@ class ConversationActivity : MediaPreviewActivity() {
             mViewModel.messages = it
             if (scroll) {
                 scroll = false
-                val id = intent?.getLongExtra(EXTRA_MESSAGE_ID, -1L) ?: -1L
-                if (id != -1L) {
+                val id = intent?.getIntExtra(EXTRA_MESSAGE_ID, -1) ?: -1
+                if (id != -1) {
                     recyclerView.postDelayed({
                         scrollToItem(id)
                     }, 200)
@@ -275,6 +278,13 @@ class ConversationActivity : MediaPreviewActivity() {
         setPrefTheme()
         setContentView(R.layout.activity_conversation)
 
+        mVideoView = videoView
+        mImagePreview = imagePreview
+        mSeekBar = seekBar
+        mPlayPauseButton = playPauseButton
+        mVideoPlayPauseButton = videoPlayPauseButton
+        mAddMedia = addMedia
+
         val receivedConversation = when {
             intent.extras!!.containsKey(EXTRA_CONVERSATION) ->
                 intent.getSerializableExtra(EXTRA_CONVERSATION) as Conversation
@@ -290,6 +300,8 @@ class ConversationActivity : MediaPreviewActivity() {
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         mainDaoProvider = MainDaoProvider(mContext)
+        mDraftsManager = DraftsManager(this, mViewModel.dao)
+        mSavedDao = SavedDbFactory(this).get().manager()
 
         if (mViewModel.conversation.id == null) {
             Thread {
@@ -345,13 +357,6 @@ class ConversationActivity : MediaPreviewActivity() {
             return
         }
 
-        mVideoView = videoView
-        mImagePreview = imagePreview
-        mSeekBar = seekBar
-        mPlayPauseButton = playPauseButton
-        mVideoPlayPauseButton = videoPlayPauseButton
-        mAddMedia = addMedia
-
         sendButton.setOnClickListener {
             if (isMms) {
                 sendButton.isEnabled = false
@@ -373,17 +378,37 @@ class ConversationActivity : MediaPreviewActivity() {
         }
         favoriteButton.setOnClickListener {
             val msg = messageEditText.text.toString().trim()
-            if (msg.isEmpty() && !isMms)
+            if (msg.isEmpty() && !isMms) {
                 return@setOnClickListener
-            mContext.startActivity(
-                Intent(mContext, SavedActivity::class.java).apply {
-                    action = Intent.ACTION_PICK
-                    data = mmsURI
-                    putExtra(EXTRA_MESSAGE_TEXT, msg)
-                }
+            }
+            mSavedDao.insert(
+                Saved(
+                    msg,
+                    System.currentTimeMillis(),
+                    SAVED_TYPE_DRAFT,
+                    path = mmsURI?.saveFile(
+                        this,
+                        System.currentTimeMillis().toString()
+                    )
+                )
             )
+            Toast.makeText(
+                this, getString(R.string.added_to_favorites), Toast.LENGTH_LONG
+            ).show()
             mViewModel.extraIsVisible = false
             syncExtraVisibility()
+        }
+
+        draftButton.setOnClickListener{
+            val msg = messageEditText.text.toString().trim()
+            if (msg.isEmpty() && !isMms) {
+                return@setOnClickListener
+            }
+            mDraftsManager.create(msg, mViewModel.conversation.address, mmsURI)
+        }
+        mAdaptor.setOnDraftClick {
+            messageEditText.setText(it.text)
+            mDraftsManager.delete(it, mViewModel.conversation.address)
         }
     }
 
@@ -425,5 +450,14 @@ class ConversationActivity : MediaPreviewActivity() {
         activeConversationSender = null
         unregisterReceiver(messageUpdatedReceiver)
         super.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        val msg = messageEditText.text.toString().trim()
+        if (msg.isEmpty()) {
+            return
+        }
+        mDraftsManager.create(msg, mViewModel.conversation.address, mmsURI)
     }
 }

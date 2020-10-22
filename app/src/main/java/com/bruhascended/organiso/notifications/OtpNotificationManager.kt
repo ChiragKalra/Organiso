@@ -64,9 +64,9 @@ class OtpNotificationManager (
         val copyIntent = Intent(mContext, NotificationActionReceiver::class.java)
             .setAction(ACTION_COPY)
             .putExtra(EXTRA_OTP, otp)
-        val copyPI = PendingIntent.getBroadcast(mContext, conversation.id!!.toInt(),
+        val copyPI = PendingIntent.getBroadcast(mContext, conversation.id!!,
             copyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val deletePI = PendingIntent.getBroadcast(mContext, conversation.id!!.toInt(),
+        val deletePI = PendingIntent.getBroadcast(mContext, conversation.id!!,
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_DELETE_OTP)
                 .putExtra(EXTRA_NOTIFICATION_ID, id)

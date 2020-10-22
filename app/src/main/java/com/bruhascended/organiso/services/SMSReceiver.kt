@@ -43,9 +43,7 @@ class SMSReceiver : BroadcastReceiver() {
             values.put("type", MESSAGE_TYPE_INBOX)
             mContext.contentResolver.insert(Telephony.Sms.CONTENT_URI, values)
             ret = true
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
+        } catch (ex: Exception) { }
         return ret
     }
 

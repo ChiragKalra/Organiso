@@ -25,11 +25,6 @@
         <item>Blocked</item>
     </string-array>
 
-    <string-array name="sample_saved">
-        <item>Happy Birthday!</item>
-        <item>Happy New Year!</item>
-    </string-array>
-
     <array name="colors">
         <item>@color/red</item>
         <item>@color/purple</item>

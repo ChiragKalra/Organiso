@@ -16,14 +16,12 @@ import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.core.data.ContactsManager
-import com.bruhascended.core.db.ContactsProvider
-import com.bruhascended.core.db.Contact
-import com.bruhascended.core.db.Conversation
-import com.bruhascended.core.db.Message
 import com.bruhascended.core.constants.*
+import com.bruhascended.core.db.*
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.common.MediaPreviewActivity
+import com.bruhascended.core.constants.saveFile
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.ui.newConversation.RecipientRecyclerAdaptor
@@ -58,6 +56,7 @@ class NewConversationActivity : MediaPreviewActivity() {
     private lateinit var addressRecyclerAdaptor: RecipientRecyclerAdaptor
     private lateinit var mAdaptor: ContactRecyclerAdaptor
     private lateinit var mContactsProvider: ContactsProvider
+    private lateinit var mSavedDao: SavedDao
 
     private val recipients = arrayListOf<Contact>()
 
@@ -264,6 +263,7 @@ class NewConversationActivity : MediaPreviewActivity() {
         mAddMedia = addMedia
         cm = ContactsManager(this)
         mContactsProvider = ContactsProvider(this)
+        mSavedDao = SavedDbFactory(mContext).get().manager()
 
         processIntentData()
         setupAddressRecycler()
@@ -277,14 +277,21 @@ class NewConversationActivity : MediaPreviewActivity() {
                 val msg = messageEditText.text.toString().trim()
                 if (msg.isEmpty() && !isMms)
                     return@setOnClickListener
-                mContext.startActivity(
-                    Intent(mContext, SavedActivity::class.java).apply {
-                        action = Intent.ACTION_PICK
-                        data = mmsURI
-                        putExtra(EXTRA_MESSAGE_TEXT, msg)
-                    }
+
+                mSavedDao.insert(
+                    Saved(
+                        msg,
+                        System.currentTimeMillis(),
+                        SAVED_TYPE_DRAFT,
+                        path = mmsURI?.saveFile(
+                            this,
+                            System.currentTimeMillis().toString()
+                        )
+                    )
                 )
-                finish()
+                Toast.makeText(
+                    this, getString(R.string.added_to_favorites), Toast.LENGTH_LONG
+                ).show()
             }
             sendButton.setOnClickListener {
                 if (messageEditText.text.toString().trim() == "" && !isMms)

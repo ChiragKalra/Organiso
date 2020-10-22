@@ -9,6 +9,6 @@ class CategoryPagerAdapter (
     fm: FragmentManager,
     lc: Lifecycle
 ): FragmentStateAdapter(fm, lc) {
-    override fun createFragment(position: Int) = CategoryFragment.newInstance(position)
+    override fun createFragment(position: Int) = CategoryFragment.newInstance(vc[position])
     override fun getItemCount() = vc.size
 }

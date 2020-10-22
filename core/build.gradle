@@ -48,9 +48,9 @@ dependencies {
 
     api 'androidx.preference:preference-ktx:1.1.1'
     api "androidx.paging:paging-runtime-ktx:3.0.0-alpha07"
-    api 'androidx.room:room-runtime:2.3.0-alpha02'
-    api "androidx.room:room-ktx:2.3.0-alpha02"
-    kapt "androidx.room:room-compiler:2.3.0-alpha02"
+    api 'androidx.room:room-runtime:2.3.0-alpha03'
+    api "androidx.room:room-ktx:2.3.0-alpha03"
+    kapt "androidx.room:room-compiler:2.3.0-alpha03"
 
     api 'com.klinkerapps:android-smsmms:5.2.5'
 

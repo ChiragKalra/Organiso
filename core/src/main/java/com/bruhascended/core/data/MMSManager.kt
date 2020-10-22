@@ -40,7 +40,11 @@ class MMSManager (
     private val mMainDaoProvider = MainDaoProvider(mContext)
 
     private val tMgr = mContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    private var mPhoneNumber = cm.getClean(tMgr.line1Number)
+    private var mPhoneNumber = try {
+        cm.getClean(tMgr.line1Number)
+    } catch (e: Exception) {
+        ""
+    }
 
     private fun getAddressNumber(id: String): Pair<Boolean, String> {
         var selection = "type=137 AND msg_id=$id"
@@ -188,7 +192,7 @@ class MMSManager (
 
         conversation = if (conversation != null) {
             conversation.apply {
-                if (LABEL_PERSONAL != label) id = null
+                id = null
                 if (time < message.time) {
                     read = init
                     time = message.time

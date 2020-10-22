@@ -49,7 +49,7 @@ class SMSSender(
 
     private fun addSmsToDb(
         conversation: Conversation, smsText: String,
-        date: Long, type: Int, delivered: Boolean, retryIndex: Long?
+        date: Long, type: Int, delivered: Boolean, retryIndex: Int?
     ) {
         val message = Message (
             smsText, type, date, id = retryIndex, delivered = delivered
@@ -60,9 +60,9 @@ class SMSSender(
                 val qs = conversationDao.search(date)
                 for (m in qs) {
                     message.id = m.id
-                    conversationDao.delete(m)
+                    conversationDao.deleteFromInternal(m)
                 }
-                if (retryIndex != null) conversationDao.delete(message)
+                if (retryIndex != null) conversationDao.deleteFromInternal(message)
                 conversationDao.insert(message)
                 close()
             }
@@ -101,7 +101,7 @@ class SMSSender(
         }
     }
 
-    fun sendSMS(smsText: String, retryIndex: Long? = null) {
+    fun sendSMS(smsText: String, retryIndex: Int? = null) {
         val date = System.currentTimeMillis()
         val transaction = Transaction(mContext, settings)
 
@@ -166,7 +166,13 @@ class SMSSender(
             }, IntentFilter(deliveredAction))
 
             val message = SMS(smsText, conversation.address.filter { char -> char.isDigit() })
-            transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
+
+            Thread {
+                if (retryIndex != null) {
+                    deleteSMS(mContext, smsText, conversation.clean)
+                }
+                transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
+            }.start()
         }
     }
 

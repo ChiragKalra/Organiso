@@ -1,5 +1,4 @@
 <resources>
-
     <!-- Titles -->
     <string name="app_name">Organiso</string>
     <string name="settings">Settings</string>
@@ -16,19 +15,17 @@
     <string name="otp">OTP</string>
 
     <!-- Actions -->
-    <string name="add">Add</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="search">Search</string>
-    <string name="report_spam">Report Spam</string>
     <string name="report">Report</string>
     <string name="reply">Reply</string>
     <string name="block">Block</string>
     <string name="move_to">Move to</string>
     <string name="move">Move</string>
     <string name="to">To</string>
-    <string name="back_button">Back Button</string>
     <string name="copy_to_clipboard">Copy</string>
+    <string name="report_spam">Report Spam</string>
     <string name="share">Share</string>
     <string name="mute">Mute</string>
     <string name="unMute">UnMute</string>
@@ -54,6 +51,7 @@
 
 
     <!-- Image(Button) Descriptions-->
+    <string name="back_button">Back Button</string>
     <string name="app_icon">App Icon</string>
     <string name="more_options">More Options</string>
     <string name="mms">MMS Image</string>
@@ -70,17 +68,14 @@
     <string name="custom_category_label">custom category label</string>
     <string name="toggle_visibility">Toggle Visibility</string>
     <string name="play_button">Play/Pause Button</string>
-    <string name="create_new_tag">create new tag</string>
     <string name="send_scheduled_message">Send scheduled message</string>
     <string name="draft_message">Draft message</string>
     <string name="add_to_favorite_messages">Add to favorite messages</string>
 
     <!-- Descriptions -->
-    <string name="new_tag">New Tag</string>
-    <string name="saved_wishes">Wishes</string>
-    <string name="saved_not_tagged">Not Tagged</string>
     <string name="you">You</string>
     <string name="title">Title</string>
+    <string name="no_favorites">No Favorites</string>
     <string name="report_a_bug">Report A Bug</string>
     <string name="messages">%1$d message(s)</string>
     <string name="audio_col">Audio: </string>
@@ -95,8 +90,8 @@
     <string name="queued">queued</string>
     <string name="failed_retry">failed. tap to retry</string>
     <string name="failed">failed</string>
-
-    <string name="x_active_conversations">%1$d active conversation(s)</string>
+    <string name="drafted">drafted</string>
+    <string name="drafted_edit">drafted. tap to edit</string>
 
     <string name="x_mins_remaining">%1$d minute(s) remaining</string>
     <string name="x_percent">%1$d%%</string>

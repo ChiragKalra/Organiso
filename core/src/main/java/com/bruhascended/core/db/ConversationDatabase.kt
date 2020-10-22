@@ -33,7 +33,7 @@ data class Conversation (
     val clean: String,
     var name: String? = null,
     @PrimaryKey(autoGenerate = true)
-    var id: Long? = null,
+    var id: Int? = null,
     var label: Int = LABEL_PERSONAL,
     var forceLabel: Int = -1,
     var probabilities: FloatArray = FloatArray(5) { if (it == LABEL_PERSONAL) 1F else 0F },
@@ -153,7 +153,6 @@ fun Conversation.moveTo(to: Int, mContext: Context) {
         forceLabel = to
         MainDaoProvider(mContext).getMainDaos()[to].insert(this)
     } else MessageDbFactory(mContext).of(clean).apply {
-        manager().nukeTable()
-        close()
+        manager().nukeTable(mContext, clean)
     }
 }

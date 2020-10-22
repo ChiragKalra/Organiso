@@ -30,11 +30,10 @@ data class Saved (
     val text: String,
     val time: Long,
     var type: Int,
-    var tag: String,
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null,
     val sender: String? = null,
-    var messageId: Long? = null,
+    var messageId: Int? = null,
     var path: String? = null,
 ): Serializable {
     override fun equals(other: Any?): Boolean {
@@ -45,7 +44,6 @@ data class Saved (
         if (text != other.text) return false
         if (time != other.time) return false
         if (path != other.path) return false
-        if (tag != other.tag) return false
         if (type != other.type) return false
         if (sender != other.sender) return false
         return true
@@ -89,17 +87,17 @@ interface SavedDao {
     @Query("SELECT * FROM saved LIMIT 1")
     fun loadSingleSync(): Saved?
 
+    @Query("SELECT * FROM saved WHERE sender like :sender AND messageId like :messageId")
+    fun loadMessageFromSender(sender:String, messageId: Int): Saved?
+
     @Query("SELECT * FROM saved ORDER BY time DESC")
     fun loadAll(): LiveData<List<Saved>>
 
-    @Query("SELECT * FROM saved WHERE tag LIKE :tag ORDER BY time DESC")
-    fun loadPagedFrom(tag: String): PagingSource<Int, Saved>
+    @Query("SELECT * FROM saved ORDER BY time DESC")
+    fun loadPaged(): PagingSource<Int, Saved>
 
     @Query("SELECT * FROM saved")
     fun loadAllSync(): List<Saved>
-
-    @Query("SELECT DISTINCT tag FROM saved")
-    fun loadPagedTags(): PagingSource<Int, String>
 
     @RawQuery
     fun findByQuery(query: SupportSQLiteQuery): List<Saved>

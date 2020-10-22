@@ -22,6 +22,9 @@ import android.webkit.MimeTypeMap
 import android.widget.*
 import androidx.core.content.FileProvider
 import androidx.core.view.doOnDetach
+import com.bruhascended.core.constants.MESSAGE_TYPE_DRAFT
+import com.bruhascended.core.constants.MESSAGE_TYPE_QUEUED
+import com.bruhascended.core.constants.MESSAGE_TYPE_SENT
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
@@ -68,7 +71,6 @@ class MessageViewHolder(
     var selectedColor = 0
     var backgroundColor = 0
     var textColor = 0
-    var failed = false
 
     init {
         val tp = mContext.obtainStyledAttributes(intArrayOf(
@@ -231,10 +233,14 @@ class MessageViewHolder(
             statusTextView.setTextColor(textColor)
             statusTextView.text =  when {
                 message.delivered -> mContext.getString(R.string.delivered)
-                message.type == 2 -> mContext.getString(R.string.sent)
-                message.type == 6 -> mContext.getString(R.string.queued)
+                message.type == MESSAGE_TYPE_SENT -> mContext.getString(R.string.sent)
+                message.type == MESSAGE_TYPE_QUEUED -> mContext.getString(R.string.queued)
+                message.type == MESSAGE_TYPE_DRAFT -> {
+                    statusTextView.setTextColor(mContext.getColor(R.color.blue))
+                    if (retryEnabled) mContext.getString(R.string.drafted_edit)
+                    else mContext.getString(R.string.drafted)
+                }
                 else -> {
-                    failed = true
                     statusTextView.setTextColor(mContext.getColor(R.color.red))
                     if (retryEnabled) mContext.getString(R.string.failed_retry)
                     else mContext.getString(R.string.failed)
