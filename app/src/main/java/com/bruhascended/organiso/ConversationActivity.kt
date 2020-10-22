@@ -129,23 +129,25 @@ class ConversationActivity : MediaPreviewActivity() {
         }
     }
 
-    private fun syncExtraVisibility() {
+    private fun toggleExtraVisibility(vis: Boolean? = null) {
+        if (vis == null) mViewModel.extraIsVisible = !mViewModel.extraIsVisible
+        else mViewModel.extraIsVisible = vis
         val extras = arrayOf(
             favoriteButton,
             draftButton,
             timedButton
         )
-        val vis = mViewModel.extraIsVisible
+        val visible = mViewModel.extraIsVisible
         extras.forEachIndexed { i, b ->
             b.animate()
-                .alpha(vis.toFloat())
-                .translationY(if (vis) 0f else 64.toPx() * (i + 1))
+                .alpha(visible.toFloat())
+                .translationY(if (visible) 0f else 64.toPx() * (i + 1))
                 .setDuration(300)
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .start()
         }
         extraButton.animate()
-            .rotation(if (vis) 45f else 0f)
+            .rotation(if (visible) 45f else 0f)
             .setInterpolator(AccelerateDecelerateInterpolator())
             .setDuration(300)
             .start()
@@ -370,11 +372,11 @@ class ConversationActivity : MediaPreviewActivity() {
                 sendButton.isEnabled = true
                 messageEditText.setText("")
             }
+            toggleExtraVisibility(false)
         }
-        syncExtraVisibility()
+        toggleExtraVisibility(mViewModel.extraIsVisible)
         extraButton.setOnClickListener {
-            mViewModel.extraIsVisible = !mViewModel.extraIsVisible
-            syncExtraVisibility()
+            toggleExtraVisibility()
         }
         favoriteButton.setOnClickListener {
             val msg = messageEditText.text.toString().trim()
@@ -395,8 +397,7 @@ class ConversationActivity : MediaPreviewActivity() {
             Toast.makeText(
                 this, getString(R.string.added_to_favorites), Toast.LENGTH_LONG
             ).show()
-            mViewModel.extraIsVisible = false
-            syncExtraVisibility()
+            toggleExtraVisibility(false)
         }
 
         draftButton.setOnClickListener{
@@ -404,11 +405,20 @@ class ConversationActivity : MediaPreviewActivity() {
             if (msg.isEmpty() && !isMms) {
                 return@setOnClickListener
             }
+            messageEditText.text = null
             mDraftsManager.create(msg, mViewModel.conversation.address, mmsURI)
+            toggleExtraVisibility(false)
         }
         mAdaptor.setOnDraftClick {
-            messageEditText.setText(it.text)
             mDraftsManager.delete(it, mViewModel.conversation.address)
+            messageEditText.apply {
+                setText(it.text)
+                setSelection(it.text.length)
+                requestFocus()
+                inputManager?.showSoftInput(this, InputMethodManager.SHOW_FORCED)
+            }
+            mViewModel.extraIsVisible = false
+            toggleExtraVisibility(false)
         }
     }
 
@@ -458,6 +468,12 @@ class ConversationActivity : MediaPreviewActivity() {
         if (msg.isEmpty()) {
             return
         }
-        mDraftsManager.create(msg, mViewModel.conversation.address, mmsURI)
+        mViewModel.apply {
+            conversation.lastSMS = msg
+            conversation.time = System.currentTimeMillis()
+            conversation.lastMMS = mmsURI != null
+            mainDaoProvider.getMainDaos()[conversation.label].update(conversation)
+            mDraftsManager.create(msg, mViewModel.conversation.address, mmsURI)
+        }
     }
 }

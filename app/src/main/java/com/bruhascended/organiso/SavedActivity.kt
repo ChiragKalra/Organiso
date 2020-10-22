@@ -121,6 +121,7 @@ class SavedActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 mViewModel.flow.cachedIn(this).collectLatest {
                     mAdapter.submitData(it)
+                    emptyList.isVisible = mViewModel.dbIsEmpty()
                 }
             }
 
@@ -145,7 +146,6 @@ class SavedActivity : AppCompatActivity() {
         setContentView(R.layout.activity_saved)
         setupToolbar(toolbar)
 
-        emptyList.isVisible = mViewModel.dbIsEmpty()
 
         actionArray = resources.getStringArray(R.array.saved_actions)
         mClipboardManager = mContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
