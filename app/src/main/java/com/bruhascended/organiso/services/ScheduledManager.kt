@@ -9,7 +9,24 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-class ScheduledManager (
+/*
+                    Copyright 2020 Chirag Kalra
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
+
+class ScheduledManager(
     private val mContext: Context,
     private val mDao: MessageDao
 ) {
@@ -24,7 +41,7 @@ class ScheduledManager (
             val conversation = inputData.getString(EXTRA_CONVERSATION_JSON).toConversation()
             val text = inputData.getString(EXTRA_MESSAGE_TEXT)!!
             val file = inputData.getString(EXTRA_FILE_PATH)
-            val time = inputData.getLong(EXTRA_TIME,0)
+            val time = inputData.getLong(EXTRA_TIME, 0)
 
             if (file == null) {
                 SMSSender(mContext, arrayOf(conversation)).sendSMS(text)
@@ -43,7 +60,11 @@ class ScheduledManager (
     fun add(scheduledTime: Long, conversation: Conversation, text: String, data: Uri?) {
         val date = System.currentTimeMillis()
         val path = data?.saveFile(mContext, date.toString())
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
         val request = OneTimeWorkRequest.Builder(SendWork::class.java)
+            .setConstraints(constraints)
             .setInitialDelay(abs(scheduledTime - date), TimeUnit.MILLISECONDS)
             .addTag(date.toString())
             .setInputData(
