@@ -18,7 +18,8 @@
         app:layout_constraintTop_toTopOf="parent"
         android:theme="?appBarLayoutStyle">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
+            app:popupTheme="@style/Menu"
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize" />

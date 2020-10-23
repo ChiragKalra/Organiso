@@ -70,12 +70,10 @@
 
     <style name="DarkTheme" parent="AppTheme.DarkTheme"/>
 
-    <style name="DarkTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColor">@color/text_primary_dark</item>
-        <item name="android:background">@color/background_dark</item>
-        <item name="android:textColorSecondary">@color/text_hint_dark</item>
-        <item name="android:textColorAlertDialogListItem">@color/text_secondary_dark</item>
+    <style name="DarkTheme.AlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorPrimary">@color/headerTextColorDark</item>
+        <item name="colorOnSurface">@color/text_primary_dark</item>
+        <item name="android:background">@color/list_item_background_dark</item>
     </style>
 
     <style name="DarkTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
@@ -108,14 +106,12 @@
 
     <style name="LightTheme" parent="AppTheme.LightTheme"/>
 
-    <style name="LightTheme.AlertDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
-        <item name="android:colorEdgeEffect">@color/text_primary_light</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColor">@color/text_primary_light</item>
-        <item name="android:background">@color/background_light</item>
-        <item name="android:textColorSecondary">@color/text_hint_light</item>
-        <item name="android:textColorAlertDialogListItem">@color/text_secondary_light</item>
+    <style name="LightTheme.AlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorPrimary">@color/headerTextColorLight</item>
+        <item name="colorOnSurface">@color/text_primary_light</item>
+        <item name="android:background">@color/list_item_background_light</item>
     </style>
+
 
     <style name="LightTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
         <item name="colorControlNormal">@color/text_secondary_light</item>

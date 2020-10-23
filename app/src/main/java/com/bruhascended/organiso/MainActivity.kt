@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
                 res.recycle()
 
                 val badge = bottom.getOrCreateBadge(i)
+                badge.isVisible = false
                 mViewModel.getLiveUnreadCount(mViewModel.visibleCategories[i]).observe(this, {
                     badge.isVisible = it > 0
                     badge.number = it

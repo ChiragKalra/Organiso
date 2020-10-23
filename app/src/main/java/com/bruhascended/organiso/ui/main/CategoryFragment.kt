@@ -155,7 +155,7 @@ class CategoryFragment: Fragment(), ConversationSelectionListener.SimpleActionMo
             addItemDecoration(FooterDecoration(height.toInt()))
             edgeEffectFactory = ScrollEffectFactory()
             addOnScrollListener(ScrollEffectFactory.OnScrollListener())
-            model.goToTop[label] = {
+            if (label != LABEL_BLOCKED) model.goToTop[label] = {
                 recyclerView.smoothScrollToPosition(0)
             }
         }
