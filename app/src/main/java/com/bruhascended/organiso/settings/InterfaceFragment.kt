@@ -29,14 +29,14 @@ class InterfaceFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.interface_preferences, rootKey)
 
         val themePref: SwitchPreferenceCompat = findPreference(PREF_DARK_THEME)!!
-        val themeCategory: PreferenceCategory = findPreference("theme_category")!!
         val swipePref: Preference = findPreference("swipe_header")!!
+        val categoryPref: Preference = findPreference("category")!!
 
-
+        categoryPref.fragment = CategorySettingsFragment::class.qualifiedName
         swipePref.fragment = SwipeFragment::class.qualifiedName
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            themeCategory.isVisible = false
+            themePref.isVisible = false
         } else {
             themePref.setOnPreferenceChangeListener { _, _ ->
                 val sp = PreferenceManager.getDefaultSharedPreferences(requireActivity())

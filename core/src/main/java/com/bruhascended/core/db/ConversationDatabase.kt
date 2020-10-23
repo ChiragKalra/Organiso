@@ -100,6 +100,9 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations")
     fun loadAllSync(): List<Conversation>
 
+    @Query("SELECT COUNT(clean) FROM conversations WHERE read = 0")
+    fun loadLiveUnreadCount(): LiveData<Int>
+
     @RawQuery
     fun findByQuery(query: SupportSQLiteQuery): List<Conversation>
 

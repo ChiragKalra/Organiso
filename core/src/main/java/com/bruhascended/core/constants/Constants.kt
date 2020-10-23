@@ -86,6 +86,7 @@ const val PREF_DELETE_OTP = "delete_otp"
 const val PREF_COPY_OTP = "copy_otp"
 const val PREF_SEND_SPAM = "report_spam"
 const val PREF_DARK_THEME = "dark_theme"
+const val PREF_ENTER_SEND = "enter_send"
 
 const val ACTION_MOVE = "Move"
 const val ACTION_REPORT = "Report Spam"

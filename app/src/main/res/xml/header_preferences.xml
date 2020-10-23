@@ -26,11 +26,6 @@
         app:title="@string/notifications" />
 
     <Preference
-        app:icon="@drawable/ic_category"
-        app:key="category"
-        app:title="@string/customise_categories" />
-
-    <Preference
         app:icon="@drawable/ic_info"
         app:key="info"
         app:title="@string/info" />

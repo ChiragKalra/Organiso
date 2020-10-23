@@ -52,7 +52,7 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
             add(CATEGORY_VISIBLE)
             for (category in visibleCategories) add(category)
             add(CATEGORY_HIDDEN)
-            for (category in hiddenCategories) add(category)
+            for (category in hiddenCategories) if (category!= LABEL_BLOCKED) add(category)
         }
 
         previousOrder = currentOrder.toTypedArray()
@@ -140,7 +140,9 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
 
     override fun onDestroy() {
         super.onDestroy()
-        val arr = mAdapter.data
+        val arr = mAdapter.data.apply {
+            add(LABEL_BLOCKED)
+        }
         if (
             arr.toTypedArray() contentDeepEquals previousOrder &&
             previousLabels contentDeepEquals mAdapter.customLabels

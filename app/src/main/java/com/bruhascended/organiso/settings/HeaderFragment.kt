@@ -31,14 +31,12 @@ class HeaderFragment : PreferenceFragmentCompat() {
         val appBadgePref: Preference = findPreference("app_badge")!!
         val interfacePref: Preference = findPreference("interface")!!
         val messagesPref: Preference = findPreference("messages")!!
-        val categoryPref: Preference = findPreference("category")!!
         val infoPref: Preference = findPreference("info")!!
 
         appBadgePref.summary = BuildConfig.VERSION_NAME
 
         interfacePref.fragment = InterfaceFragment::class.qualifiedName
         messagesPref.fragment = MessagesFragment::class.qualifiedName
-        categoryPref.fragment = CategorySettingsFragment::class.qualifiedName
         infoPref.fragment = InfoFragment::class.qualifiedName
 
         notifyPref.setOnPreferenceClickListener {

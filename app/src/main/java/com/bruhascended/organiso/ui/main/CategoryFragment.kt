@@ -151,10 +151,13 @@ class CategoryFragment: Fragment(), ConversationSelectionListener.SimpleActionMo
             layoutManager = mLayoutManager
             isNestedScrollingEnabled = true
             adapter = mAdaptor
-            val height = mContext.resources.displayMetrics.density * 84
+            val height = mContext.resources.displayMetrics.density * 68
             addItemDecoration(FooterDecoration(height.toInt()))
             edgeEffectFactory = ScrollEffectFactory()
             addOnScrollListener(ScrollEffectFactory.OnScrollListener())
+            model.goToTop[label] = {
+                recyclerView.smoothScrollToPosition(0)
+            }
         }
 
 

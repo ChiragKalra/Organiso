@@ -4,9 +4,10 @@
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
             <gradient
-                android:angle="270"
-                android:endColor="@color/colorPrimary"
-                android:startColor="@color/colorPrimary"
+                android:angle="90"
+                android:endColor="#000"
+                android:centerColor="#000"
+                android:startColor="#000"
                 android:type="linear"/>
         </shape>
     </item>

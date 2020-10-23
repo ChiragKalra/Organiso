@@ -49,4 +49,12 @@
         <item>Share</item>
     </string-array>
 
+    <integer-array name="category_icons">
+        <item>@drawable/label_personal</item>
+        <item>@drawable/label_important</item>
+        <item>@drawable/label_transactions</item>
+        <item>@drawable/label_promotions</item>
+        <item>@drawable/label_spam</item>
+    </integer-array>
+
 </resources>

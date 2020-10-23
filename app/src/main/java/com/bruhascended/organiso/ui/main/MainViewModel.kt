@@ -42,11 +42,12 @@ class MainViewModel(
     var mContactsProvider: ContactsProvider = ContactsProvider(mApp)
     var mSmsManager: SMSManager = SMSManager(mApp)
 
-
     lateinit var visibleCategories: Array<Int>
     lateinit var hiddenCategories: Array<Int>
     lateinit var customTabLabels: Array<String>
     lateinit var categoryFlows: Array<Flow<PagingData<Conversation>>>
+
+    var goToTop = Array(5){{}}
 
     init {
         forceReload()
@@ -54,13 +55,22 @@ class MainViewModel(
 
     fun isDelayed(label: Int) = label in visibleCategories && label != visibleCategories.first()
 
-    fun isEmpty(label: Int): Boolean {
-        return mMainDaoProvider.getMainDaos()[label].loadSingle() == null
-    }
+    fun isEmpty(label: Int) =
+        mMainDaoProvider.getMainDaos()[label].loadSingle() == null
+
+    fun getLiveUnreadCount(label: Int) =
+        mMainDaoProvider.getMainDaos()[label].loadLiveUnreadCount()
+
 
     fun forceReload() {
         if (prefs.getString(PREF_VISIBLE_CATEGORIES, "") == "") {
-            visibleCategories = Array(4) { it }
+            visibleCategories = Array(4) {
+                when(it) {
+                    LABEL_PERSONAL -> LABEL_IMPORTANT
+                    LABEL_IMPORTANT -> LABEL_PERSONAL
+                    else -> it
+                }
+            }
             hiddenCategories = Array(2) { 4 + it }
             prefs.edit()
                 .putString(PREF_VISIBLE_CATEGORIES, visibleCategories.toJson())

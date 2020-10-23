@@ -1,38 +1,35 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <PreferenceCategory
-        android:layout="@layout/view_category_pref"
-        app:title="@string/theme"
-        app:key="theme_category">
-        <SwitchPreferenceCompat
-            app:defaultValue="false"
-            app:icon="@drawable/ic_theme"
-            app:key="dark_theme"
-            app:allowDividerBelow="true"
-            app:title="@string/dark_theme" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:layout="@layout/view_category_pref"
-        app:title="@string/search">
-        <SwitchPreferenceCompat
-            app:defaultValue="false"
-            app:icon="@drawable/ic_search_themed"
-            app:key="show_hidden_results"
-            app:allowDividerBelow="true"
-            app:title="@string/search_hidden_categories" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:layout="@layout/view_category_pref"
-        app:title="@string/swipe_action">
-        <Preference
-            app:icon="@drawable/ic_swipe_custom"
-            app:key="swipe_header"
-            app:title="@string/custom_swipe_action" />
-    </PreferenceCategory>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:icon="@drawable/ic_theme"
+        app:key="dark_theme"
+        app:allowDividerBelow="true"
+        app:title="@string/dark_theme" />
 
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:icon="@drawable/ic_search_themed"
+        app:key="show_hidden_results"
+        app:allowDividerBelow="true"
+        app:title="@string/search_hidden_categories" />
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:icon="@drawable/ic_baseline_keyboard_return_24"
+        app:key="enter_send"
+        app:allowDividerBelow="true"
+        app:summaryOff="@string/enter_new_line"
+        app:title="@string/enter_is_send"
+        app:summaryOn="@string/enter_send_message"/>
+
+    <Preference
+        app:icon="@drawable/ic_swipe_custom"
+        app:key="swipe_header"
+        app:title="@string/custom_swipe_action" />
+
+    <Preference
+        app:icon="@drawable/ic_category"
+        app:key="category"
+        app:title="@string/customise_categories" />
 </PreferenceScreen>

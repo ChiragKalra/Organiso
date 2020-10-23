@@ -1,30 +1,31 @@
 package com.bruhascended.organiso
 
-import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.TransitionDrawable
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.provider.Telephony
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ActivityCompat
+import androidx.core.view.get
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
-import com.bruhascended.core.constants.*
+import com.bruhascended.core.constants.ARR_PERMS
+import com.bruhascended.core.constants.EXTRA_LABEL
+import com.bruhascended.core.constants.KEY_STATE_CHANGED
+import com.bruhascended.core.constants.PREF_ACTION_NAVIGATE
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryPagerAdapter
 import com.bruhascended.organiso.ui.main.MainViewModel
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.bottomnavigation.LabelVisibilityMode
 import kotlinx.android.synthetic.main.activity_main.*
 
 /*
@@ -50,39 +51,69 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var inputManager: InputMethodManager
 
-    private val onSearchCanceled = registerForActivityResult(StartActivityForResult()) {
-        if (it.resultCode == RESULT_CANCELED) {
-            appBarLayout?.postDelayed({
-                appBarLayout.setExpanded(true, true)
-            }, 300)
-        }
-    }
+    private val onSearchCanceled = registerForActivityResult(StartActivityForResult()) {}
 
-    private fun setupTabs() {
+    @SuppressLint("ResourceType")
+    private fun setupBottomNav() {
         if (mViewModel.visibleCategories.size == 1) {
-            tabs.visibility = View.GONE
+            bottom.visibility = View.GONE
         } else {
-            TabLayoutMediator(tabs, viewPager) { tab, position ->
-                val label = mViewModel.visibleCategories[position]
-                tab.text = mViewModel.customTabLabels[label]
-            }.attach()
+            mViewModel.visibleCategories.forEachIndexed { i, label ->
+                bottom.menu.add(
+                    0, i, 400 + i,
+                    mViewModel.customTabLabels[label]
+                )
+                val res = resources.obtainTypedArray(R.array.category_icons)
+                bottom.menu[i].setIcon(res.getResourceId(label, 0))
+                res.recycle()
+
+                val badge = bottom.getOrCreateBadge(i)
+                mViewModel.getLiveUnreadCount(mViewModel.visibleCategories[i]).observe(this, {
+                    badge.isVisible = it > 0
+                    badge.number = it
+                })
+            }
+            val typedArray = obtainStyledAttributes(
+                intArrayOf(R.attr.navActiveColor, R.attr.navInactiveColor)
+            )
+            val colors = intArrayOf(
+                typedArray.getColor(0, 0),
+                typedArray.getColor(1, 0)
+            )
+            typedArray.recycle()
+            val states = arrayOf(
+                intArrayOf(android.R.attr.state_checked),
+                intArrayOf(-android.R.attr.state_checked)
+            )
+            bottom.itemIconTintList = ColorStateList(states, colors)
+            bottom.labelVisibilityMode = LabelVisibilityMode.LABEL_VISIBILITY_SELECTED
+            bottom.setOnNavigationItemSelectedListener {
+                viewPager.setCurrentItem(
+                    it.itemId, mViewModel.prefs.getBoolean(PREF_ACTION_NAVIGATE, true)
+                )
+                true
+            }
+            bottom.setOnNavigationItemReselectedListener {
+                mViewModel.goToTop[mViewModel.visibleCategories[it.itemId]]()
+            }
         }
     }
 
     private fun setupViewPager() {
+        setupBottomNav()
         mViewModel.apply {
             viewPager.adapter = CategoryPagerAdapter(
                 visibleCategories, supportFragmentManager, lifecycle
             )
-            viewPager.offscreenPageLimit = 5
-            viewPager.registerOnPageChangeCallback(object: OnPageChangeCallback() {
+            viewPager.offscreenPageLimit = 4
+            viewPager.registerOnPageChangeCallback(object : OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     actionMode?.finish()
+                    bottom.selectedItemId = position
                     super.onPageSelected(position)
                 }
             })
         }
-        setupTabs()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,7 +139,7 @@ class MainActivity : AppCompatActivity() {
         addedCategoriesToMenu = true
         for (i in mViewModel.hiddenCategories.indices) {
             val label = mViewModel.hiddenCategories[i]
-            menu.add (
+            menu.add(
                 0, label, 400 + i,
                 mViewModel.customTabLabels[label]
             )
@@ -125,18 +156,6 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_search -> {
                 appBarLayout.apply {
-                    val params = appBarLayout.layoutParams as CoordinatorLayout.LayoutParams
-                    val behavior = params.behavior as AppBarLayout.Behavior
-                    ValueAnimator.ofInt().apply {
-                        interpolator = DecelerateInterpolator()
-                        duration = 300
-                        setIntValues(behavior.topAndBottomOffset, -tabs.height)
-                        addUpdateListener { animation ->
-                            behavior.topAndBottomOffset = animation.animatedValue as Int
-                            requestLayout()
-                        }
-                        start()
-                    }
                     onSearchCanceled.launch(Intent(mContext, SearchActivity::class.java))
                     overridePendingTransition(android.R.anim.fade_in, R.anim.hold)
                 }
@@ -163,15 +182,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportActionModeStarted(mode: ActionMode) {
         actionMode = mode
-        val trans: TransitionDrawable = appBarLayout.background as TransitionDrawable
-        trans.startTransition(300)
         super.onSupportActionModeStarted(mode)
     }
 
     override fun onSupportActionModeFinished(mode: ActionMode) {
         actionMode = null
-        val trans: TransitionDrawable = appBarLayout.background as TransitionDrawable
-        trans.reverseTransition(150)
         super.onSupportActionModeFinished(mode)
     }
 

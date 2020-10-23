@@ -16,6 +16,7 @@
     <string name="scheduled_messages">Scheduled Messages</string>
 
     <!-- Actions -->
+    <string name="send">send</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="search">Search</string>
@@ -106,6 +107,7 @@
 
     <string name="this_category_has_no_messages_yet">This category has no messages yet.</string>
     <string name="sending_messages_not_supported">Sender Doesn\'t Support Replies</string>
+    <string name="number_blocked">This number is blocked.</string>
     <string name="type_your_message_here">Type your message</string>
     <string name="conversation_is_muted">Conversation is Muted</string>
     <string name="describe_bug_here">Describe bug here</string>
@@ -170,4 +172,7 @@
     <string name="choose_right_swipe">Choose Right Swipe Action</string>
     <string name="custom_swipe_action">Swipe Action Settings</string>
     <string name="swipe_strength">Swipe Strength</string>
+    <string name="enter_new_line">Enter will add new line</string>
+    <string name="enter_send_message">Enter will send message</string>
+    <string name="enter_is_send">Enter is send</string>
 </resources>

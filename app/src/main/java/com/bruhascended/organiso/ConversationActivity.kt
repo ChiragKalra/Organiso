@@ -15,6 +15,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -22,6 +23,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.constants.*
@@ -359,30 +361,52 @@ class ConversationActivity : MediaPreviewActivity() {
         toggleGoToBottomButtonVisibility()
         trackLastMessage()
 
-        if (!mViewModel.conversation.clean.first().isDigit()) {
+        if (!mViewModel.conversation.clean.first().isDigit() ||
+            mViewModel.conversation.label == LABEL_BLOCKED) {
             sendLayout.visibility = View.INVISIBLE
             favoriteButton.visibility = View.GONE
             timedButton.visibility = View.GONE
             draftButton.visibility = View.GONE
             notSupported.visibility = View.VISIBLE
+            notSupported.text = if (mViewModel.conversation.label == LABEL_BLOCKED)
+                getString(R.string.number_blocked) else getString(R.string.sending_messages_not_supported)
             return
         }
 
-        sendButton.setOnClickListener {
-            if (isMms) {
-                sendButton.isEnabled = false
-                mmsSender.sendMMS(messageEditText.text.toString(), mmsURI!!)
-                sendButton.isEnabled = true
-                messageEditText.setText("")
-                hideMediaPreview()
-            } else if (messageEditText.text.toString().trim() != "") {
-                sendButton.isEnabled = false
-                smsSender.sendSMS(messageEditText.text.toString())
-                sendButton.isEnabled = true
-                messageEditText.setText("")
+
+        var sending = false
+        val onSend = {
+            if (!sending) {
+                sending = true
+                if (isMms) {
+                    mmsSender.sendMMS(messageEditText.text.toString(), mmsURI!!)
+                    messageEditText.setText("")
+                    hideMediaPreview()
+                } else if (messageEditText.text.toString().trim() != "") {
+                    smsSender.sendSMS(messageEditText.text.toString())
+                    messageEditText.setText("")
+                }
+                toggleExtraVisibility(false)
+                sending = false
             }
-            toggleExtraVisibility(false)
         }
+
+        if (PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(PREF_ENTER_SEND, false)
+        ) {
+            messageEditText.setSingleLine()
+            messageEditText.imeOptions = EditorInfo.IME_ACTION_SEND
+            messageEditText.setOnEditorActionListener { _, i, _ ->
+                if (i != EditorInfo.IME_ACTION_SEND) return@setOnEditorActionListener true
+                onSend()
+                true
+            }
+        }
+
+        sendButton.setOnClickListener {
+            onSend()
+        }
+
         toggleExtraVisibility(mViewModel.extraIsVisible)
         extraButton.setOnClickListener {
             toggleExtraVisibility()
@@ -495,6 +519,14 @@ class ConversationActivity : MediaPreviewActivity() {
         val muteItem = menu.findItem(R.id.action_mute)
         val callItem = menu.findItem(R.id.action_call)
         val contactItem = menu.findItem(R.id.action_contact)
+        val blockItem = menu.findItem(R.id.action_block)
+        val reportItem = menu.findItem(R.id.action_report_spam)
+
+        if (mViewModel.conversation.label == LABEL_BLOCKED && blockItem != null) {
+            menu.removeItem(blockItem.itemId)
+        } else if (mViewModel.conversation.label == LABEL_SPAM && reportItem != null) {
+            menu.removeItem(reportItem.itemId)
+        }
 
         mViewModel.conversation.apply {
             muteItem.title = if (isMuted) getString(R.string.unMute) else getString(R.string.mute)

@@ -1,11 +1,10 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="tabTextColor">@color/text_secondary_dark</item>
         <item name="tabSelectedTextColor">@color/text_primary_dark</item>
-        <item name="android:itemBackground">@color/popupMenuBackground</item>
 
         <item name="tabTextAppearance">@style/TabText</item>
         <item name="appBarLayoutStyle">@style/AppBarOverlay</item>
@@ -36,7 +35,7 @@
         <item name="android:actionButtonStyle">@color/text_primary_dark</item>
     </style>
 
-    <style name="ActionMode" parent="@style/Widget.AppCompat.ActionMode">
+    <style name="ActionMode" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
         <item name="background">@drawable/bg_appbarlayout</item>
         <item name="android:background">@color/popupMenuBackground</item>
         <item name="android:textColor">@color/text_primary_dark</item>
@@ -45,14 +44,19 @@
         <item name="android:itemBackground">@color/popupMenuBackground</item>
     </style>
 
+    <style name="Menu" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <item name="colorSurface">@color/popupMenuBackground</item>
+    </style>
+
     <!-- dark theme -->
     <style name="AppTheme.DarkTheme" parent="AppTheme">
         <item name="android:windowBackground">?backgroundColor</item>
-
         <item name="backgroundColor">@color/background_dark</item>
         <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
         <item name="unreadTextColor">@color/text_primary_dark</item>
+        <item name="navActiveColor">@color/text_primary_dark</item>
+        <item name="navInactiveColor">@color/text_hint_dark</item>
         <item name="android:textColorSecondary">@color/text_secondary_dark</item>
         <item name="android:textColorHint">@color/text_hint_dark</item>
         <item name="headerTextColor">@color/headerTextColorDark</item>
@@ -89,6 +93,8 @@
         <item name="android:textColorPrimary">@color/text_primary_light</item>
         <item name="headerTextColor">@color/headerTextColorLight</item>
         <item name="unreadTextColor">@color/text_primary_light</item>
+        <item name="navActiveColor">@color/text_primary_light</item>
+        <item name="navInactiveColor">@color/text_hint_light</item>
         <item name="android:textColor">@color/text_primary_light</item>
         <item name="android:textColorSecondary">@color/text_primary_light</item>
         <item name="android:textColorHint">@color/text_hint_light</item>

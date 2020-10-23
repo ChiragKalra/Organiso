@@ -143,6 +143,7 @@
             android:clearTaskOnLaunch="true"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:launchMode="singleTask" />
         <activity
             android:name=".SettingsActivity"
