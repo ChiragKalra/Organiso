@@ -1,10 +1,11 @@
-package com.bruhascended.core.db
+package com.bruhascended.core.data
 
 import android.content.Context
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.bruhascended.core.constants.*
-import com.bruhascended.core.data.ContactsManager
+import com.bruhascended.core.db.Contact
+import com.bruhascended.core.db.ContactDatabase
 
 class ContactsProvider (mContext: Context) {
 

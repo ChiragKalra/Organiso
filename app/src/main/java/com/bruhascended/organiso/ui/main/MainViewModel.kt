@@ -8,9 +8,9 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.SMSManager
-import com.bruhascended.core.db.ContactsProvider
+import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.db.Conversation
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.R
 import kotlinx.coroutines.flow.Flow

@@ -57,7 +57,7 @@
                 android:layout_height="48dp"
                 android:layout_margin="8dp"
                 android:background="#0000"
-                android:contentDescription="@string/send"
+                android:contentDescription="@string/play_button"
                 android:src="@drawable/ic_play"
                 android:tint="?android:textColor"
                 android:visibility="gone" />
@@ -96,7 +96,7 @@
         android:layout_height="48dp"
         android:layout_margin="4dp"
         android:background="#0000"
-        android:contentDescription="@string/send"
+        android:contentDescription="@string/play_button"
         android:src="@drawable/ic_play"
         android:tint="?android:textColor" />
 

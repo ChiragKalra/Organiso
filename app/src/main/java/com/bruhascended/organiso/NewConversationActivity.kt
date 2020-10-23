@@ -22,6 +22,7 @@ import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.common.MediaPreviewActivity
 import com.bruhascended.core.constants.saveFile
+import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.ui.newConversation.RecipientRecyclerAdaptor

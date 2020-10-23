@@ -1,12 +1,16 @@
 package com.bruhascended.organiso
 
 import android.app.Activity
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.icu.util.Calendar
 import android.net.Uri
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -21,15 +25,14 @@ import androidx.paging.cachedIn
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.constants.*
-import com.bruhascended.core.data.ContactsManager
-import com.bruhascended.core.data.DraftsManager
+import com.bruhascended.core.data.*
 import com.bruhascended.core.db.*
 import com.bruhascended.core.model.toFloat
 import com.bruhascended.organiso.common.*
-import com.bruhascended.organiso.common.MyPagingDataAdapter
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
 import com.bruhascended.organiso.services.MMSSender
 import com.bruhascended.organiso.services.SMSSender
+import com.bruhascended.organiso.services.ScheduledManager
 import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
 import com.bruhascended.organiso.ui.conversation.ConversationViewModel
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
@@ -39,6 +42,7 @@ import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -72,6 +76,7 @@ class ConversationActivity : MediaPreviewActivity() {
     private lateinit var selectionManager: ListSelectionManager<Message>
     private lateinit var conversationMenuOptions: ConversationMenuOptions
     private lateinit var mDraftsManager: DraftsManager
+    private lateinit var mScheduledSMSSender: ScheduledManager
     private lateinit var smsSender: SMSSender
     private lateinit var mmsSender: MMSSender
     private lateinit var mainDaoProvider: MainDaoProvider
@@ -264,6 +269,7 @@ class ConversationActivity : MediaPreviewActivity() {
                     recyclerView.scrollToPosition(0)
                 }
             }
+
             override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
                 super.onItemRangeMoved(fromPosition, toPosition, itemCount)
                 if (mLayoutManager.findFirstVisibleItemPosition() == 0) {
@@ -303,6 +309,7 @@ class ConversationActivity : MediaPreviewActivity() {
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         mainDaoProvider = MainDaoProvider(mContext)
         mDraftsManager = DraftsManager(this, mViewModel.dao)
+        mScheduledSMSSender = ScheduledManager(this, mViewModel.dao)
         mSavedDao = SavedDbFactory(this).get().manager()
 
         if (mViewModel.conversation.id == null) {
@@ -325,7 +332,9 @@ class ConversationActivity : MediaPreviewActivity() {
                 if (mViewModel.conversation.id != null) {
                     if (!mViewModel.conversation.read) {
                         mViewModel.conversation.read = true
-                        mainDaoProvider.getMainDaos()[mViewModel.conversation.label].update(mViewModel.conversation)
+                        mainDaoProvider.getMainDaos()[mViewModel.conversation.label].update(
+                            mViewModel.conversation
+                        )
                     }
                 }
             }.start()
@@ -420,6 +429,63 @@ class ConversationActivity : MediaPreviewActivity() {
             mViewModel.extraIsVisible = false
             toggleExtraVisibility(false)
         }
+
+        timedButton.setOnClickListener{
+            val timeRn = System.currentTimeMillis()
+            val calenderRn = Calendar.getInstance().apply {
+                timeInMillis = timeRn
+            }
+            val editText = messageEditText
+            val msg = editText.text.toString().trim()
+            if (msg.isEmpty() && !isMms) {
+                return@setOnClickListener
+            }
+
+            val calendar: Calendar = Calendar.getInstance()
+            DatePickerDialog(this).apply {
+                datePicker.minDate = System.currentTimeMillis()
+                setOnDateSetListener { _, i, i2, i3 ->
+                    calendar.set(i, i2, i3)
+
+                    TimePickerDialog(
+                        mContext,
+                        { _, hr, min ->
+                            calendar.set(Calendar.HOUR_OF_DAY, hr)
+                            calendar.set(Calendar.MINUTE, min)
+                            if (calendar.timeInMillis <= System.currentTimeMillis()) {
+                                Toast.makeText(
+                                    mContext,
+                                    getString(R.string.cant_send_scheduled_to_past),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                editText.text = null
+                                mScheduledSMSSender.add(
+                                    calendar.timeInMillis,
+                                    mViewModel.conversation,
+                                    msg, mmsURI
+                                )
+                                Toast.makeText(
+                                    mContext,
+                                    getString(R.string.scheduled),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                toggleExtraVisibility(false)
+                            }
+                        },
+                        if (DateUtils.isToday(timeRn)) calenderRn[Calendar.HOUR_OF_DAY] else 0,
+                        if (DateUtils.isToday(timeRn)) calenderRn[Calendar.MINUTE] + 1 else 0,
+                        false
+                    ).apply {
+                        setTitle(R.string.send_scheduled)
+                        setButton(
+                            TimePickerDialog.BUTTON_POSITIVE,
+                            getString(R.string.schedule)
+                        ) { _, _ -> }
+                    }.show()
+                }
+            }.show()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem)
@@ -464,6 +530,10 @@ class ConversationActivity : MediaPreviewActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        inputManager?.hideSoftInputFromWindow(
+            messageEditText.windowToken,
+            InputMethodManager.HIDE_IMPLICIT_ONLY
+        )
         val msg = messageEditText.text.toString().trim()
         if (msg.isEmpty()) {
             return

@@ -10,7 +10,7 @@ import android.os.IBinder
 import com.bruhascended.core.constants.LABEL_PERSONAL
 import com.bruhascended.core.constants.LABEL_TRANSACTIONS
 import com.bruhascended.core.constants.MESSAGE_TYPE_INBOX
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.model.getOtp
 import com.bruhascended.organiso.MainActivity

@@ -118,6 +118,7 @@ class SavedActivity : AppCompatActivity() {
             }
             val mAdapter = SavedRecyclerAdaptor(mContext)
             adapter = mAdapter
+            emptyList.isVisible = mViewModel.dbIsEmpty()
             lifecycleScope.launch {
                 mViewModel.flow.cachedIn(this).collectLatest {
                     mAdapter.submitData(it)

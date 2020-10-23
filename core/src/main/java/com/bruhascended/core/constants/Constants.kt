@@ -57,6 +57,9 @@ const val EXTRA_TEXT_REPLY = "TEXT_REPLY"
 const val EXTRA_OTP = "OTP"
 const val EXTRA_NOTIFICATION_ID = "ID_NOTIFICATION"
 const val EXTRA_SENDER = "SENDER"
+const val EXTRA_FILE_PATH = "FILE_PATH"
+const val EXTRA_TIME = "TIME"
+const val EXTRA_IS_OTP = "IS_OTP"
 
 // intent data
 const val TYPE_MULTI = "multipart/*"

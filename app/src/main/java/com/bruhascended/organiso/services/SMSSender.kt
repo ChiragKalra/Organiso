@@ -16,7 +16,7 @@ import com.bruhascended.organiso.ConversationActivity.Companion.activeConversati
 import com.bruhascended.organiso.R
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.data.MainDaoProvider
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import com.klinker.android.send_message.Message as SMS

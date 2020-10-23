@@ -15,17 +15,12 @@ import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.data.MainDaoProvider
 import java.util.concurrent.TimeUnit
 
 class OtpNotificationManager (
     private val mContext: Context
 ) {
-
-    companion object {
-        const val EXTRA_TIME = "time"
-        const val EXTRA_IS_OTP = "is_otp"
-    }
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(mContext)
     private val notificationManager = NotificationManagerCompat.from(mContext)

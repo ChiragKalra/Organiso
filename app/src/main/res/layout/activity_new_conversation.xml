@@ -93,7 +93,7 @@
         android:layout_height="48dp"
         android:elevation="15dp"
         android:background="#0000"
-        android:contentDescription="@string/send"
+        android:contentDescription="@string/play_button"
         android:src="@drawable/ic_play"
         android:tint="?attr/colorAccent"
         app:layout_constraintBottom_toBottomOf="@+id/sendLayout"

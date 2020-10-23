@@ -13,11 +13,13 @@
     <string name="privacy">Privacy</string>
     <string name="theme">Theme</string>
     <string name="otp">OTP</string>
+    <string name="scheduled_messages">Scheduled Messages</string>
 
     <!-- Actions -->
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="search">Search</string>
+    <string name="schedule">Schedule</string>
     <string name="report">Report</string>
     <string name="reply">Reply</string>
     <string name="block">Block</string>
@@ -48,6 +50,7 @@
     <string name="block_conversations_query">Block selected conversation(s)?</string>
     <string name="report_conversations_query">Report selected conversation(s)?</string>
     <string name="reset_to_default_query">Reset to default?</string>
+    <string name="send_scheduled">Schedule Message?</string>
 
 
     <!-- Image(Button) Descriptions-->
@@ -59,7 +62,7 @@
 
     <string name="drag_handle">Drag Handle</string>
     <string name="select_range">Select Range</string>
-    <string name="send">Send Button</string>
+    <string name="send_button">Send Button</string>
     <string name="clear_text_button">Clear Text Button</string>
     <string name="go_to_bottom">Go to bottom</string>
     <string name="remove_address">Remove Address Button</string>
@@ -76,6 +79,7 @@
     <string name="you">You</string>
     <string name="title">Title</string>
     <string name="no_favorites">No Favorites</string>
+    <string name="no_scheduled_messages">No Scheduled Messages</string>
     <string name="report_a_bug">Report A Bug</string>
     <string name="messages">%1$d message(s)</string>
     <string name="audio_col">Audio: </string>
@@ -92,6 +96,7 @@
     <string name="failed">failed</string>
     <string name="drafted">drafted</string>
     <string name="drafted_edit">drafted. tap to edit</string>
+    <string name="scheduled_to_sender">scheduled to %1$s</string>
 
     <string name="x_mins_remaining">%1$d minute(s) remaining</string>
     <string name="x_percent">%1$d%%</string>
@@ -101,7 +106,7 @@
 
     <string name="this_category_has_no_messages_yet">This category has no messages yet.</string>
     <string name="sending_messages_not_supported">Sender Doesn\'t Support Replies</string>
-    <string name="type_your_message_here">Type your message here</string>
+    <string name="type_your_message_here">Type your message</string>
     <string name="conversation_is_muted">Conversation is Muted</string>
     <string name="describe_bug_here">Describe bug here</string>
 
@@ -128,6 +133,7 @@
     <string name="otp_copied">OTP Copied To Clipboard</string>
     <string name="copied">Copied</string>
     <string name="deleted">Deleted</string>
+    <string name="scheduled">Scheduled</string>
     <string name="service_provider_error">Service provider error</string>
     <string name="no_service">No service</string>
     <string name="error">Error</string>
@@ -137,6 +143,7 @@
     <string name="cant_hide_last_category">Can\'t hide last category</string>
     <string name="message_was_deleted">Message was deleted</string>
     <string name="added_to_favorites">Added to favorites</string>
+    <string name="cant_send_scheduled_to_past">Can\'t send a scheduled message to past yet</string>
 
     <!-- Settings -->
     <string name="dark_theme">Dark Theme</string>

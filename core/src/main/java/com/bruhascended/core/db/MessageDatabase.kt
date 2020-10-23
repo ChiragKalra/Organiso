@@ -54,10 +54,38 @@ data class Message (
     }
 }
 
+@Entity(tableName = "scheduled")
+data class ScheduledMessage (
+    @PrimaryKey
+    var id: Long,
+    val text: String,
+    val time: Long,
+    val cleanAddress: String,
+    var path: String? = null
+): Serializable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Message
+        if (text != other.text) return false
+        if (time != other.time) return false
+        if (path != other.path) return false
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+}
+
 @Dao
 interface MessageDao {
     @Insert
     fun insert(message: Message)
+
+    @Insert
+    fun insertScheduled(message: ScheduledMessage)
 
     @Transaction
     @Insert
@@ -68,6 +96,9 @@ interface MessageDao {
 
     @Delete
     fun deleteFromInternal(message: Message)
+
+    @Delete
+    fun deleteScheduled(message: ScheduledMessage)
 
     fun delete(mContext: Context, message: Message, sender: String) {
         Thread {
@@ -92,7 +123,7 @@ interface MessageDao {
     @Query("SELECT * FROM messages WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
     fun searchPaged(key: String, altKey: String=""): PagingSource<Int, Message>
 
-    @Query("SELECT * FROM messages WHERE time LIKE :time")
+    @Query("SELECT * FROM messages WHERE time = :time")
     fun search(time: Long): List<Message>
 
     @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
@@ -100,6 +131,9 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
     fun loadLastSync(): Message?
+
+    @Query("SELECT * FROM scheduled WHERE time = :time")
+    fun findScheduledByTime(time: Long): ScheduledMessage
 
     @Query("SELECT * FROM messages ORDER BY time DESC")
     fun loadAll(): LiveData<List<Message>>
@@ -109,6 +143,9 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages")
     fun loadAllSync(): List<Message>
+
+    @Query("SELECT * FROM scheduled ORDER BY time ASC")
+    fun loadScheduledSync(): List<ScheduledMessage>
 
     @RawQuery
     fun findByQuery(query: SupportSQLiteQuery): List<Message>
@@ -122,7 +159,7 @@ object MessageComparator : DiffUtil.ItemCallback<Message>() {
         oldItem == newItem
 }
 
-@Database(entities = [Message::class], version = 1, exportSchema = false)
+@Database(entities = [Message::class, ScheduledMessage::class], version = 1, exportSchema = false)
 abstract class MessageDatabase: RoomDatabase() {
     abstract fun manager(): MessageDao
 }

@@ -15,8 +15,11 @@ import java.io.File
 
 fun AppCompatActivity.setPrefTheme() {
     val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-    if (prefs.getBoolean(PREF_DARK_THEME, false)) setTheme(R.style.DarkTheme)
-    else setTheme(R.style.LightTheme)
+    if (prefs.getBoolean(PREF_DARK_THEME, false)) {
+        setTheme(R.style.DarkTheme)
+    } else {
+        setTheme(R.style.LightTheme)
+    }
 }
 
 fun AppCompatActivity.setupToolbar(

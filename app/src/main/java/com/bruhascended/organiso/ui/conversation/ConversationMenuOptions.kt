@@ -23,7 +23,7 @@ import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.moveTo
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.data.MainDaoProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -223,6 +223,11 @@ class ConversationMenuOptions (
                     val intent = Intent(Intent.ACTION_DIAL)
                     intent.data = Uri.parse("tel:${conversation.address}")
                     startActivity(intent)
+                }
+
+                R.id.action_scheduled -> {
+                    startActivity(Intent(mContext, ScheduledActivity::class.java)
+                        .putExtra(EXTRA_SENDER, conversation.clean))
                 }
                 R.id.action_contact -> {
                     val intent = Intent(

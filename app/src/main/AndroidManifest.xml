@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.SMS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
@@ -75,9 +75,10 @@
         </receiver>
 
         <service android:name="com.android.mms.transaction.TransactionService" />
-        <service android:name=".services.OtpDeleteService"
-            android:exported="false"
-            android:enabled="true"/>
+        <service
+            android:name=".services.OtpDeleteService"
+            android:enabled="true"
+            android:exported="false" />
         <service
             android:name=".services.HeadlessSMSSender"
             android:exported="true"
@@ -96,7 +97,6 @@
                 <action android:name="android.intent.action.SENDTO" />
             </intent-filter>
         </service>
-
 
         <activity
             android:name=".ui.conversation.MessageSearchActivity"
@@ -166,12 +166,16 @@
             android:name=".SavedActivity"
             android:configChanges="orientation"
             android:label="@string/saved_messages"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
 
+        <activity android:name=".ScheduledActivity"
+            android:configChanges="orientation"
+            android:label="@string/scheduled_messages"
+            android:launchMode="singleTask" />
         <activity
             android:name=".NewConversationActivity"
             android:enabled="true"

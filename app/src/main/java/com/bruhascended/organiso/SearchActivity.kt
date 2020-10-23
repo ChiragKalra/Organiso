@@ -12,11 +12,11 @@ import androidx.core.widget.doOnTextChanged
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.core.constants.*
-import com.bruhascended.core.db.ContactsProvider
+import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor

@@ -43,4 +43,10 @@
         <item>Delete</item>
     </string-array>
 
+    <string-array name="scheduled_actions">
+        <item>Cancel Scheduled Message</item>
+        <item>Copy</item>
+        <item>Share</item>
+    </string-array>
+
 </resources>

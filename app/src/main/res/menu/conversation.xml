@@ -28,6 +28,12 @@
         android:orderInCategory="300"
         android:title="@string/add_to_home"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_scheduled"
+        android:orderInCategory="300"
+        android:title="@string/scheduled_messages"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/action_move"
         android:orderInCategory="300"

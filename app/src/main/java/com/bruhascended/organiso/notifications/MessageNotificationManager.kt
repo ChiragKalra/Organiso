@@ -27,7 +27,6 @@ import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.*
 import com.bruhascended.core.model.getOtp
-import com.bruhascended.organiso.notifications.OtpNotificationManager.Companion.EXTRA_IS_OTP
 import java.io.File
 
 /*

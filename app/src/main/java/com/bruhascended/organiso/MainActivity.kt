@@ -147,6 +147,9 @@ class MainActivity : AppCompatActivity() {
             R.id.action_saved -> {
                 startActivity(Intent(mContext, SavedActivity::class.java))
             }
+            R.id.action_scheduled -> {
+                startActivity(Intent(mContext, ScheduledActivity::class.java))
+            }
             else -> {
                 val intent = Intent(mContext, ExtraCategoryActivity::class.java)
                 intent.putExtra(EXTRA_LABEL, item.itemId)

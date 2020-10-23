@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.room.*
 import com.bruhascended.core.constants.*
+import com.bruhascended.core.data.MainDaoProvider
 import com.google.gson.Gson
 import java.io.Serializable
 

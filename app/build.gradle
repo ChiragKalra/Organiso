@@ -14,7 +14,7 @@ android {
         applicationId "com.bruhascended.organiso"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 1
+        versionCode 983
         versionName "0.983-beta06"
 
         kotlinOptions {

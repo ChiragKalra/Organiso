@@ -1,6 +1,8 @@
-package com.bruhascended.core.db
+package com.bruhascended.core.data
 
 import android.content.Context
+import com.bruhascended.core.db.ConversationDao
+import com.bruhascended.core.db.ConversationDbFactory
 
 class MainDaoProvider(private val mContext: Context) {
     companion object {

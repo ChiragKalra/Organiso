@@ -11,7 +11,7 @@ import com.bruhascended.organiso.*
 import com.bruhascended.core.db.*
 import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.services.SMSSender
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.data.MainDaoProvider
 
 /*
                     Copyright 2020 Chirag Kalra

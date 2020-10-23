@@ -17,7 +17,7 @@ import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.moveTo
 import com.bruhascended.organiso.common.ListSelectionManager
-import com.bruhascended.core.db.MainDaoProvider
+import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
