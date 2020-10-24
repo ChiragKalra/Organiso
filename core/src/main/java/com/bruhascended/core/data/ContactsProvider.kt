@@ -60,4 +60,6 @@ class ContactsProvider (mContext: Context) {
 
     fun getNameOrNull(number: String) =
         mDb!!.manager().findByNumber(number)?.name
+
+    fun get(number: String) = mDb!!.manager().findByNumber(number)
 }

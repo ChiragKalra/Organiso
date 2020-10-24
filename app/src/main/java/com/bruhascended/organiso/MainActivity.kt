@@ -212,6 +212,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewPager.isUserInputEnabled = mViewModel.prefs.getBoolean(PREF_ACTION_NAVIGATE, true)
+        mViewModel.visibleCategories.forEachIndexed { i, _ ->
+            val badge = bottom.getOrCreateBadge(i)
+            badge.isVisible = badge.number > 0
+        }
 
         if (mViewModel.prefs.getBoolean(KEY_STATE_CHANGED, false)) {
             mViewModel.prefs.edit().putBoolean(KEY_STATE_CHANGED, false).apply()

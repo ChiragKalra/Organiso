@@ -155,7 +155,7 @@ class ContactsManager (
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    list.add(Contact(name, getClean(phoneNo), phoneNo))
+                    list.add(Contact(name, getClean(phoneNo), phoneNo, id.toInt()))
                 }
                 pCur?.close()
             }

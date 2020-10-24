@@ -28,6 +28,7 @@ data class Contact (
     var name: String,
     val clean: String,
     val address: String,
+    val contactId: Int,
     @PrimaryKey(autoGenerate = true)
     val id: Int? = null
 ): Serializable {

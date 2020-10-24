@@ -10,6 +10,7 @@ import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.provider.ContactsContract
+import android.provider.ContactsContract.Contacts
 import android.view.Gravity
 import android.view.MenuItem
 import android.widget.Toast
@@ -18,17 +19,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.organiso.*
 import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.constants.*
+import com.bruhascended.core.data.ContactsProvider
+import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.moveTo
-import com.bruhascended.core.data.MainDaoProvider
+import com.bruhascended.organiso.ConversationActivity
+import com.bruhascended.organiso.MainActivity
+import com.bruhascended.organiso.R
+import com.bruhascended.organiso.ScheduledActivity
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.abs
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -47,7 +53,7 @@ import kotlin.math.abs
 
 */
 
-class ConversationMenuOptions (
+class ConversationMenuOptions(
     private val mContext: Context,
     private val conversation: Conversation,
     private val searchResult: ActivityResultLauncher<Intent>? = null,
@@ -226,14 +232,28 @@ class ConversationMenuOptions (
                 }
 
                 R.id.action_scheduled -> {
-                    startActivity(Intent(mContext, ScheduledActivity::class.java)
-                        .putExtra(EXTRA_SENDER, conversation.clean))
+                    startActivity(
+                        Intent(mContext, ScheduledActivity::class.java)
+                            .putExtra(EXTRA_SENDER, conversation.clean)
+                    )
                 }
                 R.id.action_contact -> {
-                    val intent = Intent(
-                        ContactsContract.Intents.SHOW_OR_CREATE_CONTACT,
-                        Uri.parse("tel:" + conversation.address)
-                    )
+                    val id = ContactsProvider(mContext).get(conversation.clean)
+                        ?.contactId?.toString()
+                    val intent = if (id != null) {
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.withAppendedPath(Contacts.CONTENT_URI,id)
+                        )
+                    } else {
+                        Intent(
+                            ContactsContract.Intents.SHOW_OR_CREATE_CONTACT,
+                            Uri.parse("tel:" + conversation.address)
+                        ).putExtra(
+                            ContactsContract.Intents.EXTRA_FORCE_CREATE,
+                            true
+                        )
+                    }
                     startActivity(intent)
                 }
                 R.id.action_create_shortcut -> {

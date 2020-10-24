@@ -100,7 +100,7 @@ class NewConversationActivity : MediaPreviewActivity() {
             val name = mContactsProvider.getNameOrNull(clean) ?: ""
             if (recipients.firstOrNull { it.clean == clean } == null) {
                 addsRecycler.post {
-                    recipients.add(Contact(name, clean, number))
+                    recipients.add(Contact(name, clean, number, 0))
                     addressRecyclerAdaptor.notifyItemInserted(recipients.lastIndex)
                 }
             }
@@ -114,7 +114,7 @@ class NewConversationActivity : MediaPreviewActivity() {
         if (clean.isBlank()) return
         val name = mContactsProvider.getNameOrNull(clean) ?: ""
         if (recipients.firstOrNull { it.clean == clean } == null) {
-            recipients.add(Contact(name, clean, number))
+            recipients.add(Contact(name, clean, number, 0))
         }
     }
 
