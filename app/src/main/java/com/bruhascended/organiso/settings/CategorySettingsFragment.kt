@@ -139,6 +139,7 @@ class CategorySettingsFragment: Fragment(), RecyclerViewAdapter.StartDragListene
     }
 
     override fun onDestroy() {
+        requireActivity().title = getString(R.string.interface_settings)
         super.onDestroy()
         val arr = mAdapter.data.apply {
             add(LABEL_BLOCKED)

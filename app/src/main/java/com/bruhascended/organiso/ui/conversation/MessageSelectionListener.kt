@@ -142,7 +142,7 @@ class MessageSelectionListener(
                                     pre.messageId = null
                                     savedDao.update(pre)
                                 }
-                                messageDao.delete(mContext, selectedItem, sender)
+                                messageDao.delete(mContext, selectedItem)
                             }
                         }.start()
                         Toast.makeText(mContext, mContext.getString(R.string.deleted), Toast.LENGTH_LONG).show()

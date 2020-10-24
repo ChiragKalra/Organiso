@@ -53,7 +53,7 @@ class MMSSender(
         if (activeConversationSender != conversation.clean) {
             MessageDbFactory(mContext).of(conversation.clean).apply {
                 val conversationDao = manager()
-                val qs = conversationDao.search(date).first()
+                val qs = conversationDao.search(date) ?: return
                 qs.type = type
                 conversationDao.update(qs)
                 close()
@@ -75,17 +75,12 @@ class MMSSender(
             MESSAGE_TYPE_QUEUED,
             date,
             id = retryIndex,
-            path = uri.saveFile(mContext, date.toString())
+            path = mContext.saveFile(uri, date.toString())
         )
 
         if (activeConversationSender != conversation.clean) {
             MessageDbFactory(mContext).of(conversation.clean).apply {
                 val conversationDao = manager()
-                val qs = conversationDao.search(date)
-                for (m in qs) {
-                    message.id = m.id
-                    conversationDao.deleteFromInternal(m)
-                }
                 if (retryIndex != null) conversationDao.deleteFromInternal(message)
                 conversationDao.insert(message)
                 close()
@@ -149,7 +144,7 @@ class MMSSender(
             }
 
             mContext.registerReceiver(object : BroadcastReceiver() {
-                override fun onReceive(arg0: Context?, arg1: Intent?) {
+                override fun onReceive(arg0: Context?, intent: Intent) {
                     when (resultCode) {
                         Activity.RESULT_OK -> updateDbMms(it, date, MESSAGE_TYPE_SENT)
                         SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {

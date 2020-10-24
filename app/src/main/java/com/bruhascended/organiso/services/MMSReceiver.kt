@@ -12,7 +12,7 @@ class MMSReceiver : MmsReceivedReceiver() {
     override fun onMessageReceived(context: Context, uri: Uri) {
 
         val out = MMSManager(context).putMMS(
-            uri.toString().split("/").last(),
+            uri.lastPathSegment!!.toInt(),
             init = false, activeSender = activeConversationSender
         )
 

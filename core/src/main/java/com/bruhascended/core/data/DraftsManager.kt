@@ -1,11 +1,10 @@
 package com.bruhascended.core.data
 
-import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
-import android.provider.Telephony
 import com.bruhascended.core.constants.MESSAGE_TYPE_DRAFT
 import com.bruhascended.core.constants.saveFile
+import com.bruhascended.core.constants.saveSms
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDao
 
@@ -16,26 +15,19 @@ class DraftsManager(
 
     fun create(message: String, address: String, data: Uri?) {
         val date = System.currentTimeMillis()
+        val id = mContext.saveSms(address, message, MESSAGE_TYPE_DRAFT)
         mDao.insert(Message(
             message,
             MESSAGE_TYPE_DRAFT,
             date,
-            path = data?.saveFile(mContext, date.toString())
+            path = mContext.saveFile(data, date.toString()),
+            id = id,
         ))
-        try {
-            val values = ContentValues()
-            values.put("address", address)
-            values.put("body", message)
-            values.put("read", 1)
-            values.put("date", date)
-            values.put("type", MESSAGE_TYPE_DRAFT)
-            mContext.contentResolver.insert(Telephony.Sms.CONTENT_URI, values)
-        } catch (ex: Exception) { }
     }
 
-    fun delete(message: Message, address: String) {
+    fun delete(message: Message) {
         Thread {
-            mDao.delete(mContext, message, address)
+            mDao.delete(mContext, message)
         }.start()
     }
 }

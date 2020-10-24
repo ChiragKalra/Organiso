@@ -75,7 +75,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
                 val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
                 MessageDbFactory(mContext).of(conversation.clean).apply {
-                    manager().delete(mContext, message, conversation.clean)
+                    manager().delete(mContext, message)
                     val last = manager().loadLastSync()
                     if (last == null) {
                         MainDaoProvider(mContext).getMainDaos()[conversation.label]

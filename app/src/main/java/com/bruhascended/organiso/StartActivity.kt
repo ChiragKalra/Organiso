@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
-import android.provider.Telephony
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +15,7 @@ import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.SMSManager
 import com.bruhascended.organiso.notifications.ChannelManager
 import com.bruhascended.core.constants.*
+import com.bruhascended.organiso.common.requestDefaultApp
 import kotlinx.android.synthetic.main.activity_start.*
 import kotlin.math.roundToInt
 
@@ -49,8 +49,13 @@ class StartActivity : AppCompatActivity() {
         R.string.done
     )
 
-    private val onPermissionsResult =
-        registerForActivityResult(StartActivityForResult()) { }
+    private val onDefaultAppResult = registerForActivityResult(StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            organise()
+        } else {
+            ActivityCompat.requestPermissions(this, ARR_PERMS, 0)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,10 +73,7 @@ class StartActivity : AppCompatActivity() {
             return
         }
 
-        if (PackageManager.PERMISSION_DENIED in
-            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it])})
-            ActivityCompat.requestPermissions(this, ARR_PERMS, 0)
-        else organise()
+        requestDefaultApp(onDefaultAppResult)
     }
 
     override fun onRequestPermissionsResult(
@@ -80,12 +82,12 @@ class StartActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
-            val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
-            onPermissionsResult.launch(setSmsAppIntent)
+        if (grantResults.contains(PackageManager.PERMISSION_DENIED)) {
+            finish()
+            return
+        } else {
+            organise()
         }
-        organise()
     }
 
     private fun organise() {

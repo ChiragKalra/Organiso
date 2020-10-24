@@ -38,7 +38,7 @@ class OtpNotificationManager (
             val conversation = MainDaoProvider(mContext)
                 .getMainDaos()[LABEL_TRANSACTIONS].findBySender(sender).first()
             val mdb = MessageDbFactory(mContext).of(sender)
-            val message = mdb.manager().search(time).first()
+            val message = mdb.manager().search(time)
             mdb.close()
 
             mContext.sendBroadcast(

@@ -4,12 +4,11 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.database.Cursor
-import android.net.Uri
 import android.os.IBinder
 import com.bruhascended.core.constants.LABEL_PERSONAL
 import com.bruhascended.core.constants.LABEL_TRANSACTIONS
 import com.bruhascended.core.constants.MESSAGE_TYPE_INBOX
+import com.bruhascended.core.constants.deleteSMS
 import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.model.getOtp
@@ -37,14 +36,13 @@ class OtpDeleteService: Service() {
 
         mContext.startForeground(10123123, notification)
 
-        val otpMessages = hashSetOf<String>()
         for (con in mainDaos[LABEL_TRANSACTIONS].loadAllSync()) {
             MessageDbFactory(mContext).of(con.clean).apply {
                 manager().loadAllSync().forEach {
                     if (getOtp(it.text) != null && it.type == MESSAGE_TYPE_INBOX &&
                         System.currentTimeMillis()-it.time > 15*60*1000) {
                         manager().deleteFromInternal(it)
-                        otpMessages.add(it.text)
+                        mContext.deleteSMS(it.id!!)
                     }
                 }
                 val it = manager().loadLastSync()
@@ -64,31 +62,7 @@ class OtpDeleteService: Service() {
                 close()
             }
         }
-        deleteMessages(otpMessages)
         stopForeground(true)
-    }
-
-    private fun deleteMessages(messages: HashSet<String>) {
-        try {
-            val uriSms: Uri = Uri.parse("content://sms/")
-            val c: Cursor? = contentResolver.query(
-                uriSms, arrayOf(
-                    "_id", "body"
-                ), null, null, null
-            )
-            if (c != null && c.moveToFirst()) {
-                do {
-                    val id: Long = c.getLong(0)
-                    val body: String = c.getString(1)
-                    if (body in messages) {
-                        contentResolver.delete(
-                            Uri.parse("content://sms/$id"), null, null
-                        )
-                    }
-                } while (c.moveToNext())
-            }
-            c?.close()
-        } catch (e: Exception) { }
     }
 
     override fun onBind(intent: Intent?): IBinder? {

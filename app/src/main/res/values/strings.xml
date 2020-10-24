@@ -175,4 +175,5 @@
     <string name="enter_new_line">Enter will add new line</string>
     <string name="enter_send_message">Enter will send message</string>
     <string name="enter_is_send">Enter is send</string>
+    <string name="insufficient_permissions">Insufficient Permissions</string>
 </resources>

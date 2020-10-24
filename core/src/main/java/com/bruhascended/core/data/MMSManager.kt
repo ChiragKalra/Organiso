@@ -45,7 +45,7 @@ class MMSManager (
         ""
     }
 
-    private fun getAddressNumber(id: String): Pair<Boolean, String> {
+    private fun getAddressNumber(id: Int): Pair<Boolean, String> {
         var selection = "type=137 AND msg_id=$id"
         val uriAddress = Uri.parse("content://mms/${id}/addr")
         var cursor = mContext.contentResolver.query(
@@ -126,7 +126,7 @@ class MMSManager (
                     val isMms = getString(textColumn) == "0"
                     val date = getString(dateColumn).toLong()
                     if (isMms) {
-                        putMMS(id, date)
+                        putMMS(id.toInt(), date)
                     }
                 } while (moveToNext())
             }
@@ -135,7 +135,7 @@ class MMSManager (
     }
 
     fun putMMS(
-        mmsId: String, date: Long = System.currentTimeMillis(),
+        mmsId: Int, date: Long = System.currentTimeMillis(),
         init: Boolean = true, activeSender: String? = null
     ): Pair<Message, Conversation>? {
         if (senderNameMap == null) {
@@ -176,7 +176,7 @@ class MMSManager (
 
         val message = Message(
             body, if (sentByUser) MESSAGE_TYPE_SENT else MESSAGE_TYPE_INBOX,
-            date, path = file
+            date, path = file, id = mmsId
         )
 
         var conversation: Conversation? = null
@@ -232,9 +232,8 @@ class MMSManager (
         } else {
             val mdb = MessageDbFactory(mContext).of(rawNumber)
             mdb.manager().insert(message)
-            val a = mdb.manager().search(message.time).first() to conversation
             mdb.close()
-            a
+            message to conversation
         }
     }
 }

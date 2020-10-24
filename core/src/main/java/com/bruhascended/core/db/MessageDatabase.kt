@@ -82,7 +82,7 @@ data class ScheduledMessage (
 @Dao
 interface MessageDao {
     @Insert
-    fun insert(message: Message)
+    fun insert(message: Message): Long
 
     @Insert
     fun insertScheduled(message: ScheduledMessage)
@@ -100,10 +100,10 @@ interface MessageDao {
     @Delete
     fun deleteScheduled(message: ScheduledMessage)
 
-    fun delete(mContext: Context, message: Message, sender: String) {
+    fun delete(mContext: Context, message: Message) {
         Thread {
             deleteFromInternal(message)
-            deleteSMS(mContext, message.text, sender)
+            mContext.deleteSMS(message.id!!)
         }.start()
     }
 
@@ -112,8 +112,10 @@ interface MessageDao {
 
     fun nukeTable(mContext: Context, sender: String) {
         Thread {
+            loadAllSync().forEach {
+                mContext.deleteSMS(it.id!!)
+            }
             nukeInternalTable()
-            deleteSMS(mContext, null, sender)
         }.start()
     }
 
@@ -123,8 +125,9 @@ interface MessageDao {
     @Query("SELECT * FROM messages WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
     fun searchPaged(key: String, altKey: String=""): PagingSource<Int, Message>
 
+
     @Query("SELECT * FROM messages WHERE time = :time")
-    fun search(time: Long): List<Message>
+    fun search(time: Long): Message?
 
     @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
     fun loadLast(): LiveData<Message?>
@@ -153,7 +156,7 @@ interface MessageDao {
 
 object MessageComparator : DiffUtil.ItemCallback<Message>() {
     override fun areItemsTheSame(oldItem: Message, newItem: Message) =
-        oldItem.id == newItem.id
+        oldItem.text == newItem.text
 
     override fun areContentsTheSame(oldItem: Message, newItem: Message) =
         oldItem == newItem

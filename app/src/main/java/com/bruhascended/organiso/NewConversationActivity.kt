@@ -284,8 +284,8 @@ class NewConversationActivity : MediaPreviewActivity() {
                         msg,
                         System.currentTimeMillis(),
                         SAVED_TYPE_DRAFT,
-                        path = mmsURI?.saveFile(
-                            this,
+                        path = saveFile(
+                            mmsURI,
                             System.currentTimeMillis().toString()
                         )
                     )

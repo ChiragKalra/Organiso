@@ -101,22 +101,31 @@ class ConversationActivity : MediaPreviewActivity() {
             when (intent.action) {
                 ACTION_NEW_MESSAGE -> {
                     val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
+                    message.id = mContext.saveSms(mViewModel.conversation.address, message.text, MESSAGE_TYPE_INBOX)
                     mViewModel.dao.insert(message)
                 }
                 ACTION_OVERWRITE_MESSAGE -> {
                     val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
-                    val qs = mViewModel.dao.search(message.time)
-                    for (m in qs) {
-                        message.id = m.id
+                    val retryIndex = intent.getIntExtra(EXTRA_RETRY_INDEX, -1)
+                    val m = mViewModel.dao.search(message.time)
+                    if (m != null) {
                         mViewModel.dao.deleteFromInternal(m)
                     }
-                    if (message.id != null) mViewModel.dao.deleteFromInternal(message)
+                    if (retryIndex != -1) {
+                        mViewModel.dao.delete(
+                            mContext,
+                            Message(
+                                message.text, MESSAGE_TYPE_FAILED,
+                                message.time, id = retryIndex
+                            )
+                        )
+                    }
                     mViewModel.dao.insert(message)
                 }
                 ACTION_UPDATE_STATUS_MESSAGE -> {
                     val date = intent.getLongExtra(EXTRA_MESSAGE_DATE, 0)
                     val type = intent.getIntExtra(EXTRA_MESSAGE_TYPE, 0)
-                    val qs = mViewModel.dao.search(date).first()
+                    val qs = mViewModel.dao.search(date) ?: return
                     qs.type = type
                     mViewModel.dao.update(qs)
                 }
@@ -421,8 +430,8 @@ class ConversationActivity : MediaPreviewActivity() {
                     msg,
                     System.currentTimeMillis(),
                     SAVED_TYPE_DRAFT,
-                    path = mmsURI?.saveFile(
-                        this,
+                    path = saveFile(
+                        mmsURI,
                         System.currentTimeMillis().toString()
                     )
                 )
@@ -443,7 +452,7 @@ class ConversationActivity : MediaPreviewActivity() {
             toggleExtraVisibility(false)
         }
         mAdaptor.setOnDraftClick {
-            mDraftsManager.delete(it, mViewModel.conversation.address)
+            mDraftsManager.delete(it)
             messageEditText.apply {
                 setText(it.text)
                 setSelection(it.text.length)

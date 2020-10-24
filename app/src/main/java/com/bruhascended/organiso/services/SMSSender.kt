@@ -49,19 +49,16 @@ class SMSSender(
 
     private fun addSmsToDb(
         conversation: Conversation, smsText: String,
-        date: Long, type: Int, delivered: Boolean, retryIndex: Int?
+        date: Long, type: Int, delivered: Boolean, retryIndex: Int?, id: Int?
     ) {
         val message = Message (
-            smsText, type, date, id = retryIndex, delivered = delivered
+            smsText, type, date, id = id, delivered = delivered
         )
         if (activeConversationSender != conversation.clean) {
             MessageDbFactory(mContext).of(conversation.clean).apply {
                 val conversationDao = manager()
-                val qs = conversationDao.search(date)
-                for (m in qs) {
-                    message.id = m.id
-                    conversationDao.deleteFromInternal(m)
-                }
+                val m = conversationDao.search(date) ?: return
+                conversationDao.deleteFromInternal(m)
                 if (retryIndex != null) conversationDao.deleteFromInternal(message)
                 conversationDao.insert(message)
                 close()
@@ -70,6 +67,7 @@ class SMSSender(
             mContext.sendBroadcast (
                 Intent(ACTION_OVERWRITE_MESSAGE).apply {
                     putExtra(EXTRA_MESSAGE, message)
+                    putExtra(EXTRA_RETRY_INDEX, retryIndex ?: -1)
                     setPackage(mContext.applicationInfo.packageName)
                 }
             )
@@ -106,13 +104,14 @@ class SMSSender(
         val transaction = Transaction(mContext, settings)
 
         conversations.forEach { conversation ->
-            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_QUEUED, false, retryIndex)
+            addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_QUEUED, false, retryIndex, null)
             mContext.registerReceiver(object : BroadcastReceiver() {
-                override fun onReceive(arg0: Context, arg1: Intent?) {
+                override fun onReceive(arg0: Context, arg1: Intent) {
+                    val id = arg1.data?.lastPathSegment?.toInt()
                     when (resultCode) {
                         Activity.RESULT_OK -> {
                             addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_SENT,
-                                false, retryIndex)
+                                false, retryIndex, id)
                         }
                         SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
                             Handler(Looper.getMainLooper()).post {
@@ -123,7 +122,7 @@ class SMSSender(
                                 ).show()
                             }
                             addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_FAILED,
-                                false, retryIndex)
+                                false, retryIndex, id)
                         }
                         SmsManager.RESULT_ERROR_NO_SERVICE -> {
                             Handler(Looper.getMainLooper()).post {
@@ -134,7 +133,7 @@ class SMSSender(
                                 ).show()
                             }
                             addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_FAILED,
-                                false, retryIndex)
+                                false, retryIndex, id)
                         }
                         else -> {
                             Handler(Looper.getMainLooper()).post {
@@ -145,21 +144,22 @@ class SMSSender(
                                 ).show()
                             }
                             addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_FAILED,
-                                false, retryIndex)
+                                false, retryIndex, id)
                         }
                     }
                     mContext.unregisterReceiver(this)
                 }
             }, IntentFilter(sentAction))
             mContext.registerReceiver(object : BroadcastReceiver() {
-                override fun onReceive(arg0: Context?, arg1: Intent?) {
+                override fun onReceive(arg0: Context?, arg1: Intent) {
+                    val id = arg1.data?.lastPathSegment?.toInt()
                     when (resultCode) {
                         Activity.RESULT_OK ->
                             addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_SENT,
-                                true, retryIndex)
+                                true, retryIndex, id)
                         else ->
                             addSmsToDb(conversation, smsText, date, MESSAGE_TYPE_SENT,
-                                false, retryIndex)
+                                false, retryIndex, id)
                     }
                     mContext.unregisterReceiver(this)
                 }
@@ -167,12 +167,10 @@ class SMSSender(
 
             val message = SMS(smsText, conversation.address.filter { char -> char.isDigit() })
 
-            Thread {
-                if (retryIndex != null) {
-                    deleteSMS(mContext, smsText, conversation.clean)
-                }
-                transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
-            }.start()
+            if (retryIndex != null) {
+                mContext.deleteSMS(retryIndex)
+            }
+            transaction.sendNewMessage(message, Transaction.NO_THREAD_ID)
         }
     }
 

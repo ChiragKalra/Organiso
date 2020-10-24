@@ -1,7 +1,11 @@
 package com.bruhascended.organiso.common
 
+import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.provider.Telephony
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.FileProvider
@@ -31,6 +35,18 @@ fun AppCompatActivity.setupToolbar(
         setDisplayShowHomeEnabled(home)
         title = mTitle ?: return
     }
+}
+
+fun AppCompatActivity.requestDefaultApp(onDefaultAppResult: ActivityResultLauncher<Intent>) {
+    val intent = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+        val roleManager = getSystemService(RoleManager::class.java)
+        roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS)
+    } else {
+        val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+        intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+        setSmsAppIntent
+    }
+    onDefaultAppResult.launch(intent)
 }
 
 fun File.getSharable(mContext: Context) : Intent {

@@ -186,11 +186,13 @@ class SMSManager (private val mContext: Context) {
                 do {
                     val name = getString(nameID)
                     val messageContent = getString(messageID)
+                    val id = getString(getColumnIndex("_id")).toInt()
                     if (name != null && !messageContent.isNullOrEmpty()) {
 
                         val number = Number(name, cm.getClean(name))
                         val message = Message(
-                            messageContent, getString(typeID).toInt(), getString(dateID).toLong()
+                            messageContent, getString(typeID).toInt(),
+                            getString(dateID).toLong(), id = id
                         )
                         if (messages.containsKey(number)) messages[number]?.add(message)
                         else messages[number] = arrayListOf(message)
@@ -220,10 +222,16 @@ class SMSManager (private val mContext: Context) {
             val msgs = messagesArray[ind].component2()
             var label: Int
 
-            if (senderNameMap.containsKey(number.clean)) label = 0
-            else nn.getPredictions(msgs).apply {
-                senderToProbs[number.clean] = this
-                label = toList().indexOf(maxOrNull())
+            if (senderNameMap.containsKey(number.clean)) {
+                label = LABEL_PERSONAL
+            } else {
+                nn.getPredictions(msgs).apply {
+                    senderToProbs[number.clean] = this
+                    label = toList().indexOf(maxOrNull())
+                    if (label == LABEL_PERSONAL && number.clean.first().isLetter()) {
+                        label = LABEL_IMPORTANT
+                    }
+                }
             }
 
             saveThread?.join()
@@ -253,7 +261,11 @@ class SMSManager (private val mContext: Context) {
             mProbs = nn.getPrediction(message)
             if (conversation != null)
                 for (j in 0..4) mProbs[j] += conversation.probabilities[j]
-            mProbs.toList().indexOf(mProbs.maxOrNull())
+            var label = mProbs.toList().indexOf(mProbs.maxOrNull())
+            if (label == LABEL_PERSONAL && rawNumber.first().isLetter()) {
+                label = LABEL_IMPORTANT
+            }
+            label
         }
 
         analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, PARAM_BACKGROUND)
@@ -290,10 +302,10 @@ class SMSManager (private val mContext: Context) {
             null
         } else {
             val mdb = MessageDbFactory(mContext).of(rawNumber)
+            message.id = mContext.saveSms(number, body, MESSAGE_TYPE_INBOX)
             mdb.manager().insert(message)
-            val a = mdb.manager().search(message.time).first() to conversation
             mdb.close()
-            a
+            message to conversation
         }
     }
 

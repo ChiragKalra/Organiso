@@ -11,6 +11,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +23,7 @@ import com.bruhascended.core.constants.ARR_PERMS
 import com.bruhascended.core.constants.EXTRA_LABEL
 import com.bruhascended.core.constants.KEY_STATE_CHANGED
 import com.bruhascended.core.constants.PREF_ACTION_NAVIGATE
+import com.bruhascended.organiso.common.requestDefaultApp
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryPagerAdapter
 import com.bruhascended.organiso.ui.main.MainViewModel
@@ -52,6 +54,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var inputManager: InputMethodManager
 
     private val onSearchCanceled = registerForActivityResult(StartActivityForResult()) {}
+
+    private val onDefaultAppResult = registerForActivityResult(StartActivityForResult()) {
+        if (PackageManager.PERMISSION_DENIED in
+            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it])}
+        ) {
+            Toast.makeText(this, getString(R.string.insufficient_permissions), Toast.LENGTH_LONG).show()
+            finish()
+        }
+    }
 
     @SuppressLint("ResourceType")
     private fun setupBottomNav() {
@@ -194,18 +205,10 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         mViewModel.mContactsProvider.updateAsync()
-        if (PackageManager.PERMISSION_DENIED in
-            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it])}
-        ) {
-            ActivityCompat.requestPermissions(this, ARR_PERMS, 1)
-        }
 
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
             mViewModel.mSmsManager.updateAsync()
-
-            val setSmsAppIntent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
-            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
-            startActivity(setSmsAppIntent)
+            requestDefaultApp(onDefaultAppResult)
         }
 
         viewPager.isUserInputEnabled = mViewModel.prefs.getBoolean(PREF_ACTION_NAVIGATE, true)

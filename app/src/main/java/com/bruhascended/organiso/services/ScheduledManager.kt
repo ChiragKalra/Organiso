@@ -59,7 +59,7 @@ class ScheduledManager(
 
     fun add(scheduledTime: Long, conversation: Conversation, text: String, data: Uri?) {
         val date = System.currentTimeMillis()
-        val path = data?.saveFile(mContext, date.toString())
+        val path = mContext.saveFile(data, date.toString())
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()

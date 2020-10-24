@@ -53,9 +53,16 @@ class ScheduledViewHolder(
         timeTextView.text = dtp.getFull(message.time)
 
         statusTextView.visibility = VISIBLE
-        statusTextView.setTextColor(mContext.getColor(R.color.green))
 
-        statusTextView.text = mContext.getString(R.string.scheduled_to_sender, message.cleanAddress)
+        if (message.time > System.currentTimeMillis()) {
+            statusTextView.setTextColor(mContext.getColor(R.color.green))
+            statusTextView.text =
+                mContext.getString(R.string.scheduled_to_sender, message.cleanAddress)
+        } else {
+            statusTextView.setTextColor(mContext.getColor(R.color.red))
+            statusTextView.text =
+                mContext.getString(R.string.failed)
+        }
         Thread {
             var conversation: Conversation? = null
             MainDaoProvider(mContext).getMainDaos().forEach {

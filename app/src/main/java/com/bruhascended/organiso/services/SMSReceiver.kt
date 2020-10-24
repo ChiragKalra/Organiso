@@ -1,11 +1,11 @@
 package com.bruhascended.organiso.services
 
 import android.content.BroadcastReceiver
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.telephony.SmsMessage
+import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.data.SMSManager
 import com.bruhascended.core.constants.*
@@ -32,21 +32,6 @@ class SMSReceiver : BroadcastReceiver() {
 
     private lateinit var mContext: Context
 
-    private fun saveSms(phoneNumber: String, message: String): Boolean {
-        var ret = false
-        try {
-            val values = ContentValues()
-            values.put("address", phoneNumber)
-            values.put("body", message)
-            values.put("read", 0)
-            values.put("date", System.currentTimeMillis())
-            values.put("type", MESSAGE_TYPE_INBOX)
-            mContext.contentResolver.insert(Telephony.Sms.CONTENT_URI, values)
-            ret = true
-        } catch (ex: Exception) { }
-        return ret
-    }
-
     override fun onReceive(context: Context, intent: Intent) {
         if (context.packageName != Telephony.Sms.getDefaultSmsPackage(context)) {
             if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {
@@ -56,6 +41,7 @@ class SMSReceiver : BroadcastReceiver() {
         } else if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {
             return
         }
+
 
         val mnm = MessageNotificationManager(context)
         val cm = ContactsManager(context)
@@ -77,14 +63,19 @@ class SMSReceiver : BroadcastReceiver() {
                 }
             }
 
+
             senders.forEach {
                 it.apply {
-                    if (activeConversationSender == cm.getClean(key)) smm.putMessage(key, value, true)
-                    else mnm.sendSmsNotification(smm.putMessage(key, value, false)!!)
-                    saveSms(key, value)
+                    if (activeConversationSender == cm.getClean(key)) {
+                        smm.putMessage(key, value, true)
+                    } else {
+                        mnm.sendSmsNotification(smm.putMessage(key, value, false)!!)
+                    }
                 }
             }
             smm.close()
+            PreferenceManager.getDefaultSharedPreferences(mContext)
+                .edit().putLong(KEY_RESUME_DATE, System.currentTimeMillis()).apply()
         }.start()
     }
 }
