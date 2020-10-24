@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
+import android.provider.Telephony
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
@@ -72,8 +73,11 @@ class StartActivity : AppCompatActivity() {
             finish()
             return
         }
-
-        requestDefaultApp(onDefaultAppResult)
+        if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
+            requestDefaultApp(onDefaultAppResult)
+        } else {
+            organise()
+        }
     }
 
     override fun onRequestPermissionsResult(

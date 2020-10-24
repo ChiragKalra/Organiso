@@ -98,10 +98,6 @@ val ARR_PREF_CUSTOM_LABELS = Array(6) {
     "custom_label_${it}"
 }
 
-
-
-
-
 // permissions
 val ARR_PERMS = arrayOf (
     Manifest.permission.READ_SMS,
@@ -115,6 +111,7 @@ const val PATH_SPAM_REPORTS = "spam_reports"
 const val PATH_BUG_REPORTS = "bug_reports"
 const val PATH_TITLE = "title"
 const val PATH_DETAIL = "detail"
+const val PATH_DEVICE = "device"
 
 // firebase analytics
 const val EVENT_BUG_REPORTED = "bug_reported"

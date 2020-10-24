@@ -68,32 +68,43 @@
         app:layout_constraintEnd_toStartOf="@id/addFile"
         app:layout_constraintBottom_toBottomOf="@id/addFile"/>
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="14dp"
+        android:textSize="18sp"
+        android:text="@string/device_details_included"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/full" />
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addFile"
-        android:tint="#000"
-        app:borderWidth="0dp"
-        android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/add_file"
+        android:layout_margin="16dp"
         android:backgroundTint="@color/colorAccent"
+        android:contentDescription="@string/attach_file"
+        android:tint="#000"
+        app:borderWidth="0dp"
         app:layout_constraintEnd_toStartOf="@id/submit"
-        app:layout_constraintTop_toBottomOf="@id/full"
-        android:contentDescription="@string/attach_file" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:srcCompat="@drawable/add_file" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/submit"
-        android:tint="#000"
-        app:borderWidth="0dp"
-        android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_send"
+        android:layout_margin="16dp"
         android:backgroundTint="@color/colorAccent"
-        app:layout_constraintTop_toBottomOf="@id/full"
+        android:contentDescription="@string/send_button"
+        android:tint="#000"
+        app:borderWidth="0dp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="@string/send_button" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:srcCompat="@drawable/ic_send" />
 
 
 

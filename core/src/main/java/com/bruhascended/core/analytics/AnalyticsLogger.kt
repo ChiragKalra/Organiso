@@ -48,7 +48,7 @@ class AnalyticsLogger(
         }.start()
     }
 
-    fun reportBug (title: String, content: String, fileUri: Uri? = null) {
+    fun reportBug (title: String, content: String, deviceDetails: String, fileUri: Uri? = null) {
         val rn = System.currentTimeMillis().toString()
         log(EVENT_BUG_REPORTED)
 
@@ -56,6 +56,7 @@ class AnalyticsLogger(
         val myRef = database.getReference("${PATH_BUG_REPORTS}/${rn}")
         myRef.child(PATH_TITLE).setValue(title)
         myRef.child(PATH_DETAIL).setValue(content)
+        myRef.child(PATH_DEVICE).setValue(deviceDetails)
 
         if (fileUri != null) {
             val storageRef = FirebaseStorage.getInstance().reference

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.view.View
@@ -124,6 +125,9 @@ class BugReportActivity : AppCompatActivity() {
                 AnalyticsLogger(this).reportBug(
                     titleEditText.text.toString(),
                     full.text.toString(),
+                    "version=${Build.VERSION.SDK_INT}, " +
+                            "manufacturer=${Build.MANUFACTURER}, " +
+                            "model=${Build.MODEL}",
                     fileUri
                 )
                 Toast.makeText(this, getString(R.string.bug_report_sent), Toast.LENGTH_SHORT).show()

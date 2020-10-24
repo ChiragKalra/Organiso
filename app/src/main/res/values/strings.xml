@@ -120,6 +120,11 @@
     <string name="no_matches">No Matches</string>
     <string name="thats_all">That\'s All</string>
 
+    <string name="device_details_included">
+        Your device model and android version will be included in
+        this report to help us identify the problem better.
+    </string>
+
 
     <string name="getting_your_msgs">Getting your messages</string>
     <string name="organising_your_msgs">Organising your messages</string>
