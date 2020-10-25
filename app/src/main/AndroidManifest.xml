@@ -80,6 +80,10 @@
             android:enabled="true"
             android:exported="false" />
         <service
+            android:name=".services.PersonalMoveService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
             android:name=".services.HeadlessSMSSender"
             android:exported="true"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">

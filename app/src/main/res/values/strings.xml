@@ -13,6 +13,7 @@
     <string name="privacy">Privacy</string>
     <string name="theme">Theme</string>
     <string name="otp">OTP</string>
+    <string name="personal">Personal</string>
     <string name="scheduled_messages">Scheduled Messages</string>
 
     <!-- Actions -->
@@ -52,6 +53,7 @@
     <string name="report_conversations_query">Report selected conversation(s)?</string>
     <string name="reset_to_default_query">Reset to default?</string>
     <string name="send_scheduled">Schedule Message?</string>
+    <string name="delete_all_otps_query">Delete all previous OTPs?</string>
 
 
     <!-- Image(Button) Descriptions-->
@@ -98,6 +100,7 @@
     <string name="drafted">drafted</string>
     <string name="drafted_edit">drafted. tap to edit</string>
     <string name="scheduled_to_sender">scheduled to %1$s</string>
+    <string name="insufficient_permissions">Insufficient Permissions</string>
 
     <string name="x_mins_remaining">%1$d minute(s) remaining</string>
     <string name="x_percent">%1$d%%</string>
@@ -129,6 +132,10 @@
     <string name="getting_your_msgs">Getting your messages</string>
     <string name="organising_your_msgs">Organising your messages</string>
     <string name="done">Done</string>
+
+
+    <string name="deleting_otp">Deleting existing OTPs</string>
+    <string name="scan_personal_contacts">Scanning personal category.</string>
 
     <!-- Toasts -->
     <string name="bug_report_sent">Bug Report Sent</string>
@@ -180,5 +187,5 @@
     <string name="enter_new_line">Enter will add new line</string>
     <string name="enter_send_message">Enter will send message</string>
     <string name="enter_is_send">Enter is send</string>
-    <string name="insufficient_permissions">Insufficient Permissions</string>
+    <string name="personal_contacts_only">Only show saved contacts in personal category.</string>
 </resources>

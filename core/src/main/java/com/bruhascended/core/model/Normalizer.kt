@@ -21,6 +21,14 @@ import kotlin.math.abs
 
 fun Boolean.toFloat() = if (this) 1f else 0f
 
+fun FloatArray.firstMax(): Int {
+    var max = 0f
+    forEach {
+        max = kotlin.math.max(max, it)
+    }
+    return indexOfFirst { it == max }
+}
+
 // removes all instances of regex from text
 private fun removeRegex (text: String, regex: Regex) : Pair<String, Float> {
     val many = regex.findAll(text)

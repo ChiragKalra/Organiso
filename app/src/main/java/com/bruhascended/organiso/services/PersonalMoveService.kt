@@ -15,7 +15,7 @@ import com.bruhascended.core.model.getOtp
 import com.bruhascended.organiso.MainActivity
 import com.bruhascended.organiso.R
 
-class OtpDeleteService: Service() {
+class PersonalMoveService: Service() {
 
     override fun onCreate() {
         super.onCreate()
@@ -28,7 +28,7 @@ class OtpDeleteService: Service() {
 
         val notification: Notification = Notification.Builder(mContext, LABEL_PERSONAL.toString())
             .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.deleting_otp))
+            .setContentText(getString(R.string.scan_personal_contacts))
             .setSmallIcon(R.drawable.message)
             .setContentIntent(pendingIntent)
             .setProgress(0, 0, true)
@@ -36,31 +36,16 @@ class OtpDeleteService: Service() {
 
         mContext.startForeground(10123123, notification)
 
-        for (con in mainDaos[LABEL_TRANSACTIONS].loadAllSync()) {
-            MessageDbFactory(mContext).of(con.clean).apply {
-                manager().loadAllSync().forEach {
-                    if (getOtp(it.text) != null && it.type == MESSAGE_TYPE_INBOX &&
-                        System.currentTimeMillis()-it.time > 15*60*1000) {
-                        manager().deleteFromInternal(it)
-                        mContext.deleteSMS(it.id!!)
-                    }
-                }
-                val it = manager().loadLastSync()
-                if (it == null) {
-                    mainDaos[2].delete(con)
-                } else {
-                    if (con.lastSMS != it.text ||
-                        con.time != it.time ||
-                        con.lastMMS != (it.path != null)
-                    ) {
-                        con.lastSMS = it.text
-                        con.time = it.time
-                        con.lastMMS = it.path != null
-                        mainDaos[2].update(con)
-                    }
-                }
-                close()
+        for (con in mainDaos[LABEL_PERSONAL].loadAllSync()) {
+            var label: Int
+            con.probabilities.clone().apply {
+                this[LABEL_PERSONAL] = 0f
+                label = toList().indexOf(maxOrNull())
             }
+            mainDaos[LABEL_PERSONAL].delete(con)
+            con.label = label
+            con.id = null
+            mainDaos[label].insert(con)
         }
         stopForeground(true)
         stopSelf()

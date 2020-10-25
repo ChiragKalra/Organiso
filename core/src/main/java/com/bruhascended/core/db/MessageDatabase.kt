@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.bruhascended.core.constants.deleteSMS
+import java.io.File
 import java.io.Serializable
 
 /*
@@ -42,10 +43,10 @@ data class Message (
 
         other as Message
         if (text != other.text) return false
-        if (delivered != other.delivered) return false
         if (time != other.time) return false
         if (path != other.path) return false
         if (type != other.type) return false
+        if (delivered != other.delivered) return false
         return true
     }
 
@@ -102,6 +103,7 @@ interface MessageDao {
 
     fun delete(mContext: Context, message: Message) {
         Thread {
+            if (message.path != null) File(message.path!!).delete()
             deleteFromInternal(message)
             mContext.deleteSMS(message.id!!)
         }.start()

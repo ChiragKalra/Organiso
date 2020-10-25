@@ -10,6 +10,7 @@ import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.model.OrganizerModel
+import com.bruhascended.core.model.firstMax
 import com.bruhascended.core.model.getOtp
 
 /*
@@ -227,7 +228,7 @@ class SMSManager (private val mContext: Context) {
             } else {
                 nn.getPredictions(msgs).apply {
                     senderToProbs[number.clean] = this
-                    label = toList().indexOf(maxOrNull())
+                    label = firstMax()
                     if (label == LABEL_PERSONAL && number.clean.first().isLetter()) {
                         label = LABEL_IMPORTANT
                     }
@@ -261,9 +262,14 @@ class SMSManager (private val mContext: Context) {
             mProbs = nn.getPrediction(message)
             if (conversation != null)
                 for (j in 0..4) mProbs[j] += conversation.probabilities[j]
-            var label = mProbs.toList().indexOf(mProbs.maxOrNull())
-            if (label == LABEL_PERSONAL && rawNumber.first().isLetter()) {
-                label = LABEL_IMPORTANT
+            var label = mProbs.firstMax()
+            if (label == LABEL_PERSONAL && rawNumber.first().isLetter() ||
+                mPrefs.getBoolean(PREF_CONTACTS_ONLY, false)
+            ) {
+                mProbs.clone().apply {
+                    this[LABEL_PERSONAL] = 0f
+                    label = firstMax()
+                }
             }
             label
         }

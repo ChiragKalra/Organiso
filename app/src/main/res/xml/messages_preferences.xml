@@ -1,6 +1,18 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+
+    <PreferenceCategory
+        android:layout="@layout/view_category_pref"
+        app:title="@string/personal" >
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:icon="@drawable/ic_contacts"
+            app:key="contacts_only"
+            app:allowDividerBelow="false"
+            app:title="@string/personal_contacts_only" />
+    </PreferenceCategory>
+
     <PreferenceCategory
         android:layout="@layout/view_category_pref"
         app:title="@string/otp" >
@@ -23,8 +35,8 @@
         android:layout="@layout/view_category_pref"
         app:title="@string/privacy" >
         <SwitchPreferenceCompat
-            app:defaultValue="true"
-            app:icon="@drawable/ic_report"
+            app:defaultValue="false"
+            app:icon="@drawable/ic_report_theme"
             app:key="report_spam"
             app:allowDividerBelow="false"
             android:summary="@string/send_reports_summary"

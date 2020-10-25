@@ -9,62 +9,63 @@
     android:keepScreenOn="true"
     android:background="?backgroundColor">
 
-    <RelativeLayout
-        android:id="@+id/relativeLayout2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/infoText"
+
+    <com.mikhaellopez.circularprogressbar.CircularProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        app:cpb_background_progressbar_color="#AEAEAE"
+        app:cpb_background_progressbar_width="5dp"
+        app:cpb_progress_direction="to_left"
+        app:cpb_progressbar_color="?attr/colorAccent"
+        app:cpb_progressbar_width="16dp"
+        app:cpb_round_border="true"
+        app:cpb_indeterminate_mode="true"
+        app:layout_constraintBottom_toTopOf="@id/etaText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <com.mikhaellopez.circularprogressbar.CircularProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            app:cpb_background_progressbar_color="#AEAEAE"
-            app:cpb_background_progressbar_width="5dp"
-            app:cpb_progress_direction="to_left"
-            app:cpb_progressbar_color="?attr/colorAccent"
-            app:cpb_progressbar_width="16dp"
-            app:cpb_round_border="true"
-            app:cpb_indeterminate_mode="true" />
+    <TextView
+        android:elevation="5dp"
+        android:id="@+id/progressText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:textColor="?android:textColor"
+        android:textSize="56sp"
+        app:layout_constraintBottom_toBottomOf="@id/progressBar"
+        app:layout_constraintEnd_toEndOf="@+id/progressBar"
+        app:layout_constraintStart_toStartOf="@+id/progressBar"
+        app:layout_constraintTop_toTopOf="@+id/progressBar" />
 
-        <TextView
-            android:id="@+id/progressText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textColor="?android:textColor"
-            android:textSize="56sp" />
-
-    </RelativeLayout>
 
     <TextView
         android:id="@+id/infoText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:textAlignment="center"
         android:textColor="?android:textColor"
         android:textSize="22sp"
-        android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@id/etaText"
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/etaText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/relativeLayout2" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/etaText"
         android:layout_width="wrap_content"
-        android:layout_height="24dp"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_marginBottom="54dp"
         android:textColor="?android:textColor"
         android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/progressBar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/infoText" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

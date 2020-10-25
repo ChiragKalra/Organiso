@@ -5,9 +5,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.bruhascended.core.constants.PREF_CONTACTS_ONLY
 import com.bruhascended.core.constants.PREF_DELETE_OTP
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.services.OtpDeleteService
+import com.bruhascended.organiso.services.PersonalMoveService
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -32,20 +34,27 @@ class MessagesFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.messages_preferences, rootKey)
 
         val deleteOtpPref: SwitchPreferenceCompat = findPreference(PREF_DELETE_OTP)!!
+        val contactsOnlyPref: SwitchPreferenceCompat = findPreference(PREF_CONTACTS_ONLY)!!
 
         val mContext = requireContext()
-
 
         deleteOtpPref.setOnPreferenceChangeListener { _, v ->
             if (v == true) {
                 AlertDialog.Builder(mContext)
-                    .setTitle("Delete all previous OTPs?")
+                    .setTitle(getString(R.string.delete_all_otps_query))
                     .setPositiveButton(mContext.getString(R.string.ok)) { d, _ ->
-                        mContext.startService(Intent(mContext, OtpDeleteService::class.java))
+                        mContext.startService(Intent(mContext, PersonalMoveService::class.java))
                         d.dismiss()
                     }.setNegativeButton(mContext.getString(R.string.cancel)) { d, _ ->
                         d.dismiss()
                     }.create().show()
+            }
+            true
+        }
+
+        contactsOnlyPref.setOnPreferenceChangeListener { _, v ->
+            if (v == true) {
+                mContext.startService(Intent(mContext, OtpDeleteService::class.java))
             }
             true
         }

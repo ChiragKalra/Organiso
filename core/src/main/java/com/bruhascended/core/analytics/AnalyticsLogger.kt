@@ -34,7 +34,6 @@ class AnalyticsLogger(
     private val mPref = PreferenceManager.getDefaultSharedPreferences(context)
     private val firebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
-
     fun reportSpam (conversation: Conversation) {
         if (!mPref.getBoolean(PREF_SEND_SPAM, false)) return
 
@@ -42,7 +41,7 @@ class AnalyticsLogger(
         val myRef = database.getReference("${PATH_SPAM_REPORTS}/${conversation.clean}")
         Thread {
             MessageDbFactory(context).of(conversation.clean).apply {
-                myRef.setValue(manager().loadAllSync())
+                myRef.setValue(manager().loadAllSync().filter { it.type == MESSAGE_TYPE_INBOX })
                 close()
             }
         }.start()

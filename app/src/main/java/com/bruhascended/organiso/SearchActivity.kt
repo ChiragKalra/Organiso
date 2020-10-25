@@ -53,11 +53,15 @@ class SearchActivity : AppCompatActivity() {
     private var searchThread = Thread{}
 
     private fun showResults(key: String) {
-        searchRecycler.scrollToPosition(0)
-        searchRecycler.isVisible = true
+        mAdaptor.refresh()
+        searchRecycler.apply {
+            isVisible = true
+            postDelayed({
+                smoothScrollToPosition(0)
+            }, 200)
+        }
         searchThread.interrupt()
         mAdaptor.searchKey = key
-        mAdaptor.refresh()
         searchThread = Thread {
             val displayedSenders = arrayListOf<String>()
             for (category in categories) {
@@ -66,7 +70,9 @@ class SearchActivity : AppCompatActivity() {
                 if (cons.isNotEmpty()) {ResultItem(TYPE_HEADER, categoryHeader = category)
                     cons.forEach { displayedSenders.add(it.clean) }
                     searchRecycler.post {
-                        mAdaptor.addItems(listOf(ResultItem(TYPE_HEADER, categoryHeader = category)))
+                        mAdaptor.addItems(
+                            listOf(ResultItem(TYPE_HEADER, categoryHeader = category))
+                        )
                         mAdaptor.addItems(
                             List(cons.size) {
                                 ResultItem(TYPE_CONVERSATION, conversation = cons[it])
