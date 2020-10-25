@@ -5,11 +5,13 @@
 /app/build/
 /app/src/androidTest/
 /app/src/test/
+/app/src/main/assets
 /app/google-services.json
 /app/proguard-rules.pro
 /core/build/
 /core/src/androidTest/
 /core/src/test/
+/core/src/main/assets
 /core/proguard-rules.pro
 /build.gradle
 /gradle.properties
