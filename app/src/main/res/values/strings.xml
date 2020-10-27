@@ -11,13 +11,11 @@
     <string name="notifications">Notifications</string>
     <string name="customise_categories">Customise Categories</string>
     <string name="privacy">Privacy</string>
-    <string name="theme">Theme</string>
     <string name="otp">OTP</string>
     <string name="personal">Personal</string>
     <string name="scheduled_messages">Scheduled Messages</string>
 
     <!-- Actions -->
-    <string name="send">send</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="search">Search</string>
@@ -95,6 +93,7 @@
     <string name="delivered">delivered</string>
     <string name="sent">sent</string>
     <string name="queued">queued</string>
+    <string name="sending">sending</string>
     <string name="failed_retry">failed. tap to retry</string>
     <string name="failed">failed</string>
     <string name="drafted">drafted</string>
@@ -135,7 +134,7 @@
 
 
     <string name="deleting_otp">Deleting existing OTPs</string>
-    <string name="scan_personal_contacts">Scanning personal category.</string>
+    <string name="scan_personal_contacts">Scanning personal category</string>
 
     <!-- Toasts -->
     <string name="bug_report_sent">Bug Report Sent</string>
@@ -175,7 +174,6 @@
     <string name="license">License</string>
     <string name="yesterday">Yesterday</string>
     <string name="mark_as_read">Mark As Read</string>
-    <string name="swipe_action">Swipe Action</string>
     <string name="no_action">None</string>
     <string name="navigate_between_categories">Navigate between categories</string>
     <string name="custom__conversation_actions">Custom conversation actions</string>
@@ -187,5 +185,5 @@
     <string name="enter_new_line">Enter will add new line</string>
     <string name="enter_send_message">Enter will send message</string>
     <string name="enter_is_send">Enter is send</string>
-    <string name="personal_contacts_only">Only show saved contacts in personal category.</string>
+    <string name="personal_contacts_only">Only show saved contacts in personal category</string>
 </resources>

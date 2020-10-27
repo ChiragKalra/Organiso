@@ -11,7 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bruhascended.core.constants.EXTRA_SENDER
+import com.bruhascended.core.constants.EXTRA_NUMBER
 import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.MessageDatabase
 import com.bruhascended.core.db.MessageDbFactory
@@ -132,14 +132,14 @@ class ScheduledActivity : AppCompatActivity() {
         mActionArray = resources.getStringArray(R.array.scheduled_actions)
         mClipboardManager = mContext.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
-        val sender = intent.getStringExtra(EXTRA_SENDER)
+        val sender = intent.getStringExtra(EXTRA_NUMBER)
         setupSavedRecycler()
         Thread {
             val daos = MainDaoProvider(mContext).getMainDaos()
             if (sender == null) {
                 for (dao in daos) {
                     for (con in dao.loadAllSync()) {
-                        addToRecycler(MessageDbFactory(mContext).of(con.clean))
+                        addToRecycler(MessageDbFactory(mContext).of(con.number))
                     }
                 }
             } else {

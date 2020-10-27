@@ -37,7 +37,7 @@ class OtpDeleteService: Service() {
         mContext.startForeground(10123123, notification)
 
         for (con in mainDaos[LABEL_TRANSACTIONS].loadAllSync()) {
-            MessageDbFactory(mContext).of(con.clean).apply {
+            MessageDbFactory(mContext).of(con.number).apply {
                 manager().loadAllSync().forEach {
                     if (getOtp(it.text) != null && it.type == MESSAGE_TYPE_INBOX &&
                         System.currentTimeMillis()-it.time > 15*60*1000) {
@@ -49,14 +49,9 @@ class OtpDeleteService: Service() {
                 if (it == null) {
                     mainDaos[2].delete(con)
                 } else {
-                    if (con.lastSMS != it.text ||
-                        con.time != it.time ||
-                        con.lastMMS != (it.path != null)
-                    ) {
-                        con.lastSMS = it.text
+                    if (con.time != it.time) {
                         con.time = it.time
-                        con.lastMMS = it.path != null
-                        mainDaos[2].update(con)
+                        mainDaos[2].insert(con)
                     }
                 }
                 close()

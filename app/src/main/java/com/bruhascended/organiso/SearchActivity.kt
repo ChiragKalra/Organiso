@@ -23,6 +23,8 @@ import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
 import kotlinx.android.synthetic.main.activity_search.*
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -52,6 +54,106 @@ class SearchActivity : AppCompatActivity() {
 
     private var searchThread = Thread{}
 
+    private fun showConversations(key: String): HashSet<String> {
+        val displayedSenders = hashSetOf<String>()
+        for (category in categories) {
+            val cons =
+                MainDaoProvider(mContext).getMainDaos()[category].loadAllSync().filter {
+                    val name = mContactsProvider.getNameOrNull(it.number)
+                    Regex("\\b${key}.*").matches(it.number) ||
+                            (name != null && Regex("\\b${key}.*").matches(name))
+                }
+            if (cons.isNotEmpty()) {
+                cons.forEach { displayedSenders.add(it.number) }
+                searchRecycler.post {
+                    mAdaptor.addItems(
+                        listOf(ResultItem(TYPE_HEADER, categoryHeader = category))
+                    )
+                    mAdaptor.addItems(
+                        List(cons.size) {
+                            ResultItem(TYPE_CONVERSATION, conversation = cons[it])
+                        }
+                    )
+                }
+                if (searchThread.isInterrupted) return displayedSenders
+            }
+        }
+        return displayedSenders
+    }
+
+    private fun showContacts(key: String, displayedNumbers: HashSet<String>) {
+        var otherDisplayed = false
+        mContactsProvider.getSync().forEach {  contact ->
+            val name = contact.name.toLowerCase(Locale.ROOT)
+            if (!Regex("\\b${key}.*").matches(name))
+                return@forEach
+
+            for (sender in displayedNumbers) {
+                if (sender == contact.number) {
+                    return@forEach
+                }
+            }
+
+            if (!otherDisplayed) {
+                otherDisplayed = true
+                searchRecycler.post {
+                    mAdaptor.addItems(
+                        listOf(ResultItem(TYPE_HEADER, categoryHeader = HEADER_CONTACTS))
+                    )
+                }
+            }
+            searchRecycler.post {
+                mAdaptor.addItems(listOf(ResultItem(
+                    TYPE_CONTACT,
+                    conversation = Conversation(contact.number)
+                )))
+            }
+            if (searchThread.isInterrupted) return
+        }
+    }
+
+
+    private fun showMessages(key: String) {
+        for (category in categories) {
+            var isEmpty = true
+            if (searchThread.isInterrupted) return
+            for (con in MainDaoProvider(mContext).getMainDaos()[category].loadAllSync()) {
+                var msgs: List<Message>
+                if (searchThread.isInterrupted) return
+                MessageDbFactory(mContext).of(con.number).apply {
+                    msgs = manager().loadAllSync().filter {
+                        Regex("\\b${key}.*").matches(it.text)
+                    }
+                    close()
+                }
+                if (!msgs.isNullOrEmpty()) {
+                    if (isEmpty) {
+                        isEmpty = false
+                        searchRecycler.post {
+                            mAdaptor.addItems(
+                                listOf(ResultItem(TYPE_HEADER, categoryHeader = 10+category))
+                            )
+                        }
+                    }
+                    searchRecycler.post {
+                        mAdaptor.addItems(listOf(ResultItem(TYPE_CONTACT, conversation = con)))
+                        mAdaptor.addItems(
+                            List(msgs.size) {
+                                ResultItem (
+                                    if (msgs[it].type == 1) TYPE_MESSAGE_RECEIVED
+                                    else TYPE_MESSAGE_SENT,
+                                    conversation = con,
+                                    message = msgs[it]
+                                )
+                            }
+                        )
+                    }
+                }
+                if (searchThread.isInterrupted) return
+            }
+        }
+    }
+
     private fun showResults(key: String) {
         mAdaptor.refresh()
         searchRecycler.apply {
@@ -63,87 +165,14 @@ class SearchActivity : AppCompatActivity() {
         searchThread.interrupt()
         mAdaptor.searchKey = key
         searchThread = Thread {
-            val displayedSenders = arrayListOf<String>()
-            for (category in categories) {
-                if (searchThread.isInterrupted) return@Thread
-                val cons = MainDaoProvider(mContext).getMainDaos()[category].search("$key%", "% $key%")
-                if (cons.isNotEmpty()) {ResultItem(TYPE_HEADER, categoryHeader = category)
-                    cons.forEach { displayedSenders.add(it.clean) }
-                    searchRecycler.post {
-                        mAdaptor.addItems(
-                            listOf(ResultItem(TYPE_HEADER, categoryHeader = category))
-                        )
-                        mAdaptor.addItems(
-                            List(cons.size) {
-                                ResultItem(TYPE_CONVERSATION, conversation = cons[it])
-                            }
-                        )
-                    }
-                }
-            }
+            val displayedNumbers = showConversations(key)
+            if (searchThread.isInterrupted) return@Thread
 
-            var otherDisplayed = false
-            mContactsProvider.getSync().forEach {  contact ->
-                val name = contact.name.toLowerCase(Locale.ROOT)
-                if (!Regex("\\b${key}.*").matches(name))
-                    return@forEach
+            showContacts(key, displayedNumbers)
+            if (searchThread.isInterrupted) return@Thread
 
-                for (sender in displayedSenders) {
-                    if (sender == contact.clean) {
-                        return@forEach
-                    }
-                }
-
-                if (!otherDisplayed) {
-                    otherDisplayed = true
-                    searchRecycler.post {
-                        mAdaptor.addItems(listOf(ResultItem(TYPE_HEADER, categoryHeader = HEADER_CONTACTS)))
-                    }
-                }
-                searchRecycler.post {
-                    mAdaptor.addItems(listOf(ResultItem(
-                        TYPE_CONTACT,
-                        conversation = Conversation(contact.address, contact.clean, contact.name)
-                    )))
-                }
-            }
-
-            for (category in categories) {
-                var isEmpty = true
-                if (searchThread.isInterrupted) return@Thread
-                for (con in MainDaoProvider(mContext).getMainDaos()[category].loadAllSync()) {
-                    var msgs: List<Message>
-                    if (searchThread.isInterrupted) return@Thread
-                    MessageDbFactory(mContext).of(con.clean).apply {
-                        msgs = manager().search("$key%", "% $key%")
-                        close()
-                    }
-                    if (!msgs.isNullOrEmpty()) {
-                        if (isEmpty) {
-                            isEmpty = false
-                            searchRecycler.post {
-                                mAdaptor.addItems(
-                                    listOf(ResultItem(TYPE_HEADER, categoryHeader = 10+category))
-                                )
-                            }
-                        }
-                        searchRecycler.post {
-                            mAdaptor.addItems(listOf(ResultItem(TYPE_CONTACT, conversation = con)))
-                            mAdaptor.addItems(
-                                List(msgs.size) {
-                                    ResultItem (
-                                        if (msgs[it].type == 1) TYPE_MESSAGE_RECEIVED
-                                        else TYPE_MESSAGE_SENT,
-                                        conversation = con,
-                                        message = msgs[it]
-                                    )
-                                }
-                            )
-                        }
-                    }
-                    if (searchThread.isInterrupted) return@Thread
-                }
-            }
+            showMessages(key)
+            if (searchThread.isInterrupted) return@Thread
 
             searchRecycler.post {
                 mAdaptor.doOnLoaded()

@@ -1,5 +1,6 @@
 package com.bruhascended.organiso
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -51,9 +52,9 @@ class StartActivity : AppCompatActivity() {
     )
 
     private val onDefaultAppResult = registerForActivityResult(StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            organise()
-        } else {
+        if (PackageManager.PERMISSION_DENIED in
+            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it]) }
+        ) {
             ActivityCompat.requestPermissions(this, ARR_PERMS, 0)
         }
     }
@@ -73,10 +74,19 @@ class StartActivity : AppCompatActivity() {
             finish()
             return
         }
-        if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
-            requestDefaultApp(onDefaultAppResult)
-        } else {
-            organise()
+        when {
+            packageName != Telephony.Sms.getDefaultSmsPackage(this) -> {
+                requestDefaultApp(onDefaultAppResult)
+            }
+            ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED -> {
+                ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.READ_CONTACTS),
+                    0)
+            }
+            else -> {
+                organise()
+            }
         }
     }
 

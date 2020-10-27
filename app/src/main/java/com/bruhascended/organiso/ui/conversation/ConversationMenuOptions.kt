@@ -24,7 +24,6 @@ import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.Conversation
-import com.bruhascended.core.db.moveTo
 import com.bruhascended.organiso.ConversationActivity
 import com.bruhascended.organiso.MainActivity
 import com.bruhascended.organiso.R
@@ -62,6 +61,7 @@ class ConversationMenuOptions(
 ) {
 
     private val analyticsLogger: AnalyticsLogger = AnalyticsLogger(mContext)
+    private val contactsProvider: ContactsProvider = ContactsProvider(mContext)
 
     private val colorRes = mContext.resources.getIntArray(R.array.colors)
 
@@ -89,9 +89,9 @@ class ConversationMenuOptions(
             setTint(colorRes[(abs(conversation.hashCode()) % colorRes.size)])
         }
 
-        val dp = File(mContext.filesDir, conversation.clean)
+        val dp = File(mContext.filesDir, conversation.number)
         return when {
-            conversation.clean.first().isLetter() -> {
+            conversation.isBot -> {
                 val bot = ContextCompat.getDrawable(mContext, R.drawable.ic_bot)
                 val finalDrawable = LayerDrawable(arrayOf(bg, bot))
                 finalDrawable.setLayerGravity(1, Gravity.CENTER)
@@ -112,7 +112,8 @@ class ConversationMenuOptions(
 
     fun onOptionsItemSelected(item: MenuItem? = null, itemId: Int = 0): Boolean {
         mContext.apply {
-            val display = conversation.name ?: conversation.address
+            val display = contactsProvider.getNameOrNull(conversation.number)
+                ?: conversation.number
             when (item?.itemId ?: itemId) {
                 R.id.action_block -> {
                     AlertDialog.Builder(mContext)
@@ -205,7 +206,7 @@ class ConversationMenuOptions(
                 R.id.action_search -> {
                     searchResult?.launch(
                         Intent(mContext, MessageSearchActivity::class.java).apply {
-                            putExtra(EXTRA_SENDER, conversation.clean)
+                            putExtra(EXTRA_NUMBER, conversation.number)
                         }
                     )
                     this as AppCompatActivity
@@ -214,7 +215,7 @@ class ConversationMenuOptions(
                 R.id.action_mute -> {
                     conversation.apply {
                         isMuted = !isMuted
-                        MainDaoProvider(mContext).getMainDaos()[label].update(this)
+                        MainDaoProvider(mContext).getMainDaos()[label].insert(this)
                         GlobalScope.launch {
                             delay(300)
                             this as AppCompatActivity
@@ -227,18 +228,18 @@ class ConversationMenuOptions(
                 }
                 R.id.action_call -> {
                     val intent = Intent(Intent.ACTION_DIAL)
-                    intent.data = Uri.parse("tel:${conversation.address}")
+                    intent.data = Uri.parse("tel:${conversation.number}")
                     startActivity(intent)
                 }
 
                 R.id.action_scheduled -> {
                     startActivity(
                         Intent(mContext, ScheduledActivity::class.java)
-                            .putExtra(EXTRA_SENDER, conversation.clean)
+                            .putExtra(EXTRA_NUMBER, conversation.number)
                     )
                 }
                 R.id.action_contact -> {
-                    val id = ContactsProvider(mContext).get(conversation.clean)
+                    val id = ContactsProvider(mContext).get(conversation.number)
                         ?.contactId?.toString()
                     val intent = if (id != null) {
                         Intent(
@@ -248,7 +249,7 @@ class ConversationMenuOptions(
                     } else {
                         Intent(
                             ContactsContract.Intents.SHOW_OR_CREATE_CONTACT,
-                            Uri.parse("tel:" + conversation.address)
+                            Uri.parse("tel:" + conversation.number)
                         ).putExtra(
                             ContactsContract.Intents.EXTRA_FORCE_CREATE,
                             true
@@ -261,9 +262,12 @@ class ConversationMenuOptions(
 
                     if (shortcutManager.isRequestPinShortcutSupported) {
                         val pinShortcutInfo =
-                            ShortcutInfo.Builder(mContext, conversation.clean)
+                            ShortcutInfo.Builder(mContext, conversation.number)
                                 .setIcon(getSenderIcon())
-                                .setShortLabel(conversation.name ?: conversation.address)
+                                .setShortLabel(
+                                    contactsProvider.getNameOrNull(conversation.number)
+                                        ?: conversation.number
+                                )
                                 .setIntent(
                                     Intent(mContext, ConversationActivity::class.java)
                                         .setAction("android.intent.action.VIEW")

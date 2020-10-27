@@ -10,7 +10,7 @@ import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.organiso.*
 import com.bruhascended.core.db.*
 import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.services.SMSSender
+import com.bruhascended.organiso.services.SenderService
 import com.bruhascended.core.data.MainDaoProvider
 
 /*
@@ -38,7 +38,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
             sendBroadcast(
                 Intent(this, NotificationActionReceiver::class.java)
                 .setAction(ACTION_CANCEL)
-                .putExtra(EXTRA_SENDER, sender)
+                .putExtra(EXTRA_NUMBER, sender)
             )
         }
     }
@@ -52,7 +52,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
         when (intent.action) {
             ACTION_CANCEL -> {
-                val sender = intent.getStringExtra(EXTRA_SENDER) ?: return
+                val sender = intent.getStringExtra(EXTRA_NUMBER) ?: return
                 NotificationDbFactory(mContext).get().apply {
                     manager().findBySender(sender).forEach {
                         manager().delete(it)
@@ -74,7 +74,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 val conversation =
                     intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
                 val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
-                MessageDbFactory(mContext).of(conversation.clean).apply {
+                MessageDbFactory(mContext).of(conversation.number).apply {
                     manager().delete(mContext, message)
                     val last = manager().loadLastSync()
                     if (last == null) {
@@ -83,27 +83,24 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     } else {
                         conversation.apply {
                             read = true
-                            lastMMS = last.path != null
-                            lastSMS = last.text
                             time = last.time
-                            MainDaoProvider(mContext).getMainDaos()[label].update(this)
+                            MainDaoProvider(mContext).getMainDaos()[label].insert(this)
                         }
                     }
                     close()
                 }
                 val id = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (id == -1) {
-                    mContext.cancelNotification(conversation.clean, conversation.id)
+                    mContext.cancelNotification(conversation.number, conversation.hashCode())
                 } else {
                     NotificationManagerCompat.from(mContext).cancel(id)
                 }
             }
             ACTION_MARK_READ -> {
-                val conversation =
-                    intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
-                conversation.read = true
-                MainDaoProvider(mContext).getMainDaos()[conversation.label].update(conversation)
-                mContext.cancelNotification(conversation.clean, conversation.id)
+                val number = intent.getStringExtra(EXTRA_NUMBER)!!
+                val label = intent.getIntExtra(EXTRA_LABEL, LABEL_PERSONAL)
+                MainDaoProvider(mContext).getMainDaos()[label].markRead(number)
+                mContext.cancelNotification(number, number.hashCode())
             }
             ACTION_REPLY -> {
                 val conversation =
@@ -113,7 +110,13 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 val newMessage = Message(replyText, MESSAGE_TYPE_SENT, System.currentTimeMillis())
                 MessageNotificationManager(mContext).sendSmsNotification(newMessage to conversation)
 
-                SMSSender(mContext.applicationContext, arrayOf(conversation)).sendSMS(replyText)
+
+                mContext.startService(
+                    Intent(mContext, SenderService::class.java).apply {
+                        putExtra(EXTRA_NUMBER, conversation.number)
+                        putExtra(EXTRA_MESSAGE_TEXT, replyText)
+                    }
+                )
             }
             ACTION_REPORT_SPAM -> {
                 val conversation =
@@ -122,7 +125,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     log("${conversation.label}_to_4")
                     reportSpam(conversation)
                 }
-                mContext.cancelNotification(conversation.clean, conversation.id)
+                mContext.cancelNotification(conversation.number, conversation.hashCode())
                 conversation.moveTo(LABEL_SPAM, mContext)
             }
         }

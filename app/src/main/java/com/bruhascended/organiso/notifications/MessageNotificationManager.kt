@@ -25,6 +25,7 @@ import com.bruhascended.organiso.ConversationActivity
 import com.bruhascended.organiso.R
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.constants.*
+import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.db.*
 import com.bruhascended.core.model.getOtp
 import java.io.File
@@ -85,13 +86,13 @@ class MessageNotificationManager(
     }
 
     private fun getSenderIcon(conversation: Conversation): IconCompat {
-        val dp = File(mContext.filesDir, conversation.clean)
+        val dp = File(mContext.filesDir, conversation.number)
         val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
-            setTint(colorRes[(conversation.id!! % colorRes.size)])
+            setTint(colorRes[(conversation.hashCode() % colorRes.size)])
         }
 
         return when {
-            conversation.clean.first().isLetter() -> {
+            conversation.isBot -> {
                 val bot = ContextCompat.getDrawable(mContext, R.drawable.ic_bot)
                 val finalDrawable = LayerDrawable(arrayOf(bg, bot))
                 finalDrawable.setLayerGravity(1, Gravity.CENTER)
@@ -149,7 +150,7 @@ class MessageNotificationManager(
         }
 
         val contentPI = PendingIntent.getActivity(
-            mContext, conversation.id!!,
+            mContext, conversation.hashCode(),
             Intent(mContext, ConversationActivity::class.java)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString())
                 .setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME),
@@ -163,7 +164,10 @@ class MessageNotificationManager(
         }
 
         val senderPerson = Person.Builder()
-            .setName(conversation.name ?: conversation.address)
+            .setName(
+                ContactsProvider(mContext).getNameOrNull(conversation.number)
+                    ?: conversation.number
+            )
             .setIcon(getSenderIcon(conversation))
             .build()
 
@@ -173,10 +177,10 @@ class MessageNotificationManager(
             .build()
 
         val cancelPI = PendingIntent.getBroadcast(
-            mContext, conversation.id!!,
+            mContext, conversation.hashCode(),
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_CANCEL)
-                .putExtra(EXTRA_SENDER, conversation.clean),
+                .putExtra(EXTRA_NUMBER, conversation.number),
             FLAG_UPDATE_CURRENT
         )
 
@@ -185,7 +189,7 @@ class MessageNotificationManager(
         ) {
             ndb.insert(
                 Notification(
-                    conversation.clean,
+                    conversation.number,
                     message.text,
                     System.currentTimeMillis(),
                     conversation.label,
@@ -196,7 +200,7 @@ class MessageNotificationManager(
         }
 
         val conversationStyle = NotificationCompat.MessagingStyle(senderPerson)
-        ndb.findBySender(conversation.clean).forEach {
+        ndb.findBySender(conversation.number).forEach {
             var msgText = it.text
             if (it.path != null) {
                 val mType = getMimeType(it.path!!)
@@ -223,7 +227,7 @@ class MessageNotificationManager(
         }
         val replyPendingIntent: PendingIntent = PendingIntent.getBroadcast(
             mContext.applicationContext,
-            conversation.id!!,
+            conversation.hashCode(),
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_REPLY)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
@@ -233,20 +237,21 @@ class MessageNotificationManager(
             R.drawable.ic_reply, mContext.getString(R.string.reply), replyPendingIntent
         ).addRemoteInput(remoteInput).build()
 
-        val readPI = PendingIntent.getBroadcast(mContext, conversation.id!!,
+        val readPI = PendingIntent.getBroadcast(mContext, conversation.hashCode(),
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_MARK_READ)
-                .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
+                .putExtra(EXTRA_NUMBER, conversation.number)
+                .putExtra(EXTRA_LABEL, conversation.label),
             FLAG_UPDATE_CURRENT
         )
-        val deletePI = PendingIntent.getBroadcast(mContext, conversation.id!!,
+        val deletePI = PendingIntent.getBroadcast(mContext, conversation.hashCode(),
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_DELETE_MESSAGE)
                 .putExtra(EXTRA_MESSAGE, message)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
             FLAG_UPDATE_CURRENT
         )
-        val reportSpamPI = PendingIntent.getBroadcast(mContext, conversation.id!!,
+        val reportSpamPI = PendingIntent.getBroadcast(mContext, conversation.hashCode(),
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_REPORT_SPAM)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
@@ -264,7 +269,7 @@ class MessageNotificationManager(
             .setAutoCancel(false)
             .setStyle(conversationStyle).apply {
                 if (message.type != MESSAGE_TYPE_INBOX) setNotificationSilent()
-                if (conversation.clean.first().isDigit() && conversation.label == LABEL_PERSONAL) {
+                if (!conversation.isBot && conversation.label == LABEL_PERSONAL) {
                     addAction(replyAction)
                 } else {
                     addAction(
@@ -283,7 +288,7 @@ class MessageNotificationManager(
                 deletePI
             ).setDeleteIntent(cancelPI)
 
-        notificationManager.notify(conversation.id!!, notification.build())
+        notificationManager.notify(conversation.hashCode(), notification.build())
         showSummaryNotification()
     }
 }

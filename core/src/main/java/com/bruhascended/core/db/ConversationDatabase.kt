@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil
-import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.room.*
-import com.bruhascended.core.constants.*
+import com.bruhascended.core.constants.LABEL_NONE
+import com.bruhascended.core.constants.LABEL_PERSONAL
 import com.bruhascended.core.data.MainDaoProvider
 import com.google.gson.Gson
 import java.io.Serializable
@@ -29,42 +29,50 @@ import java.io.Serializable
 */
 
 @Entity(tableName = "conversations")
-data class Conversation (
-    var address: String,
-    val clean: String,
-    var name: String? = null,
-    @PrimaryKey(autoGenerate = true)
-    var id: Int? = null,
+data class Conversation(
+    @PrimaryKey
+    val number: String,
+    var time: Long = 0,
     var label: Int = LABEL_PERSONAL,
     var forceLabel: Int = -1,
-    var probabilities: FloatArray = FloatArray(5) { if (it == LABEL_PERSONAL) 1F else 0F },
+    var probabilities: Array<Float> =
+        Array(5) { if (it == LABEL_PERSONAL) 1F else 0F },
     var read: Boolean = true,
-    var time: Long = 0,
-    var lastSMS: String = "",
-    var isMuted: Boolean = false,
-    var lastMMS: Boolean = false
+    var isMuted: Boolean = false
 ): Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as Conversation
-        if (clean != other.clean) return false
-        if (name != other.name) return false
         if (read != other.read) return false
-        if (time != other.time) return false
-        if (lastSMS != other.lastSMS) return false
-        if (lastMMS != other.lastMMS) return false
         if (isMuted != other.isMuted) return false
         return true
     }
 
     override fun hashCode(): Int {
-        return clean.hashCode()
+        return number.hashCode()
     }
 
     override fun toString(): String =
         Gson().toJson(this)
+
+    val isBot
+        get() = number.first().isLetter()
+
+    val id
+        get() = hashCode()
+
+    fun moveTo(to: Int, mContext: Context) {
+        MainDaoProvider(mContext).getMainDaos()[label].delete(this)
+        if (to != LABEL_NONE) {
+            label = to
+            forceLabel = to
+            MainDaoProvider(mContext).getMainDaos()[to].insert(this)
+        } else MessageDbFactory(mContext).of(number).apply {
+            manager().nukeTable(mContext, number)
+        }
+    }
 }
 
 fun String?.toConversation(): Conversation {
@@ -73,26 +81,23 @@ fun String?.toConversation(): Conversation {
 
 @Dao
 interface ConversationDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(conversation: Conversation)
 
-    @Update
-    fun update(conversation: Conversation)
+    @Query("UPDATE conversations SET read = 1 WHERE number = :number")
+    fun markRead(number: String)
+
+    @Query("UPDATE conversations SET time = :time WHERE number = :number")
+    fun updateTime(number: String, time: Long)
 
     @Delete
     fun delete(conversation: Conversation)
 
-    @Query("SELECT * FROM conversations WHERE clean LIKE :sender ORDER BY time DESC")
-    fun findBySender(sender: String): List<Conversation>
-
-    @Query("SELECT * FROM conversations WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR address LIKE :key or address like :altKey ORDER BY time DESC")
-    fun search(key: String, altKey: String=""): List<Conversation>
+    @Query("SELECT * FROM conversations WHERE number LIKE :number")
+    fun findByNumber(number: String): Conversation?
 
     @Query("SELECT * FROM conversations LIMIT 1")
     fun loadSingle(): Conversation?
-
-    @Query("SELECT * FROM conversations ORDER BY time DESC")
-    fun loadAll(): LiveData<List<Conversation>>
 
     @Query("SELECT * FROM conversations ORDER BY time DESC")
     fun loadAllPaged(): PagingSource<Int, Conversation>
@@ -100,17 +105,13 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations")
     fun loadAllSync(): List<Conversation>
 
-    @Query("SELECT COUNT(clean) FROM conversations WHERE read = 0")
-    fun loadLiveUnreadCount(): LiveData<Int>
-
-    @RawQuery
-    fun findByQuery(query: SupportSQLiteQuery): List<Conversation>
-
+    @Query("SELECT COUNT(number) FROM conversations WHERE read = 0")
+    fun getLiveUnreadCount(): LiveData<Int>
 }
 
 object ConversationComparator : DiffUtil.ItemCallback<Conversation>() {
     override fun areItemsTheSame(oldItem: Conversation, newItem: Conversation) =
-        oldItem.id == newItem.id
+        oldItem.number == newItem.number
 
     override fun areContentsTheSame(oldItem: Conversation, newItem: Conversation) =
         oldItem == newItem
@@ -118,10 +119,10 @@ object ConversationComparator : DiffUtil.ItemCallback<Conversation>() {
 
 class Converters {
     @TypeConverter
-    fun listToJson(value: FloatArray?): String = Gson().toJson(value)
+    fun listToJson(value: Array<Float>?): String = Gson().toJson(value)
 
     @TypeConverter
-    fun jsonToList(value: String?): FloatArray = Gson().fromJson(value, FloatArray::class.java)
+    fun jsonToList(value: String?): Array<Float> = Gson().fromJson(value, Array<Float>::class.java)
 }
 
 @Database(entities = [Conversation::class], version = 1, exportSchema = false)
@@ -130,33 +131,10 @@ abstract class ConversationDatabase : RoomDatabase() {
     abstract fun manager(): ConversationDao
 }
 
-class ConversationDbFactory (private val mContext: Context) {
-
-    private val arrLabel = arrayOf (
-        "Personal",
-        "Important",
-        "Transactions",
-        "Promotions",
-        "Spam",
-        "Blocked"
-    )
-
-    fun of (label: Int, mainThread: Boolean = true) = Room.databaseBuilder(
-        mContext, ConversationDatabase::class.java, arrLabel[label]
+class ConversationDbFactory(private val mContext: Context) {
+    fun of(label: Int, mainThread: Boolean = true) = Room.databaseBuilder(
+        mContext, ConversationDatabase::class.java, label.toString()
     ).apply {
         if (mainThread) allowMainThreadQueries()
     }.build()
-}
-
-
-fun Conversation.moveTo(to: Int, mContext: Context) {
-    MainDaoProvider(mContext).getMainDaos()[label].delete(this)
-    id = null
-    if (to != LABEL_NONE) {
-        label = to
-        forceLabel = to
-        MainDaoProvider(mContext).getMainDaos()[to].insert(this)
-    } else MessageDbFactory(mContext).of(clean).apply {
-        manager().nukeTable(mContext, clean)
-    }
 }

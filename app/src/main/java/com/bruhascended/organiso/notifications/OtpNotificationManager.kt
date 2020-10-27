@@ -31,14 +31,14 @@ class OtpNotificationManager (
     ): Worker(mContext, workerParams) {
 
         override fun doWork(): Result {
-            val time = inputData.getLong(EXTRA_TIME, 0L)
-            val sender = inputData.getString(EXTRA_SENDER)!!
+            val messageId = inputData.getInt(EXTRA_MESSAGE_ID, 0)
+            val sender = inputData.getString(EXTRA_NUMBER)!!
             val id = inputData.getInt(EXTRA_NOTIFICATION_ID, 0)
 
             val conversation = MainDaoProvider(mContext)
-                .getMainDaos()[LABEL_TRANSACTIONS].findBySender(sender).first()
+                .getMainDaos()[LABEL_TRANSACTIONS].findByNumber(sender)!!
             val mdb = MessageDbFactory(mContext).of(sender)
-            val message = mdb.manager().search(time)
+            val message = mdb.manager().getById(messageId)
             mdb.close()
 
             mContext.sendBroadcast(
@@ -59,18 +59,18 @@ class OtpNotificationManager (
         val copyIntent = Intent(mContext, NotificationActionReceiver::class.java)
             .setAction(ACTION_COPY)
             .putExtra(EXTRA_OTP, otp)
-        val copyPI = PendingIntent.getBroadcast(mContext, conversation.id!!,
+        val copyPI = PendingIntent.getBroadcast(mContext, conversation.id,
             copyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val deletePI = PendingIntent.getBroadcast(mContext, conversation.id!!,
+        val deletePI = PendingIntent.getBroadcast(mContext, conversation.id,
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_DELETE_OTP)
                 .putExtra(EXTRA_NOTIFICATION_ID, id)
-                .putExtra(EXTRA_MESSAGE, message)
+                .putExtra(EXTRA_MESSAGE_ID, message.id)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        var text = mContext.getString(R.string.from_sender, conversation.address)
+        var text = mContext.getString(R.string.from_sender, conversation.number)
         if (prefs.getBoolean(PREF_COPY_OTP, true)) {
             text += mContext.getString(R.string.copied_in_brackets)
             mContext.sendBroadcast(copyIntent)
@@ -81,7 +81,7 @@ class OtpNotificationManager (
                 .setInitialDelay(15, TimeUnit.MINUTES)
                 .setInputData(Data.Builder()
                     .putLong(EXTRA_TIME, message.time)
-                    .putString(EXTRA_SENDER, conversation.clean)
+                    .putString(EXTRA_NUMBER, conversation.number)
                     .putInt(EXTRA_NOTIFICATION_ID, id)
                     .build()
                 ).build()

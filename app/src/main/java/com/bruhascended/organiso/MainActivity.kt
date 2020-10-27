@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
     private val onDefaultAppResult = registerForActivityResult(StartActivityForResult()) {
         if (PackageManager.PERMISSION_DENIED in
-            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it])}
+            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it]) }
         ) {
             Toast.makeText(this, getString(R.string.insufficient_permissions), Toast.LENGTH_LONG).show()
             finish()
@@ -202,8 +202,8 @@ class MainActivity : AppCompatActivity() {
         super.onSupportActionModeFinished(mode)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
         mViewModel.mContactsProvider.updateAsync()
 
         if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {

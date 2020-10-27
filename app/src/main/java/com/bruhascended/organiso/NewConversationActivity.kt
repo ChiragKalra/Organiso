@@ -18,8 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.*
-import com.bruhascended.organiso.services.MMSSender
-import com.bruhascended.organiso.services.SMSSender
+import com.bruhascended.organiso.services.SenderService
 import com.bruhascended.organiso.common.MediaPreviewActivity
 import com.bruhascended.core.constants.saveFile
 import com.bruhascended.core.data.ContactsProvider
@@ -31,7 +30,6 @@ import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.*
 
 /*
@@ -74,8 +72,8 @@ class NewConversationActivity : MediaPreviewActivity() {
     }
 
     private val addressClickAction = { contact: Contact ->
-        to.setText(contact.address)
-        to.setSelection(contact.address.length)
+        to.setText(contact.number)
+        to.setSelection(contact.number.length)
         removeClickAction(contact)
     }
 
@@ -91,35 +89,20 @@ class NewConversationActivity : MediaPreviewActivity() {
         return if (pos == -1) base else base.substring(0, pos)
     }
 
-    private fun addRecipientAsync (number: String) {
-        Thread {
-            val clean = cm.getClean (
-                number.trim().filter { it.isDigit() }
-            )
-            if (clean.isBlank()) return@Thread
-            val name = mContactsProvider.getNameOrNull(clean) ?: ""
-            if (recipients.firstOrNull { it.clean == clean } == null) {
-                addsRecycler.post {
-                    recipients.add(Contact(name, clean, number, 0))
-                    addressRecyclerAdaptor.notifyItemInserted(recipients.lastIndex)
-                }
-            }
-        }.start()
-    }
-
-    private fun addRecipientSync (number: String) {
+    private fun addRecipient (number: String) {
         val clean = cm.getClean (
-            number.trim().toLowerCase(Locale.ROOT).filter { it.isDigit() }
+            number.trim().toLowerCase(Locale.ROOT).filter { it.isDigit() || it == '+' || it == ' ' }
         )
         if (clean.isBlank()) return
         val name = mContactsProvider.getNameOrNull(clean) ?: ""
-        if (recipients.firstOrNull { it.clean == clean } == null) {
-            recipients.add(Contact(name, clean, number, 0))
+        if (recipients.firstOrNull { it.number == clean } == null) {
+            recipients.add(Contact(name, clean, 0))
+            addressRecyclerAdaptor.notifyItemInserted(recipients.lastIndex)
         }
     }
 
     private fun addRecipient (contact: Contact) {
-        if (recipients.firstOrNull { it.clean == contact.clean } == null) {
+        if (recipients.firstOrNull { it.number == contact.number } == null) {
             recipients.add(contact)
             addressRecyclerAdaptor.notifyItemInserted(recipients.lastIndex)
         }
@@ -129,11 +112,7 @@ class NewConversationActivity : MediaPreviewActivity() {
         if (recipients.size == 1) {
             startActivity(
                 Intent(this, ConversationActivity::class.java)
-                    .putExtra(EXTRA_CONVERSATION, Conversation(
-                        recipients.first().address,
-                        recipients.first().clean,
-                        name = recipients.first().name
-                    ))
+                    .putExtra(EXTRA_NUMBER, recipients.first().number)
             )
         } else if (recipients.isNotEmpty()) {
             startActivityIfNeeded(
@@ -145,13 +124,14 @@ class NewConversationActivity : MediaPreviewActivity() {
         messageEditText.text = null
         recipients.clear()
         addressRecyclerAdaptor.notifyDataSetChanged()
+        finish()
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun processIntentData() {
         if (Intent.ACTION_SENDTO == intent.action) {
             val destinations = TextUtils.split(getRecipients(intent.data!!), ";")
-            destinations.forEach { addRecipientAsync(it) }
+            destinations.forEach { addRecipient(it) }
         } else if (Intent.ACTION_SEND == intent.action && intent.type != null) {
             when {
                 intent.type!!.startsWith("text") -> {
@@ -171,20 +151,18 @@ class NewConversationActivity : MediaPreviewActivity() {
                         keyListener = null
                     }
                     sendButton.setOnClickListener {
-                        val conversations = Array(recipients.size) {
-                            Conversation(recipients[it].address, recipients[it].clean)
-                        }
-                        val smsSender = SMSSender(mContext, conversations)
-                        val mmsSender = MMSSender(mContext, conversations)
-
-                        msgs.forEach {
-                            if (it.path == null) smsSender.sendSMS(it.text)
-                            else {
-                                val uri =  Uri.fromFile(File(it.path!!))
-                                mmsSender.sendMMS(it.text, uri)
+                        recipients.forEach{ rec ->
+                            msgs.forEach { mes ->
+                                startService(
+                                    Intent(this, SenderService::class.java).apply {
+                                        putExtra(EXTRA_NUMBER, rec.number)
+                                        putExtra(EXTRA_MESSAGE_TEXT, mes.text)
+                                        data = Uri.parse(mes.path)
+                                    }
+                                )
                             }
                         }
-                        startNextActivity()
+                        if (recipients.isNotEmpty()) startNextActivity()
                     }
                 }
                 else -> showMediaPreview(intent)
@@ -242,7 +220,7 @@ class NewConversationActivity : MediaPreviewActivity() {
         to.setOnEditorActionListener { _, i, _ ->
             if (i != EditorInfo.IME_ACTION_DONE) return@setOnEditorActionListener true
             val number = to.text.toString()
-            if (number.isNotBlank()) addRecipientAsync(number)
+            if (number.isNotBlank()) addRecipient(number)
             to.text = null
             true
         }
@@ -298,24 +276,22 @@ class NewConversationActivity : MediaPreviewActivity() {
                 if (messageEditText.text.toString().trim() == "" && !isMms)
                     return@setOnClickListener
 
-                addRecipientSync(to.text.toString())
+                addRecipient(to.text.toString())
                 to.text = null
 
                 if (recipients.isNotEmpty()) {
-                    val conversations = Array(recipients.size) {
-                        Conversation(recipients[it].address, recipients[it].clean)
-                    }
                     val msg = messageEditText.text.toString().trim()
-                    if (!isMms) {
-                        SMSSender(mContext, conversations).sendSMS(msg)
-                        hideMediaPreview()
-                    } else {
-                        MMSSender(mContext, conversations)
-                            .sendMMS(msg, mmsURI!!)
+                    recipients.forEach{ rec ->
+                        startService(
+                            Intent(this, SenderService::class.java).apply {
+                                putExtra(EXTRA_NUMBER, rec.number)
+                                putExtra(EXTRA_MESSAGE_TEXT, msg)
+                                data = mmsURI
+                            }
+                        )
                     }
-                    messageEditText.text = null
+                    startNextActivity()
                 }
-                startNextActivity()
             }
         }
     }

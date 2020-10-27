@@ -6,12 +6,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import com.bruhascended.core.constants.LABEL_PERSONAL
-import com.bruhascended.core.constants.LABEL_TRANSACTIONS
-import com.bruhascended.core.constants.MESSAGE_TYPE_INBOX
-import com.bruhascended.core.constants.deleteSMS
 import com.bruhascended.core.data.MainDaoProvider
-import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.core.model.getOtp
 import com.bruhascended.organiso.MainActivity
 import com.bruhascended.organiso.R
 
@@ -44,7 +39,6 @@ class PersonalMoveService: Service() {
             }
             mainDaos[LABEL_PERSONAL].delete(con)
             con.label = label
-            con.id = null
             mainDaos[label].insert(con)
         }
         stopForeground(true)

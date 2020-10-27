@@ -6,8 +6,9 @@ import android.net.Uri
 import android.os.IBinder
 import android.telephony.TelephonyManager
 import android.text.TextUtils
+import com.bruhascended.core.constants.EXTRA_MESSAGE_TEXT
+import com.bruhascended.core.constants.EXTRA_NUMBER
 import com.bruhascended.core.data.ContactsManager
-import com.bruhascended.core.db.Conversation
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -33,24 +34,34 @@ class HeadlessSMSSender : Service() {
         return if (pos == -1) base else base.substring(0, pos)
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         if (intent.action !in arrayOf(Intent.ACTION_SENDTO,
                 TelephonyManager.ACTION_RESPOND_VIA_MESSAGE)) {
-            return null
+            return super.onStartCommand(intent, flags, startId)
         }
 
         val cm = ContactsManager(applicationContext)
-        val extras = intent.extras ?: return null
+        val extras = intent.extras ?: return super.onStartCommand(intent, flags, startId)
         val message = extras.getString(Intent.EXTRA_TEXT) ?: extras.getString("sms_body")!!
         val intentUri: Uri = intent.data!!
         val recipients = getRecipients(intentUri)
 
-        if (TextUtils.isEmpty(recipients) || TextUtils.isEmpty(message)) return null
+        if (TextUtils.isEmpty(recipients) || TextUtils.isEmpty(message)) return super.onStartCommand(intent, flags, startId)
 
         val number = extras.get(Intent.EXTRA_PHONE_NUMBER) as String?
         val adds = if (number == null) TextUtils.split(recipients, ";") else arrayOf(number)
-        val conversations = Array(adds.size) { Conversation(adds[it], cm.getClean(adds[it])) }
-        SMSSender(this, conversations).sendSMS(message)
+        adds.forEach {
+            startService(
+                Intent(this, SenderService::class.java).apply {
+                    putExtra(EXTRA_NUMBER, cm.getClean(it))
+                    putExtra(EXTRA_MESSAGE_TEXT, message)
+                }
+            )
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    override fun onBind(p0: Intent?): IBinder? {
         return null
     }
 }

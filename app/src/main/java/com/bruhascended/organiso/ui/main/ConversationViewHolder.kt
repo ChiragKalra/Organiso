@@ -18,8 +18,12 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.QuickContactBadge
 import android.widget.TextView
-import com.bruhascended.core.constants.*
+import com.bruhascended.core.constants.ACTION_UPDATE_DP
+import com.bruhascended.core.constants.EXTRA_NUMBER
+import com.bruhascended.core.data.ContactsProvider
+import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.DateTimeProvider
 import com.bruhascended.organiso.common.ScrollEffectFactory
@@ -34,6 +38,7 @@ class ConversationViewHolder(
 
     private val picasso = Picasso.get()
     private val dtp = DateTimeProvider(mContext)
+    private val mContactsProvider = ContactsProvider(mContext)
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
     private var backgroundAnimator: ValueAnimator? = null
     private val muteImage: ImageView = root.findViewById(R.id.mutedImage)
@@ -72,11 +77,11 @@ class ConversationViewHolder(
     private fun showDisplayPicture() {
         imageView.apply {
             isEnabled = true
-            assignContactFromPhone(conversation.clean, true)
+            assignContactFromPhone(conversation.number, true)
             setMode(ContactsContract.QuickContact.MODE_LARGE)
-            val dp = File(mContext.filesDir, conversation.clean)
+            val dp = File(mContext.filesDir, conversation.number)
             when {
-                conversation.clean.first().isLetter() -> {
+                conversation.isBot -> {
                     setImageResource(R.drawable.ic_bot)
                     isEnabled = false
                 }
@@ -86,8 +91,8 @@ class ConversationViewHolder(
         }
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(p0: Context, intent: Intent) {
-                if (intent.getStringExtra(EXTRA_SENDER) == conversation.clean) {
-                    val dp = File(mContext.filesDir, conversation.clean)
+                if (intent.getStringExtra(EXTRA_NUMBER) == conversation.number) {
+                    val dp = File(mContext.filesDir, conversation.number)
                     picasso.load(dp).into(imageView)
                 }
             }
@@ -95,22 +100,39 @@ class ConversationViewHolder(
     }
 
     fun onBind() {
-        senderTextView.text = conversation.name ?: conversation.address
+        senderTextView.text = conversation.number
+        mContactsProvider.getLiveOrNull(conversation.number)?.observeForever {
+            senderTextView.text = it
+        }
         timeTextView.text = dtp.getCondensed(conversation.time)
-
-        val str = if (conversation.lastMMS)
-            SpannableString(mContext.getString(R.string.media_message, conversation.lastSMS))
-        else SpannableString(conversation.lastSMS)
-        if (!conversation.read) {
-            str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
-            str.setSpan(ForegroundColorSpan(textColor), 0, str.length, flag)
-        }
-        if (conversation.lastMMS) str.apply {
-            val color = mContext.getColor(R.color.colorAccent)
-            setSpan(ForegroundColorSpan(color), 0, 6, flag)
-        }
-        messageTextView.text = str
         muteImage.visibility = if (conversation.isMuted) View.VISIBLE else View.GONE
+
+        val last = MessageDbFactory(mContext).of(conversation.number).manager().loadLast()
+
+        last.observeForever {
+            if (it == null) {
+                MainDaoProvider(mContext).getMainDaos()[conversation.label].delete(conversation)
+                return@observeForever
+            }
+            val str = if (it.hasMedia)
+                SpannableString(
+                    mContext.getString(
+                        R.string.media_message,
+                        it.text
+                    )
+                )
+            else SpannableString(it.text)
+            if (!conversation.read) {
+                str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
+                str.setSpan(ForegroundColorSpan(textColor), 0, str.length, flag)
+            }
+            if (it.hasMedia) str.apply {
+                val color = mContext.getColor(R.color.colorAccent)
+                setSpan(ForegroundColorSpan(color), 0, 6, flag)
+            }
+            messageTextView.text = str
+        }
+
 
         showDisplayPicture()
     }

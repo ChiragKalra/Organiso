@@ -3,12 +3,9 @@ package com.bruhascended.organiso
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.icu.util.Calendar
-import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.Menu
@@ -27,14 +24,15 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.constants.*
-import com.bruhascended.core.data.*
+import com.bruhascended.core.data.ContactsProvider
+import com.bruhascended.core.data.DraftsManager
+import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.*
 import com.bruhascended.core.model.toFloat
 import com.bruhascended.organiso.common.*
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
-import com.bruhascended.organiso.services.MMSSender
-import com.bruhascended.organiso.services.SMSSender
 import com.bruhascended.organiso.services.ScheduledManager
+import com.bruhascended.organiso.services.SenderService
 import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
 import com.bruhascended.organiso.ui.conversation.ConversationViewModel
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
@@ -43,8 +41,6 @@ import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.io.File
-
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -67,25 +63,25 @@ import java.io.File
 class ConversationActivity : MediaPreviewActivity() {
 
     companion object {
-        var activeConversationSender: String? = null
+        var activeConversationNumber: String? = null
+        var activeConversationDao: MessageDao? = null
     }
 
     private val mViewModel: ConversationViewModel by viewModels()
 
-    private lateinit var mContext: Context
+
     private lateinit var mAdaptor: MessageRecyclerAdaptor
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var selectionManager: ListSelectionManager<Message>
     private lateinit var conversationMenuOptions: ConversationMenuOptions
     private lateinit var mDraftsManager: DraftsManager
     private lateinit var mScheduledSMSSender: ScheduledManager
-    private lateinit var smsSender: SMSSender
-    private lateinit var mmsSender: MMSSender
-    private lateinit var mainDaoProvider: MainDaoProvider
     private lateinit var mSavedDao: SavedDao
     private var inputManager: InputMethodManager? = null
 
     private var scroll = true
+    private val mContext = this
+    private val mainDaoProvider = MainDaoProvider(this)
 
     override lateinit var mVideoView: VideoView
     override lateinit var mImagePreview: ImageView
@@ -95,43 +91,6 @@ class ConversationActivity : MediaPreviewActivity() {
     override lateinit var mAddMedia: ImageButton
 
     private fun Int.toPx() = this * resources.displayMetrics.density
-
-    private val messageUpdatedReceiver = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context, intent: Intent) {
-            when (intent.action) {
-                ACTION_NEW_MESSAGE -> {
-                    val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
-                    message.id = mContext.saveSms(mViewModel.conversation.address, message.text, MESSAGE_TYPE_INBOX)
-                    mViewModel.dao.insert(message)
-                }
-                ACTION_OVERWRITE_MESSAGE -> {
-                    val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
-                    val retryIndex = intent.getIntExtra(EXTRA_RETRY_INDEX, -1)
-                    val m = mViewModel.dao.search(message.time)
-                    if (m != null) {
-                        mViewModel.dao.deleteFromInternal(m)
-                    }
-                    if (retryIndex != -1) {
-                        mViewModel.dao.delete(
-                            mContext,
-                            Message(
-                                message.text, MESSAGE_TYPE_FAILED,
-                                message.time, id = retryIndex
-                            )
-                        )
-                    }
-                    mViewModel.dao.insert(message)
-                }
-                ACTION_UPDATE_STATUS_MESSAGE -> {
-                    val date = intent.getLongExtra(EXTRA_MESSAGE_DATE, 0)
-                    val type = intent.getIntExtra(EXTRA_MESSAGE_TYPE, 0)
-                    val qs = mViewModel.dao.search(date) ?: return
-                    qs.type = type
-                    mViewModel.dao.update(qs)
-                }
-            }
-        }
-    }
 
     private fun toggleGoToBottomButtonVisibility() {
         if (mLayoutManager.findFirstVisibleItemPosition() > 1 && !mViewModel.goToBottomVisible) {
@@ -143,6 +102,19 @@ class ConversationActivity : MediaPreviewActivity() {
             goToBottom.animate().alpha(0f).translationY(48.toPx())
                 .setInterpolator(AccelerateDecelerateInterpolator()).start()
         }
+    }
+
+    private fun sendMessage() {
+        startService(
+            Intent(this, SenderService::class.java).apply {
+                putExtra(EXTRA_NUMBER, mViewModel.number)
+                putExtra(EXTRA_MESSAGE_TEXT, messageEditText.text.toString())
+                data = mmsURI
+            }
+        )
+        messageEditText.text = null
+        hideMediaPreview()
+        toggleExtraVisibility(false)
     }
 
     private fun toggleExtraVisibility(vis: Boolean? = null) {
@@ -169,33 +141,10 @@ class ConversationActivity : MediaPreviewActivity() {
             .start()
     }
 
-    private fun trackLastMessage() {
-        if (mViewModel.loadAll().hasActiveObservers()) {
-            return
-        }
-        mViewModel.loadLast().observe(this, {
-            mViewModel.apply {
-                if (it != null) {
-                    if (conversation.lastSMS != it.text ||
-                        conversation.time != it.time ||
-                        conversation.lastMMS != (it.path != null)
-                    ) {
-                        conversation.lastSMS = it.text
-                        conversation.time = it.time
-                        conversation.lastMMS = it.path != null
-                        mainDaoProvider.getMainDaos()[conversation.label].update(conversation)
-                    }
-                } else {
-                    mainDaoProvider.getMainDaos()[conversation.label].delete(conversation)
-                }
-            }
-        })
-    }
-
     private val scrollToItemAfterSearch = registerForActivityResult(StartActivityForResult()) {
         it.apply {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                val id = data!!.getIntExtra("ID", -1)
+                val id = data!!.getIntExtra(EXTRA_MESSAGE_ID, -1)
                 if (id != -1) scrollToItem(id)
             }
         }
@@ -234,18 +183,19 @@ class ConversationActivity : MediaPreviewActivity() {
         })
 
         mAdaptor = MessageRecyclerAdaptor(mContext)
-        val mListener =  MessageSelectionListener(mContext, mViewModel.dao, mViewModel.sender)
+        val mListener =  MessageSelectionListener(mContext, mViewModel.dao, mViewModel.number)
         selectionManager = ListSelectionManager(
             mContext as AppCompatActivity,
             mAdaptor as MyPagingDataAdapter<Message, RecyclerView.ViewHolder>,
             mListener
         )
         mAdaptor.setOnRetry {
-            if (it.path == null) smsSender.sendSMS(it.text, it.id)
-            else {
-                val uri =  Uri.fromFile(File(it.path!!))
-                mmsSender.sendMMS(it.text, uri, it.id)
-            }
+            startService(
+                Intent(this, SenderService::class.java).apply {
+                    putExtra(EXTRA_NUMBER, mViewModel.number)
+                    putExtra(EXTRA_MESSAGE_ID, it.id)
+                }
+            )
         }
         mAdaptor.selectionManager = selectionManager
         mListener.selectionManager = selectionManager
@@ -292,6 +242,39 @@ class ConversationActivity : MediaPreviewActivity() {
         })
     }
 
+    private fun getConversation() {
+        Thread {
+            for (i in 0..4) {
+                val res = mainDaoProvider.getMainDaos()[i].findByNumber(mViewModel.conversation.number)
+                if (res != null) {
+                    mViewModel.conversation = res
+                    break
+                }
+            }
+            sendLayout.post {
+                doOnConversation()
+            }
+        }.start()
+    }
+
+    private fun markRead() {
+        for (i in 0..4) {
+            mainDaoProvider.getMainDaos()[i].markRead(mViewModel.number)
+        }
+    }
+
+    private fun doOnConversation() {
+        if (mViewModel.isBot || mViewModel.label == LABEL_BLOCKED) {
+            sendLayout.visibility = View.INVISIBLE
+            favoriteButton.visibility = View.GONE
+            timedButton.visibility = View.GONE
+            draftButton.visibility = View.GONE
+            notSupported.visibility = View.VISIBLE
+            notSupported.text = if (mViewModel.label == LABEL_BLOCKED)
+                getString(R.string.number_blocked) else getString(R.string.sending_messages_not_supported)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setPrefTheme()
@@ -305,97 +288,48 @@ class ConversationActivity : MediaPreviewActivity() {
         mAddMedia = addMedia
 
         val receivedConversation = when {
-            intent.extras!!.containsKey(EXTRA_CONVERSATION) ->
+            intent.extras!!.containsKey(EXTRA_CONVERSATION) -> {
                 intent.getSerializableExtra(EXTRA_CONVERSATION) as Conversation
-            intent.extras!!.containsKey(EXTRA_CONVERSATION_JSON) ->
+            }
+            intent.extras!!.containsKey(EXTRA_CONVERSATION_JSON) -> {
                 intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
+            }
             else -> {
-                val add = intent.getStringExtra(EXTRA_ADDRESS)!!
-                Conversation(add, ContactsManager(this).getClean(add))
+                Conversation(intent.getStringExtra(EXTRA_NUMBER)!!)
             }
         }
         mViewModel.init(receivedConversation)
+        setupToolbar(
+            toolbar,
+            ContactsProvider(this).getNameOrNull(mViewModel.number)
+                ?: mViewModel.number
+        )
+        markRead()
+        getConversation()
 
-        mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        mainDaoProvider = MainDaoProvider(mContext)
         mDraftsManager = DraftsManager(this, mViewModel.dao)
         mScheduledSMSSender = ScheduledManager(this, mViewModel.dao)
         mSavedDao = SavedDbFactory(this).get().manager()
-
-        if (mViewModel.conversation.id == null) {
-            Thread {
-                var found = false
-                for (i in 0..4) {
-                    val res = mainDaoProvider.getMainDaos()[i].findBySender(mViewModel.conversation.clean)
-                    if (res.isNotEmpty()) {
-                        mViewModel.conversation = res.first()
-                        found = true
-                        break
-                    }
-                }
-                if (!found) {
-                    mViewModel.name = ContactsProvider(this).getNameOrNull(mViewModel.sender)
-                }
-                toolbar.post {
-                    supportActionBar!!.title = mViewModel.name ?: mViewModel.conversation.address
-                }
-                if (mViewModel.conversation.id != null) {
-                    if (!mViewModel.conversation.read) {
-                        mViewModel.conversation.read = true
-                        mainDaoProvider.getMainDaos()[mViewModel.conversation.label].update(
-                            mViewModel.conversation
-                        )
-                    }
-                }
-            }.start()
-        } else if (!mViewModel.conversation.read) {
-            mViewModel.conversation.read = true
-            mainDaoProvider.getMainDaos()[mViewModel.conversation.label].update(mViewModel.conversation)
-        }
-
-        smsSender = SMSSender(this, arrayOf(mViewModel.conversation))
-        mmsSender = MMSSender(this, arrayOf(mViewModel.conversation))
-        activeConversationSender = mViewModel.conversation.clean
 
         conversationMenuOptions = ConversationMenuOptions(
             this, mViewModel.conversation, scrollToItemAfterSearch
         )
 
-        setupToolbar(toolbar, mViewModel.name ?: mViewModel.conversation.address)
         setupRecycler()
         goToBottom.setOnClickListener {
             recyclerView.smoothScrollToPosition(0)
         }
         toggleGoToBottomButtonVisibility()
-        trackLastMessage()
-
-        if (!mViewModel.conversation.clean.first().isDigit() ||
-            mViewModel.conversation.label == LABEL_BLOCKED) {
-            sendLayout.visibility = View.INVISIBLE
-            favoriteButton.visibility = View.GONE
-            timedButton.visibility = View.GONE
-            draftButton.visibility = View.GONE
-            notSupported.visibility = View.VISIBLE
-            notSupported.text = if (mViewModel.conversation.label == LABEL_BLOCKED)
-                getString(R.string.number_blocked) else getString(R.string.sending_messages_not_supported)
-            return
-        }
 
 
         var sending = false
         val onSend = {
             if (!sending) {
                 sending = true
-                if (isMms) {
-                    mmsSender.sendMMS(messageEditText.text.toString(), mmsURI!!)
-                    messageEditText.setText("")
-                    hideMediaPreview()
-                } else if (messageEditText.text.toString().trim() != "") {
-                    smsSender.sendSMS(messageEditText.text.toString())
-                    messageEditText.setText("")
+                if (isMms || messageEditText.text.toString().trim() != "") {
+                    sendMessage()
                 }
-                toggleExtraVisibility(false)
                 sending = false
             }
         }
@@ -448,7 +382,7 @@ class ConversationActivity : MediaPreviewActivity() {
                 return@setOnClickListener
             }
             messageEditText.text = null
-            mDraftsManager.create(msg, mViewModel.conversation.address, mmsURI)
+            mDraftsManager.create(msg, mViewModel.number, mmsURI)
             toggleExtraVisibility(false)
         }
         mAdaptor.setOnDraftClick {
@@ -495,7 +429,7 @@ class ConversationActivity : MediaPreviewActivity() {
                                 editText.text = null
                                 mScheduledSMSSender.add(
                                     calendar.timeInMillis,
-                                    mViewModel.conversation,
+                                    mViewModel.number,
                                     msg, mmsURI
                                 )
                                 Toast.makeText(
@@ -531,16 +465,16 @@ class ConversationActivity : MediaPreviewActivity() {
         val blockItem = menu.findItem(R.id.action_block)
         val reportItem = menu.findItem(R.id.action_report_spam)
 
-        if (mViewModel.conversation.label == LABEL_BLOCKED && blockItem != null) {
+        if (mViewModel.label == LABEL_BLOCKED && blockItem != null) {
             menu.removeItem(blockItem.itemId)
-        } else if (mViewModel.conversation.label == LABEL_SPAM && reportItem != null) {
+        } else if (mViewModel.label == LABEL_SPAM && reportItem != null) {
             menu.removeItem(reportItem.itemId)
         }
 
-        mViewModel.conversation.apply {
+        mViewModel.apply {
             muteItem.title = if (isMuted) getString(R.string.unMute) else getString(R.string.mute)
-            callItem.isVisible = clean.first().isDigit()
-            contactItem.isVisible = clean.first().isDigit()
+            callItem.isVisible = !conversation.isBot
+            contactItem.isVisible = !conversation.isBot
             if (name != null) contactItem.title = getString(R.string.view_contact)
         }
         return super.onPrepareOptionsMenu(menu)
@@ -552,20 +486,15 @@ class ConversationActivity : MediaPreviewActivity() {
     }
 
     override fun onStart() {
-        if (mViewModel.conversation.id != null)
-            cancelNotification(mViewModel.sender, mViewModel.conversation.id)
-        activeConversationSender = mViewModel.conversation.clean
-        registerReceiver(messageUpdatedReceiver, IntentFilter().apply {
-            addAction(ACTION_OVERWRITE_MESSAGE)
-            addAction(ACTION_UPDATE_STATUS_MESSAGE)
-            addAction(ACTION_NEW_MESSAGE)
-        })
+        cancelNotification(mViewModel.number, mViewModel.number.hashCode())
+        activeConversationNumber = mViewModel.number
+        activeConversationDao = mViewModel.dao
         super.onStart()
     }
 
     override fun onStop() {
-        activeConversationSender = null
-        unregisterReceiver(messageUpdatedReceiver)
+        activeConversationNumber = null
+        activeConversationDao = null
         super.onStop()
     }
 
@@ -580,11 +509,7 @@ class ConversationActivity : MediaPreviewActivity() {
             return
         }
         mViewModel.apply {
-            conversation.lastSMS = msg
-            conversation.time = System.currentTimeMillis()
-            conversation.lastMMS = mmsURI != null
-            mainDaoProvider.getMainDaos()[conversation.label].update(conversation)
-            mDraftsManager.create(msg, mViewModel.conversation.address, mmsURI)
+            mDraftsManager.create(msg, mViewModel.number, mmsURI)
         }
     }
 }

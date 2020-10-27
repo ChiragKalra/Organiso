@@ -1,13 +1,13 @@
 package com.bruhascended.core.data
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.model.OrganizerModel
 import com.bruhascended.core.model.firstMax
@@ -52,7 +52,7 @@ class SMSManager (private val mContext: Context) {
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
 
     private val messages = HashMap<Number, ArrayList<Message>>()
-    private val senderToProbs = HashMap<String, FloatArray>()
+    private val senderToProbs = HashMap<String, Array<Float>>()
 
     private var isWorkingAfterInit = false
     private var done = 0
@@ -110,11 +110,10 @@ class SMSManager (private val mContext: Context) {
     private fun deletePrevious(rawNumber: String): Conversation? {
         var conversation: Conversation? = null
         for (i in 0..4) {
-            val got = mMainDaoProvider.getMainDaos()[i].findBySender(rawNumber)
-            if (got.isNotEmpty()) {
-                conversation = got.first()
-                for (item in got)
-                    mMainDaoProvider.getMainDaos()[i].delete(item)
+            val got = mMainDaoProvider.getMainDaos()[i].findByNumber(rawNumber)
+            if (got != null) {
+                conversation = got
+                mMainDaoProvider.getMainDaos()[i].delete(got)
             }
         }
         return conversation
@@ -127,27 +126,20 @@ class SMSManager (private val mContext: Context) {
 
         if (conversation != null) {
             conversation.apply {
-                if (label != this.label) id = null
                 read = !isWorkingAfterInit
                 time = messages.last().time
-                lastSMS =  messages.last().text
-                lastMMS = false
                 if (label == LABEL_PERSONAL) forceLabel = LABEL_PERSONAL
-                name = senderNameMap[number.clean]
                 mMainDaoProvider.getMainDaos()[label].insert(this)
             }
         } else {
             val con = Conversation(
-                number.address,
                 number.clean,
-                senderNameMap[number.clean],
                 read = !isWorkingAfterInit,
                 time = messages.last().time,
-                lastSMS = messages.last().text,
                 label = label,
                 forceLabel = if (label == LABEL_PERSONAL) LABEL_PERSONAL else LABEL_NONE,
                 probabilities = senderToProbs[number.clean] ?:
-                    FloatArray(5) { if (it == LABEL_PERSONAL) 1f else 0f }
+                    Array(5) { if (it == LABEL_PERSONAL) 1f else 0f }
             )
 
             mMainDaoProvider.getMainDaos()[label].insert(con)
@@ -246,7 +238,7 @@ class SMSManager (private val mContext: Context) {
         finish()
     }
 
-    fun putMessage(number: String, body: String, active: Boolean): Pair<Message, Conversation>? {
+    fun putMessage(number: String, body: String, dao: MessageDao, read: Boolean): Pair<Message, Conversation> {
         initLate()
 
         val rawNumber = cm.getClean(number)
@@ -254,7 +246,7 @@ class SMSManager (private val mContext: Context) {
 
         var conversation = deletePrevious(rawNumber)
 
-        var mProbs: FloatArray? = null
+        var mProbs: Array<Float>? = null
         val prediction = if (senderNameMap.containsKey(rawNumber)) LABEL_PERSONAL
         else if (conversation != null && conversation.forceLabel != LABEL_NONE) conversation.forceLabel
         else if (!getOtp(body).isNullOrEmpty()) LABEL_TRANSACTIONS
@@ -277,42 +269,25 @@ class SMSManager (private val mContext: Context) {
         analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, PARAM_BACKGROUND)
 
         conversation = conversation?.apply {
-            if (label != prediction) id = null
-            read = false
+            this.read = read
             time = message.time
-            lastSMS = message.text
             if (prediction == LABEL_PERSONAL) forceLabel = LABEL_PERSONAL
             label = prediction
             probabilities = mProbs ?: probabilities
-            name = senderNameMap[rawNumber]
         } ?: Conversation(
-            number,
             rawNumber,
-            senderNameMap[rawNumber],
             read = false,
             time = message.time,
-            lastSMS = message.text,
             label = prediction,
-            forceLabel = if (prediction == LABEL_PERSONAL) LABEL_PERSONAL else LABEL_NONE
+            forceLabel = if (prediction == LABEL_PERSONAL)
+                LABEL_PERSONAL else LABEL_NONE
         )
 
         mMainDaoProvider.getMainDaos()[prediction].insert(conversation)
-        if (conversation.id == null)
-            conversation.id = mMainDaoProvider.getMainDaos()[prediction].findBySender(rawNumber).first().id
 
-        return if (active) {
-            mContext.sendBroadcast(Intent(ACTION_NEW_MESSAGE).apply{
-                putExtra(EXTRA_MESSAGE, message)
-                setPackage(mContext.applicationInfo.packageName)
-            })
-            null
-        } else {
-            val mdb = MessageDbFactory(mContext).of(rawNumber)
-            message.id = mContext.saveSms(number, body, MESSAGE_TYPE_INBOX)
-            mdb.manager().insert(message)
-            mdb.close()
-            message to conversation
-        }
+        message.id = mContext.saveSms(number, body, MESSAGE_TYPE_INBOX)
+        dao.insert(message)
+        return message to conversation
     }
 
     fun updateAsync() {

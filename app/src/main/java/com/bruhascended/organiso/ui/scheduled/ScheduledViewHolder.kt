@@ -4,9 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.View.VISIBLE
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import com.bruhascended.core.data.MainDaoProvider
-import com.bruhascended.core.db.Conversation
+import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.db.ScheduledMessage
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.MediaViewHolder
@@ -56,31 +54,15 @@ class ScheduledViewHolder(
 
         if (message.time > System.currentTimeMillis()) {
             statusTextView.setTextColor(mContext.getColor(R.color.green))
-            statusTextView.text =
-                mContext.getString(R.string.scheduled_to_sender, message.cleanAddress)
+            statusTextView.text = mContext.getString(
+                R.string.scheduled_to_sender,
+                ContactsProvider(mContext).getNameOrNull(message.cleanAddress)
+                    ?: message.cleanAddress
+            )
         } else {
             statusTextView.setTextColor(mContext.getColor(R.color.red))
-            statusTextView.text =
-                mContext.getString(R.string.failed)
+            statusTextView.text = mContext.getString(R.string.failed)
         }
-        Thread {
-            var conversation: Conversation? = null
-            MainDaoProvider(mContext).getMainDaos().forEach {
-                val got = it.findBySender(message.cleanAddress)
-                if (got.isNotEmpty()) {
-                    conversation = got.first()
-                    return@forEach
-                }
-            }
-            (mContext as AppCompatActivity).runOnUiThread {
-                val display = conversation?.name ?: conversation?.address
-                if (display != null) {
-                    statusTextView.text = mContext.getString(
-                        R.string.scheduled_to_sender, display
-                    )
-                }
-            }
-        }.start()
 
         if (message.path != null) {
             showMedia()

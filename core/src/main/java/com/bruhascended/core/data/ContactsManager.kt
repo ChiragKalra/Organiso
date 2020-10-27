@@ -9,8 +9,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.ContactsContract
+import android.telephony.TelephonyManager
+import com.bruhascended.core.constants.ACTION_UPDATE_DP
+import com.bruhascended.core.constants.EXTRA_NUMBER
 import com.bruhascended.core.db.Contact
-import com.bruhascended.core.constants.*
 import io.michaelrocks.libphonenumber.android.NumberParseException
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import io.michaelrocks.libphonenumber.android.Phonenumber
@@ -19,8 +21,7 @@ import java.io.FileOutputStream
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.set
-import kotlin.collections.sortBy
-import kotlin.collections.toTypedArray
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -38,10 +39,12 @@ import kotlin.collections.toTypedArray
    limitations under the License.
  */
 
-class ContactsManager (
+class ContactsManager(
     private val mContext: Context
 ) {
     private val map = HashMap<String, String>()
+    private val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.createInstance(mContext)
+    private val tm = mContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
     private fun retrieveContactPhoto(number: String): Bitmap? {
         val contentResolver = mContext.contentResolver
@@ -72,7 +75,10 @@ class ContactsManager (
         if (contactId != null) {
             val inputStream = ContactsContract.Contacts.openContactPhotoInputStream(
                 mContext.contentResolver,
-                ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId.toLong())
+                ContentUris.withAppendedId(
+                    ContactsContract.Contacts.CONTENT_URI,
+                    contactId.toLong()
+                )
             )
             if (inputStream != null) photo = BitmapFactory.decodeStream(inputStream)
             inputStream?.close()
@@ -81,16 +87,17 @@ class ContactsManager (
     }
 
     fun getClean(number: String): String {
-        return if (number.startsWith("+")) {
-            try {
-                val phoneUtil: PhoneNumberUtil = PhoneNumberUtil.createInstance(mContext)
-                val numberProto: Phonenumber.PhoneNumber = phoneUtil.parse(number, "")
-                numberProto.nationalNumber.toString().filter { it.isLetterOrDigit() }
-            } catch (e: NumberParseException) {
-                number.filter { it.isLetterOrDigit() }
+        return try {
+            val countryCodeValue = tm.networkCountryIso
+            val numberProto: Phonenumber.PhoneNumber = phoneUtil.parse(
+                number,
+                countryCodeValue.toUpperCase(Locale.ROOT)
+            )
+            "+${numberProto.countryCode} ${numberProto.nationalNumber}"
+        } catch (e: NumberParseException) {
+            number.filter {
+                it.isLetterOrDigit()
             }
-        } else {
-            number.filter { it.isLetterOrDigit() }
         }
     }
 
@@ -155,7 +162,7 @@ class ContactsManager (
                 )
                 while (pCur != null && pCur.moveToNext()) {
                     val phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    list.add(Contact(name, getClean(phoneNo), phoneNo, id.toInt()))
+                    list.add(Contact(name, getClean(phoneNo), id.toInt()))
                 }
                 pCur?.close()
             }
@@ -165,11 +172,11 @@ class ContactsManager (
         arr.sortBy {it.name.toLowerCase(Locale.ROOT) }
          Thread {
             arr.forEach {
-                val bm = retrieveContactPhoto(it.clean)
+                val bm = retrieveContactPhoto(it.number)
                 if (bm != null) {
-                    val des = File(mContext.filesDir, it.clean)
+                    val des = File(mContext.filesDir, it.number)
                     bm.compress(Bitmap.CompressFormat.PNG, 100, FileOutputStream(des))
-                    mContext.sendBroadcast(Intent(ACTION_UPDATE_DP).putExtra(EXTRA_SENDER, it.clean))
+                    mContext.sendBroadcast(Intent(ACTION_UPDATE_DP).putExtra(EXTRA_NUMBER, it.name))
                 }
             }
         }.start()

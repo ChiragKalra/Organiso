@@ -1,6 +1,7 @@
 package com.bruhascended.core.data
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.bruhascended.core.constants.*
@@ -11,6 +12,7 @@ class ContactsProvider (mContext: Context) {
 
     companion object {
         private var mDb: ContactDatabase? = null
+        private var mCache: Array<Contact>? = null
     }
 
     private val mCm = ContactsManager(mContext)
@@ -23,43 +25,38 @@ class ContactsProvider (mContext: Context) {
         ).allowMainThreadQueries().build()
     }
 
-    private fun updateConversations (contacts: Array<Contact>) {
-        contacts.forEach {
-            for (i in 0..4) {
-                val q =
-                    mMainDaoProvider.getMainDaos()[i].findBySender(it.clean)
-                if (q.isEmpty()) continue
-                val res = q.first()
-                if (res.name != it.name) {
-                    res.name = it.name
-                    res.address = it.address
-                    mMainDaoProvider.getMainDaos()[i].update(res)
-                }
-                break
-            }
-        }
-    }
-
     fun updateAsync() {
-        if (System.currentTimeMillis() - mPref.getLong(KEY_LAST_REFRESH, 0) < 120*1000) return
+        if (System.currentTimeMillis() - mPref.getLong(KEY_LAST_REFRESH, 0) < 10*1000) return
         Thread {
             mPref.edit().putLong(KEY_LAST_REFRESH, System.currentTimeMillis()).apply()
-            mDb!!.manager().apply {
-                nukeTable()
-                val contacts = mCm.getContactsList()
-                insertAll(contacts)
-                updateConversations(contacts)
-            }
+            mDb!!.clearAllTables()
+            mDb!!.manager().insertAll(mCm.getContactsList())
         }.start()
     }
 
-    fun getSync(): Array<Contact> = mDb!!.manager().loadAllSync()
+    fun getSync(): Array<Contact> {
+        mCache = mDb!!.manager().loadAllSync()
+        return mCache!!
+    }
 
     fun getPaged(key: String) =
         mDb!!.manager().searchPaged("$key%", "% $key%")
 
-    fun getNameOrNull(number: String) =
-        mDb!!.manager().findByNumber(number)?.name
+    fun getNameOrNull(number: String): String? {
+        Thread {
+            mCache = getSync()
+        }.start()
+        return if (mCache == null) {
+            mDb!!.manager().findByNumber(number)?.name
+        } else {
+            mCache!!.firstOrNull { number == it.number }?.name
+        }
+    }
 
     fun get(number: String) = mDb!!.manager().findByNumber(number)
+
+    fun getLiveOrNull(number: String): LiveData<String>? {
+        return if (getNameOrNull(number) == null) null
+        else mDb!!.manager().getLive(number)
+    }
 }

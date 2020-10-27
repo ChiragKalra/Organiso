@@ -68,8 +68,8 @@ class ContactRecyclerAdaptor (
     override fun onBindViewHolder(holder: ContactViewHolder, position: Int) {
         val contact: Contact = getItem(position) ?: return
         holder.name.text = contact.name
-        holder.number.text = contact.address
-        val dp = File(mContext.filesDir, contact.clean)
+        holder.number.text = contact.number
+        val dp = File(mContext.filesDir, contact.number)
         holder.dp.apply {
             setBackgroundColor(colors[abs(contact.hashCode()) % colors.size])
             if (dp.exists()) picasso.load(dp).into(this)

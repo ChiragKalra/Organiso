@@ -102,7 +102,7 @@ class SavedActivity : AppCompatActivity() {
                 } else {
                     startActivity(
                         Intent(mContext, ConversationActivity::class.java)
-                            .putExtra(EXTRA_ADDRESS, holder.message.sender)
+                            .putExtra(EXTRA_NUMBER, holder.message.sender)
                             .putExtra(EXTRA_MESSAGE_ID, holder.message.messageId)
                     )
                 }

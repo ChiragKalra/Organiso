@@ -1,5 +1,6 @@
 package com.bruhascended.core.db
 
+import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
@@ -26,8 +27,7 @@ import java.io.Serializable
 @Entity(tableName = "contacts")
 data class Contact (
     var name: String,
-    val clean: String,
-    val address: String,
+    val number: String,
     val contactId: Int,
     @PrimaryKey(autoGenerate = true)
     val id: Int? = null
@@ -36,9 +36,9 @@ data class Contact (
         if (javaClass != other?.javaClass) return false
 
         other as Contact
-        return clean == other.clean
+        return number == other.number
     }
-    override fun hashCode() = clean.hashCode()
+    override fun hashCode() = number.hashCode()
 }
 
 @Dao
@@ -59,8 +59,11 @@ interface ContactDao {
     @Query("DELETE FROM contacts")
     fun nukeTable()
 
-    @Query("SELECT * FROM contacts WHERE clean LIKE :sender")
+    @Query("SELECT * FROM contacts WHERE number LIKE :sender")
     fun findByNumber(sender: String): Contact?
+
+    @Query("SELECT name FROM contacts WHERE number LIKE :sender")
+    fun getLive(sender: String): LiveData<String>
 
     @Query("SELECT * FROM contacts")
     fun loadAllSync(): Array<Contact>
@@ -68,7 +71,7 @@ interface ContactDao {
     @Query("SELECT * FROM contacts")
     fun loadAllPaged(): PagingSource<Int, Contact>
 
-    @Query("SELECT * FROM contacts WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR clean LIKE :key or address like :altKey")
+    @Query("SELECT * FROM contacts WHERE LOWER(name) LIKE :key OR LOWER(name) LIKE :altKey OR number LIKE :key or number like :altKey")
     fun searchPaged(key: String, altKey: String=""): PagingSource<Int, Contact>
 
     @RawQuery
@@ -78,7 +81,7 @@ interface ContactDao {
 
 object ContactComparator : DiffUtil.ItemCallback<Contact>() {
     override fun areItemsTheSame(oldItem: Contact, newItem: Contact) =
-        oldItem.clean == newItem.clean
+        oldItem.number == newItem.number
 
     override fun areContentsTheSame(oldItem: Contact, newItem: Contact) =
         oldItem == newItem

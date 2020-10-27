@@ -5,42 +5,38 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.db.*
 import kotlinx.coroutines.flow.Flow
 
 class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
-    private lateinit var mConversation: Conversation
+    lateinit var conversation: Conversation
     private lateinit var mPagingFlow: Flow<PagingData<Message>>
     private lateinit var mdb: MessageDatabase
+    private lateinit var mContactsProvider: ContactsProvider
     lateinit var messages: List<Message>
 
 
     var goToBottomVisible = false
     var extraIsVisible = false
 
-    var conversation: Conversation
-        get() = mConversation
-        set(c) {
-            mConversation = c
-        }
+    val number: String
+        get() = conversation.number
 
-    val sender: String
-        get() = mConversation.clean
+    val isBot: Boolean
+        get() = conversation.isBot
 
-    var name: String?
-        get() = mConversation.name
-        set(value) {
-            mConversation.name = value
-        }
-
-    val lastSms: String
-        get() = mConversation.lastSMS
+    val name: String?
+        get() = mContactsProvider.getNameOrNull(number)
 
     var isMuted: Boolean
-        get() = mConversation.isMuted
+        get() = conversation.isMuted
         set(b) {
-            mConversation.isMuted = b
+            conversation.isMuted = b
         }
+
+    val label: Int
+        get() = conversation.label
 
     val dao
         get() = mdb.manager()
@@ -51,12 +47,12 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
     fun loadLast() = mdb.manager().loadLast()
     fun loadAll() = mdb.manager().loadAll()
 
-    fun init (conversation: Conversation) {
-        if (::mConversation.isInitialized) return
+    fun init (got: Conversation) {
+        if (::conversation.isInitialized) return
 
-        mConversation = conversation
-
-        mdb = MessageDbFactory(getApplication()).of(sender)
+        conversation = got
+        mContactsProvider = ContactsProvider(getApplication())
+        mdb = MessageDbFactory(getApplication()).of(number)
 
         mPagingFlow = Pager(
             PagingConfig(

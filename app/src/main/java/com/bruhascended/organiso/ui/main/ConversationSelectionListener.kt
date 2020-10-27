@@ -15,7 +15,6 @@ import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.organiso.R
 import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
-import com.bruhascended.core.db.moveTo
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
@@ -121,7 +120,7 @@ class ConversationSelectionListener(
                 alertDialog.setTitle(mContext.getString(R.string.delete_conversations_query))
                     .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            mContext.cancelNotification(selectedItem.clean, selectedItem.id)
+                            mContext.cancelNotification(selectedItem.number, selectedItem.hashCode())
                             analyticsLogger.log("${selectedItem.label}_to_-1")
                             selectedItem.moveTo(-1, mContext)
                         }
@@ -135,7 +134,7 @@ class ConversationSelectionListener(
                     .setPositiveButton(mContext.getString(R.string.block)) { dialog, _ ->
                         for (selectedItem in selected) {
                             analyticsLogger.log("${selectedItem.label}_to_5")
-                            mContext.cancelNotification(selectedItem.clean, selectedItem.id)
+                            mContext.cancelNotification(selectedItem.number, selectedItem.hashCode())
                             selectedItem.moveTo(5, mContext)
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.senders_blocked), Toast.LENGTH_LONG).show()
@@ -149,7 +148,7 @@ class ConversationSelectionListener(
                         for (selectedItem in selected) {
                             analyticsLogger.reportSpam(selectedItem)
                             analyticsLogger.log("${selectedItem.label}_to_4")
-                            mContext.cancelNotification(selectedItem.clean, selectedItem.id)
+                            mContext.cancelNotification(selectedItem.number, selectedItem.hashCode())
                             selectedItem.moveTo(4, mContext)
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.senders_reported_spam), Toast.LENGTH_LONG).show()
@@ -184,8 +183,8 @@ class ConversationSelectionListener(
                 selected.forEach {
                     it.apply {
                         isMuted = !isMuted
-                        if (isMuted) mContext.cancelNotification(clean, id)
-                        MainDaoProvider(mContext).getMainDaos()[label].update(this)
+                        if (isMuted) mContext.cancelNotification(number, hashCode())
+                        MainDaoProvider(mContext).getMainDaos()[label].insert(this)
                     }
                 }
                 selectionManager.close()

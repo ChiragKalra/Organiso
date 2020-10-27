@@ -1,4 +1,4 @@
-package com.bruhascended.core
+package com.bruhascended.core.smsmms
 
 import android.content.Context
 import android.content.Intent

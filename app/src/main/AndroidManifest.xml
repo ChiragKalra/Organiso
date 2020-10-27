@@ -40,7 +40,7 @@
             android:name=".services.MMSReceiver"
             android:taskAffinity="com.klinker.android.messaging.MMS_RECEIVED" />
         <receiver
-            android:name="com.bruhascended.core.SmsSentReceiverProxy"
+            android:name="com.bruhascended.core.smsmms.SmsSentReceiverProxy"
             android:exported="false">
             <intent-filter>
                 <action android:name="${applicationId}.SMS_SENT" />
@@ -81,6 +81,10 @@
             android:exported="false" />
         <service
             android:name=".services.PersonalMoveService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".services.SenderService"
             android:enabled="true"
             android:exported="false" />
         <service

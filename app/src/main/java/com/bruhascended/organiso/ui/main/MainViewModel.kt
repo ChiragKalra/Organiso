@@ -59,7 +59,7 @@ class MainViewModel(
         mMainDaoProvider.getMainDaos()[label].loadSingle() == null
 
     fun getLiveUnreadCount(label: Int) =
-        mMainDaoProvider.getMainDaos()[label].loadLiveUnreadCount()
+        mMainDaoProvider.getMainDaos()[label].getLiveUnreadCount()
 
 
     fun forceReload() {

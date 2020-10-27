@@ -2,7 +2,6 @@ package com.bruhascended.core.data
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.provider.Telephony
 import android.telephony.TelephonyManager
@@ -10,6 +9,7 @@ import android.webkit.MimeTypeMap
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
 import java.io.*
 import java.lang.Exception
@@ -135,8 +135,10 @@ class MMSManager (
     }
 
     fun putMMS(
-        mmsId: Int, date: Long = System.currentTimeMillis(),
-        init: Boolean = true, activeSender: String? = null
+        mmsId: Int,
+        date: Long = System.currentTimeMillis(),
+        activeNumber: String? = null,
+        activeDao: MessageDao? = null,
     ): Pair<Message, Conversation>? {
         if (senderNameMap == null) {
             senderNameMap = cm.getContactsHashMap()
@@ -181,59 +183,43 @@ class MMSManager (
 
         var conversation: Conversation? = null
         for (i in 0..4) {
-            val got = mMainDaoProvider.getMainDaos()[i].findBySender(rawNumber)
-            if (got.isNotEmpty()) {
-                conversation = got.first()
-                for (item in got)
-                    mMainDaoProvider.getMainDaos()[i].delete(item)
+            val got = mMainDaoProvider.getMainDaos()[i].findByNumber(rawNumber)
+            if (got != null) {
+                conversation = got
+                mMainDaoProvider.getMainDaos()[i].delete(got)
             }
         }
 
         conversation = if (conversation != null) {
             conversation.apply {
-                id = null
                 if (time < message.time) {
-                    read = init
+                    read = activeNumber == rawNumber
                     time = message.time
-                    lastSMS = message.text
-                    lastMMS = true
                 }
                 label = LABEL_PERSONAL
                 forceLabel = LABEL_PERSONAL
-                name = senderNameMap!![rawNumber]
                 mMainDaoProvider.getMainDaos()[LABEL_PERSONAL].insert(this)
             }
             conversation
         } else {
             val con = Conversation(
                 sender.second,
-                rawNumber,
-                senderNameMap!![rawNumber],
-                read = init,
+                read = activeNumber == rawNumber,
                 time = message.time,
-                lastSMS = message.text,
                 label = LABEL_PERSONAL,
                 forceLabel = LABEL_PERSONAL,
-                lastMMS = true
             )
             mMainDaoProvider.getMainDaos()[LABEL_PERSONAL].insert(con)
-            con.id = mMainDaoProvider.getMainDaos()[LABEL_PERSONAL].findBySender(rawNumber).first().id
             con
         }
 
-        return if (activeSender == rawNumber) {
-            mContext.sendBroadcast (
-                Intent(ACTION_NEW_MESSAGE).apply {
-                    setPackage(mContext.applicationInfo.packageName)
-                    putExtra(EXTRA_MESSAGE, message)
-                }
-            )
-            null
+        val dao = if (activeNumber == rawNumber) {
+            activeDao!!
         } else {
-            val mdb = MessageDbFactory(mContext).of(rawNumber)
-            mdb.manager().insert(message)
-            mdb.close()
-            message to conversation
+            MessageDbFactory(mContext).of(rawNumber).manager()
         }
+
+        dao.insert(message)
+        return message to conversation
     }
 }

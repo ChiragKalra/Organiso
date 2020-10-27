@@ -9,7 +9,10 @@ import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.data.SMSManager
 import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationSender
+import com.bruhascended.core.db.MessageDao
+import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.organiso.ConversationActivity
+import com.bruhascended.organiso.ConversationActivity.Companion.activeConversationNumber
 import com.bruhascended.organiso.notifications.MessageNotificationManager
 
 /*
@@ -31,6 +34,14 @@ import com.bruhascended.organiso.notifications.MessageNotificationManager
 class SMSReceiver : BroadcastReceiver() {
 
     private lateinit var mContext: Context
+
+    private fun getDao(number: String): MessageDao {
+        return if (activeConversationNumber == number) {
+            ConversationActivity.activeConversationDao!!
+        } else {
+            MessageDbFactory(mContext).of(number).manager()
+        }
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         if (context.packageName != Telephony.Sms.getDefaultSmsPackage(context)) {
@@ -66,10 +77,15 @@ class SMSReceiver : BroadcastReceiver() {
 
             senders.forEach {
                 it.apply {
-                    if (activeConversationSender == cm.getClean(key)) {
-                        smm.putMessage(key, value, true)
-                    } else {
-                        mnm.sendSmsNotification(smm.putMessage(key, value, false)!!)
+                    val number = cm.getClean(key)
+                    val res = smm.putMessage(
+                        number,
+                        value,
+                        getDao(number),
+                        activeConversationNumber == number
+                    )
+                    if (activeConversationNumber != number) {
+                        mnm.sendSmsNotification(res)
                     }
                 }
             }

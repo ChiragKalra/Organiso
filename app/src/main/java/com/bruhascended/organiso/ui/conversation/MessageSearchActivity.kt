@@ -13,8 +13,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bruhascended.core.constants.EXTRA_SENDER
+import com.bruhascended.core.constants.EXTRA_MESSAGE_ID
+import com.bruhascended.core.constants.EXTRA_NUMBER
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.R
@@ -38,7 +40,7 @@ class MessageSearchActivity : AppCompatActivity() {
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val sender = intent.getStringExtra(EXTRA_SENDER)!!
+        val sender = intent.getStringExtra(EXTRA_NUMBER)!!
         activeConversationDao = MessageDbFactory(this).of(sender).manager()
 
         searchEditText.requestFocus()
@@ -73,34 +75,33 @@ class MessageSearchActivity : AppCompatActivity() {
             val key = searchEditText.text.toString().trim()
             searchRecycler.isVisible = !key.isBlank()
 
-            if (!key.isBlank()) {
-                Thread{
-                    val a = activeConversationDao.search("%$key%", "% $key%").isEmpty()
-                    runOnUiThread{
-                        info.isVisible = a
-                    }
-                }.start()
+            if (key.isBlank()) {
+                return@setOnEditorActionListener true
             }
+
+            info.isVisible = true
 
             mAdaptor.searchKey = key
             val flow = Pager(PagingConfig(
-                pageSize = 3,
-                initialLoadSize = 3,
-                prefetchDistance = 12,
+                pageSize = 12,
+                initialLoadSize = 12,
+                prefetchDistance = 24,
                 maxSize = 120,
             )) {
-                activeConversationDao.searchPaged("$key%", "% $key%")
+                activeConversationDao.loadAllPaged()
             }.flow.cachedIn(lifecycleScope)
             lifecycleScope.launch {
                 flow.collectLatest {
-                    mAdaptor.submitData(it)
+                    mAdaptor.submitData(it.filter { msg ->
+                        Regex("\\b${key}.*").matches(msg.text)
+                    })
                 }
             }
 
             mAdaptor.notifyDataSetChanged()
             mAdaptor.onItemClickListener = {
                 val intent = Intent("MESSAGE_SELECTED")
-                    .putExtra("ID", it.message.id)
+                    .putExtra(EXTRA_MESSAGE_ID, it.message.id)
                 setResult(RESULT_OK, intent)
                 finish()
                 overridePendingTransition(R.anim.hold, android.R.anim.fade_out)

@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
-import androidx.sqlite.db.SupportSQLiteQuery
 import com.bruhascended.core.constants.deleteSMS
 import java.io.File
 import java.io.Serializable
@@ -28,10 +27,10 @@ import java.io.Serializable
 */
 
 @Entity(tableName = "messages")
-data class Message (
+data class Message(
     val text: String,
     var type: Int,
-    val time: Long,
+    var time: Long,
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null,
     var delivered: Boolean = false,
@@ -53,10 +52,13 @@ data class Message (
     override fun hashCode(): Int {
         return id.hashCode()
     }
+
+    val hasMedia
+        get() = path != null
 }
 
 @Entity(tableName = "scheduled")
-data class ScheduledMessage (
+data class ScheduledMessage(
     @PrimaryKey
     var id: Long,
     val text: String,
@@ -82,28 +84,25 @@ data class ScheduledMessage (
 
 @Dao
 interface MessageDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(message: Message): Long
 
-    @Insert
-    fun insertScheduled(message: ScheduledMessage)
-
     @Transaction
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(messages: List<Message>)
 
-    @Update
-    fun update(message: Message)
+    @Query("UPDATE messages SET type = :status WHERE id = :id")
+    fun updateStatus(id: Int, status: Int)
+
+    @Query("UPDATE messages SET delivered = 1 WHERE id = :id")
+    fun markDelivered(id: Int)
 
     @Delete
     fun deleteFromInternal(message: Message)
 
-    @Delete
-    fun deleteScheduled(message: ScheduledMessage)
-
-    fun delete(mContext: Context, message: Message) {
+    fun delete(mContext: Context, message: Message, deleteFile: Boolean = true) {
         Thread {
-            if (message.path != null) File(message.path!!).delete()
+            if (message.path != null && deleteFile) File(message.path!!).delete()
             deleteFromInternal(message)
             mContext.deleteSMS(message.id!!)
         }.start()
@@ -121,24 +120,14 @@ interface MessageDao {
         }.start()
     }
 
-    @Query("SELECT * FROM messages WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
-    fun search(key: String, altKey: String=""): List<Message>
-
-    @Query("SELECT * FROM messages WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
-    fun searchPaged(key: String, altKey: String=""): PagingSource<Int, Message>
-
-
-    @Query("SELECT * FROM messages WHERE time = :time")
-    fun search(time: Long): Message?
+    @Query("SELECT * FROM messages WHERE id = :id")
+    fun getById(id: Int): Message?
 
     @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
     fun loadLast(): LiveData<Message?>
 
     @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
     fun loadLastSync(): Message?
-
-    @Query("SELECT * FROM scheduled WHERE time = :time")
-    fun findScheduledByTime(time: Long): ScheduledMessage
 
     @Query("SELECT * FROM messages ORDER BY time DESC")
     fun loadAll(): LiveData<List<Message>>
@@ -149,16 +138,23 @@ interface MessageDao {
     @Query("SELECT * FROM messages")
     fun loadAllSync(): List<Message>
 
+    //scheduled
+    @Insert
+    fun insertScheduled(message: ScheduledMessage)
+
+    @Delete
+    fun deleteScheduled(message: ScheduledMessage)
+
+    @Query("SELECT * FROM scheduled WHERE time = :time")
+    fun findScheduledByTime(time: Long): ScheduledMessage
+
     @Query("SELECT * FROM scheduled ORDER BY time ASC")
     fun loadScheduledSync(): List<ScheduledMessage>
-
-    @RawQuery
-    fun findByQuery(query: SupportSQLiteQuery): List<Message>
 }
 
 object MessageComparator : DiffUtil.ItemCallback<Message>() {
     override fun areItemsTheSame(oldItem: Message, newItem: Message) =
-        oldItem.text == newItem.text
+        oldItem.id == newItem.id
 
     override fun areContentsTheSame(oldItem: Message, newItem: Message) =
         oldItem == newItem

@@ -1,3 +1,11 @@
+package com.bruhascended.organiso.settings
+
+import android.os.Bundle
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import com.bruhascended.organiso.R
+import org.apache.commons.io.IOUtils
+
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -14,14 +22,6 @@
    limitations under the License.
 
 */
-
-package com.bruhascended.organiso.settings
-
-import android.os.Bundle
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import com.bruhascended.organiso.R
-import org.apache.commons.io.IOUtils
 
 class LicenseFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

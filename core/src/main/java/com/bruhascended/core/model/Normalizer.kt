@@ -21,7 +21,7 @@ import kotlin.math.abs
 
 fun Boolean.toFloat() = if (this) 1f else 0f
 
-fun FloatArray.firstMax(): Int {
+fun Array<Float>.firstMax(): Int {
     var max = 0f
     forEach {
         max = kotlin.math.max(max, it)

@@ -1,11 +1,13 @@
 package com.bruhascended.organiso.services
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.work.*
 import com.bruhascended.core.constants.*
-import com.bruhascended.core.db.*
-import java.io.File
+import com.bruhascended.core.db.MessageDao
+import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.core.db.ScheduledMessage
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -38,18 +40,21 @@ class ScheduledManager(
     ): Worker(mContext, workerParams) {
 
         override fun doWork(): Result {
-            val conversation = inputData.getString(EXTRA_CONVERSATION_JSON).toConversation()
+            val number = inputData.getString(EXTRA_NUMBER)!!
             val text = inputData.getString(EXTRA_MESSAGE_TEXT)!!
             val file = inputData.getString(EXTRA_FILE_PATH)
             val time = inputData.getLong(EXTRA_TIME, 0)
 
-            if (file == null) {
-                SMSSender(mContext, arrayOf(conversation)).sendSMS(text)
-            } else {
-                MMSSender(mContext, arrayOf(conversation)).sendMMS(text, Uri.fromFile(File(file)))
-            }
 
-            MessageDbFactory(mContext).of(conversation.clean).apply {
+            mContext.startService(
+                Intent(mContext, SenderService::class.java).apply {
+                    putExtra(EXTRA_NUMBER, number)
+                    putExtra(EXTRA_MESSAGE_TEXT, text)
+                    data = Uri.parse(file)
+                }
+            )
+
+            MessageDbFactory(mContext).of(number).apply {
                 manager().deleteScheduled(manager().findScheduledByTime(time))
             }
 
@@ -57,7 +62,7 @@ class ScheduledManager(
         }
     }
 
-    fun add(scheduledTime: Long, conversation: Conversation, text: String, data: Uri?) {
+    fun add(scheduledTime: Long, number: String, text: String, data: Uri?) {
         val date = System.currentTimeMillis()
         val path = mContext.saveFile(data, date.toString())
         val constraints = Constraints.Builder()
@@ -69,7 +74,7 @@ class ScheduledManager(
             .addTag(date.toString())
             .setInputData(
                 Data.Builder()
-                    .putString(EXTRA_CONVERSATION_JSON, conversation.toString())
+                    .putString(EXTRA_NUMBER, number)
                     .putString(EXTRA_MESSAGE_TEXT, text)
                     .putString(EXTRA_FILE_PATH, path)
                     .putLong(EXTRA_TIME, scheduledTime)
@@ -81,7 +86,7 @@ class ScheduledManager(
                 date,
                 text,
                 scheduledTime,
-                conversation.address,
+                number,
                 path,
             )
         )

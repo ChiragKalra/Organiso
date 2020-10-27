@@ -65,8 +65,8 @@ class OrganizerModel (private val context: Context) {
 
     fun getPrediction(message: Message) = getPredictions(arrayListOf(message))
 
-    fun getPredictions(messages: ArrayList<Message>) : FloatArray {
-        val probs = FloatArray(5) { 0f }
+    fun getPredictions(messages: ArrayList<Message>) : Array<Float> {
+        val probs = Array(5) { 0f }
 
         for (i in 0 until min(messages.size, HP_MESSAGE_CHECK_COUNT)) {
             val feature = fe.getFeatureVector(messages[i])
