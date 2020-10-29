@@ -94,6 +94,7 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
     }
 
     fun hideMediaPreview() {
+        if (!isMms) return
         mVideoView.stopPlayback()
         mp.reset()
         fadeAway(mVideoView, mImagePreview, mSeekBar, mPlayPauseButton, mVideoPlayPauseButton)

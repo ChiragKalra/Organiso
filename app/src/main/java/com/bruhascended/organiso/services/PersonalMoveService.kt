@@ -21,28 +21,32 @@ class PersonalMoveService: Service() {
                 PendingIntent.getActivity(mContext, 0, notificationIntent, 0)
             }
 
-        val notification: Notification = Notification.Builder(mContext, LABEL_PERSONAL.toString())
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.scan_personal_contacts))
-            .setSmallIcon(R.drawable.message)
-            .setContentIntent(pendingIntent)
-            .setProgress(0, 0, true)
-            .build()
+        val notification: Notification =
+            Notification.Builder(mContext, LABEL_PERSONAL.toString())
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.scan_personal_contacts))
+                .setSmallIcon(R.drawable.message)
+                .setColorized(true)
+                .setColor(mContext.getColor(R.color.colorAccent))
+                .setContentIntent(pendingIntent)
+                .setProgress(0, 0, true)
+                .build()
 
         mContext.startForeground(10123123, notification)
-
-        for (con in mainDaos[LABEL_PERSONAL].loadAllSync()) {
-            var label: Int
-            con.probabilities.clone().apply {
-                this[LABEL_PERSONAL] = 0f
-                label = toList().indexOf(maxOrNull())
+        Thread {
+            for (con in mainDaos[LABEL_PERSONAL].loadAllSync()) {
+                var label: Int
+                con.probabilities.clone().apply {
+                    this[LABEL_PERSONAL] = 0f
+                    label = toList().indexOf(maxOrNull())
+                }
+                mainDaos[LABEL_PERSONAL].delete(con)
+                con.label = label
+                mainDaos[label].insert(con)
             }
-            mainDaos[LABEL_PERSONAL].delete(con)
-            con.label = label
-            mainDaos[label].insert(con)
-        }
-        stopForeground(true)
-        stopSelf()
+            stopForeground(true)
+            stopSelf()
+        }.start()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

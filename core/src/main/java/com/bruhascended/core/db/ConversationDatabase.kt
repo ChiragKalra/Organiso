@@ -10,6 +10,7 @@ import com.bruhascended.core.constants.LABEL_PERSONAL
 import com.bruhascended.core.data.MainDaoProvider
 import com.google.gson.Gson
 import java.io.Serializable
+import kotlin.math.abs
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -61,7 +62,7 @@ data class Conversation(
         get() = number.first().isLetter()
 
     val id
-        get() = hashCode()
+        get() = abs(hashCode())
 
     fun moveTo(to: Int, mContext: Context) {
         MainDaoProvider(mContext).getMainDaos()[label].delete(this)

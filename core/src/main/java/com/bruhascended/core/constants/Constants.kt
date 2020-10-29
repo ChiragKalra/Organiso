@@ -58,6 +58,7 @@ const val EXTRA_FILE_PATH = "FILE_PATH"
 const val EXTRA_TIME = "TIME"
 const val EXTRA_IS_OTP = "IS_OTP"
 const val EXTRA_MESSAGE_URI = "message_uri"
+const val EXTRA_CONTENT_URI = "content_uri"
 
 // intent data
 const val TYPE_MULTI = "multipart/*"

@@ -44,8 +44,8 @@ import com.klinker.android.send_message.Message as SuperMessage
 
 class SenderService: Service() {
 
-    private val smsSentAction = "$APPLICATION_ID.MMS_SENT"
-    private val mmsSentAction = "$APPLICATION_ID.SMS_SENT"
+    private val mmsSentAction = "$APPLICATION_ID.MMS_SENT"
+    private val smsSentAction = "$APPLICATION_ID.SMS_SENT"
     private val deliveredAction = "$APPLICATION_ID.SMS_DELIVERED"
     private val mContext = this
 
@@ -54,6 +54,7 @@ class SenderService: Service() {
     private val settings = Settings().apply {
         useSystemSending = true
         deliveryReports = true
+        sendLongAsMms = false
     }
 
     private fun getDao(number: String): MessageDao {
@@ -67,7 +68,9 @@ class SenderService: Service() {
     private fun registerDeliveredReceiver(number: String, id: Int) {
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent) {
-                val gotId = Uri.parse(arg1.getStringExtra(EXTRA_MESSAGE_URI)).lastPathSegment?.toInt() ?: return
+                val uri = arg1.getStringExtra(EXTRA_MESSAGE_URI) ?:
+                    arg1.getStringExtra(EXTRA_CONTENT_URI)
+                val gotId = Uri.parse(uri).lastPathSegment?.toInt() ?: return
                 if (gotId == id && resultCode == Activity.RESULT_OK) {
                     getDao(number).markDelivered(id)
                     mContext.unregisterReceiver(this)
@@ -97,7 +100,9 @@ class SenderService: Service() {
     private fun registerSentReceiver(number: String, oldId: Int) {
         mContext.registerReceiver(object : BroadcastReceiver() {
             override fun onReceive(arg0: Context, arg1: Intent) {
-                val id = Uri.parse(arg1.getStringExtra(EXTRA_MESSAGE_URI)).lastPathSegment?.toInt() ?: return
+                val uri = arg1.getStringExtra(EXTRA_MESSAGE_URI) ?:
+                    arg1.getStringExtra(EXTRA_CONTENT_URI)
+                val id = Uri.parse(uri).lastPathSegment?.toInt() ?: return
                 updateSentStatus(number, oldId, id,
                     when (resultCode) {
                         Activity.RESULT_OK -> {
@@ -191,7 +196,7 @@ class SenderService: Service() {
             registerSentReceiver(number, id)
         }
         updateConversation(number, date)
-        val message = SuperMessage(smsText, number).apply {
+        val message = SuperMessage(smsText, number.filter { it != ' ' }).apply {
             if (data != null) {
                 val iStream: InputStream = mContext.contentResolver.openInputStream(data)!!
                 val type = mContext.contentResolver.getType(data) ?: getMimeType(data.path!!)
@@ -220,7 +225,7 @@ class SenderService: Service() {
             registerSentReceiver(number, id.toInt())
 
             updateConversation(number, date)
-            val message = SuperMessage(oldMessage.text, number).apply {
+            val message = SuperMessage(oldMessage.text, number.filter { it != ' ' }).apply {
                 if (oldMessage.path != null) {
                     val iStream: InputStream = mContext.contentResolver.openInputStream(Uri.parse(oldMessage.path))!!
                     val type = mContext.contentResolver.getType(Uri.parse(oldMessage.path)) ?: getMimeType(oldMessage.path!!)

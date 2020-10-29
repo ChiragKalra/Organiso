@@ -12,6 +12,7 @@ import com.bruhascended.core.db.*
 import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.services.SenderService
 import com.bruhascended.core.data.MainDaoProvider
+import kotlin.math.abs
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -91,7 +92,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 }
                 val id = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (id == -1) {
-                    mContext.cancelNotification(conversation.number, conversation.hashCode())
+                    mContext.cancelNotification(conversation.number, conversation.id)
                 } else {
                     NotificationManagerCompat.from(mContext).cancel(id)
                 }
@@ -100,7 +101,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 val number = intent.getStringExtra(EXTRA_NUMBER)!!
                 val label = intent.getIntExtra(EXTRA_LABEL, LABEL_PERSONAL)
                 MainDaoProvider(mContext).getMainDaos()[label].markRead(number)
-                mContext.cancelNotification(number, number.hashCode())
+                mContext.cancelNotification(number, abs(number.hashCode()))
             }
             ACTION_REPLY -> {
                 val conversation =
@@ -125,7 +126,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     log("${conversation.label}_to_4")
                     reportSpam(conversation)
                 }
-                mContext.cancelNotification(conversation.number, conversation.hashCode())
+                mContext.cancelNotification(conversation.number, conversation.id)
                 conversation.moveTo(LABEL_SPAM, mContext)
             }
         }

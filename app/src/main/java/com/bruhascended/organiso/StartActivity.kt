@@ -56,6 +56,8 @@ class StartActivity : AppCompatActivity() {
             Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it]) }
         ) {
             ActivityCompat.requestPermissions(this, ARR_PERMS, 0)
+        } else {
+            organise()
         }
     }
 

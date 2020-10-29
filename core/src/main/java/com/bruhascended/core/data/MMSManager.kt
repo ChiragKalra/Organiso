@@ -170,7 +170,8 @@ class MMSManager (
         }
         cursor.close()
 
-        if (file == null) return null
+
+        if (file==null && body.isBlank()) return null
 
         val sender = getAddressNumber(mmsId)
         val sentByUser = sender.first
@@ -203,7 +204,7 @@ class MMSManager (
             conversation
         } else {
             val con = Conversation(
-                sender.second,
+                rawNumber,
                 read = activeNumber == rawNumber,
                 time = message.time,
                 label = LABEL_PERSONAL,

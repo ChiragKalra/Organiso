@@ -86,7 +86,7 @@ class ConversationMenuOptions(
 
     private fun getSenderIcon(): Icon {
         val bg = ContextCompat.getDrawable(mContext, R.drawable.bg_notification_icon)?.apply {
-            setTint(colorRes[(abs(conversation.hashCode()) % colorRes.size)])
+            setTint(colorRes[conversation.id % colorRes.size])
         }
 
         val dp = File(mContext.filesDir, conversation.number)

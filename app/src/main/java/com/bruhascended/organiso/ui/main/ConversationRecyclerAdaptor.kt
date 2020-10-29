@@ -80,7 +80,7 @@ class ConversationRecyclerAdaptor(
         holder.apply {
             imageView.setBackgroundColor(colors[absoluteAdapterPosition % colors.size])
             conversation = getItem(position) ?: return
-            imageView.setBackgroundColor(colors[abs(conversation.hashCode()) % colors.size])
+            imageView.setBackgroundColor(colors[conversation.id % colors.size])
             onBind()
             root.apply {
                 stopBgAnim()

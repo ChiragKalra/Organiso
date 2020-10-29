@@ -101,36 +101,45 @@ class ConversationViewHolder(
 
     fun onBind() {
         senderTextView.text = conversation.number
-        mContactsProvider.getLiveOrNull(conversation.number)?.observeForever {
-            senderTextView.text = it
+        val mNumber = conversation.number
+        val live = mContactsProvider.getLive(mNumber)
+        if (!live.hasActiveObservers()) {
+            live.observeForever {
+                if (mNumber == conversation.number && it != null) {
+                    senderTextView.text = it
+                }
+            }
         }
         timeTextView.text = dtp.getCondensed(conversation.time)
         muteImage.visibility = if (conversation.isMuted) View.VISIBLE else View.GONE
 
-        val last = MessageDbFactory(mContext).of(conversation.number).manager().loadLast()
+        val last = MessageDbFactory(mContext).of(mNumber).manager().loadLast()
 
-        last.observeForever {
-            if (it == null) {
-                MainDaoProvider(mContext).getMainDaos()[conversation.label].delete(conversation)
-                return@observeForever
-            }
-            val str = if (it.hasMedia)
-                SpannableString(
-                    mContext.getString(
-                        R.string.media_message,
-                        it.text
+        if (!last.hasActiveObservers()) {
+            last.observeForever {
+                if (mNumber != conversation.number) return@observeForever
+                if (it == null) {
+                    MainDaoProvider(mContext).getMainDaos()[conversation.label].delete(conversation)
+                    return@observeForever
+                }
+                val str = if (it.hasMedia)
+                    SpannableString(
+                        mContext.getString(
+                            R.string.media_message,
+                            it.text
+                        )
                     )
-                )
-            else SpannableString(it.text)
-            if (!conversation.read) {
-                str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
-                str.setSpan(ForegroundColorSpan(textColor), 0, str.length, flag)
+                else SpannableString(it.text)
+                if (!conversation.read) {
+                    str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
+                    str.setSpan(ForegroundColorSpan(textColor), 0, str.length, flag)
+                }
+                if (it.hasMedia) str.apply {
+                    val color = mContext.getColor(R.color.colorAccent)
+                    setSpan(ForegroundColorSpan(color), 0, 6, flag)
+                }
+                messageTextView.text = str
             }
-            if (it.hasMedia) str.apply {
-                val color = mContext.getColor(R.color.colorAccent)
-                setSpan(ForegroundColorSpan(color), 0, 6, flag)
-            }
-            messageTextView.text = str
         }
 
 

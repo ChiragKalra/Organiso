@@ -30,35 +30,40 @@ class OtpDeleteService: Service() {
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.deleting_otp))
             .setSmallIcon(R.drawable.message)
+            .setColorized(true)
+            .setColor(mContext.getColor(R.color.colorAccent))
             .setContentIntent(pendingIntent)
             .setProgress(0, 0, true)
             .build()
 
         mContext.startForeground(10123123, notification)
 
-        for (con in mainDaos[LABEL_TRANSACTIONS].loadAllSync()) {
-            MessageDbFactory(mContext).of(con.number).apply {
-                manager().loadAllSync().forEach {
-                    if (getOtp(it.text) != null && it.type == MESSAGE_TYPE_INBOX &&
-                        System.currentTimeMillis()-it.time > 15*60*1000) {
-                        manager().deleteFromInternal(it)
-                        mContext.deleteSMS(it.id!!)
+        Thread {
+            for (con in mainDaos[LABEL_TRANSACTIONS].loadAllSync()) {
+                MessageDbFactory(mContext).of(con.number).apply {
+                    manager().loadAllSync().forEach {
+                        if (getOtp(it.text) != null && it.type == MESSAGE_TYPE_INBOX &&
+                            System.currentTimeMillis() - it.time > 15 * 60 * 1000
+                        ) {
+                            manager().deleteFromInternal(it)
+                            mContext.deleteSMS(it.id!!)
+                        }
                     }
-                }
-                val it = manager().loadLastSync()
-                if (it == null) {
-                    mainDaos[2].delete(con)
-                } else {
-                    if (con.time != it.time) {
-                        con.time = it.time
-                        mainDaos[2].insert(con)
+                    val it = manager().loadLastSync()
+                    if (it == null) {
+                        mainDaos[2].delete(con)
+                    } else {
+                        if (con.time != it.time) {
+                            con.time = it.time
+                            mainDaos[2].insert(con)
+                        }
                     }
+                    close()
                 }
-                close()
             }
-        }
-        stopForeground(true)
-        stopSelf()
+            stopForeground(true)
+            stopSelf()
+        }.start()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

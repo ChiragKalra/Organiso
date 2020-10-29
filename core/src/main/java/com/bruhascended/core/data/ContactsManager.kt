@@ -93,7 +93,9 @@ class ContactsManager(
                 number,
                 countryCodeValue.toUpperCase(Locale.ROOT)
             )
-            "+${numberProto.countryCode} ${numberProto.nationalNumber}"
+            if (numberProto.nationalNumber.toString().length < 7) {
+                numberProto.nationalNumber.toString()
+            } else "+${numberProto.countryCode} ${numberProto.nationalNumber}"
         } catch (e: NumberParseException) {
             number.filter {
                 it.isLetterOrDigit()

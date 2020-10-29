@@ -1,7 +1,6 @@
 package com.bruhascended.core.data
 
 import android.content.Context
-import androidx.lifecycle.LiveData
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.bruhascended.core.constants.*
@@ -29,8 +28,14 @@ class ContactsProvider (mContext: Context) {
         if (System.currentTimeMillis() - mPref.getLong(KEY_LAST_REFRESH, 0) < 10*1000) return
         Thread {
             mPref.edit().putLong(KEY_LAST_REFRESH, System.currentTimeMillis()).apply()
-            mDb!!.clearAllTables()
-            mDb!!.manager().insertAll(mCm.getContactsList())
+            val loaded = mCm.getContactsList()
+            val cached = mDb!!.manager().loadAllSync()
+            mDb!!.manager().insertAll(loaded)
+            cached.forEach {
+                if (it !in loaded) {
+                    mDb!!.manager().delete(it)
+                }
+            }
         }.start()
     }
 
@@ -55,8 +60,5 @@ class ContactsProvider (mContext: Context) {
 
     fun get(number: String) = mDb!!.manager().findByNumber(number)
 
-    fun getLiveOrNull(number: String): LiveData<String>? {
-        return if (getNameOrNull(number) == null) null
-        else mDb!!.manager().getLive(number)
-    }
+    fun getLive(number: String) = mDb!!.manager().getLive(number)
 }

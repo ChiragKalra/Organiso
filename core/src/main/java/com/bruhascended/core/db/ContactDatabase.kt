@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import java.io.Serializable
+import kotlin.math.abs
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -38,20 +39,17 @@ data class Contact (
         other as Contact
         return number == other.number
     }
-    override fun hashCode() = number.hashCode()
+    override fun hashCode() = abs(number.hashCode())
 }
 
 @Dao
 interface ContactDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(contact: Contact)
 
     @Transaction
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(contacts: Array<Contact>)
-
-    @Update
-    fun update(contact: Contact)
 
     @Delete
     fun delete(contact: Contact)
@@ -63,7 +61,7 @@ interface ContactDao {
     fun findByNumber(sender: String): Contact?
 
     @Query("SELECT name FROM contacts WHERE number LIKE :sender")
-    fun getLive(sender: String): LiveData<String>
+    fun getLive(sender: String): LiveData<String?>
 
     @Query("SELECT * FROM contacts")
     fun loadAllSync(): Array<Contact>

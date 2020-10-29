@@ -486,7 +486,7 @@ class ConversationActivity : MediaPreviewActivity() {
     }
 
     override fun onStart() {
-        cancelNotification(mViewModel.number, mViewModel.number.hashCode())
+        cancelNotification(mViewModel.number, mViewModel.conversation.id)
         activeConversationNumber = mViewModel.number
         activeConversationDao = mViewModel.dao
         super.onStart()

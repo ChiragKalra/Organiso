@@ -32,26 +32,12 @@ import com.bruhascended.core.model.getOtp
 
 class SMSManager (private val mContext: Context) {
 
-    class Number (
-        val address: String,
-        val clean: String
-    ) {
-        override fun equals(other: Any?) : Boolean {
-            if (other !is Number) return false
-            return clean == other.clean
-        }
-
-        override fun hashCode(): Int {
-            return clean.hashCode()
-        }
-    }
-
     private val cm = ContactsManager(mContext)
     private val analyticsLogger = AnalyticsLogger(mContext)
     private val mMainDaoProvider = MainDaoProvider(mContext)
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
 
-    private val messages = HashMap<Number, ArrayList<Message>>()
+    private val messages = HashMap<String, ArrayList<Message>>()
     private val senderToProbs = HashMap<String, Array<Float>>()
 
     private var isWorkingAfterInit = false
@@ -119,10 +105,10 @@ class SMSManager (private val mContext: Context) {
         return conversation
     }
 
-    private fun saveMessages(ind: Int, number: Number, messages: ArrayList<Message>, label: Int) {
-        if (number.clean.isBlank()) return
+    private fun saveMessages(ind: Int, number: String, messages: ArrayList<Message>, label: Int) {
+        if (number.isBlank()) return
 
-        val conversation = deletePrevious(number.clean)
+        val conversation = deletePrevious(number)
 
         if (conversation != null) {
             conversation.apply {
@@ -133,19 +119,19 @@ class SMSManager (private val mContext: Context) {
             }
         } else {
             val con = Conversation(
-                number.clean,
+                number,
                 read = !isWorkingAfterInit,
                 time = messages.last().time,
                 label = label,
                 forceLabel = if (label == LABEL_PERSONAL) LABEL_PERSONAL else LABEL_NONE,
-                probabilities = senderToProbs[number.clean] ?:
+                probabilities = senderToProbs[number] ?:
                     Array(5) { if (it == LABEL_PERSONAL) 1f else 0f }
             )
 
             mMainDaoProvider.getMainDaos()[label].insert(con)
         }
 
-        MessageDbFactory(mContext).of(number.clean).apply {
+        MessageDbFactory(mContext).of(number).apply {
             manager().insertAll(messages.toList())
             close()
         }
@@ -182,7 +168,7 @@ class SMSManager (private val mContext: Context) {
                     val id = getString(getColumnIndex("_id")).toInt()
                     if (name != null && !messageContent.isNullOrEmpty()) {
 
-                        val number = Number(name, cm.getClean(name))
+                        val number = cm.getClean(name)
                         val message = Message(
                             messageContent, getString(typeID).toInt(),
                             getString(dateID).toLong(), id = id
@@ -215,14 +201,15 @@ class SMSManager (private val mContext: Context) {
             val msgs = messagesArray[ind].component2()
             var label: Int
 
-            if (senderNameMap.containsKey(number.clean)) {
+            if (senderNameMap.containsKey(number)) {
                 label = LABEL_PERSONAL
             } else {
                 nn.getPredictions(msgs).apply {
-                    senderToProbs[number.clean] = this
+                    senderToProbs[number] = this
                     label = firstMax()
-                    if (label == LABEL_PERSONAL && number.clean.first().isLetter()) {
-                        label = LABEL_IMPORTANT
+                    clone().apply {
+                        this[LABEL_PERSONAL] = 0f
+                        label = firstMax()
                     }
                 }
             }

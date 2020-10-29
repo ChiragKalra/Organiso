@@ -120,7 +120,7 @@ class ConversationSelectionListener(
                 alertDialog.setTitle(mContext.getString(R.string.delete_conversations_query))
                     .setPositiveButton(mContext.getString(R.string.delete)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            mContext.cancelNotification(selectedItem.number, selectedItem.hashCode())
+                            mContext.cancelNotification(selectedItem.number, selectedItem.id)
                             analyticsLogger.log("${selectedItem.label}_to_-1")
                             selectedItem.moveTo(-1, mContext)
                         }
@@ -134,7 +134,7 @@ class ConversationSelectionListener(
                     .setPositiveButton(mContext.getString(R.string.block)) { dialog, _ ->
                         for (selectedItem in selected) {
                             analyticsLogger.log("${selectedItem.label}_to_5")
-                            mContext.cancelNotification(selectedItem.number, selectedItem.hashCode())
+                            mContext.cancelNotification(selectedItem.number, selectedItem.id)
                             selectedItem.moveTo(5, mContext)
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.senders_blocked), Toast.LENGTH_LONG).show()
@@ -148,7 +148,7 @@ class ConversationSelectionListener(
                         for (selectedItem in selected) {
                             analyticsLogger.reportSpam(selectedItem)
                             analyticsLogger.log("${selectedItem.label}_to_4")
-                            mContext.cancelNotification(selectedItem.number, selectedItem.hashCode())
+                            mContext.cancelNotification(selectedItem.number, selectedItem.id)
                             selectedItem.moveTo(4, mContext)
                         }
                         Toast.makeText(mContext, mContext.getString(R.string.senders_reported_spam), Toast.LENGTH_LONG).show()
@@ -183,7 +183,7 @@ class ConversationSelectionListener(
                 selected.forEach {
                     it.apply {
                         isMuted = !isMuted
-                        if (isMuted) mContext.cancelNotification(number, hashCode())
+                        if (isMuted) mContext.cancelNotification(number, id)
                         MainDaoProvider(mContext).getMainDaos()[label].insert(this)
                     }
                 }

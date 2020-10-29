@@ -56,7 +56,7 @@ class RecipientRecyclerAdaptor (
         val contact: Contact = contacts[position]
         holder.apply {
             name.text = if (contact.name.isBlank()) contact.number else contact.name
-            root.backgroundTintList = ColorStateList.valueOf(colors[abs(contact.hashCode()) % colors.size])
+            root.backgroundTintList = ColorStateList.valueOf(colors[contact.hashCode() % colors.size])
             remove.setOnClickListener {
                 onRemoveClick?.invoke(contacts[absoluteAdapterPosition])
             }
