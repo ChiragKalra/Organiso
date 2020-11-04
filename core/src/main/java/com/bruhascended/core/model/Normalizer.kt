@@ -102,9 +102,20 @@ fun getOtp(message: String): String? {
     val otpRegex = Regex("\\b\\d{4,6}\\b")
     val otps = otpRegex.findAll(content).toList()
 
-    if (otps.isEmpty()) return null
-    val otp = otps.first().groups.first()!!.value
-    val otpIndex = content.indexOf(otp)
+    if (otps.isEmpty()) {
+        return null
+    }
+    var otp = otps.first().groups.first()!!.value
+    var otpIndex = content.indexOf(otp)
+    if (content.contains("rs.", ignoreCase = true) &&
+        otpIndex - content.indexOf("rs.") == 3) {
+        if (otps.size == 1) {
+            return null
+        } else {
+            otp = otps[1].groups.first()!!.value
+            otpIndex = content.indexOf(otp)
+        }
+    }
 
     val keys = arrayOf(
         "otp", "code", "key", "pin", "one time password", "verify"

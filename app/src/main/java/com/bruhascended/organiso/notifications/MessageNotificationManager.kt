@@ -161,7 +161,7 @@ class MessageNotificationManager(
 
         val otp = getOtp(message.text)
         if (otp != null) {
-            onm.sendOtpNotif(otp, message, conversation, contentPI)
+            onm.sendOtpNotif(otp, message, conversation)
             return
         }
 

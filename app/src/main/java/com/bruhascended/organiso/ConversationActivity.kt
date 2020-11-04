@@ -18,6 +18,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
@@ -487,6 +488,11 @@ class ConversationActivity : MediaPreviewActivity() {
 
     override fun onStart() {
         cancelNotification(mViewModel.number, mViewModel.conversation.id)
+        val id = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+        if (id != -1) {
+            NotificationManagerCompat.from(this).cancel(id)
+        }
+
         activeConversationNumber = mViewModel.number
         activeConversationDao = mViewModel.dao
         super.onStart()

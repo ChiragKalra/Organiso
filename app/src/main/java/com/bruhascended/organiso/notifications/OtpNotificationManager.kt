@@ -14,6 +14,7 @@ import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
+import com.bruhascended.organiso.ConversationActivity
 import com.bruhascended.organiso.R
 import java.util.concurrent.TimeUnit
 
@@ -49,7 +50,7 @@ class OtpNotificationManager (
     }
 
 
-    fun sendOtpNotif(otp: String, message: Message, conversation: Conversation, pendingIntent: PendingIntent) {
+    fun sendOtpNotif(otp: String, message: Message, conversation: Conversation) {
         val id = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
 
         val copyIntent = Intent(mContext, NotificationActionReceiver::class.java)
@@ -97,6 +98,15 @@ class OtpNotificationManager (
             setTextViewText(android.R.id.title, formattedOtp)
         }
 
+        val contentPI = PendingIntent.getActivity(
+            mContext, conversation.id,
+            Intent(mContext, ConversationActivity::class.java)
+                .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString())
+                .putExtra(EXTRA_NOTIFICATION_ID, id)
+                .setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME),
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         notificationManager.notify(id,
             NotificationCompat.Builder(mContext, conversation.label.toString())
                 .addAction(
@@ -118,7 +128,7 @@ class OtpNotificationManager (
                 .setExtras(Bundle().apply {
                     putBoolean(EXTRA_IS_OTP, true)
                 })
-                .setContentIntent(pendingIntent)
+                .setContentIntent(contentPI)
                 .build()
         )
     }
