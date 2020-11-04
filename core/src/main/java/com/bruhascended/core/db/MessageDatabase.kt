@@ -101,11 +101,9 @@ interface MessageDao {
     fun deleteFromInternal(message: Message)
 
     fun delete(mContext: Context, message: Message, deleteFile: Boolean = true) {
-        Thread {
-            if (message.path != null && deleteFile) File(message.path!!).delete()
-            deleteFromInternal(message)
-            mContext.deleteSMS(message.id!!)
-        }.start()
+        if (message.path != null && deleteFile) File(message.path!!).delete()
+        mContext.deleteSMS(message.id!!)
+        deleteFromInternal(message)
     }
 
     @Query("DELETE FROM messages")
@@ -122,9 +120,6 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages WHERE id = :id")
     fun getById(id: Int): Message?
-
-    @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
-    fun loadLast(): LiveData<Message?>
 
     @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
     fun loadLastSync(): Message?

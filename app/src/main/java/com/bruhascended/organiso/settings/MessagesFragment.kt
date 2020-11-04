@@ -43,7 +43,7 @@ class MessagesFragment : PreferenceFragmentCompat() {
                 AlertDialog.Builder(mContext)
                     .setTitle(getString(R.string.delete_all_otps_query))
                     .setPositiveButton(mContext.getString(R.string.ok)) { d, _ ->
-                        mContext.startService(Intent(mContext, OtpDeleteService::class.java))
+                        mContext.startForegroundService(Intent(mContext, OtpDeleteService::class.java))
                         d.dismiss()
                     }.setNegativeButton(mContext.getString(R.string.cancel)) { d, _ ->
                         d.dismiss()
@@ -54,7 +54,7 @@ class MessagesFragment : PreferenceFragmentCompat() {
 
         contactsOnlyPref.setOnPreferenceChangeListener { _, v ->
             if (v == true) {
-                mContext.startService(Intent(mContext, PersonalMoveService::class.java))
+                mContext.startForegroundService(Intent(mContext, PersonalMoveService::class.java))
             }
             true
         }

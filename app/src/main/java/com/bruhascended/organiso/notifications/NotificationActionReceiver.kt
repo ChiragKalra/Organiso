@@ -74,9 +74,9 @@ class NotificationActionReceiver : BroadcastReceiver() {
             ACTION_DELETE_OTP, ACTION_DELETE_MESSAGE -> {
                 val conversation =
                     intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
-                val message = intent.getSerializableExtra(EXTRA_MESSAGE) as Message
+                val messageId = intent.getIntExtra(EXTRA_MESSAGE_ID, 0)
                 MessageDbFactory(mContext).of(conversation.number).apply {
-                    manager().delete(mContext, message)
+                    manager().delete(mContext, manager().getById(messageId)!!)
                     val last = manager().loadLastSync()
                     if (last == null) {
                         MainDaoProvider(mContext).getMainDaos()[conversation.label]

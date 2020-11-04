@@ -30,6 +30,22 @@ import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.squareup.picasso.Picasso
 import java.io.File
 
+/*
+                    Copyright 2020 Chirag Kalra
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+
 @SuppressLint("ResourceType")
 class ConversationViewHolder(
     val root: View,
@@ -42,6 +58,7 @@ class ConversationViewHolder(
     private val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
     private var backgroundAnimator: ValueAnimator? = null
     private val muteImage: ImageView = root.findViewById(R.id.mutedImage)
+    private val mainDaos = MainDaoProvider(mContext).getMainDaos()
 
     val imageView: QuickContactBadge = root.findViewById(R.id.dp)
     val senderTextView: TextView = root.findViewById(R.id.sender)
@@ -113,22 +130,20 @@ class ConversationViewHolder(
         timeTextView.text = dtp.getCondensed(conversation.time)
         muteImage.visibility = if (conversation.isMuted) View.VISIBLE else View.GONE
 
-        val last = MessageDbFactory(mContext).of(mNumber).manager().loadLast()
-
-        if (!last.hasActiveObservers()) {
-            last.observeForever {
-                if (mNumber != conversation.number) return@observeForever
+        val liveConversation = mainDaos[conversation.label].getLive(conversation.number)
+        if (!liveConversation.hasActiveObservers()) liveConversation.observeForever {
+            val mDb = MessageDbFactory(mContext).of(mNumber)
+            mDb.manager().loadLastSync().also {
+                if (mNumber != conversation.number) return@also
                 if (it == null) {
-                    MainDaoProvider(mContext).getMainDaos()[conversation.label].delete(conversation)
-                    return@observeForever
+                    mainDaos[conversation.label].delete(conversation)
+                    return@also
                 }
                 val str = if (it.hasMedia)
-                    SpannableString(
-                        mContext.getString(
+                    SpannableString(mContext.getString(
                             R.string.media_message,
                             it.text
-                        )
-                    )
+                        ))
                 else SpannableString(it.text)
                 if (!conversation.read) {
                     str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
@@ -140,8 +155,8 @@ class ConversationViewHolder(
                 }
                 messageTextView.text = str
             }
+            mDb.close()
         }
-
 
         showDisplayPicture()
     }

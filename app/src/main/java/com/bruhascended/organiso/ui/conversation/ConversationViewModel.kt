@@ -44,7 +44,6 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
     val pagingFlow
         get() = mPagingFlow
 
-    fun loadLast() = mdb.manager().loadLast()
     fun loadAll() = mdb.manager().loadAll()
 
     fun init (got: Conversation) {

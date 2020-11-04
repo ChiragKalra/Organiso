@@ -10,7 +10,8 @@
             app:icon="@drawable/ic_contacts"
             app:key="contacts_only"
             app:allowDividerBelow="false"
-            app:title="@string/personal_contacts_only" />
+            app:title="@string/saved_contacts_only_personal"
+            app:summary="@string/personal_contacts_only" />
     </PreferenceCategory>
 
     <PreferenceCategory

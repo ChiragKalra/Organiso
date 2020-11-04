@@ -15,6 +15,7 @@ import com.bruhascended.organiso.common.MyPagingDataAdapter
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor.ContactViewHolder
 import com.squareup.picasso.Picasso
 import java.io.File
+import kotlin.math.abs
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -70,7 +71,7 @@ class ContactRecyclerAdaptor (
         holder.number.text = contact.number
         val dp = File(mContext.filesDir, contact.number)
         holder.dp.apply {
-            setBackgroundColor(colors[(contact.id ?: 0 ) % colors.size])
+            setBackgroundColor(colors[abs(contact.hashCode()) % colors.size])
             if (dp.exists()) picasso.load(dp).into(this)
             else setImageResource(R.drawable.ic_person)
         }

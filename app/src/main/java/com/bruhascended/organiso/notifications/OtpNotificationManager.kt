@@ -11,11 +11,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.preference.PreferenceManager
 import androidx.work.*
 import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.R
+import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
-import com.bruhascended.core.db.MessageDbFactory
-import com.bruhascended.core.data.MainDaoProvider
+import com.bruhascended.organiso.R
 import java.util.concurrent.TimeUnit
 
 class OtpNotificationManager (
@@ -37,15 +36,12 @@ class OtpNotificationManager (
 
             val conversation = MainDaoProvider(mContext)
                 .getMainDaos()[LABEL_TRANSACTIONS].findByNumber(sender)!!
-            val mdb = MessageDbFactory(mContext).of(sender)
-            val message = mdb.manager().getById(messageId)
-            mdb.close()
 
             mContext.sendBroadcast(
                 Intent(mContext, NotificationActionReceiver::class.java)
                     .setAction(ACTION_DELETE_OTP)
                     .putExtra(EXTRA_NOTIFICATION_ID, id)
-                    .putExtra(EXTRA_MESSAGE, message)
+                    .putExtra(EXTRA_MESSAGE_ID, messageId)
                     .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString())
             )
             return Result.success()
@@ -82,14 +78,14 @@ class OtpNotificationManager (
                 .setInputData(Data.Builder()
                     .putLong(EXTRA_TIME, message.time)
                     .putString(EXTRA_NUMBER, conversation.number)
+                    .putInt(EXTRA_MESSAGE_ID, message.id!!)
                     .putInt(EXTRA_NOTIFICATION_ID, id)
                     .build()
                 ).build()
             WorkManager.getInstance(mContext).enqueue(request)
         }
 
-        val formattedOtp = mContext.getString(R.string.otp_col) +
-                otp.slice(0 until otp.length/2) + " " +
+        val formattedOtp = otp.slice(0 until otp.length/2) + " " +
                 otp.slice(otp.length/2 until otp.length)
         val notificationLayout = RemoteViews(mContext.packageName,
             R.layout.view_notification_otp).apply{

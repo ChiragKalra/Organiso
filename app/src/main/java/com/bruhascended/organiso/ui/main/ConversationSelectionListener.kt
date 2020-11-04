@@ -11,12 +11,14 @@ import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.organiso.R
 import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.core.data.MainDaoProvider
+import com.bruhascended.organiso.common.requestSpamReportPref
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -155,6 +157,7 @@ class ConversationSelectionListener(
                         dialog.dismiss()
                         selectionManager.close()
                     }.create().show()
+                (mContext as AppCompatActivity).requestSpamReportPref()
             }
             R.id.action_move -> {
                 val choices = ArrayList<String>().apply {

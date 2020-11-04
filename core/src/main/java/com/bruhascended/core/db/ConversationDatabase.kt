@@ -97,6 +97,9 @@ interface ConversationDao {
     @Query("SELECT * FROM conversations WHERE number LIKE :number")
     fun findByNumber(number: String): Conversation?
 
+    @Query("SELECT * FROM conversations WHERE number LIKE :number")
+    fun getLive(number: String): LiveData<Conversation?>
+
     @Query("SELECT * FROM conversations LIMIT 1")
     fun loadSingle(): Conversation?
 

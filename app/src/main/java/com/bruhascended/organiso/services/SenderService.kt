@@ -106,7 +106,6 @@ class SenderService: Service() {
                 updateSentStatus(number, oldId, id,
                     when (resultCode) {
                         Activity.RESULT_OK -> {
-                            mContext.unregisterReceiver(this)
                             MESSAGE_TYPE_SENT
                         }
                         SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
@@ -141,6 +140,7 @@ class SenderService: Service() {
                         }
                     }
                 )
+                mContext.unregisterReceiver(this)
             }
         }, IntentFilter().apply {
             addAction(smsSentAction)
@@ -242,7 +242,7 @@ class SenderService: Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Thread {
-            val retry = intent.getIntExtra(EXTRA_RETRY_ID, -1)
+            val retry = intent.getIntExtra(EXTRA_MESSAGE_ID, -1)
             if (retry == -1) {
                 sendMessage(
                     intent.getStringExtra(EXTRA_NUMBER)!!,

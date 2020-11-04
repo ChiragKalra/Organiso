@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.provider.Telephony
-import android.telephony.TelephonyManager
+import android.provider.Telephony.Threads.getOrCreateThreadId
 import android.webkit.MimeTypeMap
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Conversation
@@ -38,14 +38,19 @@ class MMSManager (
     private val cm = ContactsManager(mContext)
     private val mMainDaoProvider = MainDaoProvider(mContext)
 
-    private val tMgr = mContext.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    private var mPhoneNumber = try {
-        cm.getClean(tMgr.line1Number)
-    } catch (e: Exception) {
-        ""
-    }
-
     private fun getAddressNumber(id: Int): Pair<Boolean, String> {
+        var threadId = -1L
+        mContext.contentResolver.query(
+            Uri.parse("content://mms/${id}"),
+            arrayOf("thread_id"),
+            null,
+            null,
+            null
+        )?.apply {
+            if (moveToFirst()) {
+                threadId = getString(0).toLong()
+            }
+        }
         var selection = "type=137 AND msg_id=$id"
         val uriAddress = Uri.parse("content://mms/${id}/addr")
         var cursor = mContext.contentResolver.query(
@@ -59,11 +64,15 @@ class MMSManager (
             } while (cursor.moveToNext())
         }
         cursor.close()
-        if (address != mPhoneNumber) return false to address
+        try {
+            if (getOrCreateThreadId(mContext, address) == threadId) {
+                return false to address
+            }
+        } catch (e: Exception) { }
 
         selection = "type=151 AND msg_id=$id"
         cursor = mContext.contentResolver.query(
-            uriAddress, arrayOf("address"), selection, null, null
+            uriAddress, null, selection, null, null
         )!!
         if (cursor.moveToFirst()) {
             do {

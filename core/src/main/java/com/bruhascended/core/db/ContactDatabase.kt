@@ -28,10 +28,9 @@ import kotlin.math.abs
 @Entity(tableName = "contacts")
 data class Contact (
     var name: String,
+    @PrimaryKey
     val number: String,
-    val contactId: Int,
-    @PrimaryKey(autoGenerate = true)
-    val id: Int? = null
+    val contactId: Int
 ): Serializable {
     override fun equals(other: Any?): Boolean {
         if (javaClass != other?.javaClass) return false

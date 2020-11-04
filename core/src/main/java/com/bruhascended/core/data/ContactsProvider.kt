@@ -14,6 +14,7 @@ class ContactsProvider (mContext: Context) {
         private var mCache: Array<Contact>? = null
     }
 
+    private val keyLastInternal = "KEY_LAST_INTERNAL_REFRESH"
     private val mCm = ContactsManager(mContext)
     private val mMainDaoProvider = MainDaoProvider(mContext)
     private val mPref = PreferenceManager.getDefaultSharedPreferences(mContext)
@@ -49,7 +50,10 @@ class ContactsProvider (mContext: Context) {
 
     fun getNameOrNull(number: String): String? {
         Thread {
-            mCache = getSync()
+            if (mCache == null || mPref.getLong(KEY_LAST_REFRESH, 0) > mPref.getLong(keyLastInternal, 0)) {
+                mPref.edit().putLong(keyLastInternal, System.currentTimeMillis()).apply()
+                mCache = getSync()
+            }
         }.start()
         return if (mCache == null) {
             mDb!!.manager().findByNumber(number)?.name

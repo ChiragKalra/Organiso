@@ -35,6 +35,8 @@
     <string name="copy_otp">Copy OTP</string>
     <string name="forward">Forward</string>
     <string name="reset">Reset</string>
+    <string name="send">Send</string>
+    <string name="dont_send">Don\'t Send</string>
 
     <!-- Long Actions -->
     <string name="block_sender_query">Block %1$s?</string>
@@ -85,10 +87,9 @@
     <string name="messages">%1$d message(s)</string>
     <string name="audio_col">Audio: </string>
     <string name="video_col">Video: </string>
-    <string name="otp_col">OTP: </string>
     <string name="media_message">Media %1$s</string>
     <string name="copied_in_brackets">(Copied)</string>
-    <string name="from_sender">From %1$s</string>
+    <string name="from_sender">OTP From %1$s</string>
 
     <string name="delivered">delivered</string>
     <string name="sent">sent</string>
@@ -165,7 +166,15 @@
     <string name="auto_delete_otp">Automatically Delete OTP</string>
     <string name="otp_auto_delete_after">OTP will be deleted after 15 minutes.</string>
     <string name="upload_spam_reports">Send anonymous spam reports</string>
-    <string name="send_reports_summary">Send a copy of reported spam messages to us so we can improve our spam detection and protect users like you.</string>
+    <string name="send_reports_summary">
+        Send a copy of reported spam messages to us so we can
+        improve our spam detection and protect users like you.
+    </string>
+    <string name="send_reports_query">
+        Send a copy of reported spam messages to us so we can
+        improve our spam detection and protect users like you?
+        \n\nYou can change this later in message settings.
+    </string>
     <string name="contact_us">Contact Us</string>
     <string name="report_bug">Report a bug</string>
     <string name="about_app">About App</string>
@@ -186,4 +195,5 @@
     <string name="enter_send_message">Enter will send message</string>
     <string name="enter_is_send">Enter is send</string>
     <string name="personal_contacts_only">Only show saved contacts in personal category</string>
+    <string name="saved_contacts_only_personal">Saved Contacts Only</string>
 </resources>

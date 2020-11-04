@@ -249,7 +249,7 @@ class MessageNotificationManager(
         val deletePI = PendingIntent.getBroadcast(mContext, conversation.id,
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_DELETE_MESSAGE)
-                .putExtra(EXTRA_MESSAGE, message)
+                .putExtra(EXTRA_MESSAGE_ID, message.id)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
             FLAG_UPDATE_CURRENT
         )
