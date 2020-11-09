@@ -19,7 +19,7 @@
     <color name="headerTextColorDark">#30FFAC</color>
 
     <!-- light mode -->
-    <color name="message_bg_accent_light">#9ECFC9</color>
+    <color name="message_bg_accent_light">#BBDDD9</color>
     <color name="background_light">#F3F3F3</color>
     <color name="list_item_background_light">#DBDBDB</color>
     <color name="selection_background_light">#EAFFE4</color>

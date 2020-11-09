@@ -104,7 +104,7 @@ class OtpNotificationManager (
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString())
                 .putExtra(EXTRA_NOTIFICATION_ID, id)
                 .setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME),
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_CANCEL_CURRENT
         )
 
         notificationManager.notify(id,

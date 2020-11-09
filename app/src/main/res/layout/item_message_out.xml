@@ -68,6 +68,7 @@
         </LinearLayout>
         <TextView
             android:textColorHighlight="?headerTextColor"
+            android:textColorLink="?headerTextColor"
             android:layout_margin="4dp"
             android:textIsSelectable="false"
             android:autoLink="all"
