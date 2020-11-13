@@ -13,6 +13,7 @@ import android.widget.SeekBar
 import android.widget.VideoView
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
+import com.bruhascended.core.constants.getMimeType
 import com.bruhascended.organiso.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -106,7 +107,7 @@ abstract class MediaPreviewActivity : AppCompatActivity() {
     fun showMediaPreview(data: Intent) {
         mAddMedia.setImageResource(R.drawable.close)
         mmsURI = data.data ?: data.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as Uri
-        mmsTypeString = contentResolver.getType(mmsURI!!)!!
+        mmsTypeString = contentResolver.getType(mmsURI!!) ?: getMimeType(mmsURI!!.path!!)
         isMms = when {
             mmsTypeString.startsWith("image") -> {
                 mImagePreview.visibility = View.VISIBLE

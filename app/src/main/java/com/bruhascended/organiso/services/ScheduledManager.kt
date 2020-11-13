@@ -8,6 +8,7 @@ import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.core.db.ScheduledMessage
+import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -50,7 +51,9 @@ class ScheduledManager(
                 Intent(mContext, SenderService::class.java).apply {
                     putExtra(EXTRA_NUMBER, number)
                     putExtra(EXTRA_MESSAGE_TEXT, text)
-                    data = Uri.parse(file)
+                    if (file != null) {
+                        data = Uri.fromFile(File(file))
+                    }
                 }
             )
 

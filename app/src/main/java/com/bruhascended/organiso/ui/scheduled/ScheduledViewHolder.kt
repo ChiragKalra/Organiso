@@ -37,7 +37,7 @@ class ScheduledViewHolder(
     private val statusTextView: TextView = root.findViewById(R.id.status)
 
     override fun getUid(): Long = message.time
-    override fun getDataPath(): String? = message.path
+    override fun getDataPath(): String = message.path!!
 
     override fun hideMedia() {
         super.hideMedia()

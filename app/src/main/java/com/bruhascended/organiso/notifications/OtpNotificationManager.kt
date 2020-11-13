@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 import android.os.Bundle
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
@@ -103,7 +104,11 @@ class OtpNotificationManager (
             Intent(mContext, ConversationActivity::class.java)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString())
                 .putExtra(EXTRA_NOTIFICATION_ID, id)
-                .setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME),
+                .setFlags(
+                    Intent.FLAG_ACTIVITY_TASK_ON_HOME or
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                        FLAG_ACTIVITY_MULTIPLE_TASK
+                ),
             PendingIntent.FLAG_CANCEL_CURRENT
         )
 

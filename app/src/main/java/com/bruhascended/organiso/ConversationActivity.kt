@@ -18,6 +18,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
@@ -456,8 +457,16 @@ class ConversationActivity : MediaPreviewActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem)
-            = conversationMenuOptions.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        toggleExtraVisibility(false)
+        return conversationMenuOptions.onOptionsItemSelected(item)
+    }
+
+    override fun onSupportActionModeStarted(mode: ActionMode) {
+        toggleExtraVisibility(false)
+        super.onSupportActionModeStarted(mode)
+    }
+
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val muteItem = menu.findItem(R.id.action_mute)

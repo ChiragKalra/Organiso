@@ -10,7 +10,6 @@ import com.klinker.android.send_message.MmsReceivedReceiver
 
 class MMSReceiver : MmsReceivedReceiver() {
 
-
     override fun onMessageReceived(context: Context, uri: Uri) {
         val out = MMSManager(context).putMMS(
             uri.lastPathSegment!!.toInt(),

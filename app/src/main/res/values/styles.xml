@@ -71,6 +71,8 @@
     </style>
 
     <style name="DarkTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
+        <item name="colorAccent">@color/headerTextColorDark</item>
+        <item name="android:colorAccent">@color/headerTextColorDark</item>
         <item name="colorControlNormal">@color/text_secondary_dark</item>
         <item name="colorControlActivated">@color/headerTextColorDark</item>
         <item name="android:textColorHint">@color/text_hint_dark</item>
@@ -108,6 +110,8 @@
 
 
     <style name="LightTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
+        <item name="colorAccent">@color/headerTextColorLight</item>
+        <item name="android:colorAccent">@color/headerTextColorLight</item>
         <item name="colorControlNormal">@color/text_secondary_light</item>
         <item name="colorControlActivated">@color/headerTextColorLight</item>
         <item name="android:textColorHint">@color/text_hint_light</item>

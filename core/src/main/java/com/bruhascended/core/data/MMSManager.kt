@@ -230,6 +230,7 @@ class MMSManager (
         }
 
         dao.insert(message)
+        if (activeNumber == rawNumber) return null
         return message to conversation
     }
 }

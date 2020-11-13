@@ -127,7 +127,8 @@ fun getOtp(message: String): String? {
 
     content.apply {
         keys.forEach {
-            val ind = indexOf(it)
+            val ind = Regex("\\b$it\\b", RegexOption.IGNORE_CASE)
+                .find(this)?.range?.start ?: -1
             if (ind != -1 && abs(otpIndex-ind) < maxSepAllowed) {
                 return otp
             }

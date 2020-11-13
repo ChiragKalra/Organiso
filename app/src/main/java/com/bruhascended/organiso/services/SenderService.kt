@@ -26,6 +26,7 @@ import com.bruhascended.organiso.ConversationActivity.Companion.activeConversati
 import com.klinker.android.send_message.Settings
 import com.klinker.android.send_message.Transaction
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.InputStream
 import com.klinker.android.send_message.Message as SuperMessage
 
@@ -85,11 +86,16 @@ class SenderService: Service() {
         }
         getDao(number).apply {
             val old = getById(oldId)
+            val new = getById(id)
             if (old != null) {
                 deleteFromInternal(old)
                 old.type = status
                 old.id = id
                 insert(old)
+                if (new != null) {
+                    new.id = null
+                    insert(new)
+                }
             } else {
                 updateStatus(id, status)
             }
@@ -144,6 +150,53 @@ class SenderService: Service() {
             }
         }, IntentFilter().apply {
             addAction(smsSentAction)
+        })
+    }
+
+    private fun registerMmsSentReceiver(number: String, oldId: Int) {
+        mContext.registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(arg0: Context, arg1: Intent) {
+                val uri = arg1.getStringExtra(EXTRA_MESSAGE_URI) ?:
+                    arg1.getStringExtra(EXTRA_CONTENT_URI)
+                val id = Uri.parse(uri).lastPathSegment?.toInt() ?: return
+                when (resultCode) {
+                    Activity.RESULT_OK -> {
+                        updateSentStatus(number, oldId, id, MESSAGE_TYPE_SENT)
+                    }
+                    SmsManager.RESULT_ERROR_GENERIC_FAILURE -> {
+                        Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(
+                                mContext,
+                                mContext.getString(R.string.service_provider_error),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        updateSentStatus(number, oldId, oldId, MESSAGE_TYPE_FAILED)
+                    }
+                    SmsManager.RESULT_ERROR_NO_SERVICE -> {
+                        Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(
+                                mContext,
+                                mContext.getString(R.string.no_service),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        updateSentStatus(number, oldId, oldId, MESSAGE_TYPE_FAILED)
+                    }
+                    else -> {
+                        Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(
+                                mContext,
+                                mContext.getString(R.string.error),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        updateSentStatus(number, oldId, oldId, MESSAGE_TYPE_FAILED)
+                    }
+                }
+                mContext.unregisterReceiver(this)
+            }
+        }, IntentFilter().apply {
             addAction(mmsSentAction)
         })
     }
@@ -193,7 +246,8 @@ class SenderService: Service() {
                     path = mContext.saveFile(data, date.toString())
                 )
             ).toInt()
-            registerSentReceiver(number, id)
+            if (data == null) registerSentReceiver(number, id)
+            else registerMmsSentReceiver(number, id)
         }
         updateConversation(number, date)
         val message = SuperMessage(smsText, number.filter { it != ' ' }).apply {
@@ -224,11 +278,15 @@ class SenderService: Service() {
             )
             registerSentReceiver(number, id.toInt())
 
+            if (!oldMessage.hasMedia) registerSentReceiver(number, id.toInt())
+            else registerMmsSentReceiver(number, id.toInt())
+
             updateConversation(number, date)
             val message = SuperMessage(oldMessage.text, number.filter { it != ' ' }).apply {
                 if (oldMessage.path != null) {
-                    val iStream: InputStream = mContext.contentResolver.openInputStream(Uri.parse(oldMessage.path))!!
-                    val type = mContext.contentResolver.getType(Uri.parse(oldMessage.path)) ?: getMimeType(oldMessage.path!!)
+                    val uri = Uri.fromFile(File(oldMessage.path!!))
+                    val iStream: InputStream = mContext.contentResolver.openInputStream(uri)!!
+                    val type = mContext.contentResolver.getType(uri) ?: getMimeType(oldMessage.path!!)
                     addMedia(getBytes(iStream), type)
                 }
             }

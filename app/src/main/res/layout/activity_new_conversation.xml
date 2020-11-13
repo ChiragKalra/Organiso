@@ -42,6 +42,7 @@
         tools:listitem="@layout/item_send_address" />
 
     <EditText
+        android:theme="?editTextStyle"
         android:imeOptions="actionDone"
         style="?editTextStyle"
         android:id="@+id/to"

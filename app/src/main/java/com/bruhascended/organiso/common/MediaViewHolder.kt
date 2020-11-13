@@ -81,7 +81,7 @@ abstract class MediaViewHolder(
 
     private fun showImage() {
         imageView.visibility = View.VISIBLE
-        picasso.load(File(getDataPath()!!)).into(imageView)
+        picasso.load(File(getDataPath())).into(imageView)
         imageView.setOnClickListener{
             mContext.startActivity(contentIntent)
         }
@@ -91,7 +91,7 @@ abstract class MediaViewHolder(
         MediaPlayer().apply {
             slider.visibility = View.VISIBLE
             playPause.visibility = View.VISIBLE
-            setDataSource(mContext,  Uri.parse(getDataPath()))
+            setDataSource(mContext, Uri.fromFile(File(getDataPath())))
             prepareAsync()
             setOnPreparedListener {
                 slider.max = duration / 500
@@ -133,10 +133,10 @@ abstract class MediaViewHolder(
             messageTextView.visibility = View.GONE
         }
         mediaLayout.visibility = View.VISIBLE
-        val mmsTypeString = getMimeType(getDataPath()!!)
+        val mmsTypeString = getMimeType(getDataPath())
         val contentUri = FileProvider.getUriForFile(
             mContext,
-            "${BuildConfig.APPLICATION_ID}.fileProvider", File(getDataPath()!!)
+            "${BuildConfig.APPLICATION_ID}.fileProvider", File(getDataPath())
         )
         mContext.grantUriPermission(
             BuildConfig.APPLICATION_ID, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -162,5 +162,5 @@ abstract class MediaViewHolder(
     }
 
     protected abstract fun getUid(): Long
-    protected abstract fun getDataPath(): String?
+    protected abstract fun getDataPath(): String
 }

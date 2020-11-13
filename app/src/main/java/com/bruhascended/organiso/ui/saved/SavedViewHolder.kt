@@ -29,7 +29,7 @@ class SavedViewHolder(mContext: Context, root: View) : MediaViewHolder(mContext,
     lateinit var message: Saved
 
     override fun getUid(): Long = message.time
-    override fun getDataPath(): String? = message.path
+    override fun getDataPath(): String = message.path!!
 
     override fun hideMedia() {
         super.hideMedia()

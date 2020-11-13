@@ -8,9 +8,10 @@ import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME
 import android.graphics.*
 import android.graphics.drawable.LayerDrawable
-import android.net.Uri
 import android.view.Gravity
 import android.webkit.MimeTypeMap
 import androidx.core.app.NotificationCompat
@@ -19,6 +20,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.bruhascended.organiso.ConversationActivity
@@ -28,6 +30,8 @@ import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.db.*
 import com.bruhascended.core.model.getOtp
+import com.bruhascended.organiso.BuildConfig
+import com.bruhascended.organiso.common.getSharable
 import java.io.File
 
 /*
@@ -155,7 +159,11 @@ class MessageNotificationManager(
             mContext, conversation.id,
             Intent(mContext, ConversationActivity::class.java)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString())
-                .setFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME),
+                .setFlags(
+                    FLAG_ACTIVITY_TASK_ON_HOME or
+                            FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                ),
             PendingIntent.FLAG_CANCEL_CURRENT
         )
 
@@ -209,7 +217,7 @@ class MessageNotificationManager(
                 msgText = when {
                     mType.startsWith("audio") -> mContext.getString(R.string.audio_col)
                     mType.startsWith("video") -> mContext.getString(R.string.video_col)
-                    else -> ""
+                    else -> mContext.getString(R.string.image_col)
                 } + it.text
             }
             val msg = NotificationCompat.MessagingStyle.Message(
@@ -218,7 +226,11 @@ class MessageNotificationManager(
                 if (it.fromUser) userPerson else senderPerson
             )
             if (it.path != null && getMimeType(it.path!!).startsWith("image")) {
-                msg.setData(getMimeType(it.path!!), Uri.fromFile(File(it.path!!)))
+                val sharedUri = FileProvider.getUriForFile(
+                    mContext,
+                    "${BuildConfig.APPLICATION_ID}.fileProvider", File(it.path!!)
+                )
+                msg.setData(getMimeType(it.path!!), sharedUri)
             }
             conversationStyle.addMessage(msg)
         }

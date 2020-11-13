@@ -74,6 +74,7 @@ class ConversationViewHolder(
     var selectedColor = 0
     var backgroundColor = 0
     var textColor = 0
+    private var mediaTextColor = 0
 
     init {
         val tp = mContext.obtainStyledAttributes(
@@ -81,12 +82,14 @@ class ConversationViewHolder(
                 R.attr.multiChoiceSelectorColor,
                 android.R.attr.selectableItemBackground,
                 R.attr.unreadTextColor,
-                R.attr.backgroundColor
+                R.attr.backgroundColor,
+                R.attr.headerTextColor,
             )
         )
         defaultBackground = tp.getDrawable(1)!!
         selectedColor = tp.getColor(0, 0)
         backgroundColor = tp.getColor(3, 0)
+        mediaTextColor = tp.getColor(4, 0)
         textColor = tp.getColor(2, 0)
         tp.recycle()
     }
@@ -150,8 +153,7 @@ class ConversationViewHolder(
                     str.setSpan(ForegroundColorSpan(textColor), 0, str.length, flag)
                 }
                 if (it.hasMedia) str.apply {
-                    val color = mContext.getColor(R.color.colorAccent)
-                    setSpan(ForegroundColorSpan(color), 0, 6, flag)
+                    setSpan(ForegroundColorSpan(mediaTextColor), 0, 6, flag)
                 }
                 messageTextView.text = str
             }

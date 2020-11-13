@@ -30,6 +30,7 @@ import kotlinx.android.synthetic.main.activity_new_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.*
 
 /*
@@ -132,9 +133,9 @@ class NewConversationActivity : MediaPreviewActivity() {
         if (Intent.ACTION_SENDTO == intent.action) {
             val destinations = TextUtils.split(getRecipients(intent.data!!), ";")
             destinations.forEach { addRecipient(it) }
-        } else if (Intent.ACTION_SEND == intent.action && intent.type != null) {
+        } else if (Intent.ACTION_SEND == intent.action && (intent.type != null || intent.data != null)) {
             when {
-                intent.type!!.startsWith("text") -> {
+                intent.type?.startsWith("text") ?: false -> {
                     val str = intent.getStringExtra(Intent.EXTRA_TEXT)
                     messageEditText.setText(str)
                 }
@@ -151,13 +152,16 @@ class NewConversationActivity : MediaPreviewActivity() {
                         keyListener = null
                     }
                     sendButton.setOnClickListener {
+                        addRecipient(to.text.toString())
+                        to.text = null
+
                         recipients.forEach{ rec ->
                             msgs.forEach { mes ->
                                 startService(
                                     Intent(this, SenderService::class.java).apply {
                                         putExtra(EXTRA_NUMBER, rec.number)
                                         putExtra(EXTRA_MESSAGE_TEXT, mes.text)
-                                        data = Uri.parse(mes.path)
+                                        data = Uri.fromFile(File(mes.path!!))
                                     }
                                 )
                             }
