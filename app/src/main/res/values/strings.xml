@@ -94,7 +94,6 @@
     <string name="delivered">delivered</string>
     <string name="sent">sent</string>
     <string name="queued">queued</string>
-    <string name="sending">sending</string>
     <string name="failed_retry">failed. tap to retry</string>
     <string name="failed">failed</string>
     <string name="drafted">drafted</string>

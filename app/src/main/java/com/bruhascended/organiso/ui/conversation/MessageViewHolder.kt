@@ -11,10 +11,7 @@ import android.text.style.BackgroundColorSpan
 import android.view.View
 import android.view.View.VISIBLE
 import android.widget.TextView
-import com.bruhascended.core.constants.MESSAGE_TYPE_DRAFT
-import com.bruhascended.core.constants.MESSAGE_TYPE_OUTBOX
-import com.bruhascended.core.constants.MESSAGE_TYPE_QUEUED
-import com.bruhascended.core.constants.MESSAGE_TYPE_SENT
+import com.bruhascended.core.constants.*
 import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.MediaViewHolder
@@ -101,14 +98,13 @@ class MessageViewHolder(
         timeTextView.text = dtp.getFull(message.time)
         timeTextView.alpha = 0f
 
-        if (message.type != 1) {
+        if (message.type != MESSAGE_TYPE_INBOX) {
             statusTextView!!.visibility = VISIBLE
             statusTextView.setTextColor(textColor)
             statusTextView.text =  when {
                 message.delivered -> mContext.getString(R.string.delivered)
                 message.type == MESSAGE_TYPE_SENT -> mContext.getString(R.string.sent)
                 message.type == MESSAGE_TYPE_QUEUED -> mContext.getString(R.string.queued)
-                message.type == MESSAGE_TYPE_OUTBOX -> mContext.getString(R.string.sending)
                 message.type == MESSAGE_TYPE_DRAFT -> {
                     statusTextView.setTextColor(mContext.getColor(R.color.blue))
                     if (retryEnabled) mContext.getString(R.string.drafted_edit)

@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.core.constants.MESSAGE_TYPE_DRAFT
 import com.bruhascended.core.constants.MESSAGE_TYPE_FAILED
 import com.bruhascended.core.constants.MESSAGE_TYPE_INBOX
+import com.bruhascended.core.constants.MESSAGE_TYPE_OUTBOX
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageComparator
 import com.bruhascended.organiso.R
@@ -121,7 +122,7 @@ class MessageRecyclerAdaptor (
                         it.root.background = it.defaultBackground
                 }
             }
-            it.message.type == MESSAGE_TYPE_FAILED -> {
+            it.message.type in arrayOf(MESSAGE_TYPE_FAILED, MESSAGE_TYPE_OUTBOX) -> {
                 retryCallBack?.invoke(it.message)
             }
             it.message.type == MESSAGE_TYPE_DRAFT -> {

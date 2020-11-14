@@ -130,12 +130,14 @@ class MMSManager (
                 val idColumn = getColumnIndex("_id")
                 val dateColumn = getColumnIndex("date")
                 val textColumn = getColumnIndex("text_only")
+                val typeColumn = getColumnIndex("msg_box")
                 do {
                     val id = getString(idColumn)
                     val isMms = getString(textColumn) == "0"
-                    val date = getString(dateColumn).toLong()
+                    val date = getString(dateColumn).toLong() * 1000
+                    val type = getString(typeColumn).toInt()
                     if (isMms) {
-                        putMMS(id.toInt(), date)
+                        putMMS(id.toInt(), type, init = true, date = date)
                     }
                 } while (moveToNext())
             }
@@ -145,6 +147,8 @@ class MMSManager (
 
     fun putMMS(
         mmsId: Int,
+        type: Int,
+        init: Boolean = false,
         date: Long = System.currentTimeMillis(),
         activeNumber: String? = null,
         activeDao: MessageDao? = null,
@@ -183,12 +187,15 @@ class MMSManager (
         if (file==null && body.isBlank()) return null
 
         val sender = getAddressNumber(mmsId)
-        val sentByUser = sender.first
+        val mType = if (type in 0..2) {
+            if (sender.first) MESSAGE_TYPE_SENT else MESSAGE_TYPE_INBOX
+        } else {
+            type
+        }
         val rawNumber = cm.getClean(sender.second)
 
         val message = Message(
-            body, if (sentByUser) MESSAGE_TYPE_SENT else MESSAGE_TYPE_INBOX,
-            date, path = file, id = mmsId
+            body, mType, date, path = file, id = mmsId
         )
 
         var conversation: Conversation? = null
@@ -203,7 +210,7 @@ class MMSManager (
         conversation = if (conversation != null) {
             conversation.apply {
                 if (time < message.time) {
-                    read = activeNumber == rawNumber
+                    read = init
                     time = message.time
                 }
                 label = LABEL_PERSONAL
@@ -214,7 +221,7 @@ class MMSManager (
         } else {
             val con = Conversation(
                 rawNumber,
-                read = activeNumber == rawNumber,
+                read = init,
                 time = message.time,
                 label = LABEL_PERSONAL,
                 forceLabel = LABEL_PERSONAL,
