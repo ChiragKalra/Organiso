@@ -11,12 +11,6 @@
          android:icon="@drawable/ic_search"
          app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="300"
-        android:title="@string/settings"
-        android:icon="@drawable/ic_settings"
-        app:showAsAction="never"/>
      <item
          android:id="@+id/action_saved"
          android:orderInCategory="300"
@@ -29,4 +23,10 @@
          android:title="@string/scheduled_messages"
          app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="500"
+        android:title="@string/settings"
+        android:icon="@drawable/ic_settings"
+        app:showAsAction="never"/>
 </menu>
