@@ -120,8 +120,8 @@ class ConversationViewHolder(
     }
 
     fun onBind() {
-        senderTextView.text = conversation.number
         val mNumber = conversation.number
+        senderTextView.text = mNumber
         val live = mContactsProvider.getLive(mNumber)
         if (!live.hasActiveObservers()) {
             live.observeForever {
@@ -133,20 +133,20 @@ class ConversationViewHolder(
         timeTextView.text = dtp.getCondensed(conversation.time)
         muteImage.visibility = if (conversation.isMuted) View.VISIBLE else View.GONE
 
-        val liveConversation = mainDaos[conversation.label].getLive(conversation.number)
-        if (!liveConversation.hasActiveObservers()) liveConversation.observeForever {
-            val mDb = MessageDbFactory(mContext).of(mNumber)
-            mDb.manager().loadLastSync().also {
+        MessageDbFactory(mContext).of(mNumber).apply {
+            manager().loadLastSync().also {
                 if (mNumber != conversation.number) return@also
                 if (it == null) {
                     mainDaos[conversation.label].delete(conversation)
                     return@also
                 }
                 val str = if (it.hasMedia)
-                    SpannableString(mContext.getString(
+                    SpannableString(
+                        mContext.getString(
                             R.string.media_message,
                             it.text
-                        ))
+                        )
+                    )
                 else SpannableString(it.text)
                 if (!conversation.read) {
                     str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
@@ -157,7 +157,7 @@ class ConversationViewHolder(
                 }
                 messageTextView.text = str
             }
-            mDb.close()
+            close()
         }
 
         showDisplayPicture()

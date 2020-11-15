@@ -124,6 +124,9 @@ interface MessageDao {
     @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
     fun loadLastSync(): Message?
 
+    @Query("SELECT * FROM messages ORDER BY time DESC LIMIT 1")
+    fun loadLastLive(): LiveData<Message?>
+
     @Query("SELECT * FROM messages ORDER BY time DESC")
     fun loadAll(): LiveData<List<Message>>
 

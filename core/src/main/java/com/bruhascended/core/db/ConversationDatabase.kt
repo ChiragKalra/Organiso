@@ -48,6 +48,7 @@ data class Conversation(
         other as Conversation
         if (read != other.read) return false
         if (isMuted != other.isMuted) return false
+        if (time != other.time) return false
         return true
     }
 

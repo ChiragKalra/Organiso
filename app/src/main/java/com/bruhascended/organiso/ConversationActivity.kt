@@ -277,6 +277,17 @@ class ConversationActivity : MediaPreviewActivity() {
         }
     }
 
+    private fun liveUpdateTime() {
+        mViewModel.dao.loadLastLive().observe(this) {
+            if (it != null) {
+                mainDaoProvider.getMainDaos()[mViewModel.label].updateTime(
+                    mViewModel.number,
+                    it.time
+                )
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setPrefTheme()
@@ -319,6 +330,7 @@ class ConversationActivity : MediaPreviewActivity() {
         )
 
         setupRecycler()
+        liveUpdateTime()
         goToBottom.setOnClickListener {
             recyclerView.smoothScrollToPosition(0)
         }
