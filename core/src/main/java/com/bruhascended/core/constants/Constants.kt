@@ -3,6 +3,8 @@ package com.bruhascended.core.constants
 import android.Manifest
 import com.bruhascended.core.BuildConfig.LIBRARY_PACKAGE_NAME
 
+const val NOTIFICATION_ID_GROUP = -1231
+
 // message types
 const val MESSAGE_TYPE_ALL = 0
 const val MESSAGE_TYPE_INBOX = 1

@@ -64,19 +64,19 @@ class MainViewModel(
 
     fun forceReload() {
         if (prefs.getString(PREF_VISIBLE_CATEGORIES, "") == "") {
-            visibleCategories = Array(4) {
-                when(it) {
-                    LABEL_PERSONAL -> LABEL_IMPORTANT
-                    LABEL_IMPORTANT -> LABEL_PERSONAL
-                    else -> it
-                }
-            }
-            hiddenCategories = Array(2) { 4 + it }
+            // set default order of categories
+            visibleCategories = arrayOf(
+                LABEL_IMPORTANT, LABEL_PERSONAL, LABEL_TRANSACTIONS
+            )
+            hiddenCategories = arrayOf(
+                LABEL_PROMOTIONS, LABEL_SPAM, LABEL_BLOCKED
+            )
             prefs.edit()
                 .putString(PREF_VISIBLE_CATEGORIES, visibleCategories.toJson())
                 .putString(PREF_HIDDEN_CATEGORIES, hiddenCategories.toJson())
                 .apply()
         } else {
+            // get order of categories
             visibleCategories =
                 prefs.getString(PREF_VISIBLE_CATEGORIES, "").toLabelArray()
             hiddenCategories =

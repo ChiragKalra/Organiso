@@ -134,7 +134,7 @@ class MessageNotificationManager(
         }
         if (active < 3) return
         notificationManager.notify(
-            0,
+            NOTIFICATION_ID_GROUP,
             Builder(mContext, "0")
                 .setColorized(true)
                 .setColor(mContext.getColor(R.color.colorAccent))

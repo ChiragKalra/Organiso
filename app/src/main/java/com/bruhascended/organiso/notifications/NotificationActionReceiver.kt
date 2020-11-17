@@ -1,5 +1,6 @@
 package com.bruhascended.organiso.notifications
 
+import android.app.NotificationManager
 import android.content.*
 import android.os.Handler
 import android.os.Looper
@@ -7,11 +8,14 @@ import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
 import com.bruhascended.core.analytics.AnalyticsLogger
-import com.bruhascended.organiso.*
-import com.bruhascended.core.db.*
 import com.bruhascended.core.constants.*
-import com.bruhascended.organiso.services.SenderService
 import com.bruhascended.core.data.MainDaoProvider
+import com.bruhascended.core.db.Message
+import com.bruhascended.core.db.MessageDbFactory
+import com.bruhascended.core.db.NotificationDbFactory
+import com.bruhascended.core.db.toConversation
+import com.bruhascended.organiso.R
+import com.bruhascended.organiso.services.SenderService
 import kotlin.math.abs
 
 /*
@@ -34,6 +38,17 @@ import kotlin.math.abs
 class NotificationActionReceiver : BroadcastReceiver() {
 
     companion object {
+        private fun Context.hideSummaryNotification() {
+            val mNM = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            var active = 0
+            mNM.activeNotifications.forEach {
+                if (!it.notification.extras.getBoolean(EXTRA_IS_OTP, false)) active++
+            }
+            if (active == 1) {
+                NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_GROUP)
+            }
+        }
+
         fun Context.cancelNotification(sender: String, id: Int?) {
             NotificationManagerCompat.from(this).cancel(id!!)
             sendBroadcast(
@@ -41,6 +56,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 .setAction(ACTION_CANCEL)
                 .putExtra(EXTRA_NUMBER, sender)
             )
+            hideSummaryNotification()
         }
     }
 

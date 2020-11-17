@@ -56,6 +56,7 @@ class SenderService: Service() {
         useSystemSending = true
         deliveryReports = true
         sendLongAsMms = false
+        this.subscriptionId
     }
 
     private fun getDao(number: String): MessageDao {

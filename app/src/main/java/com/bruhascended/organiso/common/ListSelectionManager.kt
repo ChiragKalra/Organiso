@@ -93,6 +93,7 @@ class ListSelectionManager<T: Any> (
     }
 
     val isRangeMode get() = rangeSelection
+    val isRangeSelected get() = previousSelection != -1
     val isActive get() = selected.size > 0
     val selectedItems: List<T> get() = arrayListOf<T>().apply {
         for (pos in selected) {

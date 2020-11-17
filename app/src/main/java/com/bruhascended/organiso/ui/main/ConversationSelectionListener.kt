@@ -59,6 +59,7 @@ class ConversationSelectionListener(
 
     @SuppressLint("InflateParams")
     private fun toggleRange(item: MenuItem): Boolean {
+        if (selectionManager.isRangeMode && selectionManager.isRangeSelected) return true
         val inf = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val iv = inf.inflate(R.layout.view_button_transition, null) as ImageView
 
