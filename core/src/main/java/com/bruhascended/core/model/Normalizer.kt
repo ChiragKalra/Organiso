@@ -48,7 +48,7 @@ fun removeDecimals (message: String): Pair<String, Float> {
 fun removeDates (message: String): Pair<String, Float> {
     val date = Regex("(?:\\d{1,2}[-/th|st|nd|rd\\s]*)?" +
             "(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?[a-z\\s,.]*" +
-            "(?:\\d{1,2}[-/th|st|nd|rd)\\s,]*)+(?:\\d{2,4})+")
+            "(?:\\d{1,2}[-/th|st|nd|rd)\\s,]*)+(?:\\d{2,4})+", RegexOption.IGNORE_CASE)
     return removeRegex(message, date)
 }
 
@@ -67,7 +67,7 @@ fun removeLines(message: String): String {
 fun trimUrls(message: String): Pair<String, Float> {
     val urlRe = Regex("(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\." +
             "[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/" +
-            "(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})")
+            "(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})", RegexOption.IGNORE_CASE)
     val urls = urlRe.findAll(message)
     var newMessage = message
     for (url in urls) {

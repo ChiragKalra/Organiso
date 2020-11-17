@@ -93,7 +93,7 @@ class MessageSearchActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 flow.collectLatest {
                     mAdaptor.submitData(it.filter { msg ->
-                        Regex("\\b${key}.*").matches(msg.text)
+                        Regex("\\b${key}.*", RegexOption.IGNORE_CASE).find(msg.text) != null
                     })
                 }
             }

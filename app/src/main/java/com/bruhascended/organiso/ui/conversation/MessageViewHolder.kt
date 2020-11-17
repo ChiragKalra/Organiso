@@ -88,7 +88,7 @@ class MessageViewHolder(
         hideMedia()
 
         messageTextView.text = if (!searchKey.isBlank()) SpannableString(message.text).apply {
-            val regex = Regex("\\b${searchKey}")
+            val regex = Regex("\\b${searchKey}", RegexOption.IGNORE_CASE)
             val matches = regex.findAll(message.text.toLowerCase(Locale.ROOT))
             for (match in matches) {
                 val index = match.range

@@ -60,8 +60,8 @@ class SearchActivity : AppCompatActivity() {
             val cons =
                 MainDaoProvider(mContext).getMainDaos()[category].loadAllSync().filter {
                     val name = mContactsProvider.getNameOrNull(it.number)
-                    Regex("\\b${key}.*").matches(it.number) ||
-                            (name != null && Regex("\\b${key}.*").matches(name))
+                    Regex("\\b$key", RegexOption.IGNORE_CASE).find(it.number) != null ||
+                            (name != null && Regex("\\b$key", RegexOption.IGNORE_CASE).find(name) != null)
                 }
             if (cons.isNotEmpty()) {
                 cons.forEach { displayedSenders.add(it.number) }
@@ -85,7 +85,7 @@ class SearchActivity : AppCompatActivity() {
         var otherDisplayed = false
         mContactsProvider.getSync().forEach {  contact ->
             val name = contact.name.toLowerCase(Locale.ROOT)
-            if (!Regex("\\b${key}.*").matches(name))
+            if (Regex("\\b${key}", RegexOption.IGNORE_CASE).find(name) == null)
                 return@forEach
 
             for (sender in displayedNumbers) {
@@ -122,7 +122,7 @@ class SearchActivity : AppCompatActivity() {
                 if (searchThread.isInterrupted) return
                 MessageDbFactory(mContext).of(con.number).apply {
                     msgs = manager().loadAllSync().filter {
-                        Regex("\\b${key}.*").matches(it.text)
+                        Regex("\\b${key}", RegexOption.IGNORE_CASE).find(it.text) != null
                     }
                     close()
                 }
