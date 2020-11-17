@@ -88,6 +88,7 @@ const val PREF_SEND_SPAM = "report_spam"
 const val PREF_DARK_THEME = "dark_theme"
 const val PREF_ENTER_SEND = "enter_send"
 const val PREF_CONTACTS_ONLY = "contacts_only"
+const val PREF_ALTERNATE_SIM = "alternate_sim"
 
 const val ACTION_MOVE = "Move"
 const val ACTION_REPORT = "Report Spam"

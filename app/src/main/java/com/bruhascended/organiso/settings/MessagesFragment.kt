@@ -1,10 +1,17 @@
 package com.bruhascended.organiso.settings
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.telephony.SubscriptionManager
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.bruhascended.core.constants.PREF_ALTERNATE_SIM
 import com.bruhascended.core.constants.PREF_CONTACTS_ONLY
 import com.bruhascended.core.constants.PREF_DELETE_OTP
 import com.bruhascended.organiso.R
@@ -35,6 +42,8 @@ class MessagesFragment : PreferenceFragmentCompat() {
 
         val deleteOtpPref: SwitchPreferenceCompat = findPreference(PREF_DELETE_OTP)!!
         val contactsOnlyPref: SwitchPreferenceCompat = findPreference(PREF_CONTACTS_ONLY)!!
+        val simPref: SwitchPreferenceCompat = findPreference(PREF_ALTERNATE_SIM)!!
+        val simPrefCategory: PreferenceCategory = findPreference("dual_sim_category")!!
 
         val mContext = requireContext()
 
@@ -58,5 +67,34 @@ class MessagesFragment : PreferenceFragmentCompat() {
             }
             true
         }
+
+        val sm = mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
+                as SubscriptionManager
+
+        //hide dual sim settings if single sim is available
+        if (ActivityCompat.checkSelfPermission(
+                mContext,
+                Manifest.permission.READ_PHONE_STATE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        simPrefCategory.isVisible = sm.activeSubscriptionInfoCount == 2
+
+        //display sim phone numbers
+        if (sm.activeSubscriptionInfoCount == 2) {
+            simPref.summaryOn =
+                "${sm.activeSubscriptionInfoList[1].number}(${getString(R.string.sim_2)})"
+            simPref.summaryOff =
+                "${sm.activeSubscriptionInfoList[0].number}(${getString(R.string.sim_1)})"
+        }
+
     }
 }

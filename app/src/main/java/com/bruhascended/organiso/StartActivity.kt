@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
 import android.provider.Telephony
+import android.telephony.SmsManager
+import android.telephony.SubscriptionManager
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
@@ -76,12 +78,33 @@ class StartActivity : AppCompatActivity() {
             finish()
             return
         }
+
+
+        // set default sim card slot if dual sim
+        val sm = getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
+                as SubscriptionManager
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            if (sm.activeSubscriptionInfoCount == 2) {
+                sharedPref.edit()
+                    .putBoolean(
+                        PREF_ALTERNATE_SIM,
+                        SmsManager.getDefaultSmsSubscriptionId()
+                                == sm.activeSubscriptionInfoList[1].subscriptionId
+                    ).apply()
+            }
+        }
+
         when {
             packageName != Telephony.Sms.getDefaultSmsPackage(this) -> {
                 requestDefaultApp(onDefaultAppResult)
             }
-            ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED -> {
+            ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_CONTACTS
+            ) == PackageManager.PERMISSION_DENIED ->
+            {
                 ActivityCompat.requestPermissions(this,
                     arrayOf(Manifest.permission.READ_CONTACTS),
                     0)

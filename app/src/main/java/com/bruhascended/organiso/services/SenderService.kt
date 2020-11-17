@@ -1,17 +1,20 @@
 package com.bruhascended.organiso.services
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.telephony.SmsManager
+import android.telephony.SubscriptionManager
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.preference.PreferenceManager
 import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
 import com.bruhascended.organiso.R
@@ -52,11 +55,11 @@ class SenderService: Service() {
 
     private lateinit var mContactProvider: ContactsProvider
 
+    @SuppressLint("MissingPermission")
     private val settings = Settings().apply {
         useSystemSending = true
         deliveryReports = true
         sendLongAsMms = false
-        this.subscriptionId
     }
 
     private fun getDao(number: String): MessageDao {
@@ -300,6 +303,26 @@ class SenderService: Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        // use selected sim or default
+        settings.apply {
+            val sm = mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
+                    as SubscriptionManager
+            val pm = PreferenceManager.getDefaultSharedPreferences(mContext)
+
+            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE )
+                != PackageManager.PERMISSION_GRANTED) {
+                return@apply
+            }
+
+            if (sm.activeSubscriptionInfoCount == 2) {
+                subscriptionId = if (pm.getBoolean(PREF_ALTERNATE_SIM, false)) {
+                    sm.activeSubscriptionInfoList[1].subscriptionId
+                } else {
+                    sm.activeSubscriptionInfoList[0].subscriptionId
+                }
+            }
+        }
+
         Thread {
             val retry = intent.getIntExtra(EXTRA_MESSAGE_ID, -1)
             if (retry == -1) {

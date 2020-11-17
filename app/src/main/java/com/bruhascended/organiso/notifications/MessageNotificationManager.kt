@@ -31,7 +31,6 @@ import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.db.*
 import com.bruhascended.core.model.getOtp
 import com.bruhascended.organiso.BuildConfig
-import com.bruhascended.organiso.common.getSharable
 import java.io.File
 
 /*

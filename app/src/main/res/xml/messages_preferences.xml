@@ -40,8 +40,22 @@
             app:icon="@drawable/ic_report_theme"
             app:key="report_spam"
             app:allowDividerBelow="false"
-            android:summary="@string/send_reports_summary"
+            app:summary="@string/send_reports_summary"
             app:title="@string/upload_spam_reports" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="dual_sim_category"
+        android:layout="@layout/view_category_pref"
+        app:title="@string/dual_sim" >
+        <SwitchPreferenceCompat
+            app:summaryOn="@string/sim_2"
+            app:summaryOff="@string/sim_1"
+            app:defaultValue="false"
+            app:icon="@drawable/ic_sim_card"
+            app:key="alternate_sim"
+            app:allowDividerBelow="false"
+            app:title="@string/choose_sim" />
     </PreferenceCategory>
 
 </PreferenceScreen>

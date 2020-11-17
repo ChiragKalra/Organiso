@@ -12,8 +12,8 @@ android {
         applicationId "com.bruhascended.organiso"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 993
-        versionName "0.993-beta08"
+        versionCode 994
+        versionName "0.994-beta09"
 
         kotlinOptions {
             freeCompilerArgs += ['-XXLanguage:+UnitConversion']

@@ -196,4 +196,8 @@
     <string name="personal_contacts_only">Only show saved contacts in personal category</string>
     <string name="saved_contacts_only_personal">Saved Contacts Only</string>
     <string name="image_col">Image:</string>
+    <string name="dual_sim">Dual Sim</string>
+    <string name="choose_sim">Select Sim</string>
+    <string name="sim_2">Sim 2</string>
+    <string name="sim_1">Sim 1</string>
 </resources>
