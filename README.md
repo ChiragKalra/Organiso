@@ -2,8 +2,7 @@
 ![Promo](https://github.com/ChiragKalra/Organiso/blob/master/logo.png?raw=true)
 
 ## About
-SMS Organiser Android is an android app for classifying SMSs into common categories like (personal, important, transactions, advertisements, spam) with an accuracy of 93% for each message. 
-However for all practical purposes, it uses data from entire conversations to classify them. Since most conversations contain more than 1 message, real life accuracy jumps to around 99%. 
+SMS Organiser Android is an android app for classifying SMSs into common categories like (personal, important, transactions, advertisements, spam).
 
 ## Usage
 This app is in beta. However if you wanna check it out, download the latest apk from releases.
