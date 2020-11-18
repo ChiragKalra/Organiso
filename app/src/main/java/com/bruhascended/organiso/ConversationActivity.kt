@@ -371,6 +371,7 @@ class ConversationActivity : MediaPreviewActivity() {
         favoriteButton.setOnClickListener {
             val msg = messageEditText.text.toString().trim()
             if (msg.isEmpty() && !isMms) {
+                Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             mSavedDao.insert(
@@ -393,6 +394,7 @@ class ConversationActivity : MediaPreviewActivity() {
         draftButton.setOnClickListener{
             val msg = messageEditText.text.toString().trim()
             if (msg.isEmpty() && !isMms) {
+                Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             messageEditText.text = null
@@ -419,6 +421,7 @@ class ConversationActivity : MediaPreviewActivity() {
             val editText = messageEditText
             val msg = editText.text.toString().trim()
             if (msg.isEmpty() && !isMms) {
+                Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -538,5 +541,9 @@ class ConversationActivity : MediaPreviewActivity() {
         mViewModel.apply {
             mDraftsManager.create(msg, mViewModel.number, mmsURI)
         }
+        mainDaoProvider.getMainDaos()[mViewModel.label].updateTime(
+            mViewModel.number,
+            System.currentTimeMillis()
+        )
     }
 }
