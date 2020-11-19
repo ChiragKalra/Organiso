@@ -94,12 +94,19 @@ fun time (date: Long): Float {
     return abs(abs(seriesTime-240) -(60*12)) / 720f
 }
 
-// returns null if message has no otp otherwise returns the 4-6 digit OTP
+fun removeHiddenNumbers (message: String): Pair<String, Float> {
+    // identifies decimals, time, date and big numbers separated by ','
+    val decimal = Regex("\\d*[Xx*]+\\d+")
+    return removeRegex(message, decimal)
+}
+
+
+// removes large numbers from sms text
 fun getOtp(message: String): String? {
-    val maxSepAllowed = 50
+    val maxSepAllowed = 150
     val sepRegex = Regex("(?<=\\d)[\\s\\-](?=\\d)")
-    val content = message.toLowerCase(Locale.ROOT).replace(sepRegex, "")
-    val otpRegex = Regex("\\b\\d{4,6}\\b")
+    val content = removeHiddenNumbers(removeDecimals(message).first).first.toLowerCase(Locale.ROOT).replace(sepRegex, "")
+    val otpRegex = Regex("\\b\\d{6}\\b")
     val otps = otpRegex.findAll(content).toList()
 
     if (otps.isEmpty()) {
@@ -107,8 +114,7 @@ fun getOtp(message: String): String? {
     }
     var otp = otps.first().groups.first()!!.value
     var otpIndex = content.indexOf(otp)
-    if (content.contains("rs.", ignoreCase = true) &&
-        otpIndex - content.indexOf("rs.") == 3) {
+    if (otpIndex - content.indexOf(".") == 1) {
         if (otps.size == 1) {
             return null
         } else {
@@ -137,10 +143,9 @@ fun getOtp(message: String): String? {
         if (numberIndex != -1) {
             numberPairs.forEach {
                 val ind = indexOf(it)
-                if (ind != 1 && (
-                        abs(otpIndex-ind) < maxSepAllowed ||
-                        abs(otpIndex-numberIndex) < maxSepAllowed
-                    )
+                if (ind != 1 &&
+                    (abs(otpIndex-ind) < maxSepAllowed ||
+                        abs(otpIndex-numberIndex) < maxSepAllowed)
                 ) {
                     return otp
                 }

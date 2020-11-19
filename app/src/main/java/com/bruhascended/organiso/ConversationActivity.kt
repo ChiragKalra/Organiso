@@ -284,6 +284,8 @@ class ConversationActivity : MediaPreviewActivity() {
                     mViewModel.number,
                     it.time
                 )
+            } else {
+                mainDaoProvider.getMainDaos()[mViewModel.label].delete(mViewModel.conversation)
             }
         }
     }

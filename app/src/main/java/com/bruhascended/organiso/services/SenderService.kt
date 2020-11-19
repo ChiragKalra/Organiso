@@ -96,7 +96,7 @@ class SenderService: Service() {
                 old.type = status
                 old.id = id
                 insert(old)
-                if (new != null) {
+                if (new != null && new.text != old.text) {
                     new.id = null
                     insert(new)
                 }

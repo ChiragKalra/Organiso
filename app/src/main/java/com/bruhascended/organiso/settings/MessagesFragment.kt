@@ -71,7 +71,6 @@ class MessagesFragment : PreferenceFragmentCompat() {
         val sm = mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
                 as SubscriptionManager
 
-        //hide dual sim settings if single sim is available
         if (ActivityCompat.checkSelfPermission(
                 mContext,
                 Manifest.permission.READ_PHONE_STATE
