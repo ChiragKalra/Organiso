@@ -6,7 +6,6 @@ import androidx.paging.PagingSource
 import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
 import com.bruhascended.core.constants.LABEL_NONE
-import com.bruhascended.core.constants.LABEL_PERSONAL
 import com.bruhascended.core.data.MainDaoProvider
 import com.google.gson.Gson
 import java.io.Serializable
@@ -34,10 +33,10 @@ data class Conversation(
     @PrimaryKey
     val number: String,
     var time: Long = 0,
-    var label: Int = LABEL_PERSONAL,
-    var forceLabel: Int = -1,
+    var label: Int = LABEL_NONE,
+    var forceLabel: Int = LABEL_NONE,
     var probabilities: Array<Float> =
-        Array(5) { if (it == LABEL_PERSONAL) 1F else 0F },
+        Array(5) { 0F },
     var read: Boolean = true,
     var isMuted: Boolean = false
 ): Serializable {

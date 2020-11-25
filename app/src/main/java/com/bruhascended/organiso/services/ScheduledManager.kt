@@ -41,12 +41,14 @@ class ScheduledManager(
     ): Worker(mContext, workerParams) {
 
         override fun doWork(): Result {
+            // extract scheduled message data
             val number = inputData.getString(EXTRA_NUMBER)!!
             val text = inputData.getString(EXTRA_MESSAGE_TEXT)!!
             val file = inputData.getString(EXTRA_FILE_PATH)
             val time = inputData.getLong(EXTRA_TIME, 0)
 
 
+            // start send service with message data
             mContext.startService(
                 Intent(mContext, SenderService::class.java).apply {
                     putExtra(EXTRA_NUMBER, number)
@@ -57,6 +59,7 @@ class ScheduledManager(
                 }
             )
 
+            // remove this scheduled message from scheduled db
             MessageDbFactory(mContext).of(number).apply {
                 manager().deleteScheduled(manager().findScheduledByTime(time))
             }
@@ -65,12 +68,19 @@ class ScheduledManager(
         }
     }
 
+    // schedule a message when requested by user
     fun add(scheduledTime: Long, number: String, text: String, data: Uri?) {
+        // current date
         val date = System.currentTimeMillis()
+
+        // save file locally
         val path = mContext.saveFile(data, date.toString())
+
+        // add Connected Network to work constraints
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
+        // construct future work request
         val request = OneTimeWorkRequest.Builder(SendWork::class.java)
             .setConstraints(constraints)
             .setInitialDelay(abs(scheduledTime - date), TimeUnit.MILLISECONDS)
@@ -83,7 +93,10 @@ class ScheduledManager(
                     .putLong(EXTRA_TIME, scheduledTime)
                     .build()
             ).build()
+        // enqueue the request
         mWorkManager.enqueue(request)
+
+        // insert the message in scheduled db
         mDao.insertScheduled(
             ScheduledMessage(
                 date,
@@ -95,6 +108,7 @@ class ScheduledManager(
         )
     }
 
+    // remove scheduled message from db when requested by user
     fun remove(message: ScheduledMessage) {
         mWorkManager.cancelAllWorkByTag(message.id.toString())
         mDao.deleteScheduled(message)

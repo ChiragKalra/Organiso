@@ -71,23 +71,19 @@ class MessagesFragment : PreferenceFragmentCompat() {
         val sm = mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
                 as SubscriptionManager
 
+        // check permissions
         if (ActivityCompat.checkSelfPermission(
                 mContext,
                 Manifest.permission.READ_PHONE_STATE
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return
         }
+
+        // hide setting if user doesn't have dual sim
         simPrefCategory.isVisible = sm.activeSubscriptionInfoCount == 2
 
-        //display sim phone numbers
+        // display sim phone numbers
         if (sm.activeSubscriptionInfoCount == 2) {
             simPref.summaryOn =
                 "${sm.activeSubscriptionInfoList[1].number}(${getString(R.string.sim_2)})"

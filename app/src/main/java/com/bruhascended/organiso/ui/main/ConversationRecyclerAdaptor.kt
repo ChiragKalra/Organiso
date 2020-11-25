@@ -14,7 +14,6 @@ import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.ConversationComparator
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.organiso.common.MyPagingDataAdapter
-import kotlin.math.abs
 
 @SuppressLint("ResourceType")
 class ConversationRecyclerAdaptor(

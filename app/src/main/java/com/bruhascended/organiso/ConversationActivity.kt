@@ -71,7 +71,6 @@ class ConversationActivity : MediaPreviewActivity() {
 
     private val mViewModel: ConversationViewModel by viewModels()
 
-
     private lateinit var mAdaptor: MessageRecyclerAdaptor
     private lateinit var mLayoutManager: LinearLayoutManager
     private lateinit var selectionManager: ListSelectionManager<Message>
@@ -290,6 +289,68 @@ class ConversationActivity : MediaPreviewActivity() {
         }
     }
 
+    private fun requestScheduled() {
+        val timeRn = System.currentTimeMillis()
+        val calenderRn = Calendar.getInstance().apply {
+            timeInMillis = timeRn
+        }
+        val editText = messageEditText
+        val msg = editText.text.toString().trim()
+
+        // return if text field is empty and no media is added
+        if (msg.isEmpty() && !isMms) {
+            Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // get date and time from user
+        val calendar: Calendar = Calendar.getInstance()
+        DatePickerDialog(this).apply {
+            datePicker.minDate = System.currentTimeMillis()
+            setOnDateSetListener { _, i, i2, i3 ->
+                calendar.set(i, i2, i3)
+                TimePickerDialog(
+                    mContext,
+                    { _, hr, min ->
+                        calendar.set(Calendar.HOUR_OF_DAY, hr)
+                        calendar.set(Calendar.MINUTE, min)
+                        if (calendar.timeInMillis <= System.currentTimeMillis()) {
+                            Toast.makeText(
+                                mContext,
+                                getString(R.string.cant_send_scheduled_to_past),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            editText.text = null
+                            mScheduledSMSSender.add(
+                                calendar.timeInMillis,
+                                mViewModel.number,
+                                msg, mmsURI
+                            )
+                            Toast.makeText(
+                                mContext,
+                                getString(R.string.scheduled),
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            // hide extra action buttons
+                            toggleExtraVisibility(false)
+                        }
+                    },
+                    if (DateUtils.isToday(timeRn)) calenderRn[Calendar.HOUR_OF_DAY] else 0,
+                    if (DateUtils.isToday(timeRn)) calenderRn[Calendar.MINUTE] + 1 else 0,
+                    false
+                ).apply {
+                    setTitle(R.string.send_scheduled)
+                    setButton(
+                        TimePickerDialog.BUTTON_POSITIVE,
+                        getString(R.string.schedule)
+                    ) { _, _ -> }
+                }.show()
+            }
+        }.show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setPrefTheme()
@@ -323,7 +384,7 @@ class ConversationActivity : MediaPreviewActivity() {
         getConversation()
 
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        mDraftsManager = DraftsManager(this, mViewModel.dao)
+        mDraftsManager = DraftsManager(this, mViewModel.dao, mViewModel.conversation)
         mScheduledSMSSender = ScheduledManager(this, mViewModel.dao)
         mSavedDao = SavedDbFactory(this).get().manager()
 
@@ -370,8 +431,12 @@ class ConversationActivity : MediaPreviewActivity() {
         extraButton.setOnClickListener {
             toggleExtraVisibility()
         }
+
+        // add to favorite messages on click
         favoriteButton.setOnClickListener {
             val msg = messageEditText.text.toString().trim()
+
+            // return if text field is empty and no media is added
             if (msg.isEmpty() && !isMms) {
                 Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -390,17 +455,23 @@ class ConversationActivity : MediaPreviewActivity() {
             Toast.makeText(
                 this, getString(R.string.added_to_favorites), Toast.LENGTH_LONG
             ).show()
+
+            // hide extra action buttons
             toggleExtraVisibility(false)
         }
 
+        // save as draft on click
         draftButton.setOnClickListener{
             val msg = messageEditText.text.toString().trim()
+            // return if text field is empty and no media is added
             if (msg.isEmpty() && !isMms) {
                 Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             messageEditText.text = null
             mDraftsManager.create(msg, mViewModel.number, mmsURI)
+
+            // hide extra action buttons
             toggleExtraVisibility(false)
         }
         mAdaptor.setOnDraftClick {
@@ -412,65 +483,14 @@ class ConversationActivity : MediaPreviewActivity() {
                 inputManager?.showSoftInput(this, InputMethodManager.SHOW_FORCED)
             }
             mViewModel.extraIsVisible = false
+
+            // hide extra action buttons
             toggleExtraVisibility(false)
         }
 
+        // init scheduled message on click
         timedButton.setOnClickListener{
-            val timeRn = System.currentTimeMillis()
-            val calenderRn = Calendar.getInstance().apply {
-                timeInMillis = timeRn
-            }
-            val editText = messageEditText
-            val msg = editText.text.toString().trim()
-            if (msg.isEmpty() && !isMms) {
-                Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val calendar: Calendar = Calendar.getInstance()
-            DatePickerDialog(this).apply {
-                datePicker.minDate = System.currentTimeMillis()
-                setOnDateSetListener { _, i, i2, i3 ->
-                    calendar.set(i, i2, i3)
-
-                    TimePickerDialog(
-                        mContext,
-                        { _, hr, min ->
-                            calendar.set(Calendar.HOUR_OF_DAY, hr)
-                            calendar.set(Calendar.MINUTE, min)
-                            if (calendar.timeInMillis <= System.currentTimeMillis()) {
-                                Toast.makeText(
-                                    mContext,
-                                    getString(R.string.cant_send_scheduled_to_past),
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            } else {
-                                editText.text = null
-                                mScheduledSMSSender.add(
-                                    calendar.timeInMillis,
-                                    mViewModel.number,
-                                    msg, mmsURI
-                                )
-                                Toast.makeText(
-                                    mContext,
-                                    getString(R.string.scheduled),
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                toggleExtraVisibility(false)
-                            }
-                        },
-                        if (DateUtils.isToday(timeRn)) calenderRn[Calendar.HOUR_OF_DAY] else 0,
-                        if (DateUtils.isToday(timeRn)) calenderRn[Calendar.MINUTE] + 1 else 0,
-                        false
-                    ).apply {
-                        setTitle(R.string.send_scheduled)
-                        setButton(
-                            TimePickerDialog.BUTTON_POSITIVE,
-                            getString(R.string.schedule)
-                        ) { _, _ -> }
-                    }.show()
-                }
-            }.show()
+            requestScheduled()
         }
     }
 
@@ -532,20 +552,18 @@ class ConversationActivity : MediaPreviewActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        // force hide keyboard
         inputManager?.hideSoftInputFromWindow(
             messageEditText.windowToken,
             InputMethodManager.HIDE_IMPLICIT_ONLY
         )
+
+        // save as draft if text field isn't empty
         val msg = messageEditText.text.toString().trim()
-        if (msg.isEmpty()) {
-            return
+        if (msg.isNotBlank()) {
+            mViewModel.apply {
+                mDraftsManager.create(msg, mViewModel.number, mmsURI)
+            }
         }
-        mViewModel.apply {
-            mDraftsManager.create(msg, mViewModel.number, mmsURI)
-        }
-        mainDaoProvider.getMainDaos()[mViewModel.label].updateTime(
-            mViewModel.number,
-            System.currentTimeMillis()
-        )
     }
 }
