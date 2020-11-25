@@ -278,12 +278,12 @@ class ConversationActivity : MediaPreviewActivity() {
 
     private fun liveUpdateTime() {
         mViewModel.dao.loadLastLive().observe(this) {
-            if (it != null) {
+            if (it != null && mViewModel.conversation.isInDb) {
                 mainDaoProvider.getMainDaos()[mViewModel.label].updateTime(
                     mViewModel.number,
                     it.time
                 )
-            } else {
+            } else if (mViewModel.conversation.isInDb) {
                 mainDaoProvider.getMainDaos()[mViewModel.label].delete(mViewModel.conversation)
             }
         }
@@ -504,25 +504,41 @@ class ConversationActivity : MediaPreviewActivity() {
         super.onSupportActionModeStarted(mode)
     }
 
+    private fun Menu.removeItem(id: Int?) {
+        if (id != null) {
+            removeItem(id)
+        }
+    }
+
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        val muteItem = menu.findItem(R.id.action_mute)
-        val callItem = menu.findItem(R.id.action_call)
-        val contactItem = menu.findItem(R.id.action_contact)
-        val blockItem = menu.findItem(R.id.action_block)
-        val reportItem = menu.findItem(R.id.action_report_spam)
+        // init menu items
+        val muteItem = menu.findItem(R.id.action_mute) ?: null
+        val callItem = menu.findItem(R.id.action_call) ?: null
+        val contactItem = menu.findItem(R.id.action_contact) ?: null
+        val blockItem = menu.findItem(R.id.action_block) ?: null
+        val reportItem = menu.findItem(R.id.action_report_spam) ?: null
+        val moveItem = menu.findItem(R.id.action_move) ?: null
+        val deleteItem = menu.findItem(R.id.action_delete) ?: null
 
-        if (mViewModel.label == LABEL_BLOCKED && blockItem != null) {
-            menu.removeItem(blockItem.itemId)
-        } else if (mViewModel.label == LABEL_SPAM && reportItem != null) {
-            menu.removeItem(reportItem.itemId)
+        // remove menu items for different contexts
+        if (mViewModel.label == LABEL_BLOCKED) {
+            menu.removeItem(blockItem?.itemId)
+        } else if (mViewModel.label == LABEL_SPAM) {
+            menu.removeItem(reportItem?.itemId)
+        } else if (!mViewModel.conversation.isInDb) {
+            menu.removeItem(muteItem?.itemId)
+            menu.removeItem(moveItem?.itemId)
+            menu.removeItem(reportItem?.itemId)
+            menu.removeItem(blockItem?.itemId)
+            menu.removeItem(deleteItem?.itemId)
         }
 
         mViewModel.apply {
-            muteItem.title = if (isMuted) getString(R.string.unMute) else getString(R.string.mute)
-            callItem.isVisible = !conversation.isBot
-            contactItem.isVisible = !conversation.isBot
-            if (name != null) contactItem.title = getString(R.string.view_contact)
+            muteItem?.title = if (isMuted) getString(R.string.unMute) else getString(R.string.mute)
+            callItem?.isVisible = !conversation.isBot
+            contactItem?.isVisible = !conversation.isBot
+            if (name != null) contactItem?.title = getString(R.string.view_contact)
         }
         return super.onPrepareOptionsMenu(menu)
     }

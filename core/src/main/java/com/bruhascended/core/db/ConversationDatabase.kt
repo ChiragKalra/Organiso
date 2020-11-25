@@ -61,6 +61,9 @@ data class Conversation(
     val isBot
         get() = number.first().isLetter()
 
+    val isInDb
+        get() = label != LABEL_NONE
+
     val id
         get() = abs(hashCode())
 
