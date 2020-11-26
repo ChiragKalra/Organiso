@@ -9,7 +9,7 @@
 
     <string-array name="labels">
         <item>Personal</item>
-        <item>Important</item>
+        <item>Priority</item>
         <item>Transactions</item>
         <item>Promotions</item>
         <item>Spam</item>
@@ -18,7 +18,7 @@
 
     <string-array name="label_descriptions">
         <item>Personal messages sent by contacts</item>
-        <item>Important messages</item>
+        <item>Priority messages</item>
         <item>Transactional messages like financial statements, orders</item>
         <item>Advertisements</item>
         <item>Probably fraud</item>

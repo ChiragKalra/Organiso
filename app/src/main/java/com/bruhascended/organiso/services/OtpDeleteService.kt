@@ -30,8 +30,6 @@ class OtpDeleteService: Service() {
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.deleting_otp))
             .setSmallIcon(R.drawable.message)
-            .setColorized(true)
-            .setColor(mContext.getColor(R.color.colorAccent))
             .setContentIntent(pendingIntent)
             .setProgress(0, 0, true)
             .build()

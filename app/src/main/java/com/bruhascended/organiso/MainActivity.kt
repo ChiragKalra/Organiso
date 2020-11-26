@@ -53,12 +53,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var inputManager: InputMethodManager
 
+    // do nothing on search canceled
     private val onSearchCanceled = registerForActivityResult(StartActivityForResult()) {}
 
+    // get permission results
     private val onDefaultAppResult = registerForActivityResult(StartActivityForResult()) {
         if (PackageManager.PERMISSION_DENIED in
             Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it]) }
         ) {
+            // exit app if insufficient permissions
             Toast.makeText(this, getString(R.string.insufficient_permissions), Toast.LENGTH_LONG).show()
             finish()
         }
@@ -67,8 +70,10 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("ResourceType")
     private fun setupBottomNav() {
         if (mViewModel.visibleCategories.size == 1) {
+            // hide bottomNavView if only one visible category
             bottom.visibility = View.GONE
         } else {
+            // add items to bottom nav bar
             mViewModel.visibleCategories.forEachIndexed { i, label ->
                 bottom.menu.add(
                     0, i, 400 + i,
@@ -85,6 +90,8 @@ class MainActivity : AppCompatActivity() {
                     badge.number = it
                 })
             }
+
+            // set colors
             val typedArray = obtainStyledAttributes(
                 intArrayOf(R.attr.navActiveColor, R.attr.navInactiveColor)
             )
@@ -98,16 +105,22 @@ class MainActivity : AppCompatActivity() {
                 intArrayOf(-android.R.attr.state_checked)
             )
             bottom.itemIconTintList = ColorStateList(states, colors)
-            bottom.labelVisibilityMode = LabelVisibilityMode.LABEL_VISIBILITY_SELECTED
+
+            // switch view pager view on item click
             bottom.setOnNavigationItemSelectedListener {
                 viewPager.setCurrentItem(
                     it.itemId, mViewModel.prefs.getBoolean(PREF_ACTION_NAVIGATE, true)
                 )
                 true
             }
+
+            // scroll to top if label is clicked twice
             bottom.setOnNavigationItemReselectedListener {
                 mViewModel.goToTop[mViewModel.visibleCategories[it.itemId]]()
             }
+
+            // show label for selected item only
+            bottom.labelVisibilityMode = LabelVisibilityMode.LABEL_VISIBILITY_SELECTED
         }
     }
 
