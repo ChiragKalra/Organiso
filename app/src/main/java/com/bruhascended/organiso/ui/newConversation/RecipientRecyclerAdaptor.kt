@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.organiso.R
 import com.bruhascended.core.db.Contact
-import kotlin.math.abs
 
 /*
                     Copyright 2020 Chirag Kalra

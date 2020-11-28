@@ -140,7 +140,6 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
                 AnalyticsLogger(mContext).apply {
                     log("${conversation.label}_to_4")
-                    reportSpam(conversation)
                 }
                 mContext.cancelNotification(conversation.number, conversation.id)
                 conversation.moveTo(LABEL_SPAM, mContext)

@@ -15,7 +15,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.FileProvider
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.constants.PREF_DARK_THEME
-import com.bruhascended.core.constants.PREF_SEND_SPAM
 import com.bruhascended.core.constants.getMimeType
 import com.bruhascended.organiso.BuildConfig
 import com.bruhascended.organiso.R
@@ -53,30 +52,6 @@ fun AppCompatActivity.requestDefaultApp(onDefaultAppResult: ActivityResultLaunch
         setSmsAppIntent
     }
     onDefaultAppResult.launch(intent)
-}
-
-fun AppCompatActivity.requestSpamReportPref() {
-    val key = "UPLOAD_SPAM_CHOSEN"
-    val mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
-    if (mPrefs.getBoolean(key, false)) return
-
-    mPrefs.edit().putBoolean(key, true).apply()
-    val root = LinearLayout(this)
-    val text = TextView(this)
-    val dp = resources.displayMetrics.density.roundToInt()
-    root.addView(text)
-    root.setPadding(dp*10, dp*10, 10*dp, 10*dp)
-    text.text = getString(R.string.send_reports_query)
-    text.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-    AlertDialog.Builder(this)
-        .setView(root)
-        .setPositiveButton(getString(R.string.send)) { dialog, _ ->
-            mPrefs.edit().putBoolean(PREF_SEND_SPAM, true).apply()
-            dialog.dismiss()
-        }.setNegativeButton(getString(R.string.dont_send)) { dialog, _ ->
-            mPrefs.edit().putBoolean(PREF_SEND_SPAM, false).apply()
-            dialog.dismiss()
-        }.create().show()
 }
 
 fun File.getSharable(mContext: Context) : Intent {

@@ -11,14 +11,12 @@ import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.organiso.R
 import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.core.data.MainDaoProvider
-import com.bruhascended.organiso.common.requestSpamReportPref
 import com.bruhascended.organiso.notifications.NotificationActionReceiver.Companion.cancelNotification
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -58,6 +56,7 @@ class ConversationSelectionListener(
     lateinit var selectionManager: ListSelectionManager<Conversation>
 
     @SuppressLint("InflateParams")
+    // animate the range icon
     private fun toggleRange(item: MenuItem): Boolean {
         if (selectionManager.isRangeMode && selectionManager.isRangeSelected) return true
         val inf = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -87,6 +86,7 @@ class ConversationSelectionListener(
         muteItem = menu.findItem(R.id.action_mute)
         muteItem.setIcon(if (unMuteItem) R.drawable.ic_unmute else R.drawable.ic_mute)
 
+        // hide menu items which don't make sense in the context
         if (label == 4) menu.findItem(R.id.action_report_spam).isVisible = false
         if (label == 5) menu.findItem(R.id.action_block).isVisible = false
         return true
@@ -149,7 +149,6 @@ class ConversationSelectionListener(
                 alertDialog.setTitle(mContext.getString(R.string.report_conversations_query))
                     .setPositiveButton(mContext.getString(R.string.report)) { dialog, _ ->
                         for (selectedItem in selected) {
-                            analyticsLogger.reportSpam(selectedItem)
                             analyticsLogger.log("${selectedItem.label}_to_4")
                             mContext.cancelNotification(selectedItem.number, selectedItem.id)
                             selectedItem.moveTo(4, mContext)
@@ -158,7 +157,6 @@ class ConversationSelectionListener(
                         dialog.dismiss()
                         selectionManager.close()
                     }.create().show()
-                (mContext as AppCompatActivity).requestSpamReportPref()
             }
             R.id.action_move -> {
                 val choices = ArrayList<String>().apply {

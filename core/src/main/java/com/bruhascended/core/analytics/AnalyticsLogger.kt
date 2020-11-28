@@ -2,12 +2,11 @@ package com.bruhascended.core.analytics
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.BuildConfig
-import com.bruhascended.core.db.Conversation
-import com.bruhascended.core.db.MessageDbFactory
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -29,25 +28,15 @@ import com.google.firebase.storage.FirebaseStorage
  */
 
 class AnalyticsLogger(
-    private val context: Context
+    context: Context
 ) {
     private val mPref = PreferenceManager.getDefaultSharedPreferences(context)
     private val firebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
-    fun reportSpam (conversation: Conversation) {
-        if (!mPref.getBoolean(PREF_SEND_SPAM, false)) return
-
-        val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("${PATH_SPAM_REPORTS}/${conversation.number}")
-        Thread {
-            MessageDbFactory(context).of(conversation.number).apply {
-                myRef.setValue(manager().loadAllSync().filter { it.type == MESSAGE_TYPE_INBOX })
-                close()
-            }
-        }.start()
-    }
-
-    fun reportBug (title: String, content: String, deviceDetails: String, fileUri: Uri? = null) {
+    fun reportBug (title: String, deviceDetails: String, fileUri: Uri? = null) {
+        val content = "version=${Build.VERSION.SDK_INT}, " +
+                "manufacturer=${Build.MANUFACTURER}, " +
+                "model=${Build.MODEL}"
         val rn = System.currentTimeMillis().toString()
         log(EVENT_BUG_REPORTED)
 

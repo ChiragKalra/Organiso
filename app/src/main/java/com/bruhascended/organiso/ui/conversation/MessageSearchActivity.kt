@@ -73,7 +73,7 @@ class MessageSearchActivity : AppCompatActivity() {
         searchEditText.setOnEditorActionListener { _, i, _ ->
             if (i != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener true
             val key = searchEditText.text.toString().trim()
-            searchRecycler.isVisible = !key.isBlank()
+            searchRecycler.isVisible = key.isNotBlank()
 
             if (key.isBlank()) {
                 return@setOnEditorActionListener true

@@ -34,7 +34,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
-
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -138,7 +137,6 @@ class ConversationMenuOptions(
                         .setTitle(getString(R.string.report_sender_as_spam_query, display))
                         .setPositiveButton(getString(R.string.report)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_4")
-                            analyticsLogger.reportSpam(conversation)
                             conversation.moveTo(LABEL_SPAM, mContext)
                             Toast.makeText(
                                 mContext,

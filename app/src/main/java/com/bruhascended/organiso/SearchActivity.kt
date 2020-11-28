@@ -242,7 +242,7 @@ class SearchActivity : AppCompatActivity() {
             if (i != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener true
             val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
 
-            searchRecycler.isVisible = !key.isBlank()
+            searchRecycler.isVisible = key.isNotBlank()
             if (key.isBlank()) {
                 return@setOnEditorActionListener true
             } else {
