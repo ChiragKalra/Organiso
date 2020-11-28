@@ -1,4 +1,3 @@
-# Organiso
 ![Promo](https://github.com/ChiragKalra/Organiso/blob/master/feature.png?raw=true)
 
 ## About
