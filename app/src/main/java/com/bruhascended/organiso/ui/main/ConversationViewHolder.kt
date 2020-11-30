@@ -134,7 +134,7 @@ class ConversationViewHolder(
         muteImage.visibility = if (conversation.isMuted) View.VISIBLE else View.GONE
 
         MessageDbFactory(mContext).of(mNumber).apply {
-            manager().loadLastSync().also {
+            manager().loadLastSync().also { it ->
                 if (mNumber != conversation.number) return@also
                 if (it == null) {
                     if (conversation.isInDb) {
@@ -146,10 +146,10 @@ class ConversationViewHolder(
                     SpannableString(
                         mContext.getString(
                             R.string.media_message,
-                            it.text
+                            it.text.filter { c -> c != '\n' }
                         )
                     )
-                else SpannableString(it.text)
+                else SpannableString(it.text.filter { c -> c != '\n' })
                 if (!conversation.read) {
                     str.setSpan(StyleSpan(Typeface.BOLD), 0, str.length, flag)
                     str.setSpan(ForegroundColorSpan(textColor), 0, str.length, flag)

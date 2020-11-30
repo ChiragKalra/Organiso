@@ -22,7 +22,6 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.bruhascended.organiso.BugReportActivity
 import com.bruhascended.organiso.R
 
 class InfoFragment : PreferenceFragmentCompat() {

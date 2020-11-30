@@ -28,7 +28,6 @@ import com.bruhascended.organiso.ConversationActivity
 import com.bruhascended.organiso.MainActivity
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.ScheduledActivity
-import com.bruhascended.organiso.common.requestSpamReportPref
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -149,7 +148,6 @@ class ConversationMenuOptions(
                         }.setOnDismissListener {
                             cancelCallBack?.invoke(itemViewHolder)
                         }.create().show()
-                    (mContext as AppCompatActivity).requestSpamReportPref()
                 }
                 R.id.action_delete -> {
                     AlertDialog.Builder(mContext)

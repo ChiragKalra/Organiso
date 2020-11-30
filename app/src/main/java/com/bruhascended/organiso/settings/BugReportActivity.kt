@@ -1,4 +1,4 @@
-package com.bruhascended.organiso
+package com.bruhascended.organiso.settings
 
 import android.content.Intent
 import android.database.Cursor
@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.common.setupToolbar
 import kotlinx.android.synthetic.main.activity_bug_report.*

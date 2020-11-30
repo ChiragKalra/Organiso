@@ -79,8 +79,8 @@ class MessageSearchActivity : AppCompatActivity() {
                 return@setOnEditorActionListener true
             }
 
-            info.isVisible = true
 
+            info.isVisible = true
             mAdaptor.searchKey = key
             val flow = Pager(PagingConfig(
                 pageSize = 12,
@@ -95,6 +95,7 @@ class MessageSearchActivity : AppCompatActivity() {
                     mAdaptor.submitData(it.filter { msg ->
                         Regex("\\b${key}", RegexOption.IGNORE_CASE).find(msg.text) != null
                     })
+                    info.isVisible = mAdaptor.snapshot().size > 0
                 }
             }
 

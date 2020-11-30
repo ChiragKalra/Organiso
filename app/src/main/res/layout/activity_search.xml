@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:clickable="false"
-    android:background="?backgroundColor"
     android:layout_height="match_parent"
     tools:context=".ui.conversation.MessageSearchActivity">
 
@@ -71,27 +70,26 @@
             android:src="@drawable/close"
             android:focusable="true" />
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/searchRecycler"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        tools:listitem="@layout/item_conversation" />
-
     <TextView
         android:layout_margin="12dp"
         android:elevation="10dp"
         android:id="@+id/info"
         android:text="@string/no_matches"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/linearLayout" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="?backgroundColor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        tools:listitem="@layout/item_conversation" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -47,7 +47,7 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     api 'androidx.preference:preference-ktx:1.1.1'
-    api "androidx.paging:paging-runtime-ktx:3.0.0-alpha07"
+    api "androidx.paging:paging-runtime-ktx:3.0.0-alpha09"
     api 'androidx.room:room-runtime:2.3.0-alpha03'
     api "androidx.room:room-ktx:2.3.0-alpha03"
     kapt "androidx.room:room-compiler:2.3.0-alpha03"
@@ -60,7 +60,7 @@ dependencies {
     implementation 'io.michaelrocks:libphonenumber-android:8.12.6'
 
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.google.firebase:firebase-analytics:17.6.0'
-    implementation 'com.google.firebase:firebase-database:19.5.0'
+    implementation 'com.google.firebase:firebase-analytics:18.0.0'
+    implementation 'com.google.firebase:firebase-database:19.5.1'
     implementation 'com.google.firebase:firebase-storage:19.2.0'
 }

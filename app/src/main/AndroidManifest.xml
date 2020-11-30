@@ -175,7 +175,7 @@
                 android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
         <activity
-            android:name=".BugReportActivity"
+            android:name=".settings.BugReportActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
             android:label="@string/report_a_bug"
             android:launchMode="singleTop">
