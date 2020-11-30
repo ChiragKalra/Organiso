@@ -70,6 +70,8 @@ class MessageSearchActivity : AppCompatActivity() {
             addOnScrollListener(ScrollEffectFactory.OnScrollListener())
         }
 
+        info.isVisible = false
+
         searchEditText.setOnEditorActionListener { _, i, _ ->
             if (i != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener true
             val key = searchEditText.text.toString().trim()
@@ -79,8 +81,6 @@ class MessageSearchActivity : AppCompatActivity() {
                 return@setOnEditorActionListener true
             }
 
-
-            info.isVisible = true
             mAdaptor.searchKey = key
             val flow = Pager(PagingConfig(
                 pageSize = 12,
@@ -95,7 +95,6 @@ class MessageSearchActivity : AppCompatActivity() {
                     mAdaptor.submitData(it.filter { msg ->
                         Regex("\\b${key}", RegexOption.IGNORE_CASE).find(msg.text) != null
                     })
-                    info.isVisible = mAdaptor.snapshot().size > 0
                 }
             }
 
