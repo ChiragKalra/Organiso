@@ -11,17 +11,24 @@ import android.os.PowerManager
 import android.provider.Telephony
 import android.telephony.SmsManager
 import android.telephony.SubscriptionManager
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.preference.PreferenceManager
-import com.bruhascended.core.data.SMSManager
-import com.bruhascended.organiso.notifications.ChannelManager
 import com.bruhascended.core.constants.*
+import com.bruhascended.core.data.SMSManager
 import com.bruhascended.organiso.common.requestDefaultApp
+import com.bruhascended.organiso.notifications.ChannelManager
+import com.bruhascended.organiso.ui.start.PolicyActivity
 import kotlinx.android.synthetic.main.activity_start.*
+import kotlin.math.min
 import kotlin.math.roundToInt
+
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -38,7 +45,6 @@ import kotlin.math.roundToInt
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-
 
 class StartActivity : AppCompatActivity() {
 
@@ -59,7 +65,7 @@ class StartActivity : AppCompatActivity() {
         ) {
             ActivityCompat.requestPermissions(this, ARR_PERMS, 0)
         } else {
-            organise()
+            acceptTnc()
         }
     }
 
@@ -79,10 +85,8 @@ class StartActivity : AppCompatActivity() {
             return
         }
 
-
         // set default sim card slot if dual sim
-        val sm = getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
-                as SubscriptionManager
+        val sm = getSystemService(TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
             == PackageManager.PERMISSION_GRANTED
         ) {
@@ -105,12 +109,14 @@ class StartActivity : AppCompatActivity() {
                 Manifest.permission.READ_CONTACTS
             ) == PackageManager.PERMISSION_DENIED ->
             {
-                ActivityCompat.requestPermissions(this,
+                ActivityCompat.requestPermissions(
+                    this,
                     arrayOf(Manifest.permission.READ_CONTACTS),
-                    0)
+                    0
+                )
             }
             else -> {
-                organise()
+                acceptTnc()
             }
         }
     }
@@ -125,13 +131,81 @@ class StartActivity : AppCompatActivity() {
             finish()
             return
         } else {
+            acceptTnc()
+        }
+    }
+
+    private fun acceptTnc() {
+        // setup activity
+        setTheme(R.style.LightTheme)
+        setContentView(R.layout.activity_start)
+
+        if (sharedPref.getBoolean(KEY_ACCEPT_TNC, false)) {
+            // start organising
             organise()
+        } else {
+            // ask the user to accept TnC and privacy policy
+            val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            val mContext = this
+            var strIn = getString(R.string.terms_and_conditions)
+            var strOut = getString(R.string.agree_to_tnc, strIn)
+            var start = strOut.indexOf(strIn)
+            var strBuilder = SpannableStringBuilder(strOut)
+            strBuilder.setSpan(object : ClickableSpan() {
+                override fun onClick(view: View) {
+                    startActivity(
+                        Intent(mContext, PolicyActivity::class.java).apply {
+                            putExtra(Intent.EXTRA_FROM_STORAGE,"terms_and_conditions.html")
+                            putExtra(Intent.EXTRA_TITLE, strIn)
+                        }
+                    )
+                }
+            }, start, start + strIn.length, flag)
+            tnc.text = strBuilder
+            tnc.movementMethod = LinkMovementMethod.getInstance()
+
+            strIn = getString(R.string.privacy_policy)
+            strOut = getString(R.string.read_privacy_policy, strIn)
+            start = strOut.indexOf(strIn)
+            strBuilder = SpannableStringBuilder(strOut)
+            strBuilder.setSpan(object : ClickableSpan() {
+                override fun onClick(view: View) {
+                    startActivity(
+                        Intent(mContext, PolicyActivity::class.java).apply {
+                            putExtra(Intent.EXTRA_FROM_STORAGE,"privacy_policy.html")
+                            putExtra(Intent.EXTRA_TITLE, strIn)
+                        }
+                    )
+                }
+            }, start, start + strIn.length, flag)
+            privacy.text = strBuilder
+            privacy.movementMethod = LinkMovementMethod.getInstance()
+
+            lateEntry.apply {
+                alpha = 0f
+                postDelayed({
+                    animate().setDuration(700).alpha(1f).start()
+                }, 700)
+            }
+
+
+            tnc.setOnCheckedChangeListener { _, b ->
+                next.isEnabled = b && privacy.isChecked
+            }
+            privacy.setOnCheckedChangeListener { _, b ->
+                next.isEnabled = b && tnc.isChecked
+            }
+            next.setOnClickListener {
+                policyScreen.animate().alpha(0f)
+                    .translationX(-policyScreen.measuredWidth.toFloat()).setDuration(700).start()
+                organise()
+
+                sharedPref.edit().putBoolean(KEY_ACCEPT_TNC, true).apply()
+            }
         }
     }
 
     private fun organise() {
-        setTheme(R.style.LightTheme)
-        setContentView(R.layout.activity_start)
 
         val smsManager = SMSManager(this)
 
@@ -160,13 +234,15 @@ class StartActivity : AppCompatActivity() {
         smsManager.onStatusChangeListener(0)
 
         var preTimer: CountDownTimer? = null
+        var minTime = Long.MAX_VALUE
         smsManager.onEtaChangeListener =  {
             runOnUiThread {
                 preTimer?.cancel()
                 preTimer = object : CountDownTimer(it, 1000) {
                     override fun onTick(millisUntilFinished: Long) {
-                        val sec = (millisUntilFinished / 1000) % 60
-                        val min = (millisUntilFinished / 1000) / 60
+                        minTime = min(minTime, millisUntilFinished)
+                        val sec = (minTime / 1000) % 60
+                        val min = (minTime / 1000) / 60
                         if ((0 < progress) && (progress < 100)) {
                             etaText.text = when {
                                 min > 0 -> getString(R.string.x_mins_remaining, min)

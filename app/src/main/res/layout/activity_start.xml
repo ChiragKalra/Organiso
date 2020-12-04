@@ -9,7 +9,6 @@
     android:keepScreenOn="true"
     android:background="?backgroundColor">
 
-
     <com.mikhaellopez.circularprogressbar.CircularProgressBar
         android:id="@+id/progressBar"
         android:layout_width="300dp"
@@ -66,6 +65,115 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:elevation="7dp"
+        android:id="@+id/policyScreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?backgroundColor">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/imageView"
+            android:layout_width="86dp"
+            android:layout_height="86dp"
+            app:cardCornerRadius="86dp"
+            android:layout_marginTop="164dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" >
+            <ImageView
+                android:layout_width="86dp"
+                android:layout_height="86dp"
+                android:contentDescription="@string/app_icon"
+                android:src="@mipmap/ic_launcher"/>
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_margin="8dp"
+            android:id="@+id/appName"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+        <LinearLayout
+            android:id="@+id/description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="46dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appName">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/all_your_messages"
+                android:textAlignment="center"
+                android:background="?backgroundColor"
+                android:textSize="22sp"/>
+
+            <TextView
+                android:id="@+id/lateEntry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/organised"
+                android:layout_marginStart="8dp"
+                android:textAlignment="center"
+                android:textSize="22sp"/>
+        </LinearLayout>
+
+        <CheckBox
+            android:linksClickable="true"
+            android:id="@+id/privacy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/read_privacy_policy"
+            android:textColor="?android:textColorHint"
+            android:textColorLink="?headerTextColor"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/tnc"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <CheckBox
+            android:linksClickable="true"
+            android:id="@+id/tnc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginBottom="36dp"
+            android:textColorLink="?headerTextColor"
+            android:text="@string/agree_to_tnc"
+            android:textColor="?android:textColorHint"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/next"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/next"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_continue_button"
+            android:drawableEnd="@drawable/ic_round_arrow_forward_24"
+            android:foreground="?attr/selectableItemBackground"
+            android:paddingStart="24dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="16dp"
+            android:text="@string/next"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

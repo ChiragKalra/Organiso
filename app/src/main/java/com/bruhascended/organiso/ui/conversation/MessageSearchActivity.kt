@@ -70,8 +70,6 @@ class MessageSearchActivity : AppCompatActivity() {
             addOnScrollListener(ScrollEffectFactory.OnScrollListener())
         }
 
-        info.isVisible = false
-
         searchEditText.setOnEditorActionListener { _, i, _ ->
             if (i != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener true
             val key = searchEditText.text.toString().trim()

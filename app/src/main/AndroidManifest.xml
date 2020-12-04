@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-permission android:name="android.permission.SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
@@ -16,7 +15,6 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_MMS" />
     <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
-
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
@@ -72,8 +70,8 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:exported="true"
             android:name="com.android.mms.transaction.PushReceiver"
+            android:exported="true"
             android:permission="android.permission.BROADCAST_WAP_PUSH">
             <intent-filter>
                 <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
@@ -119,6 +117,13 @@
         </service>
 
         <activity
+            android:name=".ui.start.PolicyActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.bruhascended.organiso.StartActivity" />
+        </activity>
+        <activity
             android:name=".ui.conversation.MessageSearchActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateVisible" />
@@ -163,11 +168,11 @@
             android:clearTaskOnLaunch="true"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".SettingsActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:label="@string/settings"
             android:launchMode="singleTop">
             <meta-data
@@ -176,7 +181,7 @@
         </activity>
         <activity
             android:name=".settings.BugReportActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:label="@string/report_a_bug"
             android:launchMode="singleTop">
             <meta-data
@@ -192,8 +197,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.bruhascended.organiso.MainActivity" />
         </activity>
-
-        <activity android:name=".ScheduledActivity"
+        <activity
+            android:name=".ScheduledActivity"
             android:configChanges="orientation"
             android:label="@string/scheduled_messages"
             android:launchMode="singleTask" />

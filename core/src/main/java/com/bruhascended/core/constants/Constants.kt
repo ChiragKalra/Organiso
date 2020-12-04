@@ -66,6 +66,7 @@ const val TYPE_MULTI = "multipart/*"
 
 // sp keys
 const val KEY_INIT = "InitDataOrganized"
+const val KEY_ACCEPT_TNC = "TnCAccepted"
 const val KEY_RESUME_INDEX = "last_index"
 const val KEY_DONE_COUNT = "done_count"
 const val KEY_TIME_TAKEN = "time_taken"

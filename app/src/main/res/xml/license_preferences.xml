@@ -1,6 +1,6 @@
 <PreferenceScreen
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <Preference
-        app:layout="@layout/view_license_text"
+        app:layout="@layout/view_license"
         app:key="license_text" />
 </PreferenceScreen>

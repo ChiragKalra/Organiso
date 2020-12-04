@@ -8,11 +8,6 @@
             app:icon="@drawable/ic_bug_report"
             app:key="report_bug"
             app:title="@string/report_bug" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:layout="@layout/view_category_pref"
-        app:title="@string/about_app" >
         <Preference
             app:icon="@drawable/ic_web"
             app:key="website"
@@ -21,10 +16,20 @@
             app:icon="@drawable/github"
             app:key="github"
             app:title="@string/visit_github" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/view_category_pref"
+        app:title="@string/about_app" >
         <Preference
-            app:icon="@drawable/ic_policy"
             app:key="license"
             app:title="@string/license" />
+        <Preference
+            app:key="tnc"
+            app:title="@string/terms_and_conditions" />
+        <Preference
+            app:key="privacy"
+            app:title="@string/privacy_policy" />
     </PreferenceCategory>
 
 </PreferenceScreen>

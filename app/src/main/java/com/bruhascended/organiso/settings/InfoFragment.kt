@@ -31,9 +31,13 @@ class InfoFragment : PreferenceFragmentCompat() {
         val githubPref: Preference = findPreference("github")!!
         val websitePref: Preference = findPreference("website")!!
         val licensePref: Preference = findPreference("license")!!
+        val termsPref: Preference = findPreference("tnc")!!
+        val privacyPref: Preference = findPreference("privacy")!!
         val bugPref: Preference = findPreference("report_bug")!!
 
         licensePref.fragment = LicenseFragment::class.qualifiedName
+        termsPref.fragment = TermsAndConditionsFragment::class.qualifiedName
+        privacyPref.fragment = PrivacyFragment::class.qualifiedName
 
         githubPref.setOnPreferenceClickListener {
             val link = Uri.parse("https://github.com/ChiragKalra/Organiso")

@@ -31,7 +31,7 @@ data class Message(
     val text: String,
     var type: Int,
     var time: Long,
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey (autoGenerate = true)
     var id: Int? = null,
     var delivered: Boolean = false,
     var path: String? = null

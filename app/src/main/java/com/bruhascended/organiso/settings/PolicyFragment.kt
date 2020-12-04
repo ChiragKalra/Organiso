@@ -1,6 +1,8 @@
 package com.bruhascended.organiso.settings
 
 import android.os.Bundle
+import android.text.SpannableString
+import androidx.core.text.HtmlCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.bruhascended.organiso.R
@@ -23,12 +25,19 @@ import org.apache.commons.io.IOUtils
 
 */
 
-class LicenseFragment : PreferenceFragmentCompat() {
+open class PolicyFragment (
+    private val filePath: String
+) : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.license_preferences, rootKey)
         val licensePref: Preference = findPreference("license_text")!!
-        val inputStream = resources.assets.open("LICENSE")
-        licensePref.title = IOUtils.toString(inputStream, "UTF-8")
+        val inputStream = resources.assets.open(filePath)
+        licensePref.title = SpannableString(
+            HtmlCompat.fromHtml(
+                IOUtils.toString(inputStream, "UTF-8"),
+                HtmlCompat.FROM_HTML_MODE_LEGACY
+            )
+        )
     }
 
     override fun onDestroy() {
@@ -36,3 +45,7 @@ class LicenseFragment : PreferenceFragmentCompat() {
         super.onDestroy()
     }
 }
+
+class LicenseFragment : PolicyFragment("license.html")
+class PrivacyFragment : PolicyFragment("privacy_policy.html")
+class TermsAndConditionsFragment : PolicyFragment("terms_and_conditions.html")

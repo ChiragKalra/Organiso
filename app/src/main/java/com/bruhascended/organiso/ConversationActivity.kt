@@ -299,7 +299,7 @@ class ConversationActivity : MediaPreviewActivity() {
 
         // return if text field is empty and no media is added
         if (msg.isEmpty() && !isMms) {
-            Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.empty_message), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -438,7 +438,7 @@ class ConversationActivity : MediaPreviewActivity() {
 
             // return if text field is empty and no media is added
             if (msg.isEmpty() && !isMms) {
-                Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.empty_message), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             mSavedDao.insert(
@@ -465,7 +465,7 @@ class ConversationActivity : MediaPreviewActivity() {
             val msg = messageEditText.text.toString().trim()
             // return if text field is empty and no media is added
             if (msg.isEmpty() && !isMms) {
-                Toast.makeText(this, "Message is empty!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.empty_message), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             messageEditText.text = null

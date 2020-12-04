@@ -90,8 +90,8 @@ fun stem(message: String): String {
 fun time (date: Long): Float {
     val cl = Calendar.getInstance()
     cl.timeInMillis = date
-    val seriesTime = cl.get(Calendar.SECOND) + cl.get(Calendar.MINUTE)*60
-    return abs(abs(seriesTime-240) -(60*12)) / 720f
+    val seriesTime = cl.get(Calendar.MINUTE) + cl.get(Calendar.HOUR_OF_DAY)*60
+    return abs(abs(seriesTime-60*4)-(60*12)) / 720f
 }
 
 fun removeHiddenNumbers (message: String): Pair<String, Float> {

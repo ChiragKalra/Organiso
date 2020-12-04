@@ -15,6 +15,7 @@
     <string name="scheduled_messages">Scheduled Messages</string>
 
     <!-- Actions -->
+    <string name="next">continue</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="search">Search</string>
@@ -78,6 +79,8 @@
     <string name="add_to_favorite_messages">Add to favorite messages</string>
 
     <!-- Descriptions -->
+    <string name="all_your_messages">All your Messages,</string>
+    <string name="organised">Organised.</string>
     <string name="you">You</string>
     <string name="title">Title</string>
     <string name="no_favorites">No Favorites</string>
@@ -131,6 +134,9 @@
     <string name="organising_your_msgs">Organising your messages</string>
     <string name="done">Done</string>
 
+    <string name="read_privacy_policy">I have read the %1$s.</string>
+    <string name="agree_to_tnc">I agree to the %1$s.</string>
+
 
     <string name="deleting_otp">Deleting existing OTPs</string>
     <string name="scan_personal_contacts">Scanning personal category</string>
@@ -148,6 +154,7 @@
     <string name="scheduled">Scheduled</string>
     <string name="service_provider_error">Service provider error</string>
     <string name="no_service">No service</string>
+    <string name="empty_message">Message is empty!</string>
     <string name="error">Error</string>
     <string name="senders_blocked">Senders Blocked</string>
     <string name="senders_reported_spam">Sender(s) Reported Spam</string>
@@ -194,4 +201,6 @@
     <string name="choose_sim">Select Sim</string>
     <string name="sim_2">Sim 2</string>
     <string name="sim_1">Sim 1</string>
+    <string name="terms_and_conditions">Terms and Conditions</string>
+    <string name="privacy_policy">Privacy Policy</string>
 </resources>
