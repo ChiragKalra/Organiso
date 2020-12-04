@@ -158,6 +158,7 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/next"
+            android:enabled="false"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_continue_button"

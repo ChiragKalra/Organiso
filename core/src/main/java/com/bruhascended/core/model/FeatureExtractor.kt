@@ -29,16 +29,32 @@ class FeatureExtractor (context: Context) {
         "Date",
         "NumberOfWords"
     )
-    private val wordFeatures = getWordFeatures()
+    private var wordFeatures: Array<String>
+    private var mappedWordFeatures: Array<Int>
 
-    private fun getWordFeatures(): List<String> {
+    init {
+        wordFeatures = getWordFeatures()
+        val sorted = wordFeatures.clone().sortedArray()
+        val hashMap = HashMap<String, Int>()
+        for ((index, word) in wordFeatures.withIndex()) {
+            hashMap[word] = index
+        }
+        mappedWordFeatures = Array(wordFeatures.size) {
+            hashMap[sorted[it]]!!
+        }
+        wordFeatures = sorted
+    }
+
+    private fun getWordFeatures(): Array<String> {
         val fileStr = mContext.assets.open("words.csv").bufferedReader().use{
             it.readText()
         }
-        return fileStr.split("\r\n").dropLast(1)
+        return fileStr.split("\r\n").dropLast(1).toTypedArray()
     }
 
-    private fun getFeatures(k: Int, l: Int, message: Message, wordFeatures: List<String>) : Array<Float> {
+    fun getFeatureVector(message: Message) : Array<Float> {
+        val k = nonWordFeatures.size
+        val l = wordFeatures.size
         val features = Array(k+l){0f}
 
         var text = removeLines(message.text)
@@ -63,37 +79,20 @@ class FeatureExtractor (context: Context) {
 
         text = stem(text)
 
-        for (i in 0 until l) {
-            features[k + i] = (wordFeatures[i] in text).toFloat()
-            features[5] += features[k+i]
+        for (word in text.split(" ", ",", ".", "-", "!", "?", "(", ")", "\'", "\"")) {
+            val ind = wordFeatures.binarySearch(word)
+            if (ind > -1) {
+                val i = mappedWordFeatures[ind]
+                features[k + i] = 1f
+            }
+            features[5] += 1f
         }
         features[5] /= 150f
         return features
     }
 
-    fun getFeaturesLength() : Int {
-        val k = nonWordFeatures.size
-        val l = wordFeatures.size
-        return k+l
-    }
-
-    /*
-    fun getFeatureMatrix(messages: ArrayList<Message>): Array<Array<Float>> {
-        val wordFeatures = getWordFeatures()
-
-        val k = nonWordFeatures.size
-        val l = wordFeatures.size
-        val m = messages.size
-
-        return Array(m){getFeatures(k, l, messages[it], wordFeatures)}
-    }*/
-
-
-    fun getFeatureVector(message: Message): Array<Float> {
-        val k = nonWordFeatures.size
-        val l = wordFeatures.size
-        return getFeatures(k, l, message, wordFeatures)
-    }
+    fun getFeaturesLength() =
+        nonWordFeatures.size + wordFeatures.size
 
 
 }
