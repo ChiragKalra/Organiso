@@ -19,6 +19,7 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.SMSManager
@@ -142,6 +143,13 @@ class StartActivity : AppCompatActivity() {
 
         if (sharedPref.getBoolean(KEY_ACCEPT_TNC, false)) {
             // start organising
+            policyScreen.apply {
+                animate().alpha(0f)
+                    .translationX(-measuredWidth.toFloat()).setDuration(700).start()
+                policyScreen.postDelayed({
+                    isVisible = false
+                }, 700)
+            }
             organise()
         } else {
             // ask the user to accept TnC and privacy policy
@@ -196,8 +204,7 @@ class StartActivity : AppCompatActivity() {
                 next.isEnabled = b && tnc.isChecked
             }
             next.setOnClickListener {
-                policyScreen.animate().alpha(0f)
-                    .translationX(-policyScreen.measuredWidth.toFloat()).setDuration(700).start()
+                policyScreen.isVisible = false
                 organise()
 
                 sharedPref.edit().putBoolean(KEY_ACCEPT_TNC, true).apply()
