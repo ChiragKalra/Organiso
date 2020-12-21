@@ -19,7 +19,7 @@ Download the latest apk from releases.
 </p>
 
 ## Contribute
-You can contribute by reporting any bugs you find in Issues or use the in-app report a bug activity.
+You can contribute by reporting any bugs you find in Issues or via the in-app report a bug activity.
 
 If you wish to add a feature to the app then pull request.
 
