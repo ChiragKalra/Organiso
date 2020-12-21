@@ -1,4 +1,14 @@
 ![Promo](https://github.com/ChiragKalra/Organiso/blob/master/feature.png?raw=true)
+
+
+## About
+Organiso is an android app for classifying SMSs into common categories like priority, personal, transactions, advertisements, spam. It is designed to replace the default android sms app and comes with a ton of features. Check out the project website [here](https://organiso.web.app).
+
+## Usage
+Download the latest apk from releases.
+
+## Screen Shots
+
 <p>
 <img src="https://user-images.githubusercontent.com/24735099/102793099-6b27e500-43cf-11eb-8a3c-36cb41eb7ee9.png" alt="drawing" width="320"/>
 <img src="https://user-images.githubusercontent.com/24735099/102793080-619e7d00-43cf-11eb-8536-c214f8d33c31.png" alt="drawing" width="320"/>
@@ -7,11 +17,9 @@
 <img src="https://user-images.githubusercontent.com/24735099/102793091-67945e00-43cf-11eb-963a-56dfb00f88ba.png" alt="drawing" width="320"/>
 <img src="https://user-images.githubusercontent.com/24735099/102793095-68c58b00-43cf-11eb-8db5-0ec0de6cc457.png" alt="drawing" width="320"/>
 </p>
-## About
-SMS Organiser Android is an android app for classifying SMSs into common categories like (personal, important, transactions, advertisements, spam).
 
-## Usage
-This app is in beta. However if you wanna check it out, download the latest apk from releases.
+## Contribute
+
 
 ## Related Projects
 * Code used to generate the tensorflow model at it's core : https://github.com/Sids2k-ChiragKalra/SMS-organizer
