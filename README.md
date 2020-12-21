@@ -19,7 +19,11 @@ Download the latest apk from releases.
 </p>
 
 ## Contribute
+You can contribute by reporting any bugs you find in Issues or use the in-app report a bug activity.
 
+If you wish to add a feature to the app then pull request.
+
+For any queries contact me at chiragkalra5274@gmail.com.
 
 ## Related Projects
 * Code used to generate the tensorflow model at it's core : https://github.com/Sids2k-ChiragKalra/SMS-organizer
