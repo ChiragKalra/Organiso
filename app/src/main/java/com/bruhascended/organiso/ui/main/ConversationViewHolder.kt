@@ -137,6 +137,7 @@ class ConversationViewHolder(
             manager().loadLastSync().also {
                 if (mNumber != conversation.number) return@also
                 if (it == null) {
+                    messageTextView.text = null
                     return@also
                 }
                 val str = if (it.hasMedia)
