@@ -10,11 +10,11 @@ Download the latest apk from releases.
 ## Screen Shots
 
 <p>
-<img src="https://user-images.githubusercontent.com/24735099/102793099-6b27e500-43cf-11eb-8a3c-36cb41eb7ee9.png" alt="drawing" width="240"/>
-<img src="https://user-images.githubusercontent.com/24735099/102793080-619e7d00-43cf-11eb-8536-c214f8d33c31.png" alt="drawing" width="240"/>
-<img src="https://user-images.githubusercontent.com/24735099/102793084-64996d80-43cf-11eb-8c70-f7448445eff1.png" alt="drawing" width="240"/>
-<img src="https://user-images.githubusercontent.com/24735099/102793085-65ca9a80-43cf-11eb-8d48-44a3db64b43e.png" alt="drawing" width="240"/>
-<img src="https://user-images.githubusercontent.com/24735099/102793091-67945e00-43cf-11eb-963a-56dfb00f88ba.png" alt="drawing" width="240"/>
+<img src="https://user-images.githubusercontent.com/24735099/102793099-6b27e500-43cf-11eb-8a3c-36cb41eb7ee9.png" alt="drawing" width="180"/>
+<img src="https://user-images.githubusercontent.com/24735099/102793080-619e7d00-43cf-11eb-8536-c214f8d33c31.png" alt="drawing" width="180"/>
+<img src="https://user-images.githubusercontent.com/24735099/102793084-64996d80-43cf-11eb-8c70-f7448445eff1.png" alt="drawing" width="180"/>
+<img src="https://user-images.githubusercontent.com/24735099/102793085-65ca9a80-43cf-11eb-8d48-44a3db64b43e.png" alt="drawing" width="180"/>
+<img src="https://user-images.githubusercontent.com/24735099/102793091-67945e00-43cf-11eb-963a-56dfb00f88ba.png" alt="drawing" width="180"/>
 </p>
 
 ## Contribute
