@@ -15,7 +15,6 @@ Download the latest apk from releases.
 <img src="https://user-images.githubusercontent.com/24735099/102793084-64996d80-43cf-11eb-8c70-f7448445eff1.png" alt="drawing" width="240"/>
 <img src="https://user-images.githubusercontent.com/24735099/102793085-65ca9a80-43cf-11eb-8d48-44a3db64b43e.png" alt="drawing" width="240"/>
 <img src="https://user-images.githubusercontent.com/24735099/102793091-67945e00-43cf-11eb-963a-56dfb00f88ba.png" alt="drawing" width="240"/>
-<img src="https://user-images.githubusercontent.com/24735099/102793095-68c58b00-43cf-11eb-8db5-0ec0de6cc457.png" alt="drawing" width="240"/>
 </p>
 
 ## Contribute
