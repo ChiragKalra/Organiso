@@ -73,6 +73,7 @@ const val KEY_TIME_TAKEN = "time_taken"
 const val KEY_RESUME_DATE = "last_date"
 const val KEY_STATE_CHANGED = "state_changed"
 const val KEY_LAST_REFRESH = "LAST_REFRESH"
+const val KEY_EXTRA_SEND_HINTS = "EXTRA_SEND_HINTS"
 
 // prefs
 const val PREF_VISIBLE_CATEGORIES = "visible_categories"

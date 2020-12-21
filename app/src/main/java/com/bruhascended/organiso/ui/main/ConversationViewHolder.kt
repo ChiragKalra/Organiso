@@ -137,9 +137,6 @@ class ConversationViewHolder(
             manager().loadLastSync().also {
                 if (mNumber != conversation.number) return@also
                 if (it == null) {
-                    if (conversation.isInDb) {
-                        mainDaos[conversation.label].delete(conversation)
-                    }
                     return@also
                 }
                 val str = if (it.hasMedia)

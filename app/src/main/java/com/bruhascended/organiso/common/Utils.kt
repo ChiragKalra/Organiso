@@ -1,14 +1,10 @@
 package com.bruhascended.organiso.common
 
-import android.app.AlertDialog
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Telephony
-import android.util.TypedValue
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -19,7 +15,6 @@ import com.bruhascended.core.constants.getMimeType
 import com.bruhascended.organiso.BuildConfig
 import com.bruhascended.organiso.R
 import java.io.File
-import kotlin.math.roundToInt
 
 
 fun AppCompatActivity.setPrefTheme() {

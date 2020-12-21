@@ -270,10 +270,10 @@ class SMSManager (private val mContext: Context) {
                 LABEL_PERSONAL else LABEL_NONE
         )
 
-        mMainDaoProvider.getMainDaos()[prediction].insert(conversation)
-
         message.id = mContext.saveSms(number, body, MESSAGE_TYPE_INBOX)
         dao.insert(message)
+
+        mMainDaoProvider.getMainDaos()[prediction].insert(conversation)
         return message to conversation
     }
 

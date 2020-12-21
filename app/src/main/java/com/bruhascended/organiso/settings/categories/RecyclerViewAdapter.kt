@@ -123,7 +123,7 @@ class RecyclerViewAdapter(
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
-                            onRowMoved(absoluteAdapterPosition, 7)
+                            onRowMoved(absoluteAdapterPosition, 6)
                             hideButton.setImageResource(R.drawable.ic_visible)
                         }
                     } else {

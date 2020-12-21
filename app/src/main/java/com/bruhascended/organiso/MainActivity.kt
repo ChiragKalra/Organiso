@@ -144,6 +144,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // set up activity
         setPrefTheme()
         setContentView(R.layout.activity_main)
         setSupportActionBar(mToolbar)

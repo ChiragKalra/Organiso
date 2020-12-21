@@ -30,7 +30,6 @@ import kotlinx.android.synthetic.main.activity_start.*
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-
 /*
                     Copyright 2020 Chirag Kalra
 
@@ -62,7 +61,7 @@ class StartActivity : AppCompatActivity() {
 
     private val onDefaultAppResult = registerForActivityResult(StartActivityForResult()) {
         if (PackageManager.PERMISSION_DENIED in
-            Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it]) }
+            Array(ARR_PERMS.size) { ActivityCompat.checkSelfPermission(this, ARR_PERMS[it]) }
         ) {
             ActivityCompat.requestPermissions(this, ARR_PERMS, 0)
         } else {

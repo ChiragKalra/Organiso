@@ -22,7 +22,6 @@ import androidx.appcompat.view.ActionMode
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bruhascended.core.constants.*
@@ -43,6 +42,7 @@ import kotlinx.android.synthetic.main.activity_conversation.*
 import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.util.*
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -93,6 +93,13 @@ class ConversationActivity : MediaPreviewActivity() {
 
     private fun Int.toPx() = this * resources.displayMetrics.density
 
+    // array of extra send button hints
+    private val extraSendButtonHints = arrayOf(
+        R.string.add_to_favorite_messages,
+        R.string.draft_message,
+        R.string.send_scheduled_message,
+    )
+
     private fun toggleGoToBottomButtonVisibility() {
         if (mLayoutManager.findFirstVisibleItemPosition() > 1 && !mViewModel.goToBottomVisible) {
             mViewModel.goToBottomVisible = true
@@ -118,16 +125,26 @@ class ConversationActivity : MediaPreviewActivity() {
         toggleExtraVisibility(false)
     }
 
+    private var floatHints: Array<FloatHint>? = null
     private fun toggleExtraVisibility(vis: Boolean? = null) {
-        if (vis == null) mViewModel.extraIsVisible = !mViewModel.extraIsVisible
-        else mViewModel.extraIsVisible = vis
-        val extras = arrayOf(
+        // array of extra send buttons
+        val extraSendButtons = arrayOf(
             favoriteButton,
             draftButton,
             timedButton
         )
+
+        // if no state is provided, revert state
+        if (vis == null) {
+            mViewModel.extraIsVisible = !mViewModel.extraIsVisible
+        } else {
+            mViewModel.extraIsVisible = vis
+        }
+
         val visible = mViewModel.extraIsVisible
-        extras.forEachIndexed { i, b ->
+
+        // animate state change
+        extraSendButtons.forEachIndexed { i, b ->
             b.animate()
                 .alpha(visible.toFloat())
                 .translationY(if (visible) 0f else 64.toPx() * (i + 1))
@@ -140,6 +157,30 @@ class ConversationActivity : MediaPreviewActivity() {
             .setInterpolator(AccelerateDecelerateInterpolator())
             .setDuration(300)
             .start()
+
+        // show hints if first two times for user
+        val prev = mViewModel.mPrefs.getInt(KEY_EXTRA_SEND_HINTS, 0)
+        if (prev < 2 && visible) {
+            floatHints = Array(3) {
+                FloatHint(
+                    this,
+                    getString(extraSendButtonHints[it]).toUpperCase(Locale.ROOT)
+                )
+            }
+            extraButton.postDelayed({
+                mViewModel.mPrefs.edit().putInt(KEY_EXTRA_SEND_HINTS, prev + 1).apply()
+                extraSendButtons.forEachIndexed { i, b ->
+                    floatHints!![i].show(b)
+                }
+            }, 300)
+        }
+
+        // hide hints when user closes extra send actions
+        if (!visible && floatHints != null) {
+            floatHints!!.forEach {
+                it.dismiss()
+            }
+        }
     }
 
     private val scrollToItemAfterSearch = registerForActivityResult(StartActivityForResult()) {
@@ -411,9 +452,7 @@ class ConversationActivity : MediaPreviewActivity() {
             }
         }
 
-        if (PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean(PREF_ENTER_SEND, false)
-        ) {
+        if (mViewModel.mPrefs.getBoolean(PREF_ENTER_SEND, false)) {
             messageEditText.setSingleLine()
             messageEditText.imeOptions = EditorInfo.IME_ACTION_SEND
             messageEditText.setOnEditorActionListener { _, i, _ ->
