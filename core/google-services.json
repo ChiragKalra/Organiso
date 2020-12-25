@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1033526587251",
+    "firebase_url": "https://sms-organiser-android.firebaseio.com",
+    "project_id": "sms-organiser-android",
+    "storage_bucket": "sms-organiser-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033526587251:android:aada4f7a667cb804045f06",
+        "android_client_info": {
+          "package_name": "com.bruhascended.core"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1033526587251-uf5gopollljcjdlfud9jaekrtu8ro90u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATwHySjZ3bUXOMuDaty2Ribvvzk60eubI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1033526587251-uf5gopollljcjdlfud9jaekrtu8ro90u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

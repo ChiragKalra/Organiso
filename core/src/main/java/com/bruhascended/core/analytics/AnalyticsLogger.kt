@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.BuildConfig
+import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -28,10 +29,10 @@ import com.google.firebase.storage.FirebaseStorage
  */
 
 class AnalyticsLogger(
-    context: Context
+    private val context: Context
 ) {
     private val mPref = PreferenceManager.getDefaultSharedPreferences(context)
-    private val firebaseAnalytics = FirebaseAnalytics.getInstance(context)
+    private var firebaseAnalytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
     fun reportBug (title: String, deviceDetails: String, fileUri: Uri? = null) {
         val content = "version=${Build.VERSION.SDK_INT}, " +
@@ -40,6 +41,7 @@ class AnalyticsLogger(
         val rn = System.currentTimeMillis().toString()
         log(EVENT_BUG_REPORTED)
 
+        FirebaseApp.initializeApp(context)
         val database = FirebaseDatabase.getInstance()
         val myRef = database.getReference("${PATH_BUG_REPORTS}/${rn}")
         myRef.child(PATH_TITLE).setValue(title)
