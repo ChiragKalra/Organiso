@@ -75,13 +75,14 @@
 
         <androidx.cardview.widget.CardView
             android:id="@+id/imageView"
-            android:layout_width="86dp"
-            android:layout_height="86dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:cardCornerRadius="86dp"
-            android:layout_marginTop="164dp"
+            android:clipChildren="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" >
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/description">
             <ImageView
                 android:layout_width="86dp"
                 android:layout_height="86dp"
@@ -105,10 +106,12 @@
             android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="46dp"
+            android:layout_margin="32dp"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/appName">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -123,37 +126,36 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/organised"
-                android:layout_marginStart="8dp"
                 android:textAlignment="center"
                 android:textSize="22sp"/>
         </LinearLayout>
 
         <CheckBox
-            android:linksClickable="true"
             android:id="@+id/privacy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
             android:layout_marginBottom="8dp"
+            android:linksClickable="true"
             android:text="@string/read_privacy_policy"
             android:textColor="?android:textColorHint"
             android:textColorLink="?headerTextColor"
-            android:textSize="16sp"
+            android:textSize="15sp"
             app:layout_constraintBottom_toTopOf="@+id/tnc"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="@+id/tnc" />
 
         <CheckBox
-            android:linksClickable="true"
+            android:layout_marginStart="16dp"
             android:id="@+id/tnc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
             android:layout_marginBottom="36dp"
-            android:textColorLink="?headerTextColor"
+            android:linksClickable="true"
             android:text="@string/agree_to_tnc"
             android:textColor="?android:textColorHint"
-            android:textSize="16sp"
+            android:textColorLink="?headerTextColor"
+            android:textSize="15sp"
             app:layout_constraintBottom_toTopOf="@+id/next"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -170,7 +172,7 @@
             android:paddingBottom="16dp"
             android:text="@string/next"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
