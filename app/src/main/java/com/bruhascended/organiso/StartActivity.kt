@@ -154,7 +154,7 @@ class StartActivity : AppCompatActivity() {
             // ask the user to accept TnC and privacy policy
             val flag = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             val mContext = this
-            var strIn = getString(R.string.terms_and_conditions)
+            val strIn = getString(R.string.terms_and_conditions)
             var strOut = getString(R.string.agree_to_tnc, strIn)
             var start = strOut.indexOf(strIn)
             var strBuilder = SpannableStringBuilder(strOut)
@@ -171,20 +171,20 @@ class StartActivity : AppCompatActivity() {
             tnc.text = strBuilder
             tnc.movementMethod = LinkMovementMethod.getInstance()
 
-            strIn = getString(R.string.privacy_policy)
-            strOut = getString(R.string.read_privacy_policy, strIn)
-            start = strOut.indexOf(strIn)
+            val strInPP = getString(R.string.privacy_policy)
+            strOut = getString(R.string.read_privacy_policy, strInPP)
+            start = strOut.indexOf(strInPP)
             strBuilder = SpannableStringBuilder(strOut)
             strBuilder.setSpan(object : ClickableSpan() {
                 override fun onClick(view: View) {
                     startActivity(
                         Intent(mContext, PolicyActivity::class.java).apply {
                             putExtra(Intent.EXTRA_FROM_STORAGE,"privacy_policy.html")
-                            putExtra(Intent.EXTRA_TITLE, strIn)
+                            putExtra(Intent.EXTRA_TITLE, strInPP)
                         }
                     )
                 }
-            }, start, start + strIn.length, flag)
+            }, start, start + strInPP.length, flag)
             privacy.text = strBuilder
             privacy.movementMethod = LinkMovementMethod.getInstance()
 
