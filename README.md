@@ -6,6 +6,7 @@ Organiso is an android app for classifying SMSs into common categories like prio
 
 ## Usage
 Download the latest apk from releases or install from Google PlayStore.
+
 <a href="https://play.google.com/store/apps/details?id=com.bruhascended.organiso"><img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" alt="Download on Google Play" height="100"></a>
 
 ## Screen Shots
