@@ -13,7 +13,7 @@
         android:id="@android:id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="42sp"
+        android:textSize="36sp"
         style="@style/TextAppearance.Compat.Notification.Title"/>
 
     <TextView

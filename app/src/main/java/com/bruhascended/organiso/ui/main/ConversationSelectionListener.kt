@@ -12,6 +12,7 @@ import androidx.appcompat.view.ActionMode
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import com.bruhascended.core.constants.getSecondMostProbableLabelAfter
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
@@ -167,7 +168,7 @@ class ConversationSelectionListener(
                         }
                     }
                 }.toTypedArray()
-                var selection = 0
+                var selection = selected.getSecondMostProbableLabelAfter(label)
                 alertDialog.setTitle(mContext.getString(R.string.move_conversations_to))
                     .setSingleChoiceItems(choices, selection) { _, select ->
                         selection = select + if (select>=label) 1 else 0

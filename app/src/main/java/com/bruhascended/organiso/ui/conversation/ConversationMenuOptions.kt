@@ -183,7 +183,10 @@ class ConversationMenuOptions(
                         LABEL_IMPORTANT else LABEL_PERSONAL
                     AlertDialog.Builder(mContext)
                         .setTitle(getString(R.string.move_conversation_to))
-                        .setSingleChoiceItems(choices, 0) { _, select ->
+                        .setSingleChoiceItems(
+                            choices,
+                            conversation.probabilities.getSecondMostProbableLabelAfter(conversation.label)
+                        ) { _, select ->
                             selection = select + if (select >= conversation.label) 1 else 0
                         }.setPositiveButton(getText(R.string.move)) { dialog, _ ->
                             analyticsLogger.log("${conversation.label}_to_$selection")

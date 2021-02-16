@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.Telephony
 import android.webkit.MimeTypeMap
+import com.bruhascended.core.db.Conversation
 import com.google.gson.Gson
 import java.io.File
 import java.io.FileOutputStream
@@ -59,4 +60,23 @@ fun Context.saveFile(data: Uri?, fileName: String): String? {
     }
     output.flush()
     return destination.absolutePath
+}
+
+
+fun Array<Float>.getSecondMostProbableLabelAfter(label: Int): Int {
+    var ind = indexOf(sliceArray(0..3).sortedArray()[1])
+    if (ind >= label ) ind -= 1
+    return ind
+}
+
+fun List<Conversation>.getSecondMostProbableLabelAfter(label: Int): Int {
+    val floatArray = FloatArray(4)
+    forEach {
+        for (i in 0..3) {
+            floatArray[i] += it.probabilities[i]
+        }
+    }
+    var ind = floatArray.indexOfFirst { it == floatArray.sortedArray()[1]}
+    if (ind >= label ) ind -= 1
+    return ind
 }
