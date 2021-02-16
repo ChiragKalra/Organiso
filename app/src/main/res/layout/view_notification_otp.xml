@@ -8,12 +8,12 @@
     android:padding="0dp"
     xmlns:android="http://schemas.android.com/apk/res/android" >
     <TextView
+        android:letterSpacing="0.33"
         android:layout_margin="0dp"
         android:id="@android:id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="22sp"
-        android:textStyle="bold"
+        android:textSize="42sp"
         style="@style/TextAppearance.Compat.Notification.Title"/>
 
     <TextView

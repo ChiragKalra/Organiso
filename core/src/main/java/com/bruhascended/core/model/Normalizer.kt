@@ -39,8 +39,8 @@ private fun removeRegex (text: String, regex: Regex) : Pair<String, Float> {
 }
 
 fun removeDecimals (message: String): Pair<String, Float> {
-    // identifies decimals, time, date and big numbers separated by ','
-    val decimal = Regex("\\d*[.:,/\\\\]+\\d+")
+    // identifies decimals, date and big numbers separated by ','
+    val decimal = Regex("\\d*[.,/\\\\]+\\d+")
     return removeRegex(message, decimal)
 }
 

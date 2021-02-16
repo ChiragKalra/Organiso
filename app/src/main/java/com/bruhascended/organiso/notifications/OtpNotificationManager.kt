@@ -87,16 +87,15 @@ class OtpNotificationManager (
             WorkManager.getInstance(mContext).enqueue(request)
         }
 
-        val formattedOtp = otp.slice(0 until otp.length/2) + " " +
-                otp.slice(otp.length/2 until otp.length)
         val notificationLayout = RemoteViews(mContext.packageName,
             R.layout.view_notification_otp).apply{
             setTextViewText(android.R.id.content, text)
-            setTextViewText(android.R.id.title, formattedOtp)
+            setTextViewText(android.R.id.title, otp)
         }
         val notificationLayoutMin = RemoteViews(mContext.packageName,
             R.layout.view_notification_otp_small).apply{
-            setTextViewText(android.R.id.title, formattedOtp)
+            setTextViewText(android.R.id.content, text)
+            setTextViewText(android.R.id.title, otp)
         }
 
         val contentPI = PendingIntent.getActivity(
