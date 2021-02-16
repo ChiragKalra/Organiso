@@ -1,4 +1,4 @@
-package com.bruhascended.core.analytics
+package com.bruhascended.organiso.analytics
 
 import android.content.Context
 import android.net.Uri
@@ -6,7 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.constants.*
-import com.bruhascended.core.BuildConfig
+import com.bruhascended.organiso.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.FirebaseDatabase

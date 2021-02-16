@@ -13,7 +13,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import com.bruhascended.organiso.R
-import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.organiso.common.ListSelectionManager
 import com.bruhascended.core.data.MainDaoProvider

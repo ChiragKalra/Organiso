@@ -1,8 +1,6 @@
 package com.bruhascended.core.model
 
 import android.content.Context
-import com.bruhascended.core.analytics.AnalyticsLogger
-import com.bruhascended.core.constants.EVENT_MESSAGE_ORGANISED
 import com.bruhascended.core.db.Message
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.GpuDelegate
@@ -80,8 +78,6 @@ class OrganizerModel (private val context: Context) {
             tflite.run(inputData, out)
 
             for (j in 0..4) probs[j] += out[0][j]
-
-            AnalyticsLogger(mContext).log(EVENT_MESSAGE_ORGANISED)
         }
         return probs
     }

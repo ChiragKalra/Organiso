@@ -7,7 +7,7 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
-import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.MainDaoProvider
 import com.bruhascended.core.db.Message

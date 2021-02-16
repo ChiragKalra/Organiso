@@ -7,12 +7,15 @@ import android.os.IBinder
 import android.provider.Telephony
 import android.telephony.SmsMessage
 import androidx.preference.PreferenceManager
+import com.bruhascended.core.constants.EVENT_CONVERSATION_ORGANISED
 import com.bruhascended.core.constants.KEY_RESUME_DATE
+import com.bruhascended.core.constants.PARAM_BACKGROUND
 import com.bruhascended.core.data.ContactsManager
 import com.bruhascended.core.data.SMSManager
 import com.bruhascended.core.db.MessageDao
 import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.ConversationActivity
+import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.organiso.notifications.MessageNotificationManager
 
 /*
@@ -48,6 +51,8 @@ class SMSReceiverService: Service() {
         if (intent == null) {
             return super.onStartCommand(intent, flags, startId)
         }
+
+        AnalyticsLogger(mContext).log(EVENT_CONVERSATION_ORGANISED, PARAM_BACKGROUND)
 
         if (intent.action == "android.provider.Telephony.SMS_RECEIVED") {
             if (mContext.packageName != Telephony.Sms.getDefaultSmsPackage(mContext)) {

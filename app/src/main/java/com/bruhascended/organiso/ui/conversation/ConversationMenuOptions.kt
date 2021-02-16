@@ -19,7 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.RecyclerView
-import com.bruhascended.core.analytics.AnalyticsLogger
+import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.ContactsProvider
 import com.bruhascended.core.data.MainDaoProvider

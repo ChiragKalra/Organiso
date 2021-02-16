@@ -23,6 +23,7 @@ import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.constants.*
 import com.bruhascended.core.data.SMSManager
+import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.organiso.common.requestDefaultApp
 import com.bruhascended.organiso.notifications.ChannelManager
 import com.bruhascended.organiso.ui.start.PolicyActivity
@@ -212,12 +213,13 @@ class StartActivity : AppCompatActivity() {
     }
 
     private fun organise() {
-
+        val analyticsLogger = AnalyticsLogger(this)
         val smsManager = SMSManager(this)
 
         var progress = 0f
 
         smsManager.onProgressListener = {
+            analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, PARAM_INIT)
             runOnUiThread {
                 progress = it
                 if (it > 0) {

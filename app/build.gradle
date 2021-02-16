@@ -16,8 +16,8 @@ android {
         applicationId "com.bruhascended.organiso"
         minSdkVersion 26
         targetSdkVersion 30
-        versionCode 999
-        versionName "0.999-beta11"
+        versionCode 1002
+        versionName "1.002"
 
         kotlinOptions {
             freeCompilerArgs += ['-XXLanguage:+UnitConversion']
@@ -72,6 +72,14 @@ dependencies {
 
     implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
     implementation 'com.squareup.picasso:picasso:2.71828'
+
+
+    implementation 'com.google.firebase:firebase-core:18.0.0'
+    implementation 'com.google.firebase:firebase-analytics:18.0.0'
+    implementation 'com.google.firebase:firebase-perf:19.0.11'
+    implementation 'com.google.firebase:firebase-database:19.6.0'
+    implementation 'com.google.firebase:firebase-storage:19.2.1'
+
 
     implementation project(':core')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

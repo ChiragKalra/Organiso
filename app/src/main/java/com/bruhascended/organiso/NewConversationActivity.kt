@@ -130,9 +130,13 @@ class NewConversationActivity : MediaPreviewActivity() {
 
     @Suppress("UNCHECKED_CAST")
     private fun processIntentData() {
+        var recipientAdded = false
         if (Intent.ACTION_SENDTO == intent.action) {
             val destinations = TextUtils.split(getRecipients(intent.data!!), ";")
-            destinations.forEach { addRecipient(it) }
+            destinations.forEach {
+                addRecipient(it)
+                recipientAdded = true
+            }
         } else if (Intent.ACTION_SEND == intent.action && (intent.type != null || intent.data != null)) {
             when {
                 intent.type?.startsWith("text") ?: false -> {
@@ -171,6 +175,9 @@ class NewConversationActivity : MediaPreviewActivity() {
                 }
                 else -> showMediaPreview(intent)
             }
+        }
+        if (recipientAdded) {
+            messageEditText.requestFocus()
         }
     }
 
@@ -248,9 +255,9 @@ class NewConversationActivity : MediaPreviewActivity() {
         mContactsProvider = ContactsProvider(this)
         mSavedDao = SavedDbFactory(mContext).get().manager()
 
-        processIntentData()
         setupAddressRecycler()
         setupContactRecycler()
+        processIntentData()
 
         to.text = null
 

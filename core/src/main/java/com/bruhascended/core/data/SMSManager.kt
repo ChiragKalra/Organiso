@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.constants.*
-import com.bruhascended.core.analytics.AnalyticsLogger
 import com.bruhascended.core.db.Conversation
 import com.bruhascended.core.db.Message
 import com.bruhascended.core.db.MessageDao
@@ -33,7 +32,6 @@ import com.bruhascended.core.model.getOtp
 class SMSManager (private val mContext: Context) {
 
     private val cm = ContactsManager(mContext)
-    private val analyticsLogger = AnalyticsLogger(mContext)
     private val mMainDaoProvider = MainDaoProvider(mContext)
     private val mPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
 
@@ -89,8 +87,6 @@ class SMSManager (private val mContext: Context) {
         val eta = (System.currentTimeMillis()-startTime) * (100/per-1)
         onProgressListener(per)
         onEtaChangeListener(eta.toLong())
-
-        analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, PARAM_INIT)
     }
 
     private fun deletePrevious(rawNumber: String): Conversation? {
@@ -252,8 +248,6 @@ class SMSManager (private val mContext: Context) {
             }
             label
         }
-
-        analyticsLogger.log(EVENT_CONVERSATION_ORGANISED, PARAM_BACKGROUND)
 
         conversation = conversation?.apply {
             this.read = read
