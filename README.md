@@ -16,7 +16,7 @@ Install from Google PlayStore or download the latest apk from releases.
 <img src="https://user-images.githubusercontent.com/24735099/102793080-619e7d00-43cf-11eb-8536-c214f8d33c31.png" alt="drawing" width="160"/>
 <img src="https://user-images.githubusercontent.com/24735099/102793084-64996d80-43cf-11eb-8c70-f7448445eff1.png" alt="drawing" width="160"/>
 <img src="https://user-images.githubusercontent.com/24735099/102793085-65ca9a80-43cf-11eb-8d48-44a3db64b43e.png" alt="drawing" width="160"/>
-<img src="https://user-images.githubusercontent.com/24735099/109694285-a5bcb380-7bb0-11eb-9e29-3b76cbbe78fc.png" alt="drawing" width="160"/>
+<img src="https://user-images.githubusercontent.com/24735099/109694361-ba994700-7bb0-11eb-9e29-3b76cbbe78fc.png" alt="drawing" width="160"/>
 </p>
 
 ## Contribute
