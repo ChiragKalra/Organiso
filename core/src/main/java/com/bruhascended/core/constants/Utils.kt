@@ -62,7 +62,6 @@ fun Context.saveFile(data: Uri?, fileName: String): String? {
     return destination.absolutePath
 }
 
-
 fun Array<Float>.getSecondMostProbableLabelAfter(label: Int): Int {
     var ind = indexOf(sliceArray(0..3).sortedArray()[1])
     if (ind >= label ) ind -= 1

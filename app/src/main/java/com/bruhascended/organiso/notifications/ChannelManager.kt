@@ -3,8 +3,6 @@ package com.bruhascended.organiso.notifications
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.bruhascended.organiso.R
 
 /*
@@ -38,7 +36,6 @@ class ChannelManager(
         NotificationManager.IMPORTANCE_NONE
     )
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun createNotificationChannels() {
         val notificationManager =
             mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

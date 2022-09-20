@@ -38,7 +38,7 @@ class SwipeFragment : PreferenceFragmentCompat() {
         val rightPref: ListPreference = findPreference(PREF_CUSTOM_RIGHT)!!
 
         leftPref.title = requireContext().getString(R.string.choose_left_swipe)
-        rightPref.title = requireContext().getString(R.string.choose_left_swipe)
+        rightPref.title = requireContext().getString(R.string.choose_right_swipe)
 
         leftPref.setOnPreferenceChangeListener { _, _ ->
             true

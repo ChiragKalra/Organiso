@@ -10,8 +10,6 @@ class DateTimeProvider(
     private val mContext: Context
 ) {
 
-    // TODO locale language
-
     private val yesterdayStr = mContext.getString(R.string.yesterday)
 
     fun getCondensed(time: Long): String {
