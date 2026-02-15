@@ -72,11 +72,14 @@ class SMSManager (private val mContext: Context) {
     }
 
     // Init heavy objects here
+    private var isInitialized = false
+    @Synchronized
     private fun initLate() {
-        if (!::senderNameMap.isInitialized || senderNameMap.isEmpty()) {
+        if (!isInitialized) {
             senderNameMap = cm.getContactsHashMap()
             nn = OrganizerModel(mContext)
             mmsManager = MMSManager(mContext, senderNameMap)
+            isInitialized = true
         }
     }
 
