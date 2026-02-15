@@ -40,47 +40,58 @@ class MMSManager (
 
     private fun getAddressNumber(id: Int): Pair<Boolean, String> {
         var threadId = -1L
-        mContext.contentResolver.query(
-            Uri.parse("content://mms/${id}"),
-            arrayOf("thread_id"),
-            null,
-            null,
-            null
-        )?.apply {
-            if (moveToFirst()) {
-                threadId = getString(0).toLong()
-            }
-        }
-        var selection = "type=137 AND msg_id=$id"
-        val uriAddress = Uri.parse("content://mms/${id}/addr")
-        var cursor = mContext.contentResolver.query(
-            uriAddress, arrayOf("address"), selection, null, null
-        )!!
-        var address = ""
-        if (cursor.moveToFirst()) {
-            do {
-                address = cursor.getString(cursor.getColumnIndex("address"))
-                if (address != null) break
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
         try {
-            if (getOrCreateThreadId(mContext, address) == threadId) {
-                return false to address
+            mContext.contentResolver.query(
+                Uri.parse("content://mms/${id}"),
+                arrayOf("thread_id"),
+                null,
+                null,
+                null
+            )?.use {
+                if (it.moveToFirst()) {
+                    threadId = it.getLong(0)
+                }
             }
-        } catch (e: Exception) { }
-
-        selection = "type=151 AND msg_id=$id"
-        cursor = mContext.contentResolver.query(
-            uriAddress, null, selection, null, null
-        )!!
-        if (cursor.moveToFirst()) {
-            do {
-                address = cursor.getString(cursor.getColumnIndex("address"))
-                if (address != null) break
-            } while (cursor.moveToNext())
+        } catch (e: Exception) {
+            android.util.Log.e("MMSManager", "Error getting threadId", e)
         }
-        cursor.close()
+
+        var address = ""
+        val uriAddress = Uri.parse("content://mms/${id}/addr")
+        try {
+            mContext.contentResolver.query(
+                uriAddress, arrayOf("address"), "type=137 AND msg_id=$id", null, null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val addrIdx = cursor.getColumnIndex("address")
+                    if (addrIdx != -1) {
+                        address = cursor.getString(addrIdx) ?: ""
+                    }
+                }
+            }
+            if (address.isNotEmpty()) {
+                if (getOrCreateThreadId(mContext, address) == threadId) {
+                    return false to address
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MMSManager", "Error getting type 137 address", e)
+        }
+
+        try {
+            mContext.contentResolver.query(
+                uriAddress, null, "type=151 AND msg_id=$id", null, null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val addrIdx = cursor.getColumnIndex("address")
+                    if (addrIdx != -1) {
+                        address = cursor.getString(addrIdx) ?: ""
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MMSManager", "Error getting type 151 address", e)
+        }
         return true to address
     }
 
@@ -125,23 +136,25 @@ class MMSManager (
             "date" + ">?",
             arrayOf(lastDate),
             "date ASC"
-        ) ?.apply {
-            if (moveToFirst()) {
-                val idColumn = getColumnIndex("_id")
-                val dateColumn = getColumnIndex("date")
-                val textColumn = getColumnIndex("text_only")
-                val typeColumn = getColumnIndex("msg_box")
-                do {
-                    val id = getString(idColumn)
-                    val isMms = getString(textColumn) == "0"
-                    val date = getString(dateColumn).toLong() * 1000
-                    val type = getString(typeColumn).toInt()
-                    if (isMms) {
-                        putMMS(id.toInt(), type, init = true, date = date)
-                    }
-                } while (moveToNext())
+        ) ?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val idColumn = cursor.getColumnIndex("_id")
+                val dateColumn = cursor.getColumnIndex("date")
+                val textColumn = cursor.getColumnIndex("text_only")
+                val typeColumn = cursor.getColumnIndex("msg_box")
+                
+                if (idColumn != -1 && dateColumn != -1 && textColumn != -1 && typeColumn != -1) {
+                    do {
+                        val id = cursor.getString(idColumn)
+                        val isMms = cursor.getString(textColumn) == "0"
+                        val date = cursor.getString(dateColumn).toLong() * 1000
+                        val type = cursor.getString(typeColumn).toInt()
+                        if (isMms) {
+                            putMMS(id.toInt(), type, init = true, date = date)
+                        }
+                    } while (cursor.moveToNext())
+                }
             }
-            close()
         }
     }
 
@@ -159,29 +172,37 @@ class MMSManager (
 
         val selectionPart = "mid=$mmsId"
         val partUri = Uri.parse("content://mms/part")
-        val cursor = mContext.contentResolver.query(
-            partUri, null,
-            selectionPart, null, null
-        )!!
         var body = ""
         var file: String? = null
-        if (cursor.moveToFirst()) {
-            do {
-                val partId: String = cursor.getString(cursor.getColumnIndex("_id"))
-                val typeString = cursor.getString(cursor.getColumnIndex("ct"))
-                if ("text/plain" == typeString) {
-                    body = getMmsText(partId)
-                } else if (file==null &&
-                    (typeString.startsWith("video") ||
-                    typeString.startsWith("image") ||
-                    typeString.startsWith("audio"))
-                ) {
-                    file = saveFile(partId, typeString, date)
+        try {
+            mContext.contentResolver.query(
+                partUri, null,
+                selectionPart, null, null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val idIdx = cursor.getColumnIndex("_id")
+                    val ctIdx = cursor.getColumnIndex("ct")
+                    if (idIdx != -1 && ctIdx != -1) {
+                        do {
+                            val partId: String = cursor.getString(idIdx)
+                            val typeString = cursor.getString(ctIdx)
+                            if ("text/plain" == typeString) {
+                                body = getMmsText(partId)
+                            } else if (file == null &&
+                                (typeString.startsWith("video") ||
+                                        typeString.startsWith("image") ||
+                                        typeString.startsWith("audio"))
+                            ) {
+                                file = saveFile(partId, typeString, date)
+                            }
+                            if (file != null && body.isNotEmpty()) break
+                        } while (cursor.moveToNext())
+                    }
                 }
-                if (file!=null && body.isNotEmpty()) break
-            } while (cursor.moveToNext())
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MMSManager", "Error querying MMS parts", e)
         }
-        cursor.close()
 
 
         if (file==null && body.isBlank()) return null
@@ -230,14 +251,15 @@ class MMSManager (
             con
         }
 
-        val dao = if (activeNumber == rawNumber) {
-            activeDao!!
+        if (activeNumber == rawNumber) {
+            activeDao!!.insert(message)
+            return null
         } else {
-            MessageDbFactory(mContext).of(rawNumber).manager()
+            MessageDbFactory(mContext).of(rawNumber).apply {
+                manager().insert(message)
+                close()
+            }
         }
-
-        dao.insert(message)
-        if (activeNumber == rawNumber) return null
         return message to conversation
     }
 }

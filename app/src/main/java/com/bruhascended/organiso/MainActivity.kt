@@ -52,12 +52,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mContext: Context
     private lateinit var inputManager: InputMethodManager
+    private var isRequestingDefaultApp = false
 
     // do nothing on search canceled
     private val onSearchCanceled = registerForActivityResult(StartActivityForResult()) {}
 
     // get permission results
     private val onDefaultAppResult = registerForActivityResult(StartActivityForResult()) {
+        isRequestingDefaultApp = false
         if (PackageManager.PERMISSION_DENIED in
             Array(ARR_PERMS.size){ ActivityCompat.checkSelfPermission(this, ARR_PERMS[it]) }
         ) {
@@ -219,11 +221,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         mViewModel.mContactsProvider.updateAsync()
-
-        if (packageName != Telephony.Sms.getDefaultSmsPackage(this)) {
-            mViewModel.mSmsManager.updateAsync()
-            requestDefaultApp(onDefaultAppResult)
-        }
 
         viewPager.isUserInputEnabled = mViewModel.prefs.getBoolean(PREF_ACTION_NAVIGATE, true)
         mViewModel.visibleCategories.forEachIndexed { i, _ ->

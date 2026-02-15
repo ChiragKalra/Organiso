@@ -393,9 +393,11 @@ class ConversationActivity : MediaPreviewActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        android.util.Log.d("ConversationActivity", "onCreate started")
         super.onCreate(savedInstanceState)
         setPrefTheme()
         setContentView(R.layout.activity_conversation)
+        android.util.Log.d("ConversationActivity", "setContentView finished")
 
         mVideoView = videoView
         mImagePreview = imagePreview
@@ -404,18 +406,33 @@ class ConversationActivity : MediaPreviewActivity() {
         mVideoPlayPauseButton = videoPlayPauseButton
         mAddMedia = addMedia
 
+        val extras = intent.extras
+        android.util.Log.d("ConversationActivity", "Intent extras: ${extras?.keySet()}")
         val receivedConversation = when {
-            intent.extras!!.containsKey(EXTRA_CONVERSATION) -> {
+            extras?.containsKey(EXTRA_CONVERSATION) == true -> {
                 intent.getSerializableExtra(EXTRA_CONVERSATION) as Conversation
             }
-            intent.extras!!.containsKey(EXTRA_CONVERSATION_JSON) -> {
+            extras?.containsKey(EXTRA_CONVERSATION_JSON) == true -> {
                 intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
             }
-            else -> {
+            extras?.containsKey(EXTRA_NUMBER) == true -> {
                 Conversation(intent.getStringExtra(EXTRA_NUMBER)!!)
             }
+            else -> {
+                android.util.Log.e("ConversationActivity", "No conversation identifier found!")
+                null
+            }
         }
+
+        if (receivedConversation == null) {
+            android.util.Log.e("ConversationActivity", "Could not resolve conversation, finishing.")
+            finish()
+            return
+        }
+
+        android.util.Log.d("ConversationActivity", "Target conversation: ${receivedConversation.number}")
         mViewModel.init(receivedConversation)
+        android.util.Log.d("ConversationActivity", "ViewModel init finished")
         setupToolbar(
             toolbar,
             ContactsProvider(this).getNameOrNull(mViewModel.number)

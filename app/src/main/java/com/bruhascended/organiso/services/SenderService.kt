@@ -14,6 +14,7 @@ import android.telephony.SmsManager
 import android.telephony.SubscriptionManager
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.db.Message
 import com.bruhascended.organiso.BuildConfig.APPLICATION_ID
@@ -71,7 +72,7 @@ class SenderService: Service() {
     }
 
     private fun registerDeliveredReceiver(number: String, id: Int) {
-        mContext.registerReceiver(object : BroadcastReceiver() {
+        ContextCompat.registerReceiver(mContext, object : BroadcastReceiver() {
             override fun onReceive(arg0: Context?, arg1: Intent) {
                 val uri = arg1.getStringExtra(EXTRA_MESSAGE_URI) ?:
                     arg1.getStringExtra(EXTRA_CONTENT_URI)
@@ -81,7 +82,7 @@ class SenderService: Service() {
                     mContext.unregisterReceiver(this)
                 }
             }
-        }, IntentFilter(deliveredAction))
+        }, IntentFilter(deliveredAction), ContextCompat.RECEIVER_EXPORTED)
     }
 
     private fun updateSentStatus(number: String, oldId : Int, id: Int, status: Int) {
@@ -108,7 +109,7 @@ class SenderService: Service() {
     }
 
     private fun registerSentReceiver(number: String, oldId: Int) {
-        mContext.registerReceiver(object : BroadcastReceiver() {
+        ContextCompat.registerReceiver(mContext, object : BroadcastReceiver() {
             override fun onReceive(arg0: Context, arg1: Intent) {
                 val uri = arg1.getStringExtra(EXTRA_MESSAGE_URI) ?:
                     arg1.getStringExtra(EXTRA_CONTENT_URI)
@@ -154,11 +155,11 @@ class SenderService: Service() {
             }
         }, IntentFilter().apply {
             addAction(smsSentAction)
-        })
+        }, ContextCompat.RECEIVER_EXPORTED)
     }
 
     private fun registerMmsSentReceiver(number: String, oldId: Int) {
-        mContext.registerReceiver(object : BroadcastReceiver() {
+        ContextCompat.registerReceiver(mContext, object : BroadcastReceiver() {
             override fun onReceive(arg0: Context, arg1: Intent) {
                 val uri = arg1.getStringExtra(EXTRA_MESSAGE_URI) ?:
                     arg1.getStringExtra(EXTRA_CONTENT_URI)
@@ -202,7 +203,7 @@ class SenderService: Service() {
             }
         }, IntentFilter().apply {
             addAction(mmsSentAction)
-        })
+        }, ContextCompat.RECEIVER_EXPORTED)
     }
 
     private fun updateConversation(number: String, time: Long) {

@@ -18,7 +18,7 @@ class PersonalMoveService: Service() {
         val mainDaos = MainDaoProvider(mContext).getMainDaos()
         val pendingIntent: PendingIntent =
             Intent(mContext, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(mContext, 0, notificationIntent, 0)
+                PendingIntent.getActivity(mContext, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
             }
 
         val notification: Notification =
@@ -30,17 +30,27 @@ class PersonalMoveService: Service() {
                 .setProgress(0, 0, true)
                 .build()
 
-        mContext.startForeground(10123123, notification)
+        mContext.startForeground(10123123, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         Thread {
             for (con in mainDaos[LABEL_PERSONAL].loadAllSync()) {
                 var label: Int
                 con.probabilities.clone().apply {
                     this[LABEL_PERSONAL] = 0f
-                    label = toList().indexOf(maxOrNull())
+                    var max = -1f
+                    var maxInd = -1
+                    forEachIndexed { index, f ->
+                        if (f > max) {
+                            max = f
+                            maxInd = index
+                        }
+                    }
+                    label = maxInd
                 }
-                mainDaos[LABEL_PERSONAL].delete(con)
-                con.label = label
-                mainDaos[label].insert(con)
+                if (label != -1) {
+                    mainDaos[LABEL_PERSONAL].delete(con)
+                    con.label = label
+                    mainDaos[label].insert(con)
+                }
             }
             stopForeground(true)
             stopSelf()

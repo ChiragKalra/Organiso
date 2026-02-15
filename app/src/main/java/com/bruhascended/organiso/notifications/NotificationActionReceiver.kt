@@ -122,7 +122,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
             ACTION_REPLY -> {
                 val conversation =
                     intent.getStringExtra(EXTRA_CONVERSATION_JSON).toConversation()
-                val replyText = RemoteInput.getResultsFromIntent(intent).getCharSequence(EXTRA_TEXT_REPLY).toString()
+                val replyText = RemoteInput.getResultsFromIntent(intent)?.getCharSequence(EXTRA_TEXT_REPLY).toString()
 
                 val newMessage = Message(replyText, MESSAGE_TYPE_SENT, System.currentTimeMillis())
                 MessageNotificationManager(mContext).sendSmsNotification(newMessage to conversation)

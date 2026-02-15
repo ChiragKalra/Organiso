@@ -154,30 +154,31 @@ class SMSManager (private val mContext: Context) {
             "date" + ">?",
             arrayOf(lastDate),
             "date ASC"
-        ) ?.apply {
-            if (moveToFirst()) {
-                val nameID = getColumnIndex("address")
-                val messageID = getColumnIndex("body")
-                val dateID = getColumnIndex("date")
-                val typeID = getColumnIndex("type")
+        ) ?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameID = cursor.getColumnIndex("address")
+                val messageID = cursor.getColumnIndex("body")
+                val dateID = cursor.getColumnIndex("date")
+                val typeID = cursor.getColumnIndex("type")
+                val idID = cursor.getColumnIndex("_id")
 
-                do {
-                    val name = getString(nameID)
-                    val messageContent = getString(messageID)
-                    val id = getString(getColumnIndex("_id")).toInt()
-                    if (name != null && !messageContent.isNullOrEmpty()) {
-
-                        val number = cm.getClean(name)
-                        val message = Message(
-                            messageContent, getString(typeID).toInt(),
-                            getString(dateID).toLong(), id = id
-                        )
-                        if (messages.containsKey(number)) messages[number]?.add(message)
-                        else messages[number] = arrayListOf(message)
-                    }
-                } while (moveToNext())
+                if (nameID != -1 && messageID != -1 && dateID != -1 && typeID != -1 && idID != -1) {
+                    do {
+                        val name = cursor.getString(nameID)
+                        val messageContent = cursor.getString(messageID)
+                        val id = cursor.getString(idID).toInt()
+                        if (name != null && !messageContent.isNullOrEmpty()) {
+                            val number = cm.getClean(name)
+                            val message = Message(
+                                messageContent, cursor.getString(typeID).toInt(),
+                                cursor.getString(dateID).toLong(), id = id
+                            )
+                            if (messages.containsKey(number)) messages[number]?.add(message)
+                            else messages[number] = arrayListOf(message)
+                        }
+                    } while (cursor.moveToNext())
+                }
             }
-            close()
         }
         mmsThread = Thread { mmsManager.getAllMMS(lastDate) }
         mmsThread.start()

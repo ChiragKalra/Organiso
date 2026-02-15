@@ -18,6 +18,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.QuickContactBadge
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.bruhascended.core.constants.ACTION_UPDATE_DP
 import com.bruhascended.core.constants.EXTRA_NUMBER
 import com.bruhascended.core.data.ContactsProvider
@@ -59,6 +60,8 @@ class ConversationViewHolder(
     private var backgroundAnimator: ValueAnimator? = null
     private val muteImage: ImageView = root.findViewById(R.id.mutedImage)
     private val mainDaos = MainDaoProvider(mContext).getMainDaos()
+
+    private var dpUpdateReceiver: BroadcastReceiver? = null
 
     val imageView: QuickContactBadge = root.findViewById(R.id.dp)
     val senderTextView: TextView = root.findViewById(R.id.sender)
@@ -109,14 +112,35 @@ class ConversationViewHolder(
                 else -> setImageResource(R.drawable.ic_person)
             }
         }
-        mContext.registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(p0: Context, intent: Intent) {
-                if (intent.getStringExtra(EXTRA_NUMBER) == conversation.number) {
-                    val dp = File(mContext.filesDir, conversation.number)
-                    picasso.load(dp).into(imageView)
+    }
+
+    init {
+        root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                dpUpdateReceiver = object : BroadcastReceiver() {
+                    override fun onReceive(p0: Context, intent: Intent) {
+                        if (::conversation.isInitialized && intent.getStringExtra(EXTRA_NUMBER) == conversation.number) {
+                            val dp = File(mContext.filesDir, conversation.number)
+                            picasso.load(dp).into(imageView)
+                        }
+                    }
                 }
+                ContextCompat.registerReceiver(
+                    mContext, dpUpdateReceiver, IntentFilter(ACTION_UPDATE_DP), ContextCompat.RECEIVER_NOT_EXPORTED
+                )
             }
-        }, IntentFilter(ACTION_UPDATE_DP))
+
+            override fun onViewDetachedFromWindow(v: View) {
+                dpUpdateReceiver?.let {
+                    try {
+                        mContext.unregisterReceiver(it)
+                    } catch (e: Exception) {
+                        // Already unregistered or other issue
+                    }
+                }
+                dpUpdateReceiver = null
+            }
+        })
     }
 
     fun onBind() {

@@ -68,4 +68,9 @@ class ConversationViewModel(mApp: Application) : AndroidViewModel(mApp) {
             mdb.manager().loadAllPaged()
         }.flow
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        if (::mdb.isInitialized) mdb.close()
+    }
 }

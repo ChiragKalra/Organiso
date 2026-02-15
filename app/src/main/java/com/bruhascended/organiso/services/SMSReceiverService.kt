@@ -39,12 +39,18 @@ class SMSReceiverService: Service() {
 
     private val mContext: Context = this
 
-    private fun getDao(number: String): MessageDao {
-        return if (ConversationActivity.activeConversationNumber == number) {
-            ConversationActivity.activeConversationDao!!
-        } else {
-            MessageDbFactory(mContext).of(number).manager()
+    private fun handleMessage(smm: SMSManager, mnm: MessageNotificationManager, number: String, value: String) {
+        val activeNumber = ConversationActivity.activeConversationNumber
+        val db = if (activeNumber == number) null else MessageDbFactory(mContext).of(number)
+        val dao = ConversationActivity.activeConversationDao ?: db?.manager()!!
+
+        val res = smm.putMessage(
+            number, value, dao, activeNumber == number
+        )
+        if (activeNumber != number) {
+            mnm.sendSmsNotification(res)
         }
+        db?.close()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -81,18 +87,8 @@ class SMSReceiverService: Service() {
             }
 
             senders.forEach {
-                it.apply {
-                    val number = cm.getClean(key)
-                    val res = smm.putMessage(
-                        number,
-                        value,
-                        getDao(number),
-                        ConversationActivity.activeConversationNumber == number
-                    )
-                    if (ConversationActivity.activeConversationNumber != number) {
-                        mnm.sendSmsNotification(res)
-                    }
-                }
+                val number = cm.getClean(it.key)
+                handleMessage(smm, mnm, number, it.value)
             }
             smm.close()
             PreferenceManager.getDefaultSharedPreferences(mContext)

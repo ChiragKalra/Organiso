@@ -71,6 +71,9 @@ class StartActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Thread.setDefaultUncaughtExceptionHandler { t, e ->
+            android.util.Log.e("OrganisoCrash", "Uncaught exception in thread ${t.name}", e)
+        }
         super.onCreate(savedInstanceState)
 
         if (intent.action != Intent.ACTION_MAIN) {
@@ -274,12 +277,17 @@ class StartActivity : AppCompatActivity() {
                 }
             }
         Thread {
-            smsManager.apply {
-                getMessages()
-                getLabels()
+            try {
+                smsManager.apply {
+                    getMessages()
+                    getLabels()
+                }
+                startActivity(Intent(this, MainActivity::class.java))
+            } catch (e: Exception) {
+                android.util.Log.e("StartActivity", "Background thread crashed", e)
+            } finally {
+                if (wakeLock.isHeld) wakeLock.release()
             }
-            startActivity(Intent(this, MainActivity::class.java))
-            wakeLock.release()
 
             sharedPref.edit().putBoolean(KEY_INIT, true).apply()
             finish()

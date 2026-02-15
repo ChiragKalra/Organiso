@@ -58,14 +58,14 @@ class OtpNotificationManager (
             .setAction(ACTION_COPY)
             .putExtra(EXTRA_OTP, otp)
         val copyPI = PendingIntent.getBroadcast(mContext, conversation.id,
-            copyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            copyIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val deletePI = PendingIntent.getBroadcast(mContext, conversation.id,
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_DELETE_OTP)
                 .putExtra(EXTRA_NOTIFICATION_ID, id)
                 .putExtra(EXTRA_MESSAGE_ID, message.id)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         var text = mContext.getString(R.string.from_sender, conversation.number)
@@ -108,7 +108,7 @@ class OtpNotificationManager (
                         Intent.FLAG_ACTIVITY_NEW_TASK or
                         FLAG_ACTIVITY_MULTIPLE_TASK
                 ),
-            PendingIntent.FLAG_CANCEL_CURRENT
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         notificationManager.notify(id,

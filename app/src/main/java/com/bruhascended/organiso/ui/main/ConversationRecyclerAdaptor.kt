@@ -41,11 +41,7 @@ class ConversationRecyclerAdaptor(
                     it.root.background = it.defaultBackground
             }
         } else {
-            val holder = it
-            it.root.apply {
-                setOnClickListener {  }
-                postDelayed({setOnClickListener{onItemClickListener(holder)}}, 500)
-            }
+            android.util.Log.d("ConversationRecyclerAdaptor", "Starting ConversationActivity for ${it.conversation.number} at pos $pos")
             mContext.startActivity(
                 Intent(mContext, ConversationActivity::class.java)
                     .putExtra(EXTRA_CONVERSATION, it.conversation)

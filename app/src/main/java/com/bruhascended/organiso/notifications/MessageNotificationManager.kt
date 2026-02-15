@@ -163,7 +163,7 @@ class MessageNotificationManager(
                             FLAG_ACTIVITY_NEW_TASK or
                             Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 ),
-            PendingIntent.FLAG_CANCEL_CURRENT
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val otp = getOtp(message.text)
@@ -190,7 +190,7 @@ class MessageNotificationManager(
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_CANCEL)
                 .putExtra(EXTRA_NUMBER, conversation.number),
-            PendingIntent.FLAG_ONE_SHOT
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
         if (notificationManager.getNotificationChannel(conversation.label.toString())?.importance
@@ -244,7 +244,7 @@ class MessageNotificationManager(
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_REPLY)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
-            FLAG_UPDATE_CURRENT
+            FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
         val replyAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
             R.drawable.ic_reply, mContext.getString(R.string.reply), replyPendingIntent
@@ -255,20 +255,20 @@ class MessageNotificationManager(
                 .setAction(ACTION_MARK_READ)
                 .putExtra(EXTRA_NUMBER, conversation.number)
                 .putExtra(EXTRA_LABEL, conversation.label),
-            FLAG_UPDATE_CURRENT
+            FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val deletePI = PendingIntent.getBroadcast(mContext, conversation.id,
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_DELETE_MESSAGE)
                 .putExtra(EXTRA_MESSAGE_ID, message.id)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
-            FLAG_UPDATE_CURRENT
+            FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val reportSpamPI = PendingIntent.getBroadcast(mContext, conversation.id,
             Intent(mContext, NotificationActionReceiver::class.java)
                 .setAction(ACTION_REPORT_SPAM)
                 .putExtra(EXTRA_CONVERSATION_JSON, conversation.toString()),
-            FLAG_UPDATE_CURRENT
+            FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val context = mContext

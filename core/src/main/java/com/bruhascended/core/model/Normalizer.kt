@@ -71,12 +71,13 @@ fun trimUrls(message: String): Pair<String, Float> {
     val urls = urlRe.findAll(message)
     var newMessage = message
     for (url in urls) {
+        val urlValue = url.value
         val trimmedUrl =
-            url.toString().split("//").last().split("/")[0].split('?')[0]
+            urlValue.split("//").last().split("/")[0].split('?')[0]
                 .replace("www.", "").split('.')[0]
-        newMessage = newMessage.replace(url.toString(), trimmedUrl)
+        newMessage = newMessage.replace(urlValue, trimmedUrl)
     }
-    return newMessage.trim() to (!urls.none()).toFloat()
+    return newMessage.trim() to (urls.any()).toFloat()
 }
 
 // stem words to root meaning

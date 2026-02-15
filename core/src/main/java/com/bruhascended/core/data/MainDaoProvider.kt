@@ -10,11 +10,10 @@ class MainDaoProvider(private val mContext: Context) {
     }
 
     fun getMainDaos(): Array<ConversationDao> {
-        if (mDaos == null) {
-            mDaos = Array(6) {
+        return mDaos ?: synchronized(this) {
+            mDaos ?: Array(6) {
                 ConversationDbFactory(mContext).of(it).manager()
-            }
+            }.also { mDaos = it }
         }
-        return mDaos!!
     }
 }

@@ -6,3 +6,7 @@
 /app/proguard-rules.pro
 /core/build/
 local.properties
+**/*.jar
+gradlew
+gradlew.bat
+*.tflite

@@ -46,10 +46,32 @@ class FeatureExtractor (context: Context) {
     }
 
     private fun getWordFeatures(): Array<String> {
-        val fileStr = mContext.assets.open("words.csv").bufferedReader().use{
-            it.readText()
+        val wordList = ArrayList<String>()
+        val start = System.currentTimeMillis()
+        try {
+            mContext.assets.open("words.csv").use { inputStream ->
+                java.util.Scanner(inputStream).use { scanner ->
+                    while (scanner.hasNextLine()) {
+                        val line = scanner.nextLine()
+                        if (line.isNotBlank()) {
+                            wordList.add(line.trim())
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FeatureExtractor", "Error reading words.csv", e)
+            throw RuntimeException("Error reading words.csv", e)
         }
-        return fileStr.split("\r\n").dropLast(1).toTypedArray()
+        
+        android.util.Log.d("FeatureExtractor", "Loaded ${wordList.size} words in ${System.currentTimeMillis() - start}ms")
+        if (wordList.isNotEmpty()) {
+            android.util.Log.d("FeatureExtractor", "First 5: ${wordList.take(5)}")
+        } else {
+            android.util.Log.e("FeatureExtractor", "wordList is empty!")
+            throw RuntimeException("wordList is empty! Check words.csv in assets.")
+        }
+        return wordList.toTypedArray()
     }
 
     fun getFeatureVector(message: Message) : Array<Float> {

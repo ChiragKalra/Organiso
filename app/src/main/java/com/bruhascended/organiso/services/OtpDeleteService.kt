@@ -23,7 +23,7 @@ class OtpDeleteService: Service() {
         val mainDaos = MainDaoProvider(mContext).getMainDaos()
         val pendingIntent: PendingIntent =
             Intent(mContext, MainActivity::class.java).let { notificationIntent ->
-                PendingIntent.getActivity(mContext, 0, notificationIntent, 0)
+                PendingIntent.getActivity(mContext, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
             }
 
         val notification: Notification = Notification.Builder(mContext, LABEL_PERSONAL.toString())
@@ -34,8 +34,7 @@ class OtpDeleteService: Service() {
             .setProgress(0, 0, true)
             .build()
 
-        mContext.startForeground(10123123, notification)
-
+        mContext.startForeground(10123123, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         Thread {
             for (con in mainDaos[LABEL_TRANSACTIONS].loadAllSync()) {
                 MessageDbFactory(mContext).of(con.number).apply {
@@ -47,13 +46,13 @@ class OtpDeleteService: Service() {
                             mContext.deleteSMS(it.id!!)
                         }
                     }
-                    val it = manager().loadLastSync()
-                    if (it == null) {
-                        mainDaos[2].delete(con)
+                    val lastMsg = manager().loadLastSync()
+                    if (lastMsg == null) {
+                        mainDaos[LABEL_TRANSACTIONS].delete(con)
                     } else {
-                        if (con.time != it.time) {
-                            con.time = it.time
-                            mainDaos[2].insert(con)
+                        if (con.time != lastMsg.time) {
+                            con.time = lastMsg.time
+                            mainDaos[LABEL_TRANSACTIONS].insert(con)
                         }
                     }
                     close()

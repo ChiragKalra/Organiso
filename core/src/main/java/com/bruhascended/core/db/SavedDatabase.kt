@@ -73,10 +73,10 @@ interface SavedDao {
     fun nukeTable()
 
     @Query("SELECT * FROM saved WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
-    fun search(key: String, altKey: String=""): List<Saved>
+    fun search(key: String, altKey: String): List<Saved>
 
     @Query("SELECT * FROM saved WHERE LOWER(text) LIKE :key OR LOWER(text) LIKE :altKey ORDER BY time DESC")
-    fun searchPaged(key: String, altKey: String=""): PagingSource<Int, Saved>
+    fun searchPaged(key: String, altKey: String): PagingSource<Int, Saved>
 
     @Query("SELECT * FROM saved WHERE time LIKE :time")
     fun search(time: Long): List<Saved>
