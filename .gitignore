@@ -5,3 +5,4 @@
 /app/build/
 /app/proguard-rules.pro
 /core/build/
+local.properties
