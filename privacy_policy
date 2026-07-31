@@ -10,8 +10,15 @@ The terms used in this Privacy Policy have the same meanings as in our Terms and
 
 **Information Collection and Use**
 
-I will never ask you to provide me with personally identifiable information. 
-The information that Organiso uses to provide you with it's services are (a) Your phone number (b) Your contacts (c) Your messages, this information will be retained on your device and is not collected by me in any way.
+I will never ask you to manually enter or transmit personally identifiable information to external servers. 
+
+**Phone Number & Sensitive Data Usage**
+Organiso is a local SMS organizer. To function as an SMS client and provide features like dual-SIM support, contact mapping, and message categorisation, the app accesses:
+* **Phone Number & Phone State (`READ_PHONE_STATE`)**: Accesses phone number and SIM info strictly locally on your device to identify your SIM slot(s) for sending/receiving SMS and managing dual-SIM preferences.
+* **SMS Messages (`READ_SMS`, `RECEIVE_SMS`, `SEND_SMS`)**: Processed locally on device to organize messages into categories and display conversation threads.
+* **Contacts (`READ_CONTACTS`)**: Used locally on device to map phone numbers to saved contact names.
+
+**Data Retention & Sharing**: All phone numbers, contacts, and message data remain stored **strictly on your local device**. They are **NEVER collected, uploaded, transmitted to external servers, sold, or shared** with any third parties or the developer.
 
 The app does use third party services that may collect information used to identify you.
 
