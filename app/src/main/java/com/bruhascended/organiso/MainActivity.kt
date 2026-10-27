@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.Build
+import android.Manifest
 import android.provider.Telephony
 import android.view.Menu
 import android.view.MenuItem
@@ -172,6 +174,12 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         applyBottomNavigationInsets()
         setSupportActionBar(mToolbar)
+
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
+        }
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

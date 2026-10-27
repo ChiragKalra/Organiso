@@ -3,6 +3,7 @@ package com.bruhascended.organiso.ui.conversation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -37,6 +38,9 @@ class MessageSearchActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setPrefTheme()
         setContentView(R.layout.activity_search)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = closeSearch()
+        })
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -52,7 +56,7 @@ class MessageSearchActivity : BaseActivity() {
         }
 
         backButton.setOnClickListener{
-            onBackPressed()
+            closeSearch()
         }
 
         clear_text.visibility = View.GONE
@@ -109,10 +113,9 @@ class MessageSearchActivity : BaseActivity() {
         }
     }
 
-    override fun onBackPressed() {
+    private fun closeSearch() {
         setResult(RESULT_CANCELED)
         finish()
         overridePendingTransition(R.anim.hold, android.R.anim.fade_out)
-        super.onBackPressed()
     }
 }

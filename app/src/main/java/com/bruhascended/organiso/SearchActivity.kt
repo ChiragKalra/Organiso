@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
@@ -191,6 +192,9 @@ class SearchActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setPrefTheme()
         setContentView(R.layout.activity_search)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = closeSearch()
+        })
         searchEditText.requestFocus()
 
         mContext = this
@@ -229,7 +233,7 @@ class SearchActivity : BaseActivity() {
         }
 
         backButton.setOnClickListener{
-            onBackPressed()
+            closeSearch()
         }
 
         searchEditText.doOnTextChanged { key, _, _, _ ->
@@ -258,7 +262,7 @@ class SearchActivity : BaseActivity() {
         }
     }
 
-    override fun onBackPressed() {
+    private fun closeSearch() {
         setResult(RESULT_CANCELED)
         if (intent.action != null) startActivityIfNeeded(
             Intent(mContext, MainActivity::class.java)

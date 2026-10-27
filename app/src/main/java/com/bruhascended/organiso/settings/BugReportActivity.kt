@@ -96,7 +96,8 @@ class BugReportActivity : BaseActivity() {
         if (uri.scheme.equals("content")) {
             val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
             if (cursor != null && cursor.moveToFirst()) {
-                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                val nameColumn = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameColumn >= 0) result = cursor.getString(nameColumn)
             }
             cursor?.close()
         }
