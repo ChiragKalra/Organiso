@@ -8,9 +8,11 @@ plugins {
 
 android {
     namespace 'com.bruhascended.core'
-    compileSdk 34
+    compileSdk 36
 
-
+    buildFeatures {
+        buildConfig true
+    }
 
     aaptOptions {
         noCompress "tflite", "csv"

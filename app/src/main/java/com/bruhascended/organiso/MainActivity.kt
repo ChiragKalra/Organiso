@@ -14,9 +14,10 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.bruhascended.core.constants.ARR_PERMS
@@ -47,7 +48,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 */
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
+    override val bottomInsetReductionDp = 32
+
     private val mViewModel: MainViewModel by viewModels()
 
     private lateinit var mContext: Context
@@ -143,12 +146,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun applyBottomNavigationInsets() {
+        val initialBottomPadding = bottom.paddingBottom
+        val bottomInsetReduction = (12 * resources.displayMetrics.density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(bottom) { view, windowInsets ->
+            val bottomInset = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+            ).bottom
+            view.setPadding(
+                view.paddingLeft,
+                view.paddingTop,
+                view.paddingRight,
+                initialBottomPadding + (bottomInset - bottomInsetReduction).coerceAtLeast(0)
+            )
+            windowInsets
+        }
+        ViewCompat.requestApplyInsets(bottom)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // set up activity
         setPrefTheme()
         setContentView(R.layout.activity_main)
+        applyBottomNavigationInsets()
         setSupportActionBar(mToolbar)
 
         mContext = this

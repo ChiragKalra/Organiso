@@ -4,6 +4,8 @@
 ## About
 Organiso is an android app for classifying SMSs into common categories like priority, personal, transactions, advertisements, spam. It is designed to replace the default android sms app and comes with a ton of features. Check out the project website [here](https://organiso.web.app).
 
+The Firebase Hosting site is maintained in [`public/`](public/). The homepage is `public/index.html`, and the privacy policy is available at [`/privacy_policy.html`](https://organiso.web.app/privacy_policy.html). Deploy site changes from the repository root with `firebase deploy --only hosting`.
+
 ## Usage
 Install from Google PlayStore or download the latest apk from releases.
 

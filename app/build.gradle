@@ -5,7 +5,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdk 34
+    namespace 'com.bruhascended.organiso'
+    compileSdk 36
+
+    buildFeatures {
+        buildConfig true
+    }
 
     aaptOptions {
         noCompress "html"
@@ -14,9 +19,9 @@ android {
     defaultConfig {
         applicationId "com.bruhascended.organiso"
         minSdk 26
-        targetSdk 34
-        versionCode 1011
-        versionName "1.1"
+        targetSdk 36
+        versionCode 1012
+        versionName "1.2"
 
         kotlinOptions {
             freeCompilerArgs += ['-XXLanguage:+UnitConversion']

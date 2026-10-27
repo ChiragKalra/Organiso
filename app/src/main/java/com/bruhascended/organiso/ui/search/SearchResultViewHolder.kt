@@ -126,23 +126,30 @@ class SearchResultViewHolder(
             }
             TYPE_FOOTER -> {
                 val loading = root.findViewById<ProgressBar>(R.id.loading)
+                val typeSomething = root.findViewById<TextView>(R.id.typeSomething)
                 val empty = root.findViewById<TextView>(R.id.noResults)
                 val end = root.findViewById<TextView>(R.id.endOfResults)
 
-                if (mAdaptor.isLoaded) {
+                if (mAdaptor.searchKey.isBlank()) {
                     loading.isVisible = false
+                    typeSomething.isVisible = true
                     end.isVisible = false
                     empty.isVisible = false
-                    if (mAdaptor.itemCount != 1) end.isVisible = true
-                    else empty.isVisible = true
+                } else if (mAdaptor.isLoaded) {
+                    loading.isVisible = false
+                    typeSomething.isVisible = false
+                    end.isVisible = mAdaptor.itemCount != 1
+                    empty.isVisible = mAdaptor.itemCount == 1
                 } else {
                     loading.isVisible = true
+                    typeSomething.isVisible = false
                     end.isVisible = false
                     empty.isVisible = false
                 }
 
                 mAdaptor.doOnLoaded = {
                     loading.isVisible = false
+                    typeSomething.isVisible = false
                     end.isVisible = false
                     empty.isVisible = false
                     mAdaptor.isLoaded = true

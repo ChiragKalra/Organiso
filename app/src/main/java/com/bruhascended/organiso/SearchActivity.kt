@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.preference.PreferenceManager
@@ -43,7 +42,7 @@ import kotlin.collections.HashSet
 
 */
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : BaseActivity() {
 
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
@@ -155,6 +154,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showResults(key: String) {
+        mAdaptor.searchKey = key
         mAdaptor.refresh()
         searchRecycler.apply {
             isVisible = true
@@ -163,7 +163,6 @@ class SearchActivity : AppCompatActivity() {
             }, 200)
         }
         searchThread.interrupt()
-        mAdaptor.searchKey = key
         searchThread = Thread {
             val displayedNumbers = showConversations(key)
             if (searchThread.isInterrupted) return@Thread
@@ -179,6 +178,13 @@ class SearchActivity : AppCompatActivity() {
             }
         }
         searchThread.start()
+    }
+
+    private fun showEmptySearchPrompt() {
+        searchThread.interrupt()
+        mAdaptor.searchKey = ""
+        mAdaptor.refresh()
+        searchRecycler.isVisible = true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -242,13 +248,12 @@ class SearchActivity : AppCompatActivity() {
             if (i != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener true
             val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
 
-            searchRecycler.isVisible = key.isNotBlank()
             if (key.isBlank()) {
+                showEmptySearchPrompt()
                 return@setOnEditorActionListener true
-            } else {
-                showResults(key)
             }
 
+            showResults(key)
             true
         }
     }

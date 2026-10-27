@@ -1,7 +1,6 @@
 package com.bruhascended.organiso
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.bruhascended.organiso.common.setPrefTheme
@@ -26,7 +25,7 @@ import kotlinx.android.synthetic.main.activity_conversation.*
 
 */
 
-class SettingsActivity : AppCompatActivity(),
+class SettingsActivity : BaseActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     private val argTitle = "title"
