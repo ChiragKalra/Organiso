@@ -21,6 +21,12 @@
 
     <Preference
         app:allowDividerBelow="false"
+        app:key="backup"
+        app:icon="@drawable/ic_backup"
+        app:title="@string/backup_title" />
+
+    <Preference
+        app:allowDividerBelow="false"
         app:key="notifications"
         app:icon="@drawable/ic_notifications"
         app:title="@string/notifications" />

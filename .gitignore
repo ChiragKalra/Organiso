@@ -10,3 +10,7 @@ local.properties
 gradlew
 gradlew.bat
 *.tflite
+/.config.json
+/client_secret_*.json
+/.DS_Store
+**/__pycache__/

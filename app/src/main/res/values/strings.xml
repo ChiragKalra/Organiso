@@ -203,4 +203,61 @@
     <string name="sim_1">Sim 1</string>
     <string name="terms_and_conditions">Terms and Conditions</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="backup_title">Backup</string>
+    <string name="backup_sms">SMS backup</string>
+    <string name="backup_explanation">Save a copy of all SMS messages as JSON. Backups include message text, senders, dates and SIM information. MMS attachments and Organiso settings are not included. Create a copy now or configure automatic backups.</string>
+    <string name="backup_device">This device</string>
+    <string name="backup_local_title">Back up to this device</string>
+    <string name="backup_local_summary">Choose a folder on this device to save an unencrypted JSON file. Keep it somewhere private.</string>
+    <string name="backup_last">Last successful backup</string>
+    <string name="backup_never">No backup yet</string>
+    <string name="backup_drive">Google Drive</string>
+    <string name="backup_drive_connection">Google Drive connection</string>
+    <string name="backup_drive_disconnected">Off. Enable to choose a Google account and allow access to Organiso backups.</string>
+    <string name="backup_drive_connected">Connected to %1$s</string>
+    <string name="backup_drive_now">Back up to Google Drive</string>
+    <string name="backup_drive_summary">Save to Organiso’s private app folder in your selected Google account. Existing backups are kept.</string>
+    <string name="backup_status">Backup status</string>
+    <string name="backup_ready">Ready</string>
+    <string name="backup_working">Creating and verifying backup…</string>
+    <string name="backup_authorizing">Waiting for Google Drive authorization…</string>
+    <string name="backup_disconnect_working">Disconnecting Google Drive…</string>
+    <string name="backup_success">Backed up %1$d SMS messages. Verified successfully.</string>
+    <string name="backup_cancelled">Backup cancelled. No backup was recorded.</string>
+    <string name="backup_permission">Allow SMS access to create a backup. Your messages will not be changed.</string>
+    <string name="backup_failed">Backup failed. Try again after checking storage or your connection.</string>
+    <string name="backup_auth_failed">Google Drive could not connect. Check your connection and try again.</string>
+    <string name="backup_auth_config">Google Drive is not configured for this app build. The developer needs to register its Android package and signing certificate in Google Cloud.</string>
+    <string name="backup_disconnect_failed">Could not revoke Google Drive access. Check your connection and try again.</string>
+    <string name="backup_reconnect">Google Drive access expired or was denied. Reconnect your account and try again.</string>
+    <string name="backup_disconnected">Google Drive disconnected. Existing backups are kept.</string>
+    <string name="backup_auto_title">Automatic backups</string>
+    <string name="backup_auto_link_summary">Set separate daily, weekly or monthly schedules for this device and Google Drive.</string>
+    <string name="backup_auto_explanation">Configure each destination independently. Backups run around the time you enable the schedule, when battery, storage and network conditions allow. Monthly backups follow calendar months. Existing backups and messages are kept.</string>
+    <string name="backup_auto_frequency">Backup frequency</string>
+    <string name="backup_auto_folder">Backup folder on this device</string>
+    <string name="backup_auto_choose_folder">Choose a private folder for automatic JSON backups. Access is kept after restarting the device.</string>
+    <string name="backup_auto_next">Next automatic backup</string>
+    <string name="backup_auto_result">Automatic backup status</string>
+    <string name="backup_auto_run_now">Run this schedule now</string>
+    <string name="backup_auto_off">Off</string>
+    <string name="backup_auto_unmetered">Unmetered network only</string>
+    <string name="backup_auto_unmetered_summary">Wait for Wi-Fi or another unmetered connection before uploading.</string>
+    <string name="backup_auto_connect_first">Connect Google Drive in Backup settings before enabling its schedule.</string>
+    <string name="backup_auto_reconnect">Open Backup settings and reconnect Google Drive. No sign-in screen will open in the background.</string>
+    <string name="backup_auto_permission">Allow SMS access and reselect the backup folder if its access has expired.</string>
+    <string name="backup_auto_retry">Backup failed temporarily. Android will retry later.</string>
+    <string name="backup_auto_waiting">Waiting for Android and the required conditions.</string>
+    <string name="backup_auto_daily">Daily</string>
+    <string name="backup_auto_weekly">Weekly</string>
+    <string name="backup_auto_monthly">Monthly</string>
+    <string-array name="backup_frequency_labels">
+        <item>@string/backup_auto_off</item>
+        <item>@string/backup_auto_daily</item>
+        <item>@string/backup_auto_weekly</item>
+        <item>@string/backup_auto_monthly</item>
+    </string-array>
+    <string-array name="backup_frequency_values">
+        <item>off</item><item>daily</item><item>weekly</item><item>monthly</item>
+    </string-array>
 </resources>
