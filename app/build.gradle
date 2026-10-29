@@ -19,7 +19,7 @@ android {
     defaultConfig {
         applicationId "com.bruhascended.organiso"
         minSdk 26
-        targetSdk 34
+        targetSdk 36
         versionCode 1011
         versionName "1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
