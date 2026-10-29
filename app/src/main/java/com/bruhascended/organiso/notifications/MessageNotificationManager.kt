@@ -1,5 +1,7 @@
 package com.bruhascended.organiso.notifications
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.app.Notification.CATEGORY_MESSAGE
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_NONE
@@ -132,6 +134,7 @@ class MessageNotificationManager(
             if (!it.notification.extras.getBoolean(EXTRA_IS_OTP, false)) active++
         }
         if (active < 3) return
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
         notificationManager.notify(
             NOTIFICATION_ID_GROUP,
             Builder(mContext, "0")
@@ -301,7 +304,9 @@ class MessageNotificationManager(
                 deletePI
             ).setDeleteIntent(cancelPI)
 
-        notificationManager.notify(conversation.id, notification.build())
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            notificationManager.notify(conversation.id, notification.build())
+        }
         showSummaryNotification()
     }
 }

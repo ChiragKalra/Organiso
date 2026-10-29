@@ -12,7 +12,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.VideoView
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.appcompat.app.AppCompatActivity
+import com.bruhascended.organiso.BaseActivity
 import com.bruhascended.core.constants.getMimeType
 import com.bruhascended.organiso.R
 import kotlinx.coroutines.GlobalScope
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 
 */
 
-abstract class MediaPreviewActivity : AppCompatActivity() {
+abstract class MediaPreviewActivity : BaseActivity() {
 
     private val mp = MediaPlayer()
     protected abstract var mVideoView: VideoView

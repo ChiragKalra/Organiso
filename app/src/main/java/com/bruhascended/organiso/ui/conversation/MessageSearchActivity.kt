@@ -3,10 +3,11 @@ package com.bruhascended.organiso.ui.conversation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.app.AppCompatActivity
+import com.bruhascended.organiso.BaseActivity
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
@@ -27,7 +28,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
-class MessageSearchActivity : AppCompatActivity() {
+class MessageSearchActivity : BaseActivity() {
 
     private lateinit var inputManager: InputMethodManager
     private lateinit var mContext: Context
@@ -37,6 +38,9 @@ class MessageSearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setPrefTheme()
         setContentView(R.layout.activity_search)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = closeSearch()
+        })
 
         mContext = this
         inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -52,7 +56,7 @@ class MessageSearchActivity : AppCompatActivity() {
         }
 
         backButton.setOnClickListener{
-            onBackPressed()
+            closeSearch()
         }
 
         clear_text.visibility = View.GONE
@@ -109,10 +113,9 @@ class MessageSearchActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
+    private fun closeSearch() {
         setResult(RESULT_CANCELED)
         finish()
         overridePendingTransition(R.anim.hold, android.R.anim.fade_out)
-        super.onBackPressed()
     }
 }

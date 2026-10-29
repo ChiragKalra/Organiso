@@ -9,7 +9,7 @@ import android.provider.OpenableColumns
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.appcompat.app.AppCompatActivity
+import com.bruhascended.organiso.BaseActivity
 import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.setPrefTheme
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 
 */
 
-class BugReportActivity : AppCompatActivity() {
+class BugReportActivity : BaseActivity() {
 
     private var fileUri: Uri? = null
 
@@ -96,7 +96,8 @@ class BugReportActivity : AppCompatActivity() {
         if (uri.scheme.equals("content")) {
             val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
             if (cursor != null && cursor.moveToFirst()) {
-                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                val nameColumn = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameColumn >= 0) result = cursor.getString(nameColumn)
             }
             cursor?.close()
         }

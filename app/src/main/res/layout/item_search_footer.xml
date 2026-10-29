@@ -21,6 +21,23 @@
 
     <TextView
         android:visibility="gone"
+        android:id="@+id/typeSomething"
+        android:text="@string/type_something_to_get_started"
+        android:textColor="?android:textColorHint"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_margin="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:importantForAutofill="no"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:visibility="gone"
         android:textColor="?android:textColorHint"
         android:id="@+id/noResults"
         android:textAlignment="center"

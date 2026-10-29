@@ -1,7 +1,6 @@
 package com.bruhascended.organiso
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.common.setupToolbar
@@ -25,7 +24,7 @@ import kotlinx.android.synthetic.main.activity_conversation.toolbar
 
 */
 
-class ExtraCategoryActivity : AppCompatActivity() {
+class ExtraCategoryActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

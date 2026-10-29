@@ -315,11 +315,12 @@ class SenderService: Service() {
                 return@apply
             }
 
-            if (sm.activeSubscriptionInfoCount == 2) {
+            val activeSubscriptions = sm.activeSubscriptionInfoList.orEmpty()
+            if (activeSubscriptions.size == 2) {
                 subscriptionId = if (pm.getBoolean(PREF_ALTERNATE_SIM, false)) {
-                    sm.activeSubscriptionInfoList[1].subscriptionId
+                    activeSubscriptions[1].subscriptionId
                 } else {
-                    sm.activeSubscriptionInfoList[0].subscriptionId
+                    activeSubscriptions[0].subscriptionId
                 }
             }
         }

@@ -10,7 +10,12 @@ def debugVersionNameSuffix = providers.gradleProperty('debugVersionNameSuffix').
 def debugAppLabel = providers.gradleProperty('debugAppLabel')
 
 android {
-    compileSdk 34
+    namespace 'com.bruhascended.organiso'
+    compileSdk 36
+
+    buildFeatures {
+        buildConfig true
+    }
 
     aaptOptions {
         noCompress "html"
@@ -20,8 +25,8 @@ android {
         applicationId "com.bruhascended.organiso"
         minSdk 26
         targetSdk 36
-        versionCode 1011
-        versionName "1.1"
+        versionCode 1012
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [appLabel: '@string/app_name']
 

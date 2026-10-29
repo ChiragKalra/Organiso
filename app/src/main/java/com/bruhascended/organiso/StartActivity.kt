@@ -17,7 +17,6 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
@@ -47,7 +46,7 @@ import kotlin.math.roundToInt
    limitations under the License.
  */
 
-class StartActivity : AppCompatActivity() {
+class StartActivity : BaseActivity() {
 
     private val wakeLockTag = "Organiso::Wakelock"
     private val timeout = 10 * 60 * 1000L // stay awake for
@@ -94,12 +93,13 @@ class StartActivity : AppCompatActivity() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
             == PackageManager.PERMISSION_GRANTED
         ) {
-            if (sm.activeSubscriptionInfoCount == 2) {
+            val activeSubscriptions = sm.activeSubscriptionInfoList.orEmpty()
+            if (activeSubscriptions.size == 2) {
                 sharedPref.edit()
                     .putBoolean(
                         PREF_ALTERNATE_SIM,
                         SmsManager.getDefaultSmsSubscriptionId()
-                                == sm.activeSubscriptionInfoList[1].subscriptionId
+                                == activeSubscriptions[1].subscriptionId
                     ).apply()
             }
         }

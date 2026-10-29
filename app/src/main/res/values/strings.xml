@@ -16,6 +16,7 @@
 
     <!-- Actions -->
     <string name="next">continue</string>
+    <string name="ok">OK</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="search">Search</string>
@@ -123,6 +124,7 @@
     <string name="messages_in_label">Messages in %1$s</string>
     <string name="no_matches">No Matches</string>
     <string name="thats_all">That\'s All</string>
+    <string name="type_something_to_get_started">Type and press enter to search</string>
 
     <string name="device_details_included">
         Your device model and android version will be included in

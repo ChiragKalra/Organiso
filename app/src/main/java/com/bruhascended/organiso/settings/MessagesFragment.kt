@@ -81,14 +81,15 @@ class MessagesFragment : PreferenceFragmentCompat() {
         }
 
         // hide setting if user doesn't have dual sim
-        simPrefCategory.isVisible = sm.activeSubscriptionInfoCount == 2
+        val activeSubscriptions = sm.activeSubscriptionInfoList.orEmpty()
+        simPrefCategory.isVisible = activeSubscriptions.size == 2
 
         // display sim phone numbers
-        if (sm.activeSubscriptionInfoCount == 2) {
+        if (activeSubscriptions.size == 2) {
             simPref.summaryOn =
-                "${sm.activeSubscriptionInfoList[1].number}(${getString(R.string.sim_2)})"
+                "${activeSubscriptions[1].number}(${getString(R.string.sim_2)})"
             simPref.summaryOff =
-                "${sm.activeSubscriptionInfoList[0].number}(${getString(R.string.sim_1)})"
+                "${activeSubscriptions[0].number}(${getString(R.string.sim_1)})"
         }
 
     }

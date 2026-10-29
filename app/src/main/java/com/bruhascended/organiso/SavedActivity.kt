@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.cachedIn
@@ -43,7 +42,7 @@ import java.io.File
    limitations under the License.
  */
 
-class SavedActivity : AppCompatActivity() {
+class SavedActivity : BaseActivity() {
 
     private val actionSend = 0
     private val actionCopy = 1

@@ -1,5 +1,7 @@
 package com.bruhascended.organiso.notifications
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
@@ -9,6 +11,7 @@ import android.os.Bundle
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import androidx.work.*
 import com.bruhascended.core.constants.*
@@ -111,6 +114,7 @@ class OtpNotificationManager (
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
         notificationManager.notify(id,
             NotificationCompat.Builder(mContext, conversation.label.toString())
                 .addAction(

@@ -30,7 +30,11 @@ class PersonalMoveService: Service() {
                 .setProgress(0, 0, true)
                 .build()
 
-        mContext.startForeground(10123123, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            startForeground(10123123, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(10123123, notification)
+        }
         Thread {
             for (con in mainDaos[LABEL_PERSONAL].loadAllSync()) {
                 var label: Int

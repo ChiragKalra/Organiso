@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bruhascended.core.constants.EXTRA_NUMBER
@@ -42,7 +41,7 @@ import java.io.File
 
 */
 
-class ScheduledActivity : AppCompatActivity() {
+class ScheduledActivity : BaseActivity() {
 
     private val actionCancel = 0
     private val actionCopy = 1
