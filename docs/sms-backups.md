@@ -14,7 +14,18 @@ Exports are streamed through a private temporary file, which is removed after su
 Enable the Google Drive API and configure the consent screen in the existing Google Cloud project identified by the local OAuth configuration. Staging and production use separate Android OAuth clients within that same project. Register each package and signing certificate:
 
 - Release: `com.bruhascended.organiso` and its release/Play signing SHA-1.
-- Debug: `com.bruhascended.organiso.staging` and the debug signing SHA-1 (`./gradlew :app:signingReport`). Debug uses a separate package and FileProvider authority so device testing can preserve an installed production app.
+- Device-test builds: `com.bruhascended.organiso.staging` and the debug signing SHA-1 (`./gradlew :app:signingReport`). The test runner explicitly supplies debug overrides for a separate package and FileProvider authority, preserving an installed production app.
+
+Normal debug and release builds retain the production package and `Organiso` label. There is no tracked debug resource overriding `app_name`. To create the isolated device-test APK explicitly:
+
+```sh
+./gradlew :app:assembleDebug :app:assembleDebugAndroidTest \
+  -PdebugApplicationIdSuffix=.staging \
+  -PdebugVersionNameSuffix=-staging \
+  '-PdebugAppLabel=Organiso Staging'
+```
+
+These properties apply only to debug builds. Release builds retain the production identity even if the properties are supplied. The emulator runner passes the overrides automatically and checks the APK application ID before installation, including with `--skip-build`.
 
 Google Identity Services resolves Android clients from the calling package and certificate; it does not accept an Android client ID as an `AuthorizationRequest` parameter. Do not pass the downloaded Android client ID as a web/server client ID or embed a client secret. The test runner accepts `.config.json` or a downloaded `client_secret_*.json` through `--google-config`, validates its endpoints, and records its SHA-256 and project ID in a private report. Both file patterns are ignored by Git. That preflight does not register the staging package or prove that OAuth consent/upload succeeds. A real Drive check additionally requires a signed-in Google test account, a matching registered client, and Drive API access. The app reports configuration and authorization failures without falsely enabling the connection.
 

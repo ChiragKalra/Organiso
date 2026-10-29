@@ -43,8 +43,9 @@ class LiveDriveDeviceTest {
             target.click()
         }
         device.wakeUp()
+        val appLabel = context.applicationInfo.loadLabel(context.packageManager).toString()
         if (device.hasObject(By.text("Choose an account")) ||
-            device.hasObject(By.text("Choose account for Organiso Staging"))) device.pressBack()
+            device.hasObject(By.text("Choose account for $appLabel"))) device.pressBack()
         step("Opening backup settings")
         instrumentation.startActivitySync(Intent(context, SettingsActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))

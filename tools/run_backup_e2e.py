@@ -4,7 +4,6 @@ import argparse
 import datetime
 import hashlib
 import json
-import os
 from pathlib import Path
 import subprocess
 
@@ -46,8 +45,13 @@ def main():
               "live_drive_upload": "Requires a signed-in Google test account and matching Android OAuth registration"}
     if not args.skip_build:
         with (output / "build.log").open("w") as log:
-            run([str(ROOT / "gradlew"), ":app:assembleDebug", ":app:assembleDebugAndroidTest", "--console=plain"],
+            run([str(ROOT / "gradlew"), ":app:assembleDebug", ":app:assembleDebugAndroidTest",
+                 "-PdebugApplicationIdSuffix=.staging", "-PdebugVersionNameSuffix=-staging",
+                 "-PdebugAppLabel=Organiso Staging", "--console=plain"],
                 cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+    metadata = json.loads((ROOT / "app/build/outputs/apk/debug/output-metadata.json").read_text())
+    if metadata.get("applicationId") != PACKAGE:
+        parser.error("APK is not the isolated device-test build. Rebuild without --skip-build.")
     for apk in ("app/build/outputs/apk/debug/app-debug.apk",
                 "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"):
         run(adb + ["install", "-r", str(ROOT / apk)])

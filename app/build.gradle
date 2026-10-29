@@ -4,6 +4,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
+// Local debug overrides are opt-in; ordinary builds retain the production identity.
+def debugApplicationIdSuffix = providers.gradleProperty('debugApplicationIdSuffix').orElse('')
+def debugVersionNameSuffix = providers.gradleProperty('debugVersionNameSuffix').orElse('')
+def debugAppLabel = providers.gradleProperty('debugAppLabel')
+
 android {
     compileSdk 34
 
@@ -18,6 +23,7 @@ android {
         versionCode 1011
         versionName "1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [appLabel: '@string/app_name']
 
         kotlinOptions {
             freeCompilerArgs += ['-XXLanguage:+UnitConversion']
@@ -34,9 +40,9 @@ android {
             }
         }
         debug {
-            // Install alongside the real user's Play Store app during device testing.
-            applicationIdSuffix ".staging"
-            versionNameSuffix "-staging"
+            if (debugApplicationIdSuffix.get()) applicationIdSuffix debugApplicationIdSuffix.get()
+            if (debugVersionNameSuffix.get()) versionNameSuffix debugVersionNameSuffix.get()
+            if (debugAppLabel.isPresent()) manifestPlaceholders = [appLabel: debugAppLabel.get()]
             minifyEnabled false
             debuggable true
 
