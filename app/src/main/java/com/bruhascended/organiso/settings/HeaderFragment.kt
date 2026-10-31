@@ -37,6 +37,7 @@ class HeaderFragment : PreferenceFragmentCompat() {
 
         interfacePref.fragment = InterfaceFragment::class.qualifiedName
         messagesPref.fragment = MessagesFragment::class.qualifiedName
+        findPreference<Preference>("backup")!!.fragment = BackupFragment::class.qualifiedName
         infoPref.fragment = InfoFragment::class.qualifiedName
 
         notifyPref.setOnPreferenceClickListener {

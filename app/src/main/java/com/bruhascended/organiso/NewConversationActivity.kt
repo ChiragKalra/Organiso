@@ -26,8 +26,6 @@ import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.ui.newConversation.RecipientRecyclerAdaptor
 import com.bruhascended.organiso.ui.newConversation.ContactRecyclerAdaptor
-import kotlinx.android.synthetic.main.activity_new_conversation.*
-import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
@@ -50,6 +48,22 @@ import java.util.*
  */
 
 class NewConversationActivity : MediaPreviewActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val toolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+    private val addsRecycler get() = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.addsRecycler)
+    private val to get() = findViewById<android.widget.EditText>(R.id.to)
+    private val clear_text get() = findViewById<android.widget.ImageButton>(R.id.clear_text)
+    private val contactListView get() = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.contactListView)
+    private val videoPlayPauseButton get() = findViewById<android.widget.ImageButton>(R.id.videoPlayPauseButton)
+    private val imagePreview get() = findViewById<android.widget.ImageView>(R.id.imagePreview)
+    private val playPauseButton get() = findViewById<android.widget.ImageButton>(R.id.playPauseButton)
+    private val seekBar get() = findViewById<android.widget.SeekBar>(R.id.seekBar)
+    private val videoView get() = findViewById<android.widget.VideoView>(R.id.videoView)
+    private val extraButton get() = findViewById<android.widget.ImageButton>(R.id.extraButton)
+    private val messageEditText get() = findViewById<android.widget.EditText>(R.id.messageEditText)
+    private val addMedia get() = findViewById<android.widget.ImageButton>(R.id.addMedia)
+    private val sendButton get() = findViewById<android.widget.ImageButton>(R.id.sendButton)
 
     private lateinit var mContext: Context
     private lateinit var cm: ContactsManager
@@ -92,7 +106,7 @@ class NewConversationActivity : MediaPreviewActivity() {
 
     private fun addRecipient (number: String) {
         val clean = cm.getClean (
-            number.trim().toLowerCase(Locale.ROOT).filter { it.isDigit() || it == '+' || it == ' ' }
+            number.trim().lowercase(Locale.ROOT).filter { it.isDigit() || it == '+' || it == ' ' }
         )
         if (clean.isBlank()) return
         val name = mContactsProvider.getNameOrNull(clean) ?: ""

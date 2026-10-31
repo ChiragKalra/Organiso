@@ -1,12 +1,15 @@
 apply plugin: 'com.android.application'
 
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.android.legacy-kapt'
+
+// Local debug overrides are opt-in; ordinary builds retain the production identity.
+def debugApplicationIdSuffix = providers.gradleProperty('debugApplicationIdSuffix').orElse('')
+def debugVersionNameSuffix = providers.gradleProperty('debugVersionNameSuffix').orElse('')
+def debugAppLabel = providers.gradleProperty('debugAppLabel')
 
 android {
     namespace 'com.bruhascended.organiso'
-    compileSdk 36
+    compileSdk 37
 
     buildFeatures {
         buildConfig true
@@ -16,16 +19,21 @@ android {
         noCompress "html"
     }
 
+    // AGP 9 rejects android:extractNativeLibs="true" in the manifest; this is the equivalent setting.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
     defaultConfig {
         applicationId "com.bruhascended.organiso"
         minSdk 26
         targetSdk 36
-        versionCode 1012
+        versionCode 1013
         versionName "1.2"
-
-        kotlinOptions {
-            freeCompilerArgs += ['-XXLanguage:+UnitConversion']
-        }
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [appLabel: '@string/app_name']
     }
 
     buildTypes {
@@ -38,6 +46,9 @@ android {
             }
         }
         debug {
+            if (debugApplicationIdSuffix.get()) applicationIdSuffix debugApplicationIdSuffix.get()
+            if (debugVersionNameSuffix.get()) versionNameSuffix debugVersionNameSuffix.get()
+            if (debugAppLabel.isPresent()) manifestPlaceholders = [appLabel: debugAppLabel.get()]
             minifyEnabled false
             debuggable true
 
@@ -51,9 +62,12 @@ android {
         sourceCompatibility "1.8"
         targetCompatibility "1.8"
     }
+}
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+// Built-in Kotlin (AGP 9): jvmTarget defaults to compileOptions.targetCompatibility.
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add('-XXLanguage:+UnitConversion')
     }
 }
 
@@ -67,6 +81,7 @@ dependencies {
 
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0"
+    implementation 'com.google.android.gms:play-services-auth:21.5.0'
     implementation 'androidx.fragment:fragment-ktx:1.3.0'
     implementation 'androidx.work:work-runtime:2.9.0'
 
@@ -87,4 +102,8 @@ dependencies {
 
     implementation project(':core')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
 }

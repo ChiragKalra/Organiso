@@ -21,7 +21,6 @@ import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.services.ScheduledManager
 import com.bruhascended.organiso.ui.scheduled.ScheduledRecyclerAdapter
 import com.bruhascended.organiso.ui.scheduled.ScheduledViewHolder
-import kotlinx.android.synthetic.main.activity_scheduled.*
 import java.io.File
 
 /*
@@ -42,6 +41,11 @@ import java.io.File
 */
 
 class ScheduledActivity : BaseActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val toolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+    private val recyclerView get() = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView)
+    private val emptyList get() = findViewById<android.widget.TextView>(R.id.emptyList)
 
     private val actionCancel = 0
     private val actionCopy = 1
