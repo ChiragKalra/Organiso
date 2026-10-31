@@ -21,7 +21,6 @@ import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.ui.search.SearchRecyclerAdaptor
 import com.bruhascended.organiso.ui.search.SearchResultViewHolder.ResultItem
-import kotlinx.android.synthetic.main.activity_search.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
@@ -44,6 +43,12 @@ import kotlin.collections.HashSet
 */
 
 class SearchActivity : BaseActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val backButton get() = findViewById<android.widget.ImageButton>(R.id.backButton)
+    private val searchEditText get() = findViewById<android.widget.EditText>(R.id.searchEditText)
+    private val clear_text get() = findViewById<android.widget.ImageButton>(R.id.clear_text)
+    private val searchRecycler get() = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.searchRecycler)
 
     private lateinit var mContext: Context
     private lateinit var prefs: SharedPreferences
@@ -84,7 +89,7 @@ class SearchActivity : BaseActivity() {
     private fun showContacts(key: String, displayedNumbers: HashSet<String>) {
         var otherDisplayed = false
         mContactsProvider.getSync().forEach {  contact ->
-            val name = contact.name.toLowerCase(Locale.ROOT)
+            val name = contact.name.lowercase(Locale.ROOT)
             if (Regex("\\b${key}", RegexOption.IGNORE_CASE).find(name) == null)
                 return@forEach
 
@@ -250,7 +255,7 @@ class SearchActivity : BaseActivity() {
 
         searchEditText.setOnEditorActionListener { _, i, _ ->
             if (i != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener true
-            val key = searchEditText.text.toString().trim().toLowerCase(Locale.ROOT)
+            val key = searchEditText.text.toString().trim().lowercase(Locale.ROOT)
 
             if (key.isBlank()) {
                 showEmptySearchPrompt()

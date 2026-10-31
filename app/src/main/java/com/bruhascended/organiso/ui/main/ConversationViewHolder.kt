@@ -85,7 +85,7 @@ class ConversationViewHolder(
                 R.attr.multiChoiceSelectorColor,
                 android.R.attr.selectableItemBackground,
                 R.attr.unreadTextColor,
-                R.attr.backgroundColor,
+                com.google.android.material.R.attr.backgroundColor, // non-transitive R (AGP 8+)
                 R.attr.headerTextColor,
             )
         )

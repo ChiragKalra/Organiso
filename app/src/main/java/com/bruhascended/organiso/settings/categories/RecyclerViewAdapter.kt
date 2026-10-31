@@ -166,7 +166,7 @@ class RecyclerViewAdapter(
 
         val tp = mContext.obtainStyledAttributes(intArrayOf(
             R.attr.multiChoiceSelectorColor,
-            R.attr.backgroundColor
+            com.google.android.material.R.attr.backgroundColor // non-transitive R (AGP 8+)
         ))
         ValueAnimator.ofObject(
             ArgbEvaluator(),

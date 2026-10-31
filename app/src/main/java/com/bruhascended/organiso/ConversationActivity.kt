@@ -38,8 +38,6 @@ import com.bruhascended.organiso.ui.conversation.ConversationMenuOptions
 import com.bruhascended.organiso.ui.conversation.ConversationViewModel
 import com.bruhascended.organiso.ui.conversation.MessageRecyclerAdaptor
 import com.bruhascended.organiso.ui.conversation.MessageSelectionListener
-import kotlinx.android.synthetic.main.activity_conversation.*
-import kotlinx.android.synthetic.main.layout_send.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.*
@@ -63,6 +61,25 @@ import java.util.*
 
 @Suppress("UNCHECKED_CAST")
 class ConversationActivity : MediaPreviewActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val toolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+    private val recyclerView get() = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView)
+    private val notSupported get() = findViewById<android.widget.TextView>(R.id.notSupported)
+    private val goToBottom get() = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.goToBottom)
+    private val favoriteButton get() = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.favoriteButton)
+    private val draftButton get() = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.draftButton)
+    private val timedButton get() = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.timedButton)
+    private val videoPlayPauseButton get() = findViewById<android.widget.ImageButton>(R.id.videoPlayPauseButton)
+    private val sendLayout get() = findViewById<android.widget.LinearLayout>(R.id.sendLayout)
+    private val imagePreview get() = findViewById<android.widget.ImageView>(R.id.imagePreview)
+    private val playPauseButton get() = findViewById<android.widget.ImageButton>(R.id.playPauseButton)
+    private val seekBar get() = findViewById<android.widget.SeekBar>(R.id.seekBar)
+    private val videoView get() = findViewById<android.widget.VideoView>(R.id.videoView)
+    private val extraButton get() = findViewById<android.widget.ImageButton>(R.id.extraButton)
+    private val messageEditText get() = findViewById<android.widget.EditText>(R.id.messageEditText)
+    private val addMedia get() = findViewById<android.widget.ImageButton>(R.id.addMedia)
+    private val sendButton get() = findViewById<android.widget.ImageButton>(R.id.sendButton)
 
     companion object {
         var activeConversationNumber: String? = null
@@ -164,7 +181,7 @@ class ConversationActivity : MediaPreviewActivity() {
             floatHints = Array(3) {
                 FloatHint(
                     this,
-                    getString(extraSendButtonHints[it]).toUpperCase(Locale.ROOT)
+                    getString(extraSendButtonHints[it]).uppercase(Locale.ROOT)
                 )
             }
             extraButton.postDelayed({

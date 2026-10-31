@@ -6,7 +6,6 @@ import androidx.preference.PreferenceFragmentCompat
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.settings.HeaderFragment
-import kotlinx.android.synthetic.main.activity_conversation.*
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -27,6 +26,9 @@ import kotlinx.android.synthetic.main.activity_conversation.*
 
 class SettingsActivity : BaseActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val toolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
 
     private val argTitle = "title"
 

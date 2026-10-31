@@ -31,7 +31,6 @@ import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.ui.main.CategoryPagerAdapter
 import com.bruhascended.organiso.ui.main.MainViewModel
 import com.google.android.material.bottomnavigation.LabelVisibilityMode
-import kotlinx.android.synthetic.main.activity_main.*
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -52,6 +51,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity() {
     override val bottomInsetReductionDp = 32
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val appBarLayout get() = findViewById<com.google.android.material.appbar.AppBarLayout>(R.id.appBarLayout)
+    private val mToolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.mToolbar)
+    private val viewPager get() = findViewById<androidx.viewpager2.widget.ViewPager2>(R.id.viewPager)
+    private val fab get() = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab)
+    private val bottom get() = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom)
 
     private val mViewModel: MainViewModel by viewModels()
 

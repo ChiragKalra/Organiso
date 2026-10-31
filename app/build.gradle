@@ -1,8 +1,6 @@
 apply plugin: 'com.android.application'
 
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.android.legacy-kapt'
 
 // Local debug overrides are opt-in; ordinary builds retain the production identity.
 def debugApplicationIdSuffix = providers.gradleProperty('debugApplicationIdSuffix').orElse('')
@@ -11,7 +9,7 @@ def debugAppLabel = providers.gradleProperty('debugAppLabel')
 
 android {
     namespace 'com.bruhascended.organiso'
-    compileSdk 36
+    compileSdk 37
 
     buildFeatures {
         buildConfig true
@@ -21,18 +19,21 @@ android {
         noCompress "html"
     }
 
+    // AGP 9 rejects android:extractNativeLibs="true" in the manifest; this is the equivalent setting.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
     defaultConfig {
         applicationId "com.bruhascended.organiso"
         minSdk 26
         targetSdk 36
-        versionCode 1012
+        versionCode 1013
         versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [appLabel: '@string/app_name']
-
-        kotlinOptions {
-            freeCompilerArgs += ['-XXLanguage:+UnitConversion']
-        }
     }
 
     buildTypes {
@@ -61,9 +62,12 @@ android {
         sourceCompatibility "1.8"
         targetCompatibility "1.8"
     }
+}
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+// Built-in Kotlin (AGP 9): jvmTarget defaults to compileOptions.targetCompatibility.
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add('-XXLanguage:+UnitConversion')
     }
 }
 

@@ -23,12 +23,17 @@ import com.bruhascended.core.db.MessageDbFactory
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.organiso.common.setPrefTheme
-import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
 class MessageSearchActivity : BaseActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val backButton get() = findViewById<android.widget.ImageButton>(R.id.backButton)
+    private val searchEditText get() = findViewById<android.widget.EditText>(R.id.searchEditText)
+    private val clear_text get() = findViewById<android.widget.ImageButton>(R.id.clear_text)
+    private val searchRecycler get() = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.searchRecycler)
 
     private lateinit var inputManager: InputMethodManager
     private lateinit var mContext: Context

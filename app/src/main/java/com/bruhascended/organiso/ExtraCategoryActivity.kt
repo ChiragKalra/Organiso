@@ -5,7 +5,6 @@ import com.bruhascended.core.constants.*
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.ui.main.CategoryFragment
-import kotlinx.android.synthetic.main.activity_conversation.toolbar
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -25,6 +24,9 @@ import kotlinx.android.synthetic.main.activity_conversation.toolbar
 */
 
 class ExtraCategoryActivity : BaseActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val toolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
