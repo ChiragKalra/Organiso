@@ -7,6 +7,10 @@ Version 1014 carries forward removal of the unused `FOREGROUND_SERVICE_SPECIAL_U
 permission. It also checks Android's SMS role directly on Android 10+ so SMS save and
 delete operations are not skipped when the legacy default-app API returns null.
 User-initiated maintenance notifications request immediate display on Android 12+.
+Hidden conversation lists stop binding paging updates while Settings is open, and
+empty-state database checks run off the UI thread. The 20,000-conversation
+reclassification scenario now completes and returns to the category list without
+an input-dispatch timeout.
 The app still uses `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_DATA_SYNC`.
 
 ## Foreground service declaration

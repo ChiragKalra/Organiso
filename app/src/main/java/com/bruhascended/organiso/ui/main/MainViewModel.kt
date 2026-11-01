@@ -3,9 +3,11 @@ package com.bruhascended.organiso.ui.main
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.preference.PreferenceManager
 import com.bruhascended.core.data.SMSManager
 import com.bruhascended.core.data.ContactsProvider
@@ -101,7 +103,7 @@ class MainViewModel(
                 )
             ) {
                 mMainDaoProvider.getMainDaos()[it].loadAllPaged()
-            }.flow
+            }.flow.cachedIn(viewModelScope)
         }
 
     }
