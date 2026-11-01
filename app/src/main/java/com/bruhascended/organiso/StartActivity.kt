@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
-import android.provider.Telephony
 import android.telephony.SmsManager
 import android.telephony.SubscriptionManager
 import android.text.Spannable
@@ -115,7 +114,7 @@ class StartActivity : BaseActivity() {
         }
 
         when {
-            packageName != Telephony.Sms.getDefaultSmsPackage(this) -> {
+            !isDefaultSmsApp() -> {
                 requestDefaultApp(onDefaultAppResult)
             }
             ActivityCompat.checkSelfPermission(
