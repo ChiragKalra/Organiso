@@ -2,7 +2,7 @@
 
 ## Upload
 
-Replace version 1012 in the draft release with `organiso-1.2-1015-play.aab`.
+Replace the older bundle in the draft release with `organiso-1.2-1015-play.aab`.
 Version 1015 carries forward removal of the unused `FOREGROUND_SERVICE_SPECIAL_USE`
 permission. It also checks Android's SMS role directly on Android 10+ so SMS save and
 delete operations are not skipped when the legacy default-app API returns null.
@@ -43,10 +43,16 @@ Suggested explanation of delay or interruption:
 > Interrupting it can leave only part of the existing message history processed;
 > a foreground notification makes the ongoing operation visible while it finishes.
 
-If Play Console requests a demonstration video, record both settings flows on a
-test device containing synthetic messages. Show the user action, OTP confirmation,
-foreground notification while the task runs, and completed operation. Do not expose
-real SMS messages or account details. Supply the actual video URL in the form.
+The prepared demonstration is in
+`~/Downloads/Organiso-Play-Demo-1015/Organiso-Foreground-Service-Demo-1015.mp4`.
+It shows both settings flows, the readable OTP confirmation, the foreground
+notifications and completed operations using synthetic messages on Android 16.
+The 79.3-second video shortens processing waits and labels those edits. The OTP
+flow verifies 100 expired messages removed from both stores and two recent messages
+preserved; reclassification moves 20,000 conversations to Priority while preserving
+all 20,002 SMS messages. Raw recordings and test logs are in the accompanying
+`evidence` folder. Host the video at a reviewer-accessible URL, then supply that URL
+in the foreground-service declaration.
 
 ## Government apps declaration
 
