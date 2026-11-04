@@ -28,6 +28,11 @@ class PersonalMoveService: Service() {
                 .setSmallIcon(R.drawable.message)
                 .setContentIntent(pendingIntent)
                 .setProgress(0, 0, true)
+                .apply {
+                    if (android.os.Build.VERSION.SDK_INT >= 31) {
+                        setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+                    }
+                }
                 .build()
 
         if (android.os.Build.VERSION.SDK_INT >= 29) {

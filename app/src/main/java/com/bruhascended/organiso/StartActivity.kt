@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.PowerManager
-import android.provider.Telephony
 import android.telephony.SmsManager
 import android.telephony.SubscriptionManager
 import android.text.Spannable
@@ -26,7 +25,6 @@ import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.organiso.common.requestDefaultApp
 import com.bruhascended.organiso.notifications.ChannelManager
 import com.bruhascended.organiso.ui.start.PolicyActivity
-import kotlinx.android.synthetic.main.activity_start.*
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -47,6 +45,17 @@ import kotlin.math.roundToInt
  */
 
 class StartActivity : BaseActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val progressBar get() = findViewById<com.mikhaellopez.circularprogressbar.CircularProgressBar>(R.id.progressBar)
+    private val progressText get() = findViewById<android.widget.TextView>(R.id.progressText)
+    private val infoText get() = findViewById<android.widget.TextView>(R.id.infoText)
+    private val etaText get() = findViewById<android.widget.TextView>(R.id.etaText)
+    private val policyScreen get() = findViewById<androidx.constraintlayout.widget.ConstraintLayout>(R.id.policyScreen)
+    private val lateEntry get() = findViewById<android.widget.TextView>(R.id.lateEntry)
+    private val privacy get() = findViewById<android.widget.CheckBox>(R.id.privacy)
+    private val tnc get() = findViewById<android.widget.CheckBox>(R.id.tnc)
+    private val next get() = findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.next)
 
     private val wakeLockTag = "Organiso::Wakelock"
     private val timeout = 10 * 60 * 1000L // stay awake for
@@ -105,7 +114,7 @@ class StartActivity : BaseActivity() {
         }
 
         when {
-            packageName != Telephony.Sms.getDefaultSmsPackage(this) -> {
+            !isDefaultSmsApp() -> {
                 requestDefaultApp(onDefaultAppResult)
             }
             ActivityCompat.checkSelfPermission(

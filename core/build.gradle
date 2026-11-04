@@ -1,18 +1,26 @@
 plugins {
     id 'com.android.library'
-    id 'kotlin-android'
-    id 'kotlin-android-extensions'
-    id 'kotlin-kapt'
-    id 'com.google.gms.google-services'
+    id 'com.android.legacy-kapt'
+}
+
+// AGP 9 removed the old variant API used by google-services 4.3.x, and google-services 4.4+
+// only supports application modules (the app's ".staging" debug id has no client in
+// app/google-services.json). Generate the same Firebase string resources that google-services
+// 4.3.15 produced for this library from google-services.json (client com.bruhascended.core).
+def googleServicesJson = new groovy.json.JsonSlurper().parse(file('google-services.json'))
+def googleServicesClient = googleServicesJson.client.find {
+    it.client_info.android_client_info.package_name == 'com.bruhascended.core'
 }
 
 android {
     namespace 'com.bruhascended.core'
-    compileSdk 36
+    compileSdk 37
 
     buildFeatures {
-        buildConfig true
+        buildConfig true // Constants.kt uses BuildConfig.LIBRARY_PACKAGE_NAME
+        resValues true
     }
+
 
     aaptOptions {
         noCompress "tflite", "csv"
@@ -25,6 +33,17 @@ android {
         versionName "1.0"
 
         consumerProguardFiles "consumer-rules.pro"
+
+        def projectInfo = googleServicesJson.project_info
+        resValue "string", "gcm_defaultSenderId", projectInfo.project_number
+        resValue "string", "project_id", projectInfo.project_id
+        resValue "string", "firebase_database_url", projectInfo.firebase_url
+        resValue "string", "google_storage_bucket", projectInfo.storage_bucket
+        resValue "string", "google_app_id", googleServicesClient.client_info.mobilesdk_app_id
+        resValue "string", "google_api_key", googleServicesClient.api_key[0].current_key
+        resValue "string", "google_crash_reporting_api_key", googleServicesClient.api_key[0].current_key
+        resValue "string", "default_web_client_id",
+                googleServicesClient.oauth_client.find { it.client_type == 3 }.client_id
     }
 
     buildTypes {
@@ -41,9 +60,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
+    // Built-in Kotlin (AGP 9): jvmTarget defaults to compileOptions.targetCompatibility (1.8).
 }
 
 dependencies {
@@ -51,10 +68,13 @@ dependencies {
 
     api 'androidx.preference:preference-ktx:1.2.1'
     api "androidx.paging:paging-runtime-ktx:3.2.1"
-    api 'androidx.room:room-runtime:2.6.1'
-    api "androidx.room:room-ktx:2.6.1"
-    api "androidx.room:room-paging:2.6.1"
-    kapt "androidx.room:room-compiler:2.6.1"
+    // Room 2.6.1's processor can't read Kotlin 2.4 metadata; 2.7.2 is the first release that uses
+    // the (overridable) kotlin-metadata-jvm artifact, lifted to the Kotlin version below.
+    api 'androidx.room:room-runtime:2.7.2'
+    api "androidx.room:room-ktx:2.7.2"
+    api "androidx.room:room-paging:2.7.2"
+    kapt "androidx.room:room-compiler:2.7.2"
+    kapt "org.jetbrains.kotlin:kotlin-metadata-jvm:$kotlin_version"
 
     api 'com.klinkerapps:android-smsmms:5.2.5'
 

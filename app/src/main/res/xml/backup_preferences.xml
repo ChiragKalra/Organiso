@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference app:key="backup_info" app:selectable="false"
+        app:title="@string/backup_sms" app:summary="@string/backup_explanation" />
+    <Preference app:key="backup_status" app:title="@string/backup_status"
+        app:selectable="false" />
+    <Preference app:key="automatic_backups" app:title="@string/backup_auto_title"
+        app:summary="@string/backup_auto_link_summary" />
+    <PreferenceCategory app:title="@string/backup_device">
+        <Preference app:key="backup_local" app:title="@string/backup_local_title"
+            app:summary="@string/backup_local_summary" />
+        <Preference app:key="backup_local_last" app:title="@string/backup_last"
+            app:selectable="false" />
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/backup_drive">
+        <SwitchPreferenceCompat app:key="backup_drive_connection" app:persistent="false"
+            app:title="@string/backup_drive_connection" />
+        <Preference app:key="backup_drive_now" app:title="@string/backup_drive_now"
+            app:summary="@string/backup_drive_summary" />
+        <Preference app:key="backup_drive_last" app:title="@string/backup_last"
+            app:selectable="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

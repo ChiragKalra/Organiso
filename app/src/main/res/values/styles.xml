@@ -69,16 +69,25 @@
         <item name="multiChoiceSelectorColor">@color/selection_background_dark</item>
         <item name="bg_accent">@color/message_bg_accent_dark</item>
         <item name="android:alertDialogTheme">@style/DarkTheme.AlertDialog</item>
+        <item name="alertDialogTheme">@style/DarkTheme.AlertDialog</item>
         <item name="android:navigationBarColor">?backgroundColor</item>
         <item name="editTextStyle">@style/DarkTheme.EditTextTheme</item>
     </style>
 
     <style name="DarkTheme" parent="AppTheme.DarkTheme"/>
 
-    <style name="DarkTheme.AlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+    <style name="AppTheme.AlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_alert_dialog</item>
+    </style>
+
+    <style name="DarkTheme.AlertDialog" parent="AppTheme.AlertDialog">
         <item name="colorPrimary">@color/headerTextColorDark</item>
+        <item name="colorAccent">@color/headerTextColorDark</item>
+        <item name="android:colorAccent">@color/headerTextColorDark</item>
         <item name="colorOnSurface">@color/text_primary_dark</item>
-        <item name="android:background">@color/list_item_background_dark</item>
+        <item name="colorBackgroundFloating">@color/list_item_background_dark</item>
+        <item name="android:textColorPrimary">@color/text_primary_dark</item>
+        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
     </style>
 
     <style name="DarkTheme.EditTextTheme" parent="Widget.AppCompat.EditText">
@@ -106,17 +115,22 @@
         <item name="contactItemBackground">@color/list_item_background_light</item>
         <item name="multiChoiceSelectorColor">@color/selection_background_light</item>
         <item name="bg_accent">@color/message_bg_accent_light</item>
-       <item name="android:alertDialogTheme">@style/LightTheme.AlertDialog</item>
+        <item name="android:alertDialogTheme">@style/LightTheme.AlertDialog</item>
+        <item name="alertDialogTheme">@style/LightTheme.AlertDialog</item>
         <item name="android:navigationBarColor">?backgroundColor</item>
         <item name="editTextStyle">@style/LightTheme.EditTextTheme</item>
     </style>
 
     <style name="LightTheme" parent="AppTheme.LightTheme"/>
 
-    <style name="LightTheme.AlertDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+    <style name="LightTheme.AlertDialog" parent="AppTheme.AlertDialog">
         <item name="colorPrimary">@color/headerTextColorLight</item>
+        <item name="colorAccent">@color/headerTextColorLight</item>
+        <item name="android:colorAccent">@color/headerTextColorLight</item>
         <item name="colorOnSurface">@color/text_primary_light</item>
-        <item name="android:background">@color/list_item_background_light</item>
+        <item name="colorBackgroundFloating">@color/list_item_background_light</item>
+        <item name="android:textColorPrimary">@color/text_primary_light</item>
+        <item name="android:textColorSecondary">@color/text_secondary_light</item>
     </style>
 
 

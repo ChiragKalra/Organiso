@@ -1,0 +1,23 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference app:key="auto_info" app:selectable="false"
+        app:title="@string/backup_auto_title" app:summary="@string/backup_auto_explanation" />
+    <PreferenceCategory app:title="@string/backup_device">
+        <ListPreference app:key="auto_local_frequency" app:persistent="false"
+            app:title="@string/backup_auto_frequency" app:entries="@array/backup_frequency_labels"
+            app:entryValues="@array/backup_frequency_values" app:useSimpleSummaryProvider="true" />
+        <Preference app:key="auto_local_folder" app:title="@string/backup_auto_folder" />
+        <Preference app:key="auto_local_next" app:selectable="false" app:title="@string/backup_auto_next" />
+        <Preference app:key="auto_local_status" app:selectable="false" app:title="@string/backup_auto_result" />
+        <Preference app:key="auto_local_now" app:title="@string/backup_auto_run_now" />
+    </PreferenceCategory>
+    <PreferenceCategory app:title="@string/backup_drive">
+        <ListPreference app:key="auto_drive_frequency" app:persistent="false"
+            app:title="@string/backup_auto_frequency" app:entries="@array/backup_frequency_labels"
+            app:entryValues="@array/backup_frequency_values" app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat app:key="auto_drive_unmetered" app:persistent="false"
+            app:title="@string/backup_auto_unmetered" app:summary="@string/backup_auto_unmetered_summary" />
+        <Preference app:key="auto_drive_next" app:selectable="false" app:title="@string/backup_auto_next" />
+        <Preference app:key="auto_drive_status" app:selectable="false" app:title="@string/backup_auto_result" />
+        <Preference app:key="auto_drive_now" app:title="@string/backup_auto_run_now" />
+    </PreferenceCategory>
+</PreferenceScreen>

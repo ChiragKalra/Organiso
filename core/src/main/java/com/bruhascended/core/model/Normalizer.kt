@@ -84,7 +84,7 @@ fun trimUrls(message: String): Pair<String, Float> {
 fun stem(message: String): String {
     var newMessage = Regex("[\\-.']+").replace(message, "")  // no space
     newMessage = Regex("[/,:;_!<>()&^*#@+]+").replace(newMessage, " ") // added space
-    return  newMessage.toLowerCase(Locale.ROOT)
+    return  newMessage.lowercase(Locale.ROOT)
 }
 
 // changes long time to [0,1] ([day, night])
@@ -106,7 +106,7 @@ fun removeHiddenNumbers (message: String): Pair<String, Float> {
 fun getOtp(message: String): String? {
     val maxSepAllowed = 150
     val sepRegex = Regex("(?<=\\d)[\\s\\-](?=\\d)")
-    val content = removeHiddenNumbers(removeDecimals(message).first).first.toLowerCase(Locale.ROOT).replace(sepRegex, "")
+    val content = removeHiddenNumbers(removeDecimals(message).first).first.lowercase(Locale.ROOT).replace(sepRegex, "")
     val otpRegex = Regex("\\b\\d{6}\\b")
     val otps = otpRegex.findAll(content).toList()
 

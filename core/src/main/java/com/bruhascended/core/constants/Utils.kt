@@ -2,7 +2,9 @@ package com.bruhascended.core.constants
 
 import android.content.ContentValues
 import android.content.Context
+import android.app.role.RoleManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Telephony
 import android.webkit.MimeTypeMap
 import com.bruhascended.core.db.Conversation
@@ -22,8 +24,15 @@ fun getMimeType(url: String): String {
 
 // SMS utils
 
+/** RoleManager is authoritative on Android 10+; the legacy API can return null for a held role. */
+fun Context.isDefaultSmsApp(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    getSystemService(RoleManager::class.java)?.isRoleHeld(RoleManager.ROLE_SMS) == true
+} else {
+    packageName == Telephony.Sms.getDefaultSmsPackage(this)
+}
+
 fun Context.deleteSMS(id: Int) {
-    if (packageName == Telephony.Sms.getDefaultSmsPackage(this)) {
+    if (isDefaultSmsApp()) {
         contentResolver.delete(
             Uri.parse("content://sms/$id"),
             null, null
@@ -32,7 +41,7 @@ fun Context.deleteSMS(id: Int) {
 }
 
 fun Context.saveSms(phoneNumber: String, message: String, type: Int): Int? {
-    if(packageName != Telephony.Sms.getDefaultSmsPackage(this)) return null
+    if (!isDefaultSmsApp()) return null
     val date = System.currentTimeMillis()
     val values = ContentValues().apply {
         put("address", phoneNumber)

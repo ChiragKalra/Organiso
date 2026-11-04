@@ -21,7 +21,6 @@ import com.bruhascended.organiso.common.setupToolbar
 import com.bruhascended.organiso.ui.saved.SavedRecyclerAdaptor
 import com.bruhascended.organiso.ui.saved.SavedViewHolder
 import com.bruhascended.organiso.ui.saved.SavedViewModel
-import kotlinx.android.synthetic.main.activity_saved.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
@@ -43,6 +42,11 @@ import java.io.File
  */
 
 class SavedActivity : BaseActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val toolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+    private val recyclerView get() = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView)
+    private val emptyList get() = findViewById<android.widget.TextView>(R.id.emptyList)
 
     private val actionSend = 0
     private val actionCopy = 1

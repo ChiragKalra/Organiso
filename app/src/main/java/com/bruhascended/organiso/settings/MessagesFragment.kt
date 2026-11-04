@@ -51,7 +51,7 @@ class MessagesFragment : PreferenceFragmentCompat() {
             if (v == true) {
                 AlertDialog.Builder(mContext)
                     .setTitle(getString(R.string.delete_all_otps_query))
-                    .setPositiveButton(mContext.getString(R.string.ok)) { d, _ ->
+                    .setPositiveButton(mContext.getString(com.klinker.android.send_message.R.string.ok)) { d, _ ->
                         mContext.startForegroundService(Intent(mContext, OtpDeleteService::class.java))
                         d.dismiss()
                     }.setNegativeButton(mContext.getString(R.string.cancel)) { d, _ ->

@@ -63,7 +63,7 @@ class MessageViewHolder(
             R.attr.multiChoiceSelectorColor,
             android.R.attr.selectableItemBackground,
             R.attr.unreadTextColor,
-            R.attr.backgroundColor
+            com.google.android.material.R.attr.backgroundColor // non-transitive R (AGP 8+)
         ))
         defaultBackground = tp.getDrawable(1)!!
         selectedColor = tp.getColor(0, 0)
@@ -89,7 +89,7 @@ class MessageViewHolder(
 
         messageTextView.text = if (searchKey.isNotBlank()) SpannableString(message.text).apply {
             val regex = Regex("\\b${searchKey}", RegexOption.IGNORE_CASE)
-            val matches = regex.findAll(message.text.toLowerCase(Locale.ROOT))
+            val matches = regex.findAll(message.text.lowercase(Locale.ROOT))
             for (match in matches) {
                 val index = match.range
                 setSpan(BackgroundColorSpan(highlightColor), index.first, index.last+1, flag)

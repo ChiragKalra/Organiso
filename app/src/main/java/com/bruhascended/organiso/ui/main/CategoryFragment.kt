@@ -12,7 +12,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.cachedIn
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,8 +25,10 @@ import com.bruhascended.organiso.common.MyPagingDataAdapter
 import com.bruhascended.organiso.common.ScrollEffectFactory
 import com.bruhascended.core.constants.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /*
                     Copyright 2020 Chirag Kalra
@@ -131,9 +134,6 @@ class CategoryFragment: Fragment(), ConversationSelectionListener.SimpleActionMo
 
         if (::selectionManager.isInitialized) selectionManager.close()
 
-        val flow =
-            model.categoryFlows[label].cachedIn(mContext.lifecycleScope)
-
         mAdaptor = ConversationRecyclerAdaptor(mContext)
         mListener = ConversationSelectionListener(mContext, label, this)
         selectionManager = ListSelectionManager(
@@ -161,15 +161,22 @@ class CategoryFragment: Fragment(), ConversationSelectionListener.SimpleActionMo
         }
 
 
-        mContext.lifecycleScope.launch {
-            delay(if (model.isDelayed(label)) 500 else 0)
-            flow.collectLatest {
-                textView.isVisible = model.isEmpty(label)
-                mAdaptor.submitData(it)
+        return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val textView = view.findViewById<TextView>(R.id.emptyList)
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Settings can update thousands of conversations; hidden lists must not bind every update.
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                delay(if (model.isDelayed(label)) 500 else 0)
+                model.categoryFlows[label].collectLatest { data ->
+                    textView.isVisible = withContext(Dispatchers.IO) { model.isEmpty(label) }
+                    mAdaptor.submitData(data)
+                }
             }
         }
-
-        return root
     }
 
     override fun onResume() {

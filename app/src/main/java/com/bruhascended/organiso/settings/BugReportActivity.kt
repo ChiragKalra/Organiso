@@ -14,7 +14,6 @@ import com.bruhascended.organiso.analytics.AnalyticsLogger
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.common.setPrefTheme
 import com.bruhascended.organiso.common.setupToolbar
-import kotlinx.android.synthetic.main.activity_bug_report.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -37,6 +36,14 @@ import kotlinx.coroutines.launch
 */
 
 class BugReportActivity : BaseActivity() {
+
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val toolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+    private val titleEditText get() = findViewById<android.widget.EditText>(R.id.titleEditText)
+    private val full get() = findViewById<android.widget.EditText>(R.id.full)
+    private val fileName get() = findViewById<android.widget.TextView>(R.id.fileName)
+    private val addFile get() = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.addFile)
+    private val submit get() = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.submit)
 
     private var fileUri: Uri? = null
 

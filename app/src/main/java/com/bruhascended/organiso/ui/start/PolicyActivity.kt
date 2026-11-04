@@ -8,10 +8,13 @@ import androidx.core.text.HtmlCompat
 import com.bruhascended.organiso.R
 import com.bruhascended.organiso.BaseActivity
 import com.bruhascended.organiso.common.setupToolbar
-import kotlinx.android.synthetic.main.activity_policy.*
 import org.apache.commons.io.IOUtils
 
 class PolicyActivity : BaseActivity() {
+    // Replaces kotlin-android-extensions synthetics (removed in Kotlin 1.8+).
+    private val mToolbar get() = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.mToolbar)
+    private val license get() = findViewById<android.widget.TextView>(R.id.license)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_policy)

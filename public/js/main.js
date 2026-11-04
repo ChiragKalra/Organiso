@@ -1,6 +1,16 @@
 (function ($) {
 
     "use strict";
+
+    // Show page animations when the HTML is ready, without waiting for every image.
+    $(function () {
+        if (typeof WOW === "function") {
+            new WOW().init({
+                mobile: false,
+            });
+        }
+    });
+
     $(".carousel-inner .item:first-child").addClass("active");
     /* Mobile menu click then remove
     ==========================*/
@@ -68,15 +78,17 @@
     /*---------------------------
     MICHIMP INTEGRATION
     -----------------------------*/
-    $('#mc-form').ajaxChimp({
-        url: 'https://quomodosoft.us14.list-manage.com/subscribe/post?u=b2a3f199e321346f8785d48fb&amp;id=d0323b0697', //Set Your Mailchamp URL
-        callback: function (resp) {
-            if (resp.result === 'success') {
-                $('.subscrie-form, .join-button').fadeOut();
-                $('body').css('overflow-y', 'scroll');
+    if ($('#mc-form').length && typeof $.fn.ajaxChimp === "function") {
+        $('#mc-form').ajaxChimp({
+            url: 'https://quomodosoft.us14.list-manage.com/subscribe/post?u=b2a3f199e321346f8785d48fb&amp;id=d0323b0697', //Set Your Mailchamp URL
+            callback: function (resp) {
+                if (resp.result === 'success') {
+                    $('.subscrie-form, .join-button').fadeOut();
+                    $('body').css('overflow-y', 'scroll');
+                }
             }
-        }
-    });
+        });
+    }
 
     /*-- Smoth-Scroll --*/
     $('.mainmenu-area a[href*="#"]')
@@ -143,14 +155,4 @@
     };
     // Call the functions
     magnifPopup();
-    /* Preloader Js
-    ===================*/
-    $(window).on("load", function () {
-        $('.preloader').fadeOut(500);
-        /*WoW js Active
-        =================*/
-        new WOW().init({
-            mobile: false,
-        });
-    });
 })(jQuery);

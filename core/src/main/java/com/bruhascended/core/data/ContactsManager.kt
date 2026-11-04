@@ -91,7 +91,7 @@ class ContactsManager(
             val countryCodeValue = tm.networkCountryIso
             val numberProto: Phonenumber.PhoneNumber = phoneUtil.parse(
                 number,
-                countryCodeValue.toUpperCase(Locale.ROOT)
+                countryCodeValue.uppercase(Locale.ROOT)
             )
             if (numberProto.nationalNumber.toString().length < 7) {
                 numberProto.nationalNumber.toString()
@@ -171,7 +171,7 @@ class ContactsManager(
         }
         cur?.close()
         val arr = list.toTypedArray()
-        arr.sortBy {it.name.toLowerCase(Locale.ROOT) }
+        arr.sortBy {it.name.lowercase(Locale.ROOT) }
          Thread {
             arr.forEach {
                 val bm = retrieveContactPhoto(it.number)
