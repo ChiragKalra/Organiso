@@ -30,7 +30,7 @@ android {
         applicationId "com.bruhascended.organiso"
         minSdk 26
         targetSdk 36
-        versionCode 1014
+        versionCode 1015
         versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [appLabel: '@string/app_name']
